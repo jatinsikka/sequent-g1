@@ -1,0 +1,53 @@
+# HRC RL for Loco-Manip with the Unitree G1
+
+# TODOS: 
+
+* Reference and cite any AMO stuff needed to be cited
+
+## Installation instructions
+
+1. Ensure you have conda installed
+2. Run the following commands, there may be some issues with graphics drivers
+
+```bash
+conda create -n amo python=3.8
+conda activate amo
+pip install -r requirements.txt
+```
+
+## Basic usage instructions
+
+For simple teleop of the robot
+
+```bash
+python play_amo.py
+```
+
+## Basic RL Training Info
+
+To train use the train.py file there are a few arguments that can be used
+
+--total_timesteps (timesteps to train)
+--learning_rate (learning rate)
+--use_wandb (for disabling wandb logging)
+--headless (for enabling visuals of sim)
+
+There are some others as well but these are the main ones needed
+
+## Eval info
+
+``` bash
+python eval.py \
+  --model_path checkpoints/final_model \
+  --num_episodes 5 \
+  --render True \
+  --use_wandb True
+```
+
+## Configuration
+
+Look at config.py for more info
+
+## Reward function
+
+Currently consists of solely distance from goal and an action penalty

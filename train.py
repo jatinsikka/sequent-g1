@@ -1,0 +1,570 @@
+"""
+Training script for G1 humanoid RL using Stable Baselines 3.
+
+This script integrates:
+  - Stable Baselines 3 PPO algorithm for training
+  - Weights & Biases for experiment tracking and logging
+  - Modular environment and reward function setup
+  - Checkpoint saving and resuming capability
+
+Usage:
+    python train.py --total_timesteps 1000000 --use_wandb True
+"""
+
+import argparse
+import os
+import numpy as np
+import torch
+import wandb
+from typing import Optional
+
+from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import CheckpointCallback, BaseCallback
+from gymnasium.wrappers import TimeLimit
+
+from env_wrapper import G1RLEnv
+from reward_fn import RewardFunction
+from config import get_training_config
+
+
+class WandbCallback(BaseCallback):
+    """
+    Enhanced callback for comprehensive W&B logging of training metrics.
+    
+    Logs:
+    - Episode statistics (return, length, termination)
+    - Per-step metrics (torso state, actions, rewards)
+    - Aggregated statistics (distributions, moving averages)
+    - Termination analysis (failure mode tracking)
+    """
+    
+    def __init__(self, use_wandb: bool = True, verbose: int = 0, log_frequency: int = 1):
+        """
+        Initialize W&B callback.
+        
+        Args:
+            use_wandb: Whether to actually log to W&B (False = no-op).
+            verbose: Verbosity level (0 = silent).
+            log_frequency: How often to log per-step metrics (1 = every step).
+        """
+        super().__init__(verbose)
+        self.use_wandb = use_wandb
+        self.log_frequency = log_frequency
+        
+        # Per-episode metrics accumulation
+        self.current_episode_heights = []
+        self.current_episode_rolls = []
+        self.current_episode_pitches = []
+        self.current_episode_actions = []
+        
+        # Termination analysis
+        self.termination_counts = {
+            "height": 0,
+            "roll": 0,
+            "pitch": 0,
+            "goal_achieved": 0,
+            "time_exceeded": 0,
+            "timeout": 0,
+        }
+        
+        # Rolling statistics (last 100 episodes)
+        self.recent_returns = []
+        self.recent_lengths = []
+        self.max_recent = 100
+    
+    def _on_step(self) -> bool:
+        """
+        Called at every step.
+        
+        Returns:
+            bool: Whether to continue training.
+        """
+        # Log per-step metrics at specified frequency
+        if self.use_wandb and self.n_calls % self.log_frequency == 0:
+            self._log_step_metrics()
+        
+        # Log episode statistics when episodes complete
+        if len(self.locals.get("infos", [])) > 0:
+            for info in self.locals["infos"]:
+                if "episode" in info:
+                    self._log_episode_complete(info)
+        
+        return True
+    
+    def _log_step_metrics(self):
+        """Log per-step metrics to W&B."""
+        infos = self.locals.get("infos", [])
+        if len(infos) == 0:
+            return
+        
+        # Get info from first environment (for single env training)
+        info = infos[0]
+        
+        # Extract state information if available
+        log_dict = {}
+        
+        if "torso_height" in info:
+            log_dict["step/torso_height"] = info["torso_height"]
+            self.current_episode_heights.append(info["torso_height"])
+        
+        if "roll" in info:
+            log_dict["step/roll"] = info["roll"]
+            log_dict["step/roll_abs"] = abs(info["roll"])
+            self.current_episode_rolls.append(info["roll"])
+        
+        if "pitch" in info:
+            log_dict["step/pitch"] = info["pitch"]
+            log_dict["step/pitch_abs"] = abs(info["pitch"])
+            self.current_episode_pitches.append(info["pitch"])
+        
+        if "distance_to_goal" in info:
+            log_dict["step/distance_to_goal"] = info["distance_to_goal"]
+        
+        if "episode_time" in info:
+            log_dict["step/episode_time"] = info["episode_time"]
+        
+        # Log action information if available
+        if "actions" in self.locals:
+            actions = self.locals["actions"]
+            if len(actions.shape) > 1:
+                actions = actions[0]  # First env
+            
+            log_dict["step/action_mean"] = float(np.mean(np.abs(actions)))
+            log_dict["step/action_max"] = float(np.max(np.abs(actions)))
+            log_dict["step/action_std"] = float(np.std(actions))
+            self.current_episode_actions.append(actions.copy())
+        
+        # Log reward information
+        if "rewards" in self.locals:
+            rewards = self.locals["rewards"]
+            log_dict["step/reward"] = float(rewards[0] if len(rewards) > 0 else 0)
+        
+        if log_dict:
+            wandb.log(log_dict, step=self.num_timesteps)
+    
+    def _log_episode_complete(self, info):
+        """Log comprehensive episode statistics when episode completes."""
+        episode_info = info["episode"]
+        
+        # Get termination reason if available
+        termination_reason = info.get("termination_reason", None)
+        terminated = info.get("terminated", False)
+        
+        # Track episode statistics
+        episode_return = episode_info["r"]
+        episode_length = episode_info["l"]
+        
+        self.episode_returns.append(episode_return)
+        self.episode_lengths.append(episode_length)
+        self.recent_returns.append(episode_return)
+        self.recent_lengths.append(episode_length)
+        
+        # Maintain rolling window
+        if len(self.recent_returns) > self.max_recent:
+            self.recent_returns.pop(0)
+            self.recent_lengths.pop(0)
+        
+        # Analyze termination type
+        if terminated and termination_reason:
+            if "goal_achieved" in termination_reason:
+                self.termination_counts["goal_achieved"] += 1
+                self.episode_terminations.append("goal_achieved")
+            elif "time_exceeded" in termination_reason:
+                self.termination_counts["time_exceeded"] += 1
+                self.episode_terminations.append("time_exceeded")
+            elif "height" in termination_reason:
+                self.termination_counts["height"] += 1
+                self.episode_terminations.append("height")
+            elif "roll" in termination_reason:
+                self.termination_counts["roll"] += 1
+                self.episode_terminations.append("roll")
+            elif "pitch" in termination_reason:
+                self.termination_counts["pitch"] += 1
+                self.episode_terminations.append("pitch")
+        else:
+            self.termination_counts["timeout"] += 1
+            self.episode_terminations.append("timeout")
+        
+        # Only log to W&B if enabled
+        if self.use_wandb:
+            log_dict = {
+                # Basic episode metrics
+                "episode/return": episode_return,
+                "episode/length": episode_length,
+                "episode/time": episode_info["t"],
+                
+                # Rolling statistics
+                "episode/return_mean_100": np.mean(self.recent_returns),
+                "episode/return_std_100": np.std(self.recent_returns),
+                "episode/length_mean_100": np.mean(self.recent_lengths),
+                
+                # Episode-level aggregations
+                "episode/height_mean": np.mean(self.current_episode_heights) if self.current_episode_heights else 0,
+                "episode/height_min": np.min(self.current_episode_heights) if self.current_episode_heights else 0,
+                "episode/height_std": np.std(self.current_episode_heights) if self.current_episode_heights else 0,
+                
+                "episode/roll_mean_abs": np.mean(np.abs(self.current_episode_rolls)) if self.current_episode_rolls else 0,
+                "episode/roll_max_abs": np.max(np.abs(self.current_episode_rolls)) if self.current_episode_rolls else 0,
+                
+                "episode/pitch_mean_abs": np.mean(np.abs(self.current_episode_pitches)) if self.current_episode_pitches else 0,
+                "episode/pitch_max_abs": np.max(np.abs(self.current_episode_pitches)) if self.current_episode_pitches else 0,
+                
+                "episode/action_mean": np.mean(np.abs(self.current_episode_actions)) if self.current_episode_actions else 0,
+                "episode/action_max": np.max(np.abs(self.current_episode_actions)) if self.current_episode_actions else 0,
+                
+                # Termination statistics
+                "termination/total_height": self.termination_counts["height"],
+                "termination/total_roll": self.termination_counts["roll"],
+                "termination/total_pitch": self.termination_counts["pitch"],
+                "termination/total_goal_achieved": self.termination_counts["goal_achieved"],
+                "termination/total_time_exceeded": self.termination_counts["time_exceeded"],
+                "termination/total_timeout": self.termination_counts["timeout"],
+                
+                # Termination ratios
+                "termination/ratio_height": self.termination_counts["height"] / max(1, sum(self.termination_counts.values())),
+                "termination/ratio_roll": self.termination_counts["roll"] / max(1, sum(self.termination_counts.values())),
+                "termination/ratio_pitch": self.termination_counts["pitch"] / max(1, sum(self.termination_counts.values())),
+                "termination/ratio_goal_achieved": self.termination_counts["goal_achieved"] / max(1, sum(self.termination_counts.values())),
+                "termination/ratio_time_exceeded": self.termination_counts["time_exceeded"] / max(1, sum(self.termination_counts.values())),
+                "termination/ratio_timeout": self.termination_counts["timeout"] / max(1, sum(self.termination_counts.values())),
+            }
+            
+            if termination_reason:
+                log_dict["episode/termination"] = termination_reason
+            
+            # Add histograms every N episodes
+            if len(self.episode_returns) % 10 == 0:
+                if self.current_episode_heights:
+                    log_dict["histogram/heights"] = wandb.Histogram(self.current_episode_heights)
+                if self.current_episode_rolls:
+                    log_dict["histogram/rolls"] = wandb.Histogram(self.current_episode_rolls)
+                if self.current_episode_pitches:
+                    log_dict["histogram/pitches"] = wandb.Histogram(self.current_episode_pitches)
+                if self.current_episode_actions:
+                    actions_flat = np.array(self.current_episode_actions).flatten()
+                    log_dict["histogram/actions"] = wandb.Histogram(actions_flat)
+            
+            wandb.log(log_dict, step=self.num_timesteps)
+        
+        # Reset per-episode accumulators
+        self.current_episode_heights = []
+        self.current_episode_rolls = []
+        self.current_episode_pitches = []
+        self.current_episode_actions = []
+        
+        # Print episode info with termination reason
+        if self.verbose > 0 or not self.use_wandb:
+            term_str = f", termination={termination_reason}" if termination_reason else ""
+            print(f"Episode finished: return={episode_return:.2f}, length={episode_length}{term_str}")
+        
+        return True
+
+
+class TrainingManager:
+    """
+    Manager class for G1 humanoid RL training.
+    
+    Handles environment setup, agent creation, training loop, and logging.
+    """
+    
+    def __init__(self, config=None):
+        """
+        Initialize the training manager.
+        
+        Args:
+            config: TrainingConfig instance; uses default if None.
+        """
+        self.config = config or get_training_config()
+        self.env = None
+        self.model = None
+        self.run = None
+    
+    def setup_wandb(self):
+        """Initialize Weights & Biases logging."""
+        if not self.config.use_wandb:
+            return
+        
+        self.run = wandb.init(
+            project=self.config.wandb_project,
+            entity=self.config.wandb_entity,
+            name=f"g1-ppo-{np.random.randint(10000)}",
+            config={
+                "learning_rate": self.config.learning_rate,
+                "batch_size": self.config.batch_size,
+                "n_epochs": self.config.n_epochs,
+                "n_envs": self.config.n_envs,
+                "total_timesteps": self.config.total_timesteps,
+                "reward_position_weight": self.config.reward_position_weight,
+                "reward_action_penalty": self.config.reward_action_penalty,
+                "goal_distance": self.config.goal_distance,
+                "max_episode_time": self.config.max_episode_time,
+            },
+            tags=self.config.wandb_tags,
+            notes=self.config.wandb_notes,
+        )
+        
+        print(f"[INFO] W&B run started: {self.run.name}")
+    
+    def create_environment(self):
+        """
+        Create and configure the training environment(s).
+        
+        Returns:
+            VecEnv or single env: The wrapped humanoid environment(s).
+        """
+        from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
+        
+        # Initialize reward function with config values
+        reward_fn = RewardFunction(
+            target_position=self.config.target_position,
+            desired_height=self.config.desired_height,
+            position_weight=self.config.reward_position_weight,
+            action_penalty=self.config.reward_action_penalty,
+        )
+        
+        def make_env(rank: int):
+            """
+            Create a single environment instance.
+            
+            Args:
+                rank: Environment ID for seeding.
+            """
+            def _init():
+                env = G1RLEnv(
+                    policy_jit_path="amo_jit.pt",
+                    robot_type=self.config.robot_type,
+                    device=self.config.device,
+                    action_scale=self.config.action_scale,
+                    max_episode_steps=self.config.max_episode_steps,
+                    reward_fn=reward_fn,
+                    headless=self.config.headless,
+                    min_height=self.config.min_height,
+                    max_roll=self.config.max_roll,
+                    max_pitch=self.config.max_pitch,
+                    goal_distance=self.config.goal_distance,
+                    max_episode_time=self.config.max_episode_time,
+                    verbose=0,
+                )
+                # Wrap with TimeLimit to enforce max episode steps
+                env = TimeLimit(env, max_episode_steps=self.config.max_episode_steps)
+                return env
+            return _init
+        
+        # Create vectorized environment if n_envs > 1
+        if self.config.n_envs > 1:
+            # Use SubprocVecEnv for parallel environments (better performance)
+            env = SubprocVecEnv([make_env(i) for i in range(self.config.n_envs)])
+            mode_str = "headless" if self.config.headless else "with GUI"
+            print(f"[INFO] Created {self.config.n_envs} parallel environments ({mode_str})")
+        else:
+            # Single environment
+            env = DummyVecEnv([make_env(0)])
+            mode_str = "headless" if self.config.headless else "with GUI"
+            print(f"[INFO] Created single environment ({mode_str})")
+        
+        print(f"[INFO] Termination conditions:")
+        print(f"  - Fall: height<{self.config.min_height}m, |roll|>{self.config.max_roll}rad, |pitch|>{self.config.max_pitch}rad")
+        print(f"  - Success: distance to goal <{self.config.goal_distance}m")
+        print(f"  - Time limit: >{self.config.max_episode_time}s")
+        
+        return env
+    
+    def create_agent(self) -> PPO:
+        """
+        Create a Stable Baselines 3 PPO agent.
+        
+        Returns:
+            PPO: Configured PPO agent.
+        """
+        # Configure policy network architecture
+        policy_kwargs = dict(
+            net_arch=self.config.net_arch  # Shared architecture for policy and value networks
+        )
+        
+        agent = PPO(
+            policy="MlpPolicy",
+            env=self.env,
+            policy_kwargs=policy_kwargs,
+            learning_rate=self.config.learning_rate,
+            n_steps=self.config.max_episode_steps,  # Steps per rollout
+            batch_size=self.config.batch_size,
+            n_epochs=self.config.n_epochs,
+            clip_range=self.config.clip_range,
+            ent_coef=self.config.ent_coef,
+            vf_coef=self.config.vf_coef,
+            max_grad_norm=self.config.max_grad_norm,
+            verbose=1,
+            device=self.config.device,
+        )
+        
+        print(f"[INFO] PPO agent created with learning rate {self.config.learning_rate}")
+        print(f"[INFO] Network architecture: {self.config.net_arch}")
+        return agent
+    
+    def train(self, resume_from: Optional[str] = None):
+        """
+        Execute the training loop.
+        
+        Args:
+            resume_from: Path to a saved model to resume training from.
+        """
+        print("[INFO] Starting training setup...")
+        
+        # Initialize W&B
+        self.setup_wandb()
+        
+        # Create environment and agent
+        self.env = self.create_environment()
+        
+        if resume_from and os.path.exists(resume_from):
+            print(f"[INFO] Resuming from checkpoint: {resume_from}")
+            self.model = PPO.load(resume_from, env=self.env)
+        else:
+            self.model = self.create_agent()
+        
+        # Set up callbacks for checkpointing
+        checkpoint_callback = CheckpointCallback(
+            save_freq=self.config.save_interval,
+            save_path=self.config.checkpoint_dir,
+            name_prefix="ppo_g1",
+            save_replay_buffer=False,
+        )
+        
+        # Enhanced W&B callback with comprehensive logging
+        # log_frequency=10 means log per-step metrics every 10 steps (reduce overhead)
+        wandb_callback = WandbCallback(
+            use_wandb=self.config.use_wandb,
+            verbose=1,
+            log_frequency=10
+        )
+        
+        print(f"\n[INFO] Training for {self.config.total_timesteps} timesteps...")
+        print(f"[INFO] Checkpoints saved to: {self.config.checkpoint_dir}")
+        if self.config.use_wandb:
+            print(f"[INFO] W&B logging enabled with comprehensive metrics")
+        print()
+        
+        try:
+            # Train the model
+            self.model.learn(
+                total_timesteps=self.config.total_timesteps,
+                callback=[checkpoint_callback, wandb_callback],
+                progress_bar=True,
+            )
+            
+            # Save final model
+            final_model_path = os.path.join(self.config.checkpoint_dir, "final_model")
+            self.model.save(final_model_path)
+            print(f"\n[INFO] Training complete. Final model saved to: {final_model_path}")
+            
+            # Log final model to W&B
+            if self.config.use_wandb:
+                wandb.save(f"{final_model_path}.zip")
+                print(f"[INFO] Final model uploaded to W&B")
+        
+        except KeyboardInterrupt:
+            print("\n[INFO] Training interrupted by user. Saving checkpoint...")
+            interrupt_path = os.path.join(self.config.checkpoint_dir, "interrupted_model")
+            self.model.save(interrupt_path)
+            print(f"[INFO] Checkpoint saved to: {interrupt_path}")
+        
+        finally:
+            # Cleanup
+            self.env.close()
+            if self.config.use_wandb:
+                wandb.finish()
+
+
+def main():
+    """Main entry point for training script."""
+    parser = argparse.ArgumentParser(
+        description="Train G1 humanoid RL agent with Stable Baselines 3"
+    )
+    parser.add_argument(
+        "--total_timesteps",
+        type=int,
+        default=int(1e6),
+        help="Total training timesteps",
+    )
+    parser.add_argument(
+        "--learning_rate",
+        type=float,
+        default=3e-4,
+        help="Learning rate for PPO",
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=64,
+        help="Batch size for training",
+    )
+    parser.add_argument(
+        "--net_arch",
+        type=str,
+        default="128,128",
+        help="Network architecture as comma-separated layer sizes (e.g., '256,256,128')",
+    )
+    parser.add_argument(
+        "--use_wandb",
+        type=lambda x: x.lower() == "true",
+        default=True,
+        help="Enable Weights & Biases logging",
+    )
+    parser.add_argument(
+        "--wandb_project",
+        type=str,
+        default="g1-humanoid-rl",
+        help="W&B project name",
+    )
+    parser.add_argument(
+        "--resume_from",
+        type=str,
+        default=None,
+        help="Path to checkpoint to resume training from",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cuda",
+        help="Device to use: cuda or cpu",
+    )
+    parser.add_argument(
+        "--headless",
+        type=lambda x: x.lower() == "true",
+        default=True,
+        help="Run without GUI (True for faster training, False to show graphics)",
+    )
+    parser.add_argument(
+        "--n_envs",
+        type=int,
+        default=2,
+        help="Number of parallel environments for training",
+    )
+    
+    args = parser.parse_args()
+    
+    # Create config with command-line overrides
+    config = get_training_config()
+    config.total_timesteps = args.total_timesteps
+    config.learning_rate = args.learning_rate
+    config.batch_size = args.batch_size
+    
+    # Parse network architecture from command line
+    if args.net_arch:
+        config.net_arch = [int(x.strip()) for x in args.net_arch.split(',')]
+    
+    # config.n_envs = args.n_envs
+    config.use_wandb = args.use_wandb
+    config.wandb_project = args.wandb_project
+    config.device = args.device
+    config.headless = args.headless
+    if not config.headless:
+        config.n_envs = 1  # Force single env if not headless
+    
+    # Create and run training manager
+    manager = TrainingManager(config)
+    manager.train(resume_from=args.resume_from)
+
+
+if __name__ == "__main__":
+    main()

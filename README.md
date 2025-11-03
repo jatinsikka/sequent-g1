@@ -3,6 +3,10 @@
 # TODOS: 
 
 * Reference and cite any AMO stuff needed to be cited
+* Combine the movable object in this file
+* Add grasping to the arms
+* Train on grasping? Pushing button? how do you generalize it
+* John? Use distilled AMO for locomotion
 
 ## Installation instructions
 
@@ -33,6 +37,12 @@ To train use the train.py file there are a few arguments that can be used
 --headless (for enabling visuals of sim)
 
 There are some others as well but these are the main ones needed
+
+Train:
+python train.py --total_timesteps 1000000 --learning_rate 5e-4 --use_wandb true --headless true --n_envs 2
+
+Run:
+python eval.py --model_path checkpoints/final_model --num_episodes 5 --render true
 
 ## Eval info
 

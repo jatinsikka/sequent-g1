@@ -7,6 +7,7 @@
 * Add grasping to the arms
 * Train on grasping? Pushing button? how do you generalize it
 * John? Use distilled AMO for locomotion
+* Figure CPU vs GPU performance 
 
 ## Installation instructions
 

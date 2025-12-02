@@ -1,0 +1,106 @@
+<mujoco model="interactive_objects">
+  <!-- Interactive movable objects for robot manipulation tasks -->
+  
+  <default>
+    <default class="interactive">
+      <joint actuatorfrclimited="false" frictionloss="0.1" damping="1"/>
+    </default>
+    <geom solref="0.02 1" solimp="0.95 0.95 0.001" friction="1.5 0.5 0.1" contype="1" conaffinity="15"/>
+  </default>
+  
+  <option>
+    <flag gravity="enable"/>
+  </option>
+  
+  <worldbody>
+    
+    <!-- ============================================= -->
+    <!-- CONTROL PANEL - ORGANIZED LAYOUT             -->
+    <!-- Centered: Buttons in a neat row              -->
+    <!-- ============================================= -->
+    
+    <!-- Push Button - Red Emergency (leftmost) -->
+    <body name="push_button_red" pos="-0.45 -1.85 1.0">
+      <joint name="push_button_red_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
+      <geom name="push_button_red_base" type="cylinder" size="0.055 0.03" rgba="0.85 0.1 0.1 1" contype="1" conaffinity="15"/>
+      <geom name="push_button_red_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.95 0.2 0.2 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Push Button - Green Start -->
+    <body name="push_button_green" pos="-0.15 -1.85 1.0">
+      <joint name="push_button_green_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
+      <geom name="push_button_green_base" type="cylinder" size="0.055 0.03" rgba="0.1 0.75 0.1 1" contype="1" conaffinity="15"/>
+      <geom name="push_button_green_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.2 0.9 0.2 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Push Button - Yellow Caution -->
+    <body name="push_button_yellow" pos="0.15 -1.85 1.0">
+      <joint name="push_button_yellow_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
+      <geom name="push_button_yellow_base" type="cylinder" size="0.055 0.03" rgba="0.9 0.8 0.1 1" contype="1" conaffinity="15"/>
+      <geom name="push_button_yellow_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.95 0.9 0.2 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Push Button - Blue Reset (rightmost) -->
+    <body name="push_button_blue" pos="0.45 -1.85 1.0">
+      <joint name="push_button_blue_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
+      <geom name="push_button_blue_base" type="cylinder" size="0.055 0.03" rgba="0.1 0.1 0.8 1" contype="1" conaffinity="15"/>
+      <geom name="push_button_blue_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.2 0.2 0.95 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- ============================================= -->
+    <!-- MOVABLE OBJECTS ON WORKBENCH                 -->
+    <!-- ============================================= -->
+    
+    <!-- Screwdriver (on right table) -->
+    <body name="screwdriver" pos="1.2 1.35 0.74">
+      <freejoint name="screwdriver_joint"/>
+      <geom name="screwdriver_handle" type="box" size="0.012 0.012 0.04" rgba="0.9 0.6 0.1 1" contype="1" conaffinity="15"/>
+      <geom name="screwdriver_shaft" type="box" size="0.004 0.004 0.05" pos="0 0 0.09" rgba="0.7 0.7 0.7 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0.03" mass="0.08" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Small Cube Block (on left table) -->
+    <body name="block_cube" pos="1.5 -0.15 0.75">
+      <freejoint name="block_cube_joint"/>
+      <geom name="block_cube_geom" type="box" size="0.025 0.025 0.025" rgba="0.3 0.6 0.9 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Small Box (on left table) -->
+    <body name="small_box" pos="1.3 -0.3 0.74">
+      <freejoint name="small_box_joint"/>
+      <geom name="small_box_geom" type="box" size="0.03 0.02 0.015" rgba="0.9 0.5 0.2 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.08" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Wrench Tool (on left table) -->
+    <body name="wrench" pos="1.25 -0.25 0.74">
+      <freejoint name="wrench_joint"/>
+      <geom name="wrench_handle" type="box" size="0.008 0.06 0.003" rgba="0.5 0.5 0.5 1" contype="1" conaffinity="15"/>
+      <geom name="wrench_head" type="cylinder" size="0.015 0.004" pos="0 0.07 0" rgba="0.5 0.5 0.5 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.12" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Purple Object (on right table) -->
+    <body name="right_table_item2" pos="1.4 1.45 0.74">
+      <freejoint name="right_table_item2_joint"/>
+      <geom name="right_item2" type="box" size="0.04 0.02 0.03" rgba="0.6 0.3 0.8 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.12" diaginertia="0.0001 0.0001 0.0001"/>
+    </body>
+    
+    <!-- Battery Pack (on right table) -->
+    <body name="battery_pack" pos="1.55 1.5 0.74">
+      <freejoint name="battery_pack_joint"/>
+      <geom name="battery_body" type="box" size="0.04 0.025 0.015" rgba="0.2 0.2 0.2 1" contype="1" conaffinity="15"/>
+      <geom name="battery_terminal1" type="cylinder" size="0.005 0.003" pos="0.03 0 0.018" rgba="0.8 0.7 0.2 1" contype="1" conaffinity="15"/>
+      <geom name="battery_terminal2" type="cylinder" size="0.005 0.003" pos="-0.03 0 0.018" rgba="0.8 0.7 0.2 1" contype="1" conaffinity="15"/>
+      <inertial pos="0 0 0" mass="0.25" diaginertia="0.0002 0.0002 0.0002"/>
+    </body>
+    
+  </worldbody>
+  
+</mujoco>

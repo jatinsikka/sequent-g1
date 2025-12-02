@@ -1,7 +1,7 @@
 <mujoco model="g1_mocap">
   <compiler angle="radian" meshdir="meshes" eulerseq="xyz"/>
-  <include file="purple_object.xml"/>
-  <option timestep='0.001' iterations='50' solver='PGS' gravity='0 0 -9.81'>
+  <include file="interactive_objects.xml"/>
+  <option timestep='0.001' iterations='50' solver='PGS' gravity='0 0 -9.81' viscosity='0.0001'>
     </option>
     <size njmax="500" nconmax="100" />
   <default>
@@ -47,7 +47,7 @@
   </asset>
 
   <worldbody>
-    <body name="pelvis" pos="1 1 0.793">
+    <body name="pelvis" pos="0.75 1.6 0.793">
       <inertial pos="0 0 -0.07605" quat="1 0 -0.000399148 0" mass="3.813" diaginertia="0.010549 0.0093089 0.0079184"/>
       <freejoint name="pelvis"/>
   <geom type="mesh" contype="2" conaffinity="1" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="pelvis"/>
@@ -294,7 +294,7 @@
     <light name="back_light" pos="-3 -2 3" dir="1 0 -1" diffuse="0.4 0.4 0.4" specular="0.05 0.05 0.05" directional="true"/>
     
     <!-- Left Workstation Table -->
-    <body name="left_workstation" pos="0.8 -0.6 0">
+    <body name="left_workstation" pos="1.4 -0.2 0">
       <!-- Table top -->
   <geom name="left_table_top" type="box" size="0.4 0.3 0.02" pos="0 0 0.7" rgba="0.8 0.6 0.4 1" contype="1" conaffinity="2"/>
       <!-- Table legs -->
@@ -302,21 +302,10 @@
   <geom name="left_table_leg2" type="cylinder" size="0.02 0.35" pos="0.35 -0.25 0.35" rgba="0.7 0.7 0.8 1" contype="1" conaffinity="2"/>
   <geom name="left_table_leg3" type="cylinder" size="0.02 0.35" pos="-0.35 0.25 0.35" rgba="0.7 0.7 0.8 1" contype="1" conaffinity="2"/>
   <geom name="left_table_leg4" type="cylinder" size="0.02 0.35" pos="-0.35 -0.25 0.35" rgba="0.7 0.7 0.8 1" contype="1" conaffinity="2"/>
-      
-      <!-- Items on left table -->
-      <body name="left_table_item1" pos="0.1 0.05 0.72">
-        <geom name="left_item1" type="box" size="0.05 0.03 0.02" rgba="0.8 0.2 0.2 1"/>
-        <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="left_table_item2" pos="-0.1 -0.05 0.72">
-        <geom name="left_item2" type="sphere" size="0.02" rgba="0.2 0.4 0.8 1"/>
-        <inertial pos="0 0 0" mass="0.05" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
     </body>
     
     <!-- Right Workstation Table -->
-    <body name="right_workstation" pos="0.8 0.6 0">
+    <body name="right_workstation" pos="1.4 1.4 0">
       <!-- Table top -->
   <geom name="right_table_top" type="box" size="0.4 0.3 0.02" pos="0 0 0.7" rgba="0.8 0.6 0.4 1" contype="1" conaffinity="2"/>
       <!-- Table legs -->
@@ -324,217 +313,97 @@
   <geom name="right_table_leg2" type="cylinder" size="0.02 0.35" pos="0.35 -0.25 0.35" rgba="0.7 0.7 0.8 1" contype="1" conaffinity="2"/>
   <geom name="right_table_leg3" type="cylinder" size="0.02 0.35" pos="-0.35 0.25 0.35" rgba="0.7 0.7 0.8 1" contype="1" conaffinity="2"/>
   <geom name="right_table_leg4" type="cylinder" size="0.02 0.35" pos="-0.35 -0.25 0.35" rgba="0.7 0.7 0.8 1" contype="1" conaffinity="2"/>
-      
-      <!-- Items on right table -->
-      <body name="right_table_item1" pos="0.1 0.05 0.72">
-        <geom name="right_item1" type="cylinder" size="0.03 0.02" rgba="0.2 0.8 0.4 1"/>
-        <inertial pos="0 0 0" mass="0.08" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
     </body>
     
-    <!-- Big Industrial Machine -->
-    <body name="industrial_machine" pos="0 -2 0">
+    <!-- Big Industrial Machine (Simplified) -->
+    <body name="industrial_machine" pos="0 -2.5 0">
       <!-- Machine Base -->
-      <geom name="machine_base" type="box" size="1.5 0.8 0.1" pos="0 0 0.05" rgba="0.2 0.2 0.2 1"/>
+      <geom name="machine_base" type="box" size="1.2 0.6 0.1" pos="0 0 0.05" rgba="0.25 0.25 0.25 1"/>
       
-      <!-- Main Machine Body -->
+      <!-- Main Machine Body - cleaner design -->
       <body name="machine_body" pos="0 0 0.6">
-        <geom name="body_main" type="box" size="1.2 0.6 1.0" rgba="0.3 0.3 0.3 0.3"/>
+        <geom name="body_main" type="box" size="1.0 0.5 0.8" rgba="0.35 0.35 0.38 1"/>
         
-        <!-- Machine Door -->
-        <body name="machine_door" pos="0.61 0 0">
-          <geom name="door_frame" type="box" size="0.05 0.5 0.8" pos="0 0 0" rgba="0.1 0.1 0.1 1"/>
-          <geom name="door_panel" type="box" size="0.02 0.45 0.75" pos="0 0 0" rgba="0.4 0.4 0.4 1"/>
-          <geom name="door_handle" type="cylinder" size="0.03 0.08" pos="0.01 0.2 0" rgba="0.8 0.8 0.8 1"/>
-          <geom name="door_window" type="box" size="0.001 0.3 0.4" pos="0.001 0 0.1" rgba="0.7 0.7 0.9 0.8"/>
-        </body>
-        
-
-        
-        <!-- Machine Vents -->
-        <geom name="vent1" type="box" size="0.1 0.01 0.2" pos="-0.61 0 0.2" rgba="0.1 0.1 0.1 1"/>
-        <geom name="vent2" type="box" size="0.1 0.01 0.2" pos="0.61 0 0.2" rgba="0.1 0.1 0.1 1"/>
-        <geom name="vent3" type="box" size="0.1 0.01 0.2" pos="-0.61 0 0.6" rgba="0.1 0.1 0.1 1"/>
-        <geom name="vent4" type="box" size="0.1 0.01 0.2" pos="0.61 0 0.6" rgba="0.1 0.1 0.1 1"/>
-        
-        <!-- Warning Labels -->
-        <geom name="warning_label1" type="box" size="0.08 0.01 0.05" pos="-0.61 0 0.4" rgba="0.8 0.2 0.2 1"/>
-        <geom name="warning_label2" type="box" size="0.08 0.01 0.05" pos="0.61 0 0.4" rgba="0.8 0.2 0.2 1"/>
-        
-        <!-- Side Panels -->
-        <geom name="side_panel1" type="box" size="0.02 0.4 0.6" pos="-0.61 0 0.3" rgba="0.2 0.2 0.2 1"/>
-        <geom name="side_panel2" type="box" size="0.02 0.4 0.6" pos="0.61 0 0.3" rgba="0.2 0.2 0.2 1"/>
+        <!-- Simple side accents -->
+        <geom name="side_accent_left" type="box" size="0.02 0.45 0.7" pos="-0.98 0 0" rgba="0.2 0.2 0.2 1"/>
+        <geom name="side_accent_right" type="box" size="0.02 0.45 0.7" pos="0.98 0 0" rgba="0.2 0.2 0.2 1"/>
       </body>
       
-      <!-- Machine Top -->
-      <body name="machine_top" pos="0 0 1.2">
-        <geom name="top_plate" type="box" size="1.0 0.4 0.1" rgba="0.2 0.2 0.2 1"/>
-        <geom name="top_vent" type="box" size="0.8 0.2 0.05" pos="0 0 0.05" rgba="0.1 0.1 0.1 1"/>
-      </body>
-      
-      <!-- Machine Pipes -->
-      <body name="pipe1" pos="-0.4 0 0.8">
-        <geom name="pipe1_main" type="cylinder" size="0.03 0.3" rgba="0.4 0.4 0.4 1"/>
-        <geom name="pipe1_joint" type="sphere" size="0.05" pos="0 0.3 0" rgba="0.3 0.3 0.3 1"/>
-      </body>
-      
-      <body name="pipe2" pos="0.4 0 0.8">
-        <geom name="pipe2_main" type="cylinder" size="0.03 0.3" rgba="0.4 0.4 0.4 1"/>
-        <geom name="pipe2_joint" type="sphere" size="0.05" pos="0 0.3 0" rgba="0.3 0.3 0.3 1"/>
+      <!-- Machine Top - simplified -->
+      <body name="machine_top" pos="0 0 1.4">
+        <geom name="top_plate" type="box" size="0.9 0.4 0.05" rgba="0.2 0.2 0.2 1"/>
       </body>
     </body>
     
-    <!-- Separate Visible Features -->
-    <!-- Interactive Control Panel (separate from machine body) -->
-    <body name="interactive_control_panel" pos="0 -1.5 0.9">
-      <!-- Main panel base -->
-      <geom name="panel_base" type="box" size="0.8 0.1 0.2" rgba="0.1 0.1 0.1 1"/>
+    <!-- Clean Control Panel -->
+    <body name="interactive_control_panel" pos="0 -1.95 0.85">
+      <!-- Main panel base - wider and cleaner -->
+      <geom name="panel_base" type="box" size="1.0 0.1 0.25" rgba="0.12 0.12 0.12 1"/>
       
-      <!-- Individual interactive gauges -->
-      <body name="gauge1" pos="-0.3 0.06 0.1">
-        <geom name="gauge1_face" type="cylinder" size="0.06 0.015" rgba="0.9 0.9 0.9 1"/>
-        <geom name="gauge1_needle" type="box" size="0.04 0.003 0.002" pos="0 0 0.016" rgba="0.8 0.2 0.2 1"/>
-        <geom name="gauge1_center" type="sphere" size="0.008" rgba="0.2 0.2 0.2 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="gauge2" pos="0 0.06 0.1">
-        <geom name="gauge2_face" type="cylinder" size="0.06 0.015" rgba="0.9 0.9 0.9 1"/>
-        <geom name="gauge2_needle" type="box" size="0.04 0.003 0.002" pos="0 0 0.016" rgba="0.2 0.8 0.2 1"/>
-        <geom name="gauge2_center" type="sphere" size="0.008" rgba="0.2 0.2 0.2 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="gauge3" pos="0.3 0.06 0.1">
-        <geom name="gauge3_face" type="cylinder" size="0.06 0.015" rgba="0.9 0.9 0.9 1"/>
-        <geom name="gauge3_needle" type="box" size="0.04 0.003 0.002" pos="0 0 0.016" rgba="0.2 0.2 0.8 1"/>
-        <geom name="gauge3_center" type="sphere" size="0.008" rgba="0.2 0.2 0.2 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <!-- Interactive buttons -->
-      <body name="emergency_button" pos="-0.5 0.06 0.05">
-        <geom name="emergency_btn" type="cylinder" size="0.025 0.015" rgba="0.9 0.1 0.1 1"/>
-        <inertial pos="0 0 0" mass="0.01" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="start_button" pos="-0.2 0.06 0.05">
-        <geom name="start_btn" type="cylinder" size="0.02 0.012" rgba="0.1 0.8 0.1 1"/>
-        <inertial pos="0 0 0" mass="0.01" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="stop_button" pos="0.2 0.06 0.05">
-        <geom name="stop_btn" type="cylinder" size="0.02 0.012" rgba="0.8 0.8 0.1 1"/>
-        <inertial pos="0 0 0" mass="0.01" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="reset_button" pos="0.5 0.06 0.05">
-        <geom name="reset_btn" type="cylinder" size="0.02 0.012" rgba="0.1 0.1 0.8 1"/>
-        <inertial pos="0 0 0" mass="0.01" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <!-- Display screen -->
-      <geom name="display_screen" type="box" size="0.15 0.08 0.008" pos="0 0.06 0.15" rgba="0.05 0.05 0.05 1"/>
-      <geom name="display_content" type="box" size="0.14 0.07 0.001" pos="0 0.061 0.159" rgba="0.0 0.3 0.0 1"/>
+      <!-- Display screen - larger -->
+      <geom name="display_screen" type="box" size="0.2 0.08 0.12" pos="0 0.06 0.08" rgba="0.02 0.02 0.02 1"/>
+      <geom name="display_content" type="box" size="0.18 0.07 0.001" pos="0 0.061 0.1" rgba="0.0 0.4 0.0 1"/>
     </body>
     
-    <!-- Interactive Status Lights Panel (separate from machine body) -->
-    <body name="status_lights_panel" pos="0 -1.5 1.15">
+    <!-- Status Warning Lights - Much Bigger and Prominent -->
+    <body name="status_lights_panel" pos="0 -1.95 1.2">
       <!-- Light panel base -->
-      <geom name="lights_base" type="box" size="0.6 0.08 0.05" rgba="0.15 0.15 0.15 1"/>
+      <geom name="lights_base" type="box" size="0.5 0.08 0.08" rgba="0.1 0.1 0.1 1"/>
       
-      <!-- Individual status lights -->
-      <body name="alarm_light" pos="-0.4 0.05 0.03">
-        <geom name="alarm_bulb" type="sphere" size="0.03" rgba="0.9 0.1 0.1 1"/>
-        <geom name="alarm_housing" type="cylinder" size="0.035 0.02" rgba="0.3 0.3 0.3 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="operation_light" pos="-0.2 0.05 0.03">
-        <geom name="operation_bulb" type="sphere" size="0.03" rgba="0.1 0.9 0.1 1"/>
-        <geom name="operation_housing" type="cylinder" size="0.035 0.02" rgba="0.3 0.3 0.3 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="status_light" pos="0 0.05 0.03">
-        <geom name="status_bulb" type="sphere" size="0.03" rgba="0.1 0.1 0.9 1"/>
-        <geom name="status_housing" type="cylinder" size="0.035 0.02" rgba="0.3 0.3 0.3 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="warning_light" pos="0.2 0.05 0.03">
-        <geom name="warning_bulb" type="sphere" size="0.03" rgba="0.9 0.8 0.1 1"/>
-        <geom name="warning_housing" type="cylinder" size="0.035 0.02" rgba="0.3 0.3 0.3 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
-      
-      <body name="maintenance_light" pos="0.4 0.05 0.03">
-        <geom name="maintenance_bulb" type="sphere" size="0.03" rgba="0.9 0.4 0.9 1"/>
-        <geom name="maintenance_housing" type="cylinder" size="0.035 0.02" rgba="0.3 0.3 0.3 1"/>
-        <inertial pos="0 0 0" mass="0.02" diaginertia="0.0001 0.0001 0.0001"/>
-      </body>
+      <!-- Large Status indicator lights -->
+      <geom name="light_red" type="sphere" size="0.05" pos="-0.2 0.06 0" rgba="0.95 0.1 0.1 1"/>
+      <geom name="light_yellow" type="sphere" size="0.05" pos="0 0.06 0" rgba="0.95 0.85 0.1 1"/>
+      <geom name="light_green" type="sphere" size="0.05" pos="0.2 0.06 0" rgba="0.1 0.95 0.1 1"/>
     </body>
     
-    <!-- Large Door (separate from machine body) -->
-    <body name="visible_door" pos="0.61 -2 0.6">
-      <geom name="visible_door_panel" type="box" size="0.02 0.5 0.8" rgba="0.4 0.4 0.4 1"/>
-      <geom name="visible_door_handle" type="cylinder" size="0.04 0.1" pos="0.01 0.2 0" rgba="0.8 0.8 0.8 1"/>
-      <geom name="visible_door_window" type="box" size="0.001 0.3 0.4" pos=".001 0 0.1" rgba="0.7 0.7 0.9 0.8"/>
+    <!-- Large Door - simplified, no handle -->
+    <body name="visible_door" pos="0.9 -2.5 0.6">
+      <geom name="visible_door_panel" type="box" size="0.03 0.4 0.7" rgba="0.45 0.45 0.45 1"/>
+      <geom name="visible_door_window" type="box" size="0.005 0.25 0.35" pos="0.01 0 0.1" rgba="0.6 0.7 0.85 0.7"/>
     </body>
   </worldbody>
 
   <!-- 
-  KEYFRAME QPOS EXPLANATION (41 values total):
+  KEYFRAME QPOS EXPLANATION (76 values total):
   
-  *** IMPORTANT: purple_object.xml is included FIRST, so its DOF come first in qpos! ***
+  === FROM interactive_objects.xml (46 DOFs) ===
+  Push Buttons (4 slide joints):
+  [0] = push_button_red_joint
+  [1] = push_button_green_joint
+  [2] = push_button_yellow_joint
+  [3] = push_button_blue_joint
   
-  First 7 values - PURPLE OBJECT FREEJOINT (included from purple_object.xml):
-    [0-2] = Position (X, Y, Z) - Purple object on right table
-    [3-6] = Quaternion (qw, qx, qy, qz) - Purple object rotation [1 0 0 0] = identity
+  Freejoint Objects (6 objects × 7 DOFs = 42 DOFs):
+  [4-10] = screwdriver (pos + quat) - right table
+  [11-17] = block_cube (pos + quat) - left table
+  [18-24] = small_box (pos + quat) - left table
+  [25-31] = wrench (pos + quat) - left table
+  [32-38] = right_table_item2/purple object (pos + quat) - right table
+  [39-45] = battery_pack (pos + quat) - right table
   
-  Next 7 values - ROBOT BASE FREEJOINT:
-    [7]   = X position (forward/backward) - Robot position along world X axis
-    [8]   = Y position (left/right)       - Robot position along world Y axis
-    [9]   = Z position (height)           - Robot height above ground
-    [10-13] = Quaternion (qw, qx, qy, qz) - Robot body orientation [1 0 0 0] = identity
-  
-  Next 23 values - LEG AND BODY JOINTS (indices 14-36):
-    LEFT LEG (indices 14-19):
-      [14] = left_hip_pitch, [15] = left_hip_roll, [16] = left_hip_yaw
-      [17] = left_knee, [18] = left_ankle_pitch, [19] = left_ankle_roll
-    
-    RIGHT LEG (indices 20-25):
-      [20] = right_hip_pitch, [21] = right_hip_roll, [22] = right_hip_yaw
-      [23] = right_knee, [24] = right_ankle_pitch, [25] = right_ankle_roll
-    
-    TORSO/WAIST (indices 26-28):
-      [26] = waist_yaw, [27] = waist_roll, [28] = waist_pitch
-    
-    LEFT ARM (indices 29-32):
-      [29] = left_shoulder_pitch, [30] = left_shoulder_roll
-      [31] = left_shoulder_yaw, [32] = left_elbow
-    
-    RIGHT ARM (indices 33-36):
-      [33] = right_shoulder_pitch, [34] = right_shoulder_roll
-      [35] = right_shoulder_yaw, [36] = right_elbow
-  
-  Last 4 values - GRIPPER FINGERS (indices 37-40):
-    [37] = left_finger_1_joint (close/open left finger 1)
-    [38] = left_finger_2_joint (close/open left finger 2)
-    [39] = right_finger_1_joint (close/open right finger 1)
-    [40] = right_finger_2_joint (close/open right finger 2)
-    
-    Range: -0.5236 to 0.5236 radians (~-30° to +30°)
-    Negative = close (fingers together), Positive = open (fingers apart)
-  
-  EXAMPLE: To move robot to (0.6, 0.6, 0.95) and close left gripper:
-    Set indices [7-9] to "0.6 0.6 0.95" 
-    Set indices [37-38] to "-0.3 -0.3" (both fingers closed)
+  === FROM g1.xml ROBOT (30 DOFs) ===
+  [46-52] = Robot pelvis freejoint (pos + quat)
+  [53-58] = Left leg joints (6)
+  [59-64] = Right leg joints (6)
+  [65-67] = Waist joints (3)
+  [68-71] = Left arm joints (4)
+  [72-75] = Right arm joints (4)
   -->
-
 
   <keyframe>
     <key name="home"
-      qpos="0.5 0.55 0.72 1 0 0 0 0.2 0.6 0.95 1 0 0 0 -0.1 0 0 0.5 -0.4 0 -0.1 0 0 0.5 -0.4 0 0 0 0 0 0.4 0 1.2 0 -0.4 0 1.2" />
+      qpos="0 0 0 0
+            1.2 1.35 0.74 1 0 0 0
+            1.5 -0.15 0.75 1 0 0 0
+            1.3 -0.3 0.74 1 0 0 0
+            1.25 -0.25 0.74 1 0 0 0
+            1.4 1.45 0.74 1 0 0 0
+            1.55 1.5 0.74 1 0 0 0
+            0.75 1.6 0.793 1 0 0 0
+            -0.1 0 0 0.5 -0.4 0
+            -0.1 0 0 0.5 -0.4 0
+            0 0 0
+            0 0.4 0 1.2
+            0 -0.4 0 1.2" />
   </keyframe>
 </mujoco>

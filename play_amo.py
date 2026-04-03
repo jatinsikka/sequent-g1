@@ -171,8 +171,9 @@ G1_CONFIG = {
 class HumanoidEnv:
     """MuJoCo environment for G1 humanoid robot with AMO policy."""
     
-    def __init__(self, policy_jit, robot_type="g1", device="cuda"):
+    def __init__(self, policy_jit, robot_type="g1", device="cuda", headless=False):
         self.device = device
+        self.headless = headless
         self._load_robot_config(robot_type)
         self._init_simulation()
         self._init_viewer()
@@ -212,6 +213,18 @@ class HumanoidEnv:
     
     def _init_viewer(self):
         """Initialize viewer with keyboard controls."""
+        if self.headless:
+            # Create mock viewer for headless mode
+            class MockViewer:
+                def __init__(self):
+                    self.commands = np.zeros(8, dtype=np.float32)
+                def render(self):
+                    pass
+                def close(self):
+                    pass
+            self.viewer = MockViewer()
+            return
+        
         self.viewer = mujoco_viewer.MujocoViewer(self.model, self.data)
         self.viewer.commands = np.zeros(8, dtype=np.float32)
         

@@ -57,6 +57,11 @@ class WandbCallback(BaseCallback):
         self.current_episode_pitches = []
         self.current_episode_actions = []
         
+        # Episode tracking lists
+        self.episode_returns = []
+        self.episode_lengths = []
+        self.episode_terminations = []
+        
         # Termination analysis
         self.termination_counts = {
             "height": 0,
@@ -89,7 +94,25 @@ class WandbCallback(BaseCallback):
                 if "episode" in info:
                     self._log_episode_complete(info)
         
+        # Print summary every 2500 steps
+        if self.num_timesteps % 2500 == 0 and self.num_timesteps > 0:
+            self._print_training_summary()
+        
         return True
+    
+    def _print_training_summary(self):
+        """Print training summary every 2500 steps."""
+        n_episodes = len(self.episode_returns)
+        if n_episodes > 0:
+            recent_returns = self.recent_returns[-10:] if self.recent_returns else self.episode_returns[-10:]
+            avg_return = np.mean(recent_returns)
+            best_return = max(self.episode_returns) if self.episode_returns else 0
+            print(f"\n{'='*60}")
+            print(f"[Step {self.num_timesteps}] Training Summary")
+            print(f"  Episodes completed: {n_episodes}")
+            print(f"  Avg return (last 10): {avg_return:.2f}")
+            print(f"  Best return ever: {best_return:.2f}")
+            print(f"{'='*60}\n")
     
     def _log_step_metrics(self):
         """Log per-step metrics to W&B."""
@@ -117,11 +140,41 @@ class WandbCallback(BaseCallback):
             log_dict["step/pitch_abs"] = abs(info["pitch"])
             self.current_episode_pitches.append(info["pitch"])
         
-        if "distance_to_goal" in info:
-            log_dict["step/distance_to_goal"] = info["distance_to_goal"]
+        # Grasping-specific metrics
+        if "min_hand_dist" in info:
+            log_dict["step/min_hand_dist"] = info["min_hand_dist"]
+        
+        if "best_distance_ever" in info:
+            log_dict["step/best_distance_ever"] = info["best_distance_ever"]
+        
+        if "left_hand_dist" in info:
+            log_dict["step/left_hand_dist"] = info["left_hand_dist"]
+            
+        if "right_hand_dist" in info:
+            log_dict["step/right_hand_dist"] = info["right_hand_dist"]
         
         if "episode_time" in info:
             log_dict["step/episode_time"] = info["episode_time"]
+        
+        # Reward component logging (for debugging reward shaping)
+        if "milestone_bonus" in info:
+            log_dict["reward/milestone_bonus"] = info["milestone_bonus"]
+        if "proximity_reward" in info:
+            log_dict["reward/proximity"] = info["proximity_reward"]
+        if "progress_reward" in info:
+            log_dict["reward/progress"] = info["progress_reward"]
+        if "hovering_penalty" in info:
+            log_dict["reward/hovering_penalty"] = info["hovering_penalty"]
+        if "time_close_without_grasp" in info:
+            log_dict["step/time_close_without_grasp"] = info["time_close_without_grasp"]
+        if "grasp_bonus" in info:
+            log_dict["reward/grasp_bonus"] = info["grasp_bonus"]
+        if "grasp_ready_bonus" in info:
+            log_dict["reward/grasp_ready_bonus"] = info["grasp_ready_bonus"]
+        if "object_grasped" in info:
+            log_dict["step/object_grasped"] = float(info["object_grasped"])
+        if "active_hand_vel" in info:
+            log_dict["step/active_hand_vel"] = info["active_hand_vel"]
         
         # Log action information if available
         if "actions" in self.locals:
@@ -252,12 +305,138 @@ class WandbCallback(BaseCallback):
         self.current_episode_pitches = []
         self.current_episode_actions = []
         
-        # Print episode info with termination reason
-        if self.verbose > 0 or not self.use_wandb:
-            term_str = f", termination={termination_reason}" if termination_reason else ""
-            print(f"Episode finished: return={episode_return:.2f}, length={episode_length}{term_str}")
+        # Always print episode info with running average
+        n_episodes = len(self.episode_returns)
+        avg_return = np.mean(self.recent_returns) if self.recent_returns else episode_return
+        term_str = f", term={termination_reason}" if termination_reason else ""
+        print(f"[Ep {n_episodes}] Return={episode_return:.2f}, Avg(100)={avg_return:.2f}, Len={episode_length}{term_str}")
         
         return True
+
+
+class VideoRecorderCallback(BaseCallback):
+    """
+    Callback for recording evaluation videos and logging them to W&B.
+    """
+    
+    def __init__(
+        self,
+        eval_freq: int = 10000,
+        video_length: int = 10000,
+        use_wandb: bool = True,
+        verbose: int = 1,
+    ):
+        super().__init__(verbose)
+        self.eval_freq = eval_freq
+        self.video_length = video_length
+        self.use_wandb = use_wandb
+        self.last_eval_step = 0
+        self._eval_env = None
+    
+    def _on_step(self) -> bool:
+        if not self.use_wandb:
+            return True
+        
+        if self.num_timesteps - self.last_eval_step >= self.eval_freq:
+            self.last_eval_step = self.num_timesteps
+            self._record_video()
+        
+        return True
+    
+    def _record_episode(self, deterministic: bool) -> tuple:
+        """Record a single episode and return frames, return, and min distance."""
+        frames = []
+        obs, _ = self._eval_env.reset()
+        episode_return = 0.0
+        min_hand_dist = float('inf')
+        
+        for step in range(self.video_length):
+            action, _ = self.model.predict(obs, deterministic=deterministic)
+            obs, reward, terminated, truncated, info = self._eval_env.step(action)
+            episode_return += reward
+            
+            if 'min_hand_dist' in info:
+                min_hand_dist = min(min_hand_dist, info['min_hand_dist'])
+            
+            # Capture frame
+            try:
+                frame = self._eval_env.render_frame(width=480, height=360)
+                frames.append(frame)
+            except Exception as e:
+                print(f"[VideoRecorder] Frame capture error: {e}")
+                break
+            
+            if terminated or truncated:
+                break
+        
+        return frames, episode_return, min_hand_dist
+    
+    def _record_video(self):
+        """Record both deterministic and stochastic evaluation episodes and log to W&B."""
+        print(f"[VideoRecorder] Recording videos at step {self.num_timesteps}...")
+        
+        try:
+            # Create eval environment
+            if self._eval_env is None:
+                from config import get_training_config
+                config = get_training_config()
+                self._eval_env = G1RLEnv(
+                    policy_jit_path="amo_jit.pt",
+                    robot_type=config.robot_type,
+                    device="cuda",  # Must use CUDA for AMO policy
+                    max_episode_steps=config.max_episode_steps,
+                    headless=True,
+                    max_episode_time=config.max_episode_time,
+                    freeze_arm=config.freeze_arm,
+                )
+                print(f"[VideoRecorder] Created eval environment")
+            
+            # Record deterministic episode
+            det_frames, det_return, det_min_dist = self._record_episode(deterministic=True)
+            print(f"[VideoRecorder] Deterministic: {len(det_frames)} frames, return={det_return:.1f}, min_dist={det_min_dist:.3f}")
+            
+            # Record stochastic episode
+            sto_frames, sto_return, sto_min_dist = self._record_episode(deterministic=False)
+            print(f"[VideoRecorder] Stochastic: {len(sto_frames)} frames, return={sto_return:.1f}, min_dist={sto_min_dist:.3f}")
+            
+            # Log videos to W&B
+            log_dict = {}
+            
+            if len(det_frames) > 10:
+                video_array = np.array(det_frames)  # (T, H, W, C)
+                video_array = np.transpose(video_array, (0, 3, 1, 2))  # (T, C, H, W)
+                log_dict["video/deterministic"] = wandb.Video(
+                    video_array, fps=25, format="mp4",
+                    caption=f"Deterministic - Step {self.num_timesteps}, Return: {det_return:.1f}, MinDist: {det_min_dist:.3f}"
+                )
+                log_dict["video/det_return"] = det_return
+                log_dict["video/det_min_dist"] = det_min_dist if det_min_dist < float('inf') else -1
+            
+            if len(sto_frames) > 10:
+                video_array = np.array(sto_frames)  # (T, H, W, C)
+                video_array = np.transpose(video_array, (0, 3, 1, 2))  # (T, C, H, W)
+                log_dict["video/stochastic"] = wandb.Video(
+                    video_array, fps=25, format="mp4",
+                    caption=f"Stochastic - Step {self.num_timesteps}, Return: {sto_return:.1f}, MinDist: {sto_min_dist:.3f}"
+                )
+                log_dict["video/sto_return"] = sto_return
+                log_dict["video/sto_min_dist"] = sto_min_dist if sto_min_dist < float('inf') else -1
+            
+            if log_dict:
+                wandb.log(log_dict, step=self.num_timesteps)
+                print(f"[VideoRecorder] Videos logged to W&B!")
+            else:
+                print(f"[VideoRecorder] Not enough frames, skipping videos")
+        
+        except Exception as e:
+            print(f"[VideoRecorder] Error recording video: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def _on_training_end(self):
+        if self._eval_env is not None:
+            self._eval_env.close()
+            self._eval_env = None
 
 
 class TrainingManager:
@@ -315,11 +494,18 @@ class TrainingManager:
         from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
         
         # Initialize reward function with config values
+        # target_object_pos is the 3D position of the screwdriver
+        target_object_pos = (self.config.target_position[0], self.config.target_position[1], 0.74)  # screwdriver height
+        
         reward_fn = RewardFunction(
             target_position=self.config.target_position,
+            target_object_pos=target_object_pos,
             desired_height=self.config.desired_height,
-            position_weight=self.config.reward_position_weight,
-            action_penalty=self.config.reward_action_penalty,
+            position_weight=1.0,  # Bonus for being close
+            velocity_weight=5.0,  # Strong reward for moving toward target
+            hand_proximity_weight=2.0,  # Reward for reaching
+            action_penalty=0.003,  # Low penalty to encourage larger actions
+            alive_bonus=0.5,  # Constant reward for staying upright
         )
         
         def make_env(rank: int):
@@ -343,6 +529,7 @@ class TrainingManager:
                     max_pitch=self.config.max_pitch,
                     goal_distance=self.config.goal_distance,
                     max_episode_time=self.config.max_episode_time,
+                    freeze_arm=self.config.freeze_arm,
                     verbose=0,
                 )
                 # Wrap with TimeLimit to enforce max episode steps
@@ -350,12 +537,13 @@ class TrainingManager:
                 return env
             return _init
         
-        # Create vectorized environment if n_envs > 1
+        # Create vectorized environment
+        # Note: Use DummyVecEnv instead of SubprocVecEnv to avoid CUDA JIT issues on Windows
+        # SubprocVecEnv creates separate processes that can't share CUDA context properly
         if self.config.n_envs > 1:
-            # Use SubprocVecEnv for parallel environments (better performance)
-            env = SubprocVecEnv([make_env(i) for i in range(self.config.n_envs)])
+            env = DummyVecEnv([make_env(i) for i in range(self.config.n_envs)])
             mode_str = "headless" if self.config.headless else "with GUI"
-            print(f"[INFO] Created {self.config.n_envs} parallel environments ({mode_str})")
+            print(f"[INFO] Created {self.config.n_envs} sequential environments ({mode_str})")
         else:
             # Single environment
             env = DummyVecEnv([make_env(0)])
@@ -381,12 +569,16 @@ class TrainingManager:
             net_arch=self.config.net_arch  # Shared architecture for policy and value networks
         )
         
+        # n_steps should be at least as large as batch_size for proper updates
+        # Use 2048 as standard for PPO (will collect multiple episodes)
+        n_steps = 2048
+        
         agent = PPO(
             policy="MlpPolicy",
             env=self.env,
             policy_kwargs=policy_kwargs,
             learning_rate=self.config.learning_rate,
-            n_steps=self.config.max_episode_steps,  # Steps per rollout
+            n_steps=n_steps,  # Steps per rollout buffer
             batch_size=self.config.batch_size,
             n_epochs=self.config.n_epochs,
             clip_range=self.config.clip_range,
@@ -398,6 +590,7 @@ class TrainingManager:
         )
         
         print(f"[INFO] PPO agent created with learning rate {self.config.learning_rate}")
+        print(f"[INFO] Rollout buffer: n_steps={n_steps}, batch_size={self.config.batch_size}")
         print(f"[INFO] Network architecture: {self.config.net_arch}")
         return agent
     
@@ -431,24 +624,31 @@ class TrainingManager:
         )
         
         # Enhanced W&B callback with comprehensive logging
-        # log_frequency=10 means log per-step metrics every 10 steps (reduce overhead)
         wandb_callback = WandbCallback(
             use_wandb=self.config.use_wandb,
             verbose=1,
             log_frequency=10
         )
         
+        # Video recording callback
+        video_callback = VideoRecorderCallback(
+            eval_freq=2500,  # Record every 2500 steps
+            video_length=200,
+            use_wandb=self.config.use_wandb,
+            verbose=1,
+        )
+        
         print(f"\n[INFO] Training for {self.config.total_timesteps} timesteps...")
         print(f"[INFO] Checkpoints saved to: {self.config.checkpoint_dir}")
         if self.config.use_wandb:
-            print(f"[INFO] W&B logging enabled with comprehensive metrics")
+            print(f"[INFO] W&B logging enabled with video recording every 2500 steps")
         print()
         
         try:
             # Train the model
             self.model.learn(
                 total_timesteps=self.config.total_timesteps,
-                callback=[checkpoint_callback, wandb_callback],
+                callback=[checkpoint_callback, wandb_callback, video_callback],
                 progress_bar=True,
             )
             

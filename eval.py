@@ -35,6 +35,7 @@ class EvaluationManager:
         deterministic: bool = True,
         use_wandb: bool = True,
         render: bool = False,
+        freeze_arm: str = "none",
     ):
         """
         Initialize the evaluation manager.
@@ -55,7 +56,8 @@ class EvaluationManager:
         self.model = None
         self.env = None
         self.run = None
-    
+        self.freeze_arm = freeze_arm.lower() if isinstance(freeze_arm, str) else "none"
+
     def setup_wandb(self, run_name: str = "eval_run"):
         """
         Initialize Weights & Biases for evaluation logging.
@@ -65,7 +67,7 @@ class EvaluationManager:
         """
         if not self.use_wandb:
             return
-        
+
         config = get_training_config()
         self.run = wandb.init(
             project=config.wandb_project,
@@ -74,7 +76,7 @@ class EvaluationManager:
             job_type="evaluation",
             tags=["eval", "inference"],
         )
-        
+
         print(f"[INFO] W&B evaluation run started: {self.run.name}")
     
     def load_model(self) -> PPO:
@@ -108,13 +110,23 @@ class EvaluationManager:
         """
         config = get_training_config()
         
+        # Initialize reward function with same parameters as training
+        target_object_pos = (config.target_position[0], config.target_position[1], 0.74)
+        
         reward_fn = RewardFunction(
             target_position=config.target_position,
+            target_object_pos=target_object_pos,
             desired_height=config.desired_height,
-            position_weight=config.reward_position_weight,
-            action_penalty=config.reward_action_penalty,
+            position_weight=1.0,
+            velocity_weight=5.0,
+            hand_proximity_weight=2.0,
+            action_penalty=0.001,
+            alive_bonus=0.5,
         )
         
+        # Use CLI-provided freeze_arm if set, otherwise fall back to config
+        freeze_setting = self.freeze_arm if self.freeze_arm != "none" else config.freeze_arm
+
         env = G1RLEnv(
             policy_jit_path="amo_jit.pt",
             robot_type=config.robot_type,
@@ -126,6 +138,9 @@ class EvaluationManager:
             min_height=config.min_height,
             max_roll=config.max_roll,
             max_pitch=config.max_pitch,
+            goal_distance=config.goal_distance,
+            max_episode_time=config.max_episode_time,
+            freeze_arm=freeze_setting,
         )
         
         mode_str = "with GUI" if render else "headless"
@@ -141,6 +156,10 @@ class EvaluationManager:
         """
         print(f"\n[INFO] Starting evaluation for {self.num_episodes} episodes...")
         
+        # Initialize W&B if enabled
+        if self.use_wandb:
+            self.setup_wandb()
+        
         self.model = self.load_model()
         self.env = self.create_eval_env(render=self.render)
         
@@ -154,7 +173,7 @@ class EvaluationManager:
             episode_return = 0.0
             episode_length = 0
             min_torso_height = float('inf')
-            max_distance = 0.0
+            min_distance = float('inf')  # Track CLOSEST distance (best)
             
             done = False
             while not done:
@@ -171,22 +190,23 @@ class EvaluationManager:
                 episode_length += 1
                 min_torso_height = min(min_torso_height, info.get("torso_height", 0))
                 
-                # Compute distance to target (access underlying env's data)
-                target = self.env.reward_fn.target_position
-                current_pos = self.env.env.data.qpos[:2]  # Access wrapped env's data
-                distance = np.linalg.norm(current_pos - target)
-                max_distance = max(max_distance, distance)
+                # Get distance from info (hand distance to target object)
+                distance = info.get("min_hand_dist", 0)
+                min_distance = min(min_distance, distance)  # Track best (closest)
                 
                 done = terminated or truncated
             
             episode_returns.append(episode_return)
             episode_lengths.append(episode_length)
             episode_torso_heights.append(min_torso_height)
-            episode_distances.append(max_distance)
+            episode_distances.append(min_distance)
             
-            print(f"  Episode {episode_idx + 1}/{self.num_episodes}: "
-                  f"Return={episode_return:.2f}, Length={episode_length}, "
-                  f"Min Height={min_torso_height:.3f}, Max Dist={max_distance:.3f}")
+            # Compute running average
+            avg_return = np.mean(episode_returns)
+            
+            print(f"  [Ep {episode_idx + 1}/{self.num_episodes}] "
+                  f"Return={episode_return:.2f}, Avg={avg_return:.2f}, Len={episode_length}, "
+                  f"MinHeight={min_torso_height:.3f}, BestDist={min_distance:.3f}")
         
         # Compute statistics
         metrics = {
@@ -196,11 +216,11 @@ class EvaluationManager:
             "max_return": np.max(episode_returns),
             "mean_length": np.mean(episode_lengths),
             "mean_min_torso_height": np.mean(episode_torso_heights),
-            "mean_max_distance": np.mean(episode_distances),
+            "mean_best_distance": np.mean(episode_distances),  # Best (closest) distance
         }
         
-        # Log to W&B
-        if self.use_wandb:
+        # Log to W&B only if initialized successfully
+        if self.use_wandb and self.run is not None:
             wandb.log(metrics)
             print(f"\n[INFO] Metrics logged to W&B")
         
@@ -218,7 +238,7 @@ class EvaluationManager:
         """Clean up resources."""
         if self.env is not None:
             self.env.close()
-        if self.use_wandb:
+        if self.use_wandb and self.run is not None:
             wandb.finish()
 
 
@@ -257,9 +277,16 @@ def main():
         default=True,
         help="Enable Weights & Biases logging",
     )
-    
+    parser.add_argument(
+        "--freeze_arm",
+        type=str,
+        default="none",
+        choices=["none", "left", "right"],
+        help="Which arm to freeze during evaluation ('none', 'left', 'right')",
+    )
+
     args = parser.parse_args()
-    
+
     # Create and run evaluation manager
     manager = EvaluationManager(
         model_path=args.model_path,
@@ -267,6 +294,7 @@ def main():
         deterministic=args.deterministic,
         use_wandb=args.use_wandb,
         render=args.render,
+        freeze_arm=args.freeze_arm,
     )
     
     try:

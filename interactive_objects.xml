@@ -19,36 +19,37 @@
     <!-- Centered: Buttons in a neat row              -->
     <!-- ============================================= -->
     
+    <!-- Push buttons now FACE the robot (+y): cylinder axis rotated to y via euler -->
     <!-- Push Button - Red Emergency (leftmost) -->
     <body name="push_button_red" pos="-0.45 -1.85 1.0">
       <joint name="push_button_red_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
       <!-- contype=2 to avoid collision with panel (contype=1), but robot hands (conaffinity includes 2) can push -->
-      <geom name="push_button_red_base" type="cylinder" size="0.055 0.03" rgba="0.85 0.1 0.1 1" contype="2" conaffinity="2"/>
-      <geom name="push_button_red_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.95 0.2 0.2 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_red_base" type="cylinder" size="0.05 0.022" euler="1.5708 0 0" rgba="0.85 0.1 0.1 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_red_top" type="cylinder" size="0.044 0.016" pos="0 0.03 0" euler="1.5708 0 0" rgba="0.95 0.2 0.2 1" contype="2" conaffinity="2"/>
       <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
     </body>
-    
+
     <!-- Push Button - Green Start -->
     <body name="push_button_green" pos="-0.15 -1.85 1.0">
       <joint name="push_button_green_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
-      <geom name="push_button_green_base" type="cylinder" size="0.055 0.03" rgba="0.1 0.75 0.1 1" contype="2" conaffinity="2"/>
-      <geom name="push_button_green_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.2 0.9 0.2 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_green_base" type="cylinder" size="0.05 0.022" euler="1.5708 0 0" rgba="0.1 0.75 0.1 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_green_top" type="cylinder" size="0.044 0.016" pos="0 0.03 0" euler="1.5708 0 0" rgba="0.2 0.9 0.2 1" contype="2" conaffinity="2"/>
       <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
     </body>
-    
+
     <!-- Push Button - Yellow Caution -->
     <body name="push_button_yellow" pos="0.15 -1.85 1.0">
       <joint name="push_button_yellow_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
-      <geom name="push_button_yellow_base" type="cylinder" size="0.055 0.03" rgba="0.9 0.8 0.1 1" contype="2" conaffinity="2"/>
-      <geom name="push_button_yellow_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.95 0.9 0.2 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_yellow_base" type="cylinder" size="0.05 0.022" euler="1.5708 0 0" rgba="0.9 0.8 0.1 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_yellow_top" type="cylinder" size="0.044 0.016" pos="0 0.03 0" euler="1.5708 0 0" rgba="0.95 0.9 0.2 1" contype="2" conaffinity="2"/>
       <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
     </body>
-    
+
     <!-- Push Button - Blue Reset (rightmost) -->
     <body name="push_button_blue" pos="0.45 -1.85 1.0">
       <joint name="push_button_blue_joint" class="interactive" type="slide" axis="0 1 0" range="0 0.03" damping="5" stiffness="100"/>
-      <geom name="push_button_blue_base" type="cylinder" size="0.055 0.03" rgba="0.1 0.1 0.8 1" contype="2" conaffinity="2"/>
-      <geom name="push_button_blue_top" type="cylinder" size="0.045 0.018" pos="0 0.03 0" rgba="0.2 0.2 0.95 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_blue_base" type="cylinder" size="0.05 0.022" euler="1.5708 0 0" rgba="0.1 0.1 0.8 1" contype="2" conaffinity="2"/>
+      <geom name="push_button_blue_top" type="cylinder" size="0.044 0.016" pos="0 0.03 0" euler="1.5708 0 0" rgba="0.2 0.2 0.95 1" contype="2" conaffinity="2"/>
       <inertial pos="0 0 0" mass="0.1" diaginertia="0.0001 0.0001 0.0001"/>
     </body>
     

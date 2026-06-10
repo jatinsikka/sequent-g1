@@ -48,8 +48,9 @@ class TrainingConfig:
     target_position: tuple = (1.1, 1.35)  # (x, y) - screwdriver location
     desired_height: float = 0.75  # Desired torso height
     
-    # Episode settings - shorter episodes for faster iteration
-    max_episode_steps: int = 150  # ~3 seconds per episode
+    # Episode settings. 250 steps (5s): measured grasps latch at step ~85-123, so
+    # 150-step episodes left <1.3s to perform the lift -- not enough runway.
+    max_episode_steps: int = 250  # ~5 seconds per episode
     sim_dt: float = 0.002
     sim_decimation: int = 10
     control_dt: float = sim_dt * sim_decimation
@@ -59,7 +60,7 @@ class TrainingConfig:
     max_roll: float = 0.8
     max_pitch: float = 0.8
     goal_distance: float = 0.08  # Success if hand within 8cm of screwdriver (easier)
-    max_episode_time: float = 3.0  # 3 seconds max per episode
+    max_episode_time: float = 5.0  # 5 seconds max per episode (lift runway)
 
     # Optionally freeze one arm to simplify the task ('none', 'left', 'right')
     freeze_arm: str = "left"  # Freeze left arm so RL only controls right arm

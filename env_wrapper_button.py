@@ -13,7 +13,7 @@ import mujoco
 from collections import deque
 from typing import Tuple, Dict, Any, Optional
 
-from play_amo import HumanoidEnv
+from play_amo import HumanoidEnv, quat_to_euler
 from reward_fn import ButtonPressRewardFunction, BUTTON_POSITIONS
 
 
@@ -157,6 +157,10 @@ class ButtonPressEnv(gym.Env):
         # -90° yaw rotation (facing -Y direction toward buttons)
         # Quaternion [w, x, y, z] for -90° around Z axis
         self.robot_start_quat = np.array([0.7071, 0, 0, -0.7071])
+        # AMO commands[1] is an ABSOLUTE world target-yaw setpoint. Hold the spawn
+        # heading so dyaw=0; zeroing it while spawned ~90 deg rotated makes AMO fight
+        # a persistent yaw error and topple (confirmed via _diag.py).
+        self.target_yaw = float(quat_to_euler(self.robot_start_quat)[2])
         
         # Determine which arm to use based on button position
         # For buttons on the left (x < 0), use left arm (freeze right)
@@ -211,9 +215,10 @@ class ButtonPressEnv(gym.Env):
         self.env._in_place_stand = True
         self.env.gait_cycle = np.array([0.25, 0.25])
         
-        # Reset viewer commands (stand still)
+        # Reset viewer commands (stand still), but keep the heading setpoint
         # MockViewer in headless mode has commands attribute
         self.env.viewer.commands[:] = 0.0
+        self.env.viewer.commands[1] = self.target_yaw
         
         # Reset history buffers
         self.env.proprio_history = deque(maxlen=self.env.history_len)
@@ -226,6 +231,7 @@ class ButtonPressEnv(gym.Env):
         # Let AMO settle for a few steps to stabilize balance
         for _ in range(10):
             self.env.viewer.commands[:] = 0.0
+            self.env.viewer.commands[1] = self.target_yaw
             self.env._extract_state()
             amo_obs = self.env._compute_observation()
             
@@ -238,7 +244,7 @@ class ButtonPressEnv(gym.Env):
                 leg_action = self.policy_jit(obs_tensor, extra_hist).cpu().numpy().squeeze()
             
             leg_action = np.clip(leg_action, -40.0, 40.0)
-            scaled_leg_action = leg_action * self.action_scale
+            scaled_leg_action = leg_action * self.env.action_scale  # AMO leg scale (0.25), NOT the wrapper's arm scale (0.5)
             
             pd_target = self.env.default_dof_pos.copy()
             pd_target[:15] = scaled_leg_action + self.env.default_dof_pos[:15]
@@ -315,9 +321,10 @@ class ButtonPressEnv(gym.Env):
         scaled_arm_action = action * self.action_scale
         
         # === LEG CONTROL FROM AMO (standing still) ===
-        # Zero velocity commands = stand in place
+        # Zero velocity commands = stand in place (but keep heading setpoint)
         # Use viewer.commands (MockViewer in headless mode has this)
         self.env.viewer.commands[:] = 0.0
+        self.env.viewer.commands[1] = self.target_yaw
         self.env._extract_state()
         amo_obs = self.env._compute_observation()
         
@@ -331,12 +338,12 @@ class ButtonPressEnv(gym.Env):
             leg_action = self.policy_jit(obs_tensor, extra_hist).cpu().numpy().squeeze()
         
         leg_action = np.clip(leg_action, -40.0, 40.0)
-        scaled_leg_action = leg_action * self.action_scale
+        scaled_leg_action = leg_action * self.env.action_scale  # AMO leg scale (0.25), NOT the wrapper's arm scale (0.5)
         
         # Update last_action buffer (needed by _compute_observation for next step)
         self.env.last_action = np.concatenate([
             leg_action.copy(),
-            (self.env.dof_pos[15:] - self.env.default_dof_pos[15:]) / self.action_scale
+            (self.env.dof_pos[15:] - self.env.default_dof_pos[15:]) / self.env.action_scale
         ])
         
         # Combine leg + arm actions
@@ -348,10 +355,12 @@ class ButtonPressEnv(gym.Env):
         self.env.gait_cycle = np.remainder(
             self.env.gait_cycle + self.env.control_dt * self.env.gait_freq, 1.0
         )
-        if self.env._in_place_stand:
-            if np.any(np.abs(self.env.gait_cycle - 0.25) < 0.05):
-                self.env.gait_cycle = np.array([0.25, 0.25])
-        
+        # Gait sync — EXACTLY matches the working walk_and_grasp loop (lines 212-215)
+        if self.env._in_place_stand and np.any(np.abs(self.env.gait_cycle - 0.25) < 0.05):
+            self.env.gait_cycle = np.array([0.25, 0.25])
+        if not self.env._in_place_stand and np.all(np.abs(self.env.gait_cycle - 0.25) < 0.05):
+            self.env.gait_cycle = np.array([0.25, 0.75])
+
         # Step simulation
         for _ in range(self.env.sim_decimation):
             torque = (pd_target - self.env.dof_pos) * self.env.stiffness - self.env.dof_vel * self.env.damping
@@ -404,12 +413,8 @@ class ButtonPressEnv(gym.Env):
         if self.episode_steps >= self.max_episode_steps:
             truncated = True
         
-        # Update gait for standing
-        self.env.gait_cycle = np.remainder(
-            self.env.gait_cycle + self.env.control_dt * self.env.gait_freq, 1.0
-        )
-        if np.any(np.abs(self.env.gait_cycle - 0.25) < 0.05):
-            self.env.gait_cycle = np.array([0.25, 0.25])
+        # (gait is already advanced once per control step above, matching walk_and_grasp;
+        #  the previous duplicate gait update here advanced it twice per step and was removed)
         
         # Render if not headless
         if not self.headless and hasattr(self.env, 'viewer') and self.env.viewer is not None:

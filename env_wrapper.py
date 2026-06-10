@@ -50,6 +50,7 @@ class G1RLEnv(gym.Env):
         max_episode_time: float = 10.0,
         verbose: int = 0,
         freeze_arm: str = "none",
+        curriculum: bool = False,
     ):
         """
         Initialize the G1 RL environment.
@@ -145,6 +146,21 @@ class G1RLEnv(gym.Env):
             name = self.env.model.geom(i).name
             if 'screw' in name.lower() or 'wrench' in name.lower() or 'battery' in name.lower():
                 self.object_geom_ids.append(i)
+        # Cache ROBOT geom IDs (every geom on the pelvis and its descendants) so the
+        # table-collision counter scores ONLY robot<->table contacts, not objects (the
+        # screwdriver) resting on the table — which previously pinned it at 1 every step.
+        _robot_bodies = set()
+        for b in range(self.env.model.nbody):
+            bid = b
+            while bid != 0:
+                if bid == self.pelvis_body_id:
+                    _robot_bodies.add(b)
+                    break
+                bid = self.env.model.body_parentid[bid]
+        self.robot_geom_ids = set(
+            g for g in range(self.env.model.ngeom)
+            if self.env.model.geom_bodyid[g] in _robot_bodies
+        )
         
         # Arm joint indices and limits
         # Joints: [L_pitch, L_roll, L_yaw, L_elbow, R_pitch, R_roll, R_yaw, R_elbow]
@@ -181,12 +197,12 @@ class G1RLEnv(gym.Env):
         # Initialize reward function
         self.reward_fn = reward_fn or RewardFunction()
         
-        # Action space: 8 arm joint position offsets in [-1, 1]
-        # NO locomotion - only arm control for grasping
+        # Action space: 8 arm joint offsets + 1 torso-pitch lean command, all in [-1, 1].
+        # The torso lean lets the robot bend forward to reach objects on the table.
         self.action_space = spaces.Box(
             low=-1.0,
             high=1.0,
-            shape=(self.num_arm_joints,),
+            shape=(self.num_arm_joints + 1,),
             dtype=np.float32,
         )
         
@@ -218,17 +234,37 @@ class G1RLEnv(gym.Env):
         self.screwdriver_body_id = mujoco.mj_name2id(
             self.env.model, mujoco.mjtObj.mjOBJ_BODY, 'screwdriver'
         )
+        # Geom sets for CONTACT-based grasp (a hand geom actually touching a screwdriver geom)
+        self.right_hand_geom_ids = set(g for g in range(self.env.model.ngeom)
+                                       if self.env.model.geom_bodyid[g] == self.right_hand_id)
+        self.left_hand_geom_ids = set(g for g in range(self.env.model.ngeom)
+                                      if self.env.model.geom_bodyid[g] == self.left_hand_id)
+        self.screwdriver_geom_ids = set(g for g in range(self.env.model.ngeom)
+                                        if self.env.model.geom_bodyid[g] == self.screwdriver_body_id)
         
         # Grasp parameters
-        self.grasp_distance = 0.08  # 8cm - increased for easier grasp
+        self.grasp_distance = 0.13  # 13cm - forgiving magnetic-grasp abstraction
         self.lift_height = 0.85  # Height above table to consider "lifted"
         self.object_grasped = False
         self.grasping_hand = None  # 'left' or 'right'
         self.grasp_offset = None  # Offset from hand to object when grasped
+        self.grasp_rewarded = False  # one-time grasp bonus fired
+        # Fixed pose the tool is held at, expressed in the hand's local frame. The
+        # object is snapped here every step once grasped, so it reads as genuinely
+        # gripped instead of floating at the random contact-moment gap.
+        self.grasp_local_offset = np.array([0.02, 0.0, 0.0])
         
         # Anti-hovering: track time spent close without grasping
         self.time_close_without_grasp = 0.0
         self.best_distance_ever = float('inf')  # Track best distance achieved
+
+        # ADAPTIVE SPAWN CURRICULUM (training only). When on, the robot spawns up to
+        # 6cm closer to the table (the deterministic policy plateaus ~4cm short of
+        # contact, so this guarantees real grasp/lift experience), then anneals back
+        # to the full task as the rolling grasp rate rises. rho=0 easiest, rho=1 full.
+        self.curriculum = curriculum
+        self.curriculum_rho = 0.0 if curriculum else 1.0
+        self._curr_outcomes = deque(maxlen=50)
         
         # Initial screwdriver position (for detecting lift)
         self.initial_object_height = 0.74
@@ -241,8 +277,34 @@ class G1RLEnv(gym.Env):
         if seed is not None:
             np.random.seed(seed)
         
+        # Curriculum bookkeeping: record last episode's outcome BEFORE grasp state is
+        # cleared below, then adapt rho (ease off when struggling, harden when winning).
+        if self.curriculum:
+            if self.episode_steps > 0:
+                self._curr_outcomes.append(1.0 if self.object_grasped else 0.0)
+            if len(self._curr_outcomes) >= 20:
+                rate = float(np.mean(self._curr_outcomes))
+                if rate > 0.5:
+                    self.curriculum_rho = min(1.0, self.curriculum_rho + 0.05)
+                elif rate < 0.1:
+                    self.curriculum_rho = max(0.0, self.curriculum_rho - 0.02)
+        spawn_y = 0.90 + (0.06 * (1.0 - self.curriculum_rho) if self.curriculum else 0.0)
+
         # Reset MuJoCo simulation to initial keyframe (home position)
         mujoco.mj_resetDataKeyframe(self.env.model, self.env.data, 0)
+        # Spawn at the right table, facing +Y, within comfortable arm reach.
+        _rq = 46
+        self.env.data.qpos[_rq:_rq + 3] = np.array([0.6, spawn_y, 0.793])
+        self.env.data.qpos[_rq + 3:_rq + 7] = np.array([0.7071, 0, 0, 0.7071])
+        # DOMAIN RANDOMIZATION: place the screwdriver at a random reachable spot on the
+        # table each episode. With object-relative observations this forces a GENERAL
+        # reaching policy instead of a memorized motion to one fixed point.
+        _sj = self.env.model.jnt_qposadr[mujoco.mj_name2id(
+            self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'screwdriver_joint')]
+        self.env.data.qpos[_sj:_sj + 3] = np.array([
+            np.random.uniform(0.50, 0.72), np.random.uniform(1.10, 1.26), 0.75])
+        self.env.data.qpos[_sj + 3:_sj + 7] = np.array([1.0, 0, 0, 0])
+        self.env.data.qvel[:] = 0.0
         mujoco.mj_step(self.env.model, self.env.data)
         
         # Reset internal state variables
@@ -283,6 +345,8 @@ class G1RLEnv(gym.Env):
         self.object_grasped = False
         self.grasping_hand = None
         self.grasp_offset = None
+        self.grasp_rewarded = False
+        self.prev_rl_action = np.zeros(9, dtype=np.float32)  # for the action-smoothness penalty (8 arm + 1 torso)
         
         # Reset anti-hovering tracking
         self.time_close_without_grasp = 0.0
@@ -344,16 +408,20 @@ class G1RLEnv(gym.Env):
         self.steps_since_reset += 1
         
         # === ARM CONTROL FROM RL ACTION ===
-        # Scale action to cover full joint range
-        # action in [-1, 1] maps to [arm_pos_low, arm_pos_high]
+        # Split action: first 8 = arm joint targets, 9th = torso-pitch lean command
+        action = np.asarray(action, dtype=np.float32)
+        torso_cmd = float(action[8]) if action.shape[0] > 8 else 0.0
+        arm_action = action[:8]
+        # arm action in [-1, 1] maps to [arm_pos_low, arm_pos_high]
         arm_range = (self.arm_pos_high - self.arm_pos_low) / 2.0
         arm_center = (self.arm_pos_high + self.arm_pos_low) / 2.0
-        target_arm_pos = arm_center + action * arm_range
+        target_arm_pos = arm_center + arm_action * arm_range
         target_arm_pos = np.clip(target_arm_pos, self.arm_pos_low, self.arm_pos_high)
-        
-        # === LEG CONTROL FROM AMO (standing still) ===
-        # Zero velocity commands = stand in place
+
+        # === LEG + TORSO CONTROL FROM AMO ===
+        # Stand in place, but let the policy LEAN forward (torso pitch) to reach the table.
         self.env.viewer.commands[:] = 0.0
+        self.env.viewer.commands[5] = 0.6 * torso_cmd  # torso pitch lean (~ +/- 0.6 rad)
         self.env._extract_state()
         amo_obs = self.env._compute_observation()
         
@@ -427,56 +495,69 @@ class G1RLEnv(gym.Env):
         right_hand_vel = np.linalg.norm(right_hand_pos - self.prev_right_hand_pos) / self.env.control_dt
         
         # Grasp speed threshold - hand must be moving slowly for magnetic attach
-        GRASP_SPEED_THRESHOLD = 0.5  # m/s - must be moving slower than this to grasp
+        GRASP_SPEED_THRESHOLD = 1.0  # m/s - forgiving: grab on a roughly-controlled approach
         
         if not self.object_grasped:
-            # Check if either hand is close enough to grasp
-            left_dist_to_obj = np.linalg.norm(left_hand_pos - screwdriver_pos)
-            right_dist_to_obj = np.linalg.norm(right_hand_pos - screwdriver_pos)
-            
-            # Right hand grasp - must be close AND moving slowly
-            if right_dist_to_obj < self.grasp_distance and right_hand_vel < GRASP_SPEED_THRESHOLD:
+            # CONTACT-based grasp: a hand geom must actually be touching a screwdriver
+            # geom. margin=0 in the model, so a contact only exists on real surface
+            # touch -- no latching across a visible gap.
+            right_contact = False
+            left_contact = False
+            for ci in range(self.env.data.ncon):
+                c = self.env.data.contact[ci]
+                g1, g2 = c.geom1, c.geom2
+                if not (g1 in self.screwdriver_geom_ids or g2 in self.screwdriver_geom_ids):
+                    continue
+                if g1 in self.right_hand_geom_ids or g2 in self.right_hand_geom_ids:
+                    right_contact = True
+                if g1 in self.left_hand_geom_ids or g2 in self.left_hand_geom_ids:
+                    left_contact = True
+
+            # Right hand grasp - must be touching AND moving slowly (calm grab)
+            if right_contact and right_hand_vel < GRASP_SPEED_THRESHOLD:
                 self.object_grasped = True
                 self.grasping_hand = 'right'
                 self.grasp_offset = screwdriver_pos - right_hand_pos
-                print(f"[GRASP] Right hand grabbed screwdriver at step {self.episode_steps}! (speed: {right_hand_vel:.2f} m/s)")
-            # Left hand grasp - must be close AND moving slowly
-            elif left_dist_to_obj < self.grasp_distance and left_hand_vel < GRASP_SPEED_THRESHOLD:
+                print(f"[GRASP] Right hand CONTACT-grabbed screwdriver at step {self.episode_steps}! (speed: {right_hand_vel:.2f} m/s)")
+            # Left hand grasp - must be touching AND moving slowly
+            elif left_contact and left_hand_vel < GRASP_SPEED_THRESHOLD:
                 self.object_grasped = True
                 self.grasping_hand = 'left'
                 self.grasp_offset = screwdriver_pos - left_hand_pos
-                print(f"[GRASP] Left hand grabbed screwdriver at step {self.episode_steps}! (speed: {left_hand_vel:.2f} m/s)")
-            # Log if close but too fast
-            elif right_dist_to_obj < self.grasp_distance:
+                print(f"[GRASP] Left hand CONTACT-grabbed screwdriver at step {self.episode_steps}! (speed: {left_hand_vel:.2f} m/s)")
+            # Log if touching but too fast (slapped it instead of a calm grab)
+            elif right_contact or left_contact:
                 if self.episode_steps % 50 == 0:
-                    print(f"[GRASP FAIL] Right hand close ({right_dist_to_obj:.3f}m) but too fast ({right_hand_vel:.2f} m/s > {GRASP_SPEED_THRESHOLD})")
-            elif left_dist_to_obj < self.grasp_distance:
-                if self.episode_steps % 50 == 0:
-                    print(f"[GRASP FAIL] Left hand close ({left_dist_to_obj:.3f}m) but too fast ({left_hand_vel:.2f} m/s > {GRASP_SPEED_THRESHOLD})")
+                    hv = right_hand_vel if right_contact else left_hand_vel
+                    print(f"[GRASP FAIL] Hand touching screwdriver but too fast ({hv:.2f} m/s > {GRASP_SPEED_THRESHOLD})")
         
         # Update previous hand positions
         self.prev_left_hand_pos = left_hand_pos.copy()
         self.prev_right_hand_pos = right_hand_pos.copy()
         
-        # If object is grasped, move it with the hand
+        # If object is grasped, rigidly hold it in a FIXED pose relative to the hand.
+        # Locking BOTH position and orientation to the hand makes the tool look
+        # genuinely gripped instead of floating/tumbling at the contact-moment gap.
         if self.object_grasped:
-            if self.grasping_hand == 'right':
-                new_obj_pos = right_hand_pos + self.grasp_offset
-            else:
-                new_obj_pos = left_hand_pos + self.grasp_offset
-            
-            # Update screwdriver position in simulation
-            # Find the screwdriver's qpos index (it's a freejoint)
+            hand_id = self.right_hand_id if self.grasping_hand == 'right' else self.left_hand_id
+            hand_pos = self.env.data.xpos[hand_id].copy()
+            hand_quat = self.env.data.xquat[hand_id].copy()  # (w, x, y, z)
+            # rotate the fixed palm-offset into the world frame
+            R = np.zeros(9, dtype=np.float64)
+            mujoco.mju_quat2Mat(R, hand_quat)
+            new_obj_pos = hand_pos + R.reshape(3, 3) @ self.grasp_local_offset
+
             screwdriver_qpos_start = self.env.model.jnt_qposadr[
                 mujoco.mj_name2id(self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'screwdriver_joint')
             ]
             self.env.data.qpos[screwdriver_qpos_start:screwdriver_qpos_start+3] = new_obj_pos
-            # Zero out velocity so it doesn't fly away
+            # lock orientation to the hand so the tool can't tumble or levitate
+            self.env.data.qpos[screwdriver_qpos_start+3:screwdriver_qpos_start+7] = hand_quat
             screwdriver_qvel_start = self.env.model.jnt_dofadr[
                 mujoco.mj_name2id(self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'screwdriver_joint')
             ]
             self.env.data.qvel[screwdriver_qvel_start:screwdriver_qvel_start+6] = 0
-            
+
             # Update the position for reward calculation
             screwdriver_pos = new_obj_pos.copy()
         
@@ -532,8 +613,8 @@ class G1RLEnv(gym.Env):
         # === 2. SMALL CONTINUOUS PROXIMITY (reduced to prevent hovering) ===
         proximity_reward = 0.0
         if not self.object_grasped:
-            # Much smaller continuous reward - just for gradient
-            proximity_reward = 1.0 * np.exp(-3.0 * min_dist)  # Reduced from 5.0 * exp(-5.0)
+            # gentle long-range gradient + STRONG short-range pull to close the final ~0.1m
+            proximity_reward = 1.0 * np.exp(-3.0 * min_dist) + 5.0 * np.exp(-20.0 * min_dist)
         
         # === 3. PROGRESS REWARD (only for sustained progress, not oscillation) ===
         progress_reward = 0.0
@@ -545,13 +626,14 @@ class G1RLEnv(gym.Env):
         self.prev_min_dist = min_dist
         
         # === 4. HOVERING PENALTY (penalize time spent close without grasping) ===
+        # Hovering penalty REMOVED: it punished dwelling near the object, but dwelling
+        # (slow + close) is exactly what triggers the magnetic grasp. grasp_ready_bonus
+        # already rewards the good version (close AND slow).
         hovering_penalty = 0.0
-        if min_dist < 0.15 and not self.object_grasped:
-            # Increasing penalty the longer you hover
-            hovering_penalty = 0.5 * self.time_close_without_grasp  # Grows over time!
-            # Extra penalty for being very close but not grasping
+        if False and min_dist < 0.15 and not self.object_grasped:
+            hovering_penalty = 0.5 * self.time_close_without_grasp
             if min_dist < 0.1:
-                hovering_penalty += 1.0  # Per-step penalty for hovering in grasp zone
+                hovering_penalty += 1.0
         
         # === 5. SPEED CONTROL (simplified) ===
         speed_reward = 0.0
@@ -559,12 +641,15 @@ class G1RLEnv(gym.Env):
         grasp_ready_bonus = 0.0
         
         if not self.object_grasped:
-            if min_dist < 0.1:
-                # Close: reward being slow and ready to grasp
-                if active_hand_vel < 0.5:
-                    grasp_ready_bonus = 5.0  # Ready to grasp!
+            if min_dist < 0.18:
+                if active_hand_vel < 1.0:
+                    # Closeness-SCALED ready bonus: ~0 at the zone edge, max at contact
+                    # range. A flat bonus here taught the policy to park at 0.15m and
+                    # farm it forever (v5.2: 0/20 deterministic grasps, pure hovering).
+                    # Scaling keeps the gradient pointing at the tool.
+                    grasp_ready_bonus = 20.0 * float(np.clip((0.18 - min_dist) / 0.13, 0.0, 1.0))
                 else:
-                    speed_penalty = 2.0 * (active_hand_vel - 0.5)  # Too fast
+                    speed_penalty = 5.0 * (active_hand_vel - 1.0)  # punish swiping through fast
         
         # === 6. GRASP AND LIFT REWARDS (MASSIVE) ===
         grasp_bonus = 0.0
@@ -573,27 +658,48 @@ class G1RLEnv(gym.Env):
         lift_amount = object_height - self.initial_object_height
         
         if self.object_grasped:
-            # HUGE bonus for successful grasp - this is the PRIMARY goal!
-            grasp_bonus = 500.0  # Massively increased! This should dominate
-            
-            # Bonus for lifting (progressive)
+            # ONE-TIME bonus the first step the grasp latches (rewards achieving it,
+            # not maintaining it -- a flat per-step hold bonus let the arm flail
+            # forever while still farming reward).
+            if not self.grasp_rewarded:
+                grasp_bonus = 400.0
+                self.grasp_rewarded = True
+            # CALM-HOLD: per-step bonus ONLY while the arm is settled. Set HIGHER than
+            # the max pre-grasp ready bonus (20) so holding the object strictly
+            # dominates hovering near it -- v5.2 hovered because grasping cut income.
+            if arm_speed < 2.0:
+                grasp_bonus += 30.0 * (1.0 - arm_speed / 2.0)
+
+            # LIFTING is now the dominant continuous signal once grasped.
             if lift_amount > 0:
-                lift_bonus = 100.0 * lift_amount
-            
-            # Big bonus for lifting above threshold
+                lift_bonus = 400.0 * lift_amount
+            # Big terminal bonus for lifting above threshold
             if object_height > self.lift_height:
-                lift_bonus += 500.0
+                lift_bonus += 600.0
         
         # === 7. ACTION PENALTY ===
         action_magnitude = np.sqrt(np.sum(action ** 2))
         action_penalty = 0.001 * action_magnitude ** 2
+        # SMOOTHNESS: penalize how much the arm action CHANGES step-to-step. Smooth, deliberate
+        # motion -> tiny penalty; shaking left-right to farm reward / slapping -> big penalty.
+        _act = np.asarray(action, dtype=np.float32)
+        if not hasattr(self, "prev_rl_action"):
+            self.prev_rl_action = np.zeros_like(_act)
+        # mild global smoothness only -- enough to discourage shaking, NOT so high it
+        # makes the policy timid and refuse to reach. Post-grasp flailing is handled
+        # separately by the targeted velocity damping below, not by this term.
+        action_penalty += 0.05 * float(np.sum((_act - self.prev_rl_action) ** 2))
+        self.prev_rl_action = _act.copy()
         
         # === 8. ALIVE BONUS (small) ===
         alive_bonus = 0.05  # Reduced
         
         # === 9. COLLISION PENALTIES ===
         table_collisions = self._count_table_collisions()
-        table_collision_penalty = 5.0 * table_collisions
+        # Mild "don't grind on the table" penalty — but ONLY when far from the object.
+        # Near the object the hand MUST approach the table surface to grasp something
+        # lying on it, so we don't punish that final approach.
+        table_collision_penalty = (1.5 * table_collisions) if min_dist > 0.15 else 0.0
         
         self_collisions = self._count_self_collisions()
         self_collision_penalty = 2.0 * self_collisions
@@ -602,8 +708,12 @@ class G1RLEnv(gym.Env):
         table_collision_termination = table_collisions > 10
         
         # === 10. VELOCITY DAMPING ===
+        # Near the object, settle. Once GRASPED, damp hard -- a wildly rotating
+        # elbow whipping the held tool around is the main "absurd" failure mode.
         velocity_penalty = 0.0
-        if min_dist < 0.15:
+        if self.object_grasped:
+            velocity_penalty = 1.5 * arm_speed
+        elif min_dist < 0.15:
             velocity_penalty = 0.1 * arm_speed
         
         # === CALCULATE TOTAL REWARD ===
@@ -623,9 +733,7 @@ class G1RLEnv(gym.Env):
             - hovering_penalty     # Penalty for hovering without grasping
         )
         
-        # Extra penalty for table collision
-        if table_collisions > 0:
-            reward -= 10.0 * table_collisions
+        # (Removed the extra -10/collision: it made reaching over the table net-negative.)
         
         self.episode_return += reward
         self.episode_time += self.env.control_dt
@@ -681,6 +789,7 @@ class G1RLEnv(gym.Env):
             "object_height": object_height,
             "lift_amount": lift_amount,
             "grasping_hand": self.grasping_hand or "none",
+            "curriculum_rho": self.curriculum_rho,
         }
         
         return self._get_grasp_obs(), reward, terminated, truncated, info
@@ -694,8 +803,8 @@ class G1RLEnv(gym.Env):
             if geom1 in self.table_geom_ids or geom2 in self.table_geom_ids:
                 # Check that the other geom is not the floor (geom 0)
                 other_geom = geom2 if geom1 in self.table_geom_ids else geom1
-                if other_geom > 0 and other_geom not in self.table_geom_ids:
-                    return 1  # Binary: touching table
+                if other_geom in self.robot_geom_ids:
+                    return 1  # Binary: ROBOT touching table (objects on the table excluded)
         return 0
 
     def _count_self_collisions(self) -> int:

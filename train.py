@@ -15,7 +15,10 @@ import argparse
 import os
 import numpy as np
 import torch
-import wandb
+try:
+    import wandb
+except Exception:  # wandb pulls in pkg_resources, absent on setuptools>=81
+    wandb = None
 from typing import Optional
 
 from stable_baselines3 import PPO
@@ -76,6 +79,13 @@ class WandbCallback(BaseCallback):
         self.recent_returns = []
         self.recent_lengths = []
         self.max_recent = 100
+        # Clean HEADLINE metrics (rolling over last 50 episodes) — the "is it learning" view
+        from collections import deque as _dq
+        self._recent_grasps = _dq(maxlen=50)
+        self._recent_success = _dq(maxlen=50)
+        self._recent_bestdist = _dq(maxlen=50)
+        self._recent_epret = _dq(maxlen=50)
+        self._total_episodes = 0
     
     def _on_step(self) -> bool:
         """
@@ -93,7 +103,29 @@ class WandbCallback(BaseCallback):
             for info in self.locals["infos"]:
                 if "episode" in info:
                     self._log_episode_complete(info)
-        
+
+        # HEADLINE metrics from episode ends (uses dones; works without a Monitor wrapper)
+        dones = self.locals.get("dones", [])
+        infos = self.locals.get("infos", [])
+        ended = False
+        for i, d in enumerate(dones):
+            if d and i < len(infos):
+                inf = infos[i]
+                self._recent_grasps.append(1.0 if inf.get("object_grasped") else 0.0)
+                self._recent_success.append(1.0 if inf.get("success") else 0.0)
+                self._recent_bestdist.append(float(inf.get("best_distance_ever", 1.0)))
+                self._recent_epret.append(float(inf.get("episode_return", 0.0)))
+                self._total_episodes += 1
+                ended = True
+        if self.use_wandb and ended and len(self._recent_grasps) > 0:
+            wandb.log({
+                "key/grasp_success_rate": float(np.mean(self._recent_grasps)),
+                "key/lift_success_rate": float(np.mean(self._recent_success)),
+                "key/mean_best_reach_dist": float(np.mean(self._recent_bestdist)),
+                "key/episode_return": float(np.mean(self._recent_epret)),
+                "key/total_episodes": self._total_episodes,
+            }, step=self.num_timesteps)
+
         # Print summary every 2500 steps
         if self.num_timesteps % 2500 == 0 and self.num_timesteps > 0:
             self._print_training_summary()
@@ -463,10 +495,16 @@ class TrainingManager:
         if not self.config.use_wandb:
             return
         
+        # Readable, sortable run name: "<label>-<MMDD-HHMM>", e.g. v5.2-reachgrasp-0609-2230.
+        # Pass --run_name to label the iteration; otherwise it defaults to "reachgrasp".
+        from datetime import datetime
+        label = getattr(self.config, "run_name", None) or "reachgrasp"
+        run_name = f"{label}-{datetime.now().strftime('%m%d-%H%M')}"
+
         self.run = wandb.init(
             project=self.config.wandb_project,
             entity=self.config.wandb_entity,
-            name=f"g1-ppo-{np.random.randint(10000)}",
+            name=run_name,
             config={
                 "learning_rate": self.config.learning_rate,
                 "batch_size": self.config.batch_size,
@@ -531,6 +569,7 @@ class TrainingManager:
                     max_episode_time=self.config.max_episode_time,
                     freeze_arm=self.config.freeze_arm,
                     verbose=0,
+                    curriculum=getattr(self.config, "curriculum", False),
                 )
                 # Wrap with TimeLimit to enforce max episode steps
                 env = TimeLimit(env, max_episode_steps=self.config.max_episode_steps)
@@ -631,8 +670,12 @@ class TrainingManager:
         )
         
         # Video recording callback
+        # NOTE: each call spins up an eval env and encodes TWO mp4s via moviepy,
+        # which blocks the trainer. At eval_freq=2500 that was the dominant cost
+        # (~40fps, mostly stalled in encode). 25000 keeps a live dashboard cadence
+        # (~one video per ~10min of training) without throttling throughput.
         video_callback = VideoRecorderCallback(
-            eval_freq=2500,  # Record every 2500 steps
+            eval_freq=25000,  # Record every 25k steps (was 2500 -- killed fps)
             video_length=200,
             use_wandb=self.config.use_wandb,
             verbose=1,
@@ -641,7 +684,7 @@ class TrainingManager:
         print(f"\n[INFO] Training for {self.config.total_timesteps} timesteps...")
         print(f"[INFO] Checkpoints saved to: {self.config.checkpoint_dir}")
         if self.config.use_wandb:
-            print(f"[INFO] W&B logging enabled with video recording every 2500 steps")
+            print(f"[INFO] W&B logging enabled with video recording every 25000 steps")
         print()
         
         try:
@@ -717,6 +760,18 @@ def main():
         help="W&B project name",
     )
     parser.add_argument(
+        "--run_name",
+        type=str,
+        default=None,
+        help="Label for the W&B run, e.g. 'v5.2-reachgrasp'. A timestamp is appended automatically.",
+    )
+    parser.add_argument(
+        "--curriculum",
+        type=lambda x: x.lower() == "true",
+        default=False,
+        help="Adaptive spawn curriculum: robot starts closer when struggling, anneals to full task.",
+    )
+    parser.add_argument(
         "--resume_from",
         type=str,
         default=None,
@@ -756,6 +811,8 @@ def main():
     # config.n_envs = args.n_envs
     config.use_wandb = args.use_wandb
     config.wandb_project = args.wandb_project
+    config.run_name = args.run_name
+    config.curriculum = args.curriculum
     config.device = args.device
     config.headless = args.headless
     if not config.headless:

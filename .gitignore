@@ -1,4 +1,25 @@
-wandb/
-checkpoints/
 __pycache__/
 *.pyc
+
+# experiment artifacts (logs/curves live in wandb; summaries in TRAINING_LOG.md)
+wandb/
+_frames/
+*.log
+checkpoints_button/
+checkpoints/*
+!checkpoints/v55_final.zip
+
+# renders — only the published demo clip is versioned
+*.gif
+*.png
+!v55_best.gif
+
+# upstream AMO doc images
+img/
+
+# scratch / one-off diagnostic scripts (underscore prefix), except the keepers
+_*.py
+!_eval_policy.py
+!_viewer.py
+
+PRESENTATION.md

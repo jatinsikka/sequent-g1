@@ -13,7 +13,10 @@ import argparse
 import os
 import numpy as np
 import torch
-import wandb
+try:
+    import wandb
+except Exception:  # wandb pulls in pkg_resources, which is absent on setuptools>=81
+    wandb = None
 from datetime import datetime
 
 from stable_baselines3 import PPO

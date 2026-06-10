@@ -1,0 +1,13 @@
+# Reach-and-grasp training log
+
+One line per iteration: what we changed · why · how it did. Newest at bottom.
+
+| Ver | Changed | Why | Result |
+|-----|---------|-----|--------|
+| v1–v4 | distance-based magnetic latch, smoothness 0.15 | first pass | 0% deterministic grasp; latched across a visible gap, slapped the tool |
+| v5 | contact-based grasp + torso-lean + smoothness 0.04 | make the grab honest + let it reach | exploration grasp 0→34%, lift 0→26%; but tool levitated/tumbled & post-grasp flail |
+| v5.1 | lock tool to hand pose+orientation; kill flat +500/step hold bonus; action-rate 0.12; post-grasp velocity damping; lift-dominant reward | stop the levitation and the rewarded flailing | tool held cleanly, but policy went **timid** (deterministic reach 0.20m, return 67) — global penalty killed the reach |
+| v5.2 | action-rate 0.12 → 0.05 (keep targeted post-grasp damping) | timidity came from penalizing *all* motion; flail should be fought only post-grasp | reach recovered (0.146m@75k) but final eval **0/20 deterministic grasps** — policy learned to HOVER at 0.09–0.15m farming the flat +20/step ready bonus (grasping paid less per step) |
+| v5.3 | ready bonus scaled by closeness (0→20 as d→0.05); calm-hold 8→30/step (> max hover income); episodes 150→250 steps for lift runway; resume v5.2 weights, 800k | hovering was rational under v5.2's reward — make approaching and holding strictly dominate parking | stopped @400k: gradient income alone didn't cross the final 4cm — deterministic still 0.09–0.21m, **0 grasps in 8 det clips** |
+| v5.4 | adaptive spawn curriculum: robot starts +6cm closer (= exactly the plateau gap, so contact happens immediately), anneals back as rolling grasp rate >50%; resume v5.3 @400k | the mean policy never *experienced* grasp income — give it that experience directly, then stretch the distance | stopped @250k: **regression** (grasp 12% vs 24%; det dists worse) — closer spawn is off-distribution for resumed weights; 3rd resumed iteration chasing a moving reward = baggage |
+| v5.5 | FRESH weights, current reward (contact grasp + scaled ready income + calm-hold + lift-dominant) + curriculum, 400k | 3 resumed fixes failed → stop patching: clean test of the final design without v5.2 hover habits; also the honest read is this is a sample-budget problem (CPU ~190k steps/h vs 10-100M-step baselines) → real fix is parallel sim on Azure | **BREAKTHROUGH: 40% grasp / 30% lift / 0 falls DETERMINISTIC** (20-ep eval, full task) — first nonzero det rate; grasps at step 24–32, tool held cleanly; motion decisive but not yet smooth (act_rate 0.92); left-hand-latch edge case at freeze_arm noted |

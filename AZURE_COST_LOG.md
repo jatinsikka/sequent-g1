@@ -15,7 +15,7 @@ Sponsorship credits: $10,000 (expires 2028-04-30). Quota: 65 vCPU regional (East
 | Date | Run name | VM | Hours (est) | Cost (est) | Notes |
 |---|---|---|---|---|---|
 | 2026-06-12 | (setup + pipeline validation) | sequent-cpu32 | ~1.0 | ~$1.30 | VM created, env install, smoke tests, cuda→cpu JIT patch |
-| 2026-06-12 | v5.6-grasp-0612 (10M steps, 32 envs) | sequent-cpu32 | TBD | TBD | first cloud run; auto-shutdown 19:30 UTC may cut it — checkpoints save periodically |
+| 2026-06-12 | v5.6-grasp-0612 (10M steps, 32 envs) | sequent-cpu32 | ~2.2 | ~$2.80 | 1,521 fps; det eval: grasp 45%, lift 0% (regression vs v5.5) + GIF render. VM deallocated 15:30 UTC. Day total ≈ $4.20 |
 
 ## Monthly burn check
 

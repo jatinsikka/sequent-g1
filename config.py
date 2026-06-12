@@ -6,18 +6,23 @@ evaluation, and inference. Modify these values to adjust algorithm behavior.
 """
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
+
+
+def _default_device() -> str:
+    import torch
+    return "cuda" if torch.cuda.is_available() else "cpu"
 
 
 @dataclass
 class TrainingConfig:
     """Hyperparameters for GRASPING training."""
-    
+
     # Environment
     robot_type: str = "g1"
     model_path: str = "g1.xml"
-    device: str = "cuda"  # "cuda" or "cpu"
+    device: str = field(default_factory=_default_device)  # auto: cuda if available, else cpu
     headless: bool = True  # Run without GUI (faster training)
     
     # Action space: 8 arm joint position offsets

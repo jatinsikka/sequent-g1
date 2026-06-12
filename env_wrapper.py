@@ -895,12 +895,13 @@ class G1RLEnv(gym.Env):
             0.8  # Look at roughly chest height
         ])
         
-        # Camera position: behind and above the robot, looking toward target
+        # Camera position: behind and above the robot, looking toward target.
+        # Overridable via env vars, e.g. AMO_CAM_AZIMUTH=-45 for a front view.
         cam = mujoco.MjvCamera()
         cam.lookat[:] = lookat
-        cam.distance = 2.5  # Distance from lookat point
-        cam.azimuth = 135   # Angle around vertical axis (behind-left of robot)
-        cam.elevation = -25  # Angle from horizontal (looking down slightly)
+        cam.distance = float(os.environ.get("AMO_CAM_DISTANCE", 2.5))
+        cam.azimuth = float(os.environ.get("AMO_CAM_AZIMUTH", 135))   # 135 = behind-left of robot
+        cam.elevation = float(os.environ.get("AMO_CAM_ELEVATION", -25))
         
         # Update scene with custom camera
         self._renderer.update_scene(self.env.data, camera=cam)

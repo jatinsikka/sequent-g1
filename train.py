@@ -13,6 +13,7 @@ Usage:
 
 import argparse
 import os
+import sys
 import numpy as np
 import torch
 try:
@@ -577,12 +578,15 @@ class TrainingManager:
             return _init
         
         # Create vectorized environment
-        # Note: Use DummyVecEnv instead of SubprocVecEnv to avoid CUDA JIT issues on Windows
-        # SubprocVecEnv creates separate processes that can't share CUDA context properly
+        # SubprocVecEnv (true parallelism) is safe on Linux with CPU inference.
+        # Keep DummyVecEnv on Windows or CUDA: subprocess workers can't share the CUDA JIT context.
         if self.config.n_envs > 1:
-            env = DummyVecEnv([make_env(i) for i in range(self.config.n_envs)])
+            use_subproc = sys.platform != "win32" and self.config.device == "cpu"
+            vec_cls = SubprocVecEnv if use_subproc else DummyVecEnv
+            env = vec_cls([make_env(i) for i in range(self.config.n_envs)])
             mode_str = "headless" if self.config.headless else "with GUI"
-            print(f"[INFO] Created {self.config.n_envs} sequential environments ({mode_str})")
+            par_str = "parallel" if use_subproc else "sequential"
+            print(f"[INFO] Created {self.config.n_envs} {par_str} environments ({mode_str})")
         else:
             # Single environment
             env = DummyVecEnv([make_env(0)])
@@ -792,7 +796,7 @@ def main():
     parser.add_argument(
         "--n_envs",
         type=int,
-        default=2,
+        default=1,
         help="Number of parallel environments for training",
     )
     
@@ -808,7 +812,7 @@ def main():
     if args.net_arch:
         config.net_arch = [int(x.strip()) for x in args.net_arch.split(',')]
     
-    # config.n_envs = args.n_envs
+    config.n_envs = args.n_envs
     config.use_wandb = args.use_wandb
     config.wandb_project = args.wandb_project
     config.run_name = args.run_name

@@ -1,0 +1,90 @@
+# Planner configuration for Flan-T5 + LoRA adapter
+# Updated for 100 SOPs and 100 incident examples
+
+model:
+  base: "google/flan-t5-base"        # Base seq2seq model used for planning
+  use_peft: true                     # Whether to load / save PEFT LoRA adapter
+  adapter_dir: "artifacts/planner_lora/adapter"  # Where adapter weights are stored
+
+data:
+  # With 100 SOPs, we synthesize ~100 training pairs (one per SOP example)
+  train_json: "src/data/sop_examples.json"    # SOPs used to synthesize training pairs (100 examples)
+  train_key: "sop_examples"          # Key in JSON file containing array of SOPs
+  validation_split: 0.1              # Fraction of data for validation (future use)
+  augment_examples: false            # Enable data augmentation if needed for better generalization
+
+training:
+  # Recommended for 100 SOPs with synthetic pairs:
+  # ~100 pairs / batch_size 4 = ~25 steps per epoch
+  # 10 epochs = ~250 effective gradient steps
+  epochs: 10                         # Increased from 3 for better convergence with larger dataset
+  batch_size: 4                      # Increased from 2 for better gradient estimation
+  learning_rate: 0.0001              # Slightly lower LR with larger batch size
+  max_input_length: 512              # Max token length for encoder inputs (incident+SOP+skills)
+  max_target_length: 256             # Max token length for target plan outputs
+  save_adapter: true                 # Persist adapter on disk after training
+  save_strategy: "epoch"             # Save checkpoint every epoch (to track progress)
+  logging_steps: 5                   # Log training loss every N steps
+  gradient_accumulation_steps: 1     # Accumulate gradients over N batches (1 = no accumulation)
+
+lora:
+  # LoRA (Low-Rank Adaptation) hyperparameters
+  # Increased r for better capacity with more complex SOPs
+  r: 32                             # LoRA rank (increased from 16 for larger SOP diversity)
+  alpha: 64                          # LoRA scaling factor (alpha / r = 2, controls magnitude)
+  dropout: 0.1                       # LoRA dropout rate to prevent overfitting (increased from 0.05)
+  target_modules:                    # Which attention modules to adapt (auto-detected in code)
+    - "q"                            # Query projections
+    - "v"                            # Value projections
+  # Note: Larger r = more model capacity but slower training/inference
+  # For 100 diverse SOPs, r=32 balances capacity and efficiency
+
+generation:
+  max_new_tokens: 200                # Increased from 128 for complex multi-step plans
+  temperature: 0.0                   # Deterministic generation (0.0 = greedy)
+  top_p: 0.95                        # Nucleus sampling: consider top cumulative probability
+  top_k: 50                          # Top-k sampling: consider top 50 logits
+  do_sample: false                   # Use greedy decoding by default
+  repetition_penalty: 1.0            # Penalize repeated tokens (>1.0 to discourage repeats)
+
+output:
+  out_dir: "artifacts/planner_lora"  # Root for saving adapter + tokenizer
+  tokenizer_dir: "artifacts/planner_lora/tokenizer"
+  log_dir: "logs/planner"            # Training logs for TensorBoard (optional)
+
+paths:
+  train_data: "src/data/sop_examples.json"
+  output_dir: "artifacts/planner_lora"
+
+safety:
+  # Whitelisted skills; planner outputs will be validated against this list.
+  # These skills can be called by the generated JSON plans
+  allowed_skills:
+    - walk_to                        # Navigate to location
+    - press_button                   # Press button on machine
+    - wait                           # Wait for N seconds
+    - read_sensor                    # Read sensor value
+    - pick                           # Pick up object (manipulation)
+    - place                          # Place object (manipulation)
+    - notify                         # Alert technician
+  # Safety constraints
+  max_plan_length: 30                # Increased from 20 for complex 100-SOP scenarios
+  validate_skills: true              # Enable skill validation against whitelist
+  # With 100 diverse SOPs, some may generate longer plans
+
+validation:
+  # Validation settings for future implementation
+  eval_steps: null                   # Evaluate every N training steps (null = no eval during training)
+  metric: "loss"                     # Metric to track (loss/accuracy/custom)
+  early_stopping_patience: 5         # Stop training if metric doesn't improve for N evaluations
+
+# Optional: heuristic settings (used by fallback planner if model fails)
+heuristics:
+  # Keywords for heuristic planning fallback
+  button_keywords: ["press", "button", "push", "activate"]
+  sensor_keywords: ["read", "check", "sensor", "monitor"]
+  # Enable fallback planner if model fails
+  fallback_enabled: true
+  fallback_timeout_seconds: 5        # Max seconds before fallback kicks in
+  # With 100 SOPs, heuristic matching may help when model uncertainty is high
+

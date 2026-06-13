@@ -1,0 +1,704 @@
+{
+  "incident_examples": [
+    {
+      "incident_id": "INC-001",
+      "text": "Yellow warning light is flashing on the machine and the pressure gauge seems to be reading low; need to run diagnostic and check the pressure sensor.",
+      "labels": {
+        "sop_id": "SOP-001"
+      }
+    },
+    {
+      "incident_id": "INC-002",
+      "text": "Machine is overheating with red fault light on solid; requires immediate emergency shutdown procedure.",
+      "labels": {
+        "sop_id": "SOP-002"
+      }
+    },
+    {
+      "incident_id": "INC-003",
+      "text": "Machine has been idle and green light is off; need to perform proper startup sequence to get it running.",
+      "labels": {
+        "sop_id": "SOP-003"
+      }
+    },
+    {
+      "incident_id": "INC-004",
+      "text": "Temperature sensor is showing above normal readings and yellow warning indicator is illuminated; check for high temperature alert.",
+      "labels": {
+        "sop_id": "SOP-004"
+      }
+    },
+    {
+      "incident_id": "INC-005",
+      "text": "Vibration sensor is detecting abnormal readings with yellow light flashing intermittently; investigate vibration anomaly.",
+      "labels": {
+        "sop_id": "SOP-005"
+      }
+    },
+    {
+      "incident_id": "INC-006",
+      "text": "Machine needs a diagnostic check; activate diagnostic mode to read all sensor values.",
+      "labels": {
+        "sop_id": "SOP-006"
+      }
+    },
+    {
+      "incident_id": "INC-007",
+      "text": "Yellow warning light is still on even though the issue was resolved; need to reset the warning indicator.",
+      "labels": {
+        "sop_id": "SOP-007"
+      }
+    },
+    {
+      "incident_id": "INC-008",
+      "text": "Yellow indicator is on and there may be debris in the intake; need to inspect and clean the intake cover.",
+      "labels": {
+        "sop_id": "SOP-008"
+      }
+    },
+    {
+      "incident_id": "INC-009",
+      "text": "Vibration sensor readings are high likely due to friction in moving parts; apply lubrication to reduce vibration.",
+      "labels": {
+        "sop_id": "SOP-009"
+      }
+    },
+    {
+      "incident_id": "INC-010",
+      "text": "Red fault light is solid on the machine; investigate the fault and identify the issue source.",
+      "labels": {
+        "sop_id": "SOP-010"
+      }
+    },
+    {
+      "incident_id": "INC-011",
+      "text": "Machine is showing low power warning and may need battery replacement; perform battery swap procedure.",
+      "labels": {
+        "sop_id": "SOP-011"
+      }
+    },
+    {
+      "incident_id": "INC-012",
+      "text": "Red light is on and machine is completely unresponsive; likely a blown fuse that needs replacement.",
+      "labels": {
+        "sop_id": "SOP-012"
+      }
+    },
+    {
+      "incident_id": "INC-013",
+      "text": "Light sensor is giving erratic and inconsistent readings; clean the sensor to fix detection issues.",
+      "labels": {
+        "sop_id": "SOP-013"
+      }
+    },
+    {
+      "incident_id": "INC-014",
+      "text": "Pressure sensor readings seem off and may need calibration check; run calibration verification procedure.",
+      "labels": {
+        "sop_id": "SOP-014"
+      }
+    },
+    {
+      "incident_id": "INC-015",
+      "text": "Temperature sensor readings are fluctuating unexpectedly; verify sensor accuracy and stability.",
+      "labels": {
+        "sop_id": "SOP-015"
+      }
+    },
+    {
+      "incident_id": "INC-016",
+      "text": "Machine surface has accumulated dirt that may be affecting operation; perform surface cleaning procedure.",
+      "labels": {
+        "sop_id": "SOP-016"
+      }
+    },
+    {
+      "incident_id": "INC-017",
+      "text": "Cables around the machine appear loose and tangled; organize cables with cable ties.",
+      "labels": {
+        "sop_id": "SOP-017"
+      }
+    },
+    {
+      "incident_id": "INC-018",
+      "text": "Safety inspection is required before maintenance work; perform safety equipment check.",
+      "labels": {
+        "sop_id": "SOP-018"
+      }
+    },
+    {
+      "incident_id": "INC-019",
+      "text": "Vibration sensor shows high readings due to loose bolts on the machine; tighten bolts to reduce vibration.",
+      "labels": {
+        "sop_id": "SOP-019"
+      }
+    },
+    {
+      "incident_id": "INC-020",
+      "text": "Panel on the machine is loose and rattling; tighten panel screws with screwdriver.",
+      "labels": {
+        "sop_id": "SOP-020"
+      }
+    },
+    {
+      "incident_id": "INC-021",
+      "text": "Debris has accumulated around the machine area; collect debris into container bin.",
+      "labels": {
+        "sop_id": "SOP-021"
+      }
+    },
+    {
+      "incident_id": "INC-022",
+      "text": "Light sensor is not properly detecting indicator light status; run light sensor diagnostic.",
+      "labels": {
+        "sop_id": "SOP-022"
+      }
+    },
+    {
+      "incident_id": "INC-023",
+      "text": "Bracket appears misaligned and causing vibration issues; adjust bracket alignment.",
+      "labels": {
+        "sop_id": "SOP-023"
+      }
+    },
+    {
+      "incident_id": "INC-024",
+      "text": "Pressure sensor shows drop due to blocked intake; clear the intake blockage.",
+      "labels": {
+        "sop_id": "SOP-024"
+      }
+    },
+    {
+      "incident_id": "INC-025",
+      "text": "Routine sensor verification is needed; perform all sensor health check.",
+      "labels": {
+        "sop_id": "SOP-025"
+      }
+    },
+    {
+      "incident_id": "INC-026",
+      "text": "Green indicator light is not illuminating after pressing start; verify green light function.",
+      "labels": {
+        "sop_id": "SOP-026"
+      }
+    },
+    {
+      "incident_id": "INC-027",
+      "text": "Yellow warning light is on but all sensors appear normal; acknowledge and clear false warning.",
+      "labels": {
+        "sop_id": "SOP-027"
+      }
+    },
+    {
+      "incident_id": "INC-028",
+      "text": "Red fault light was on but issue has been fixed; perform controlled restart after clearing fault.",
+      "labels": {
+        "sop_id": "SOP-028"
+      }
+    },
+    {
+      "incident_id": "INC-029",
+      "text": "Maintenance is scheduled and machine needs to be safely shut down; execute pre-maintenance shutdown.",
+      "labels": {
+        "sop_id": "SOP-029"
+      }
+    },
+    {
+      "incident_id": "INC-030",
+      "text": "Maintenance is complete and machine needs to be restarted; perform post-maintenance startup.",
+      "labels": {
+        "sop_id": "SOP-030"
+      }
+    },
+    {
+      "incident_id": "INC-031",
+      "text": "Vibration sensor is showing critical level readings; respond to excessive vibration emergency.",
+      "labels": {
+        "sop_id": "SOP-031"
+      }
+    },
+    {
+      "incident_id": "INC-032",
+      "text": "Temperature sensor reading is approaching the critical threshold; take action to prevent overheating.",
+      "labels": {
+        "sop_id": "SOP-032"
+      }
+    },
+    {
+      "incident_id": "INC-033",
+      "text": "Pressure sensor is giving intermittent readings that cut in and out; fix sensor connection issue.",
+      "labels": {
+        "sop_id": "SOP-033"
+      }
+    },
+    {
+      "incident_id": "INC-034",
+      "text": "Sensors appear to be covered with dust affecting readings; perform dust cleaning procedure.",
+      "labels": {
+        "sop_id": "SOP-034"
+      }
+    },
+    {
+      "incident_id": "INC-035",
+      "text": "Machine operation mode needs to be changed; execute mode selection procedure.",
+      "labels": {
+        "sop_id": "SOP-035"
+      }
+    },
+    {
+      "incident_id": "INC-036",
+      "text": "Multiple warning lights are flashing simultaneously; execute rapid shutdown protocol immediately.",
+      "labels": {
+        "sop_id": "SOP-036"
+      }
+    },
+    {
+      "incident_id": "INC-037",
+      "text": "Pressure sensor shows slow but steady pressure increase; monitor and check gradual pressure build.",
+      "labels": {
+        "sop_id": "SOP-037"
+      }
+    },
+    {
+      "incident_id": "INC-038",
+      "text": "Machine was shut down and is now cooling; monitor cooling period with temperature sensor.",
+      "labels": {
+        "sop_id": "SOP-038"
+      }
+    },
+    {
+      "incident_id": "INC-039",
+      "text": "Access panel needs to be opened for visual inspection; perform screwdriver maintenance task.",
+      "labels": {
+        "sop_id": "SOP-039"
+      }
+    },
+    {
+      "incident_id": "INC-040",
+      "text": "Machine components may have loosened; perform wrench tightening inspection of all bolts.",
+      "labels": {
+        "sop_id": "SOP-040"
+      }
+    },
+    {
+      "incident_id": "INC-041",
+      "text": "Intake cover is damaged and needs replacement; execute intake cover replacement procedure.",
+      "labels": {
+        "sop_id": "SOP-041"
+      }
+    },
+    {
+      "incident_id": "INC-042",
+      "text": "Machine sounds dry during operation; check lubricant levels and apply if needed.",
+      "labels": {
+        "sop_id": "SOP-042"
+      }
+    },
+    {
+      "incident_id": "INC-043",
+      "text": "Full diagnostic cycle is required; run complete blue button diagnostic cycle.",
+      "labels": {
+        "sop_id": "SOP-043"
+      }
+    },
+    {
+      "incident_id": "INC-044",
+      "text": "Multiple sensors are showing abnormal readings at the same time; respond to multi-sensor anomaly.",
+      "labels": {
+        "sop_id": "SOP-044"
+      }
+    },
+    {
+      "incident_id": "INC-045",
+      "text": "Start of shift and machine is idle; perform routine start of day check.",
+      "labels": {
+        "sop_id": "SOP-045"
+      }
+    },
+    {
+      "incident_id": "INC-046",
+      "text": "End of shift requires machine shutdown; perform end of day shutdown procedure.",
+      "labels": {
+        "sop_id": "SOP-046"
+      }
+    },
+    {
+      "incident_id": "INC-047",
+      "text": "Machine requires thorough deep cleaning; execute cleaning brush deep clean protocol.",
+      "labels": {
+        "sop_id": "SOP-047"
+      }
+    },
+    {
+      "incident_id": "INC-048",
+      "text": "Loose parts are scattered around machine area; collect parts using container bin.",
+      "labels": {
+        "sop_id": "SOP-048"
+      }
+    },
+    {
+      "incident_id": "INC-049",
+      "text": "Hazardous operation is about to be performed; check safety goggles requirement.",
+      "labels": {
+        "sop_id": "SOP-049"
+      }
+    },
+    {
+      "incident_id": "INC-050",
+      "text": "Cables need to be reorganized and bundled properly; perform cable tie organization.",
+      "labels": {
+        "sop_id": "SOP-050"
+      }
+    },
+    {
+      "incident_id": "INC-051",
+      "text": "Pressure sensor shows sudden significant drop in pressure; respond to pressure drop emergency.",
+      "labels": {
+        "sop_id": "SOP-051"
+      }
+    },
+    {
+      "incident_id": "INC-052",
+      "text": "Temperature sensor shows rapid temperature increase; respond to temperature spike immediately.",
+      "labels": {
+        "sop_id": "SOP-052"
+      }
+    },
+    {
+      "incident_id": "INC-053",
+      "text": "Vibration sensor is showing unusual vibration pattern; perform vibration pattern analysis.",
+      "labels": {
+        "sop_id": "SOP-053"
+      }
+    },
+    {
+      "incident_id": "INC-054",
+      "text": "All indicator lights need to be tested for proper function; run light indicator test.",
+      "labels": {
+        "sop_id": "SOP-054"
+      }
+    },
+    {
+      "incident_id": "INC-055",
+      "text": "Need to verify spare fuse inventory; perform spare fuse inventory check.",
+      "labels": {
+        "sop_id": "SOP-055"
+      }
+    },
+    {
+      "incident_id": "INC-056",
+      "text": "Battery backup status needs verification; check battery status and condition.",
+      "labels": {
+        "sop_id": "SOP-056"
+      }
+    },
+    {
+      "incident_id": "INC-057",
+      "text": "Emergency stop function needs to be tested; perform red button function test.",
+      "labels": {
+        "sop_id": "SOP-057"
+      }
+    },
+    {
+      "incident_id": "INC-058",
+      "text": "Machine start function needs to be verified; perform green button function test.",
+      "labels": {
+        "sop_id": "SOP-058"
+      }
+    },
+    {
+      "incident_id": "INC-059",
+      "text": "Warning reset function needs to be tested; perform yellow button function test.",
+      "labels": {
+        "sop_id": "SOP-059"
+      }
+    },
+    {
+      "incident_id": "INC-060",
+      "text": "Diagnostic function needs verification; perform blue button function test.",
+      "labels": {
+        "sop_id": "SOP-060"
+      }
+    },
+    {
+      "incident_id": "INC-061",
+      "text": "Pressure sensor threshold setting needs verification; check pressure threshold adjustment.",
+      "labels": {
+        "sop_id": "SOP-061"
+      }
+    },
+    {
+      "incident_id": "INC-062",
+      "text": "Temperature sensor threshold needs to be checked; verify temperature threshold setting.",
+      "labels": {
+        "sop_id": "SOP-062"
+      }
+    },
+    {
+      "incident_id": "INC-063",
+      "text": "Vibration sensor threshold verification is needed; check vibration threshold settings.",
+      "labels": {
+        "sop_id": "SOP-063"
+      }
+    },
+    {
+      "incident_id": "INC-064",
+      "text": "Both red fault and yellow warning lights are on simultaneously; respond to dual light warning.",
+      "labels": {
+        "sop_id": "SOP-064"
+      }
+    },
+    {
+      "incident_id": "INC-065",
+      "text": "Red fault light is blinking indicating intermittent fault condition; investigate blinking red light.",
+      "labels": {
+        "sop_id": "SOP-065"
+      }
+    },
+    {
+      "incident_id": "INC-066",
+      "text": "Yellow warning light is blinking on the machine; respond to blinking yellow light warning.",
+      "labels": {
+        "sop_id": "SOP-066"
+      }
+    },
+    {
+      "incident_id": "INC-067",
+      "text": "Green light is blinking instead of being solid after startup; investigate blinking green light.",
+      "labels": {
+        "sop_id": "SOP-067"
+      }
+    },
+    {
+      "incident_id": "INC-068",
+      "text": "No indicator lights are illuminated on the machine; investigate all lights off condition.",
+      "labels": {
+        "sop_id": "SOP-068"
+      }
+    },
+    {
+      "incident_id": "INC-069",
+      "text": "Sensor readings suggest possible disconnection; verify sensor connections.",
+      "labels": {
+        "sop_id": "SOP-069"
+      }
+    },
+    {
+      "incident_id": "INC-070",
+      "text": "Pressure sensor shows slow leak pattern; check intake cover seal condition.",
+      "labels": {
+        "sop_id": "SOP-070"
+      }
+    },
+    {
+      "incident_id": "INC-071",
+      "text": "Specific bolt appears to be causing vibration; check and tighten bolt vibration source.",
+      "labels": {
+        "sop_id": "SOP-071"
+      }
+    },
+    {
+      "incident_id": "INC-072",
+      "text": "Panel needs to be removed for internal inspection; perform panel inspection access procedure.",
+      "labels": {
+        "sop_id": "SOP-072"
+      }
+    },
+    {
+      "incident_id": "INC-073",
+      "text": "Bracket misalignment is suspected; perform bracket alignment check.",
+      "labels": {
+        "sop_id": "SOP-073"
+      }
+    },
+    {
+      "incident_id": "INC-074",
+      "text": "Scheduled lubrication is due; execute lubricant application schedule.",
+      "labels": {
+        "sop_id": "SOP-074"
+      }
+    },
+    {
+      "incident_id": "INC-075",
+      "text": "Scheduled cleaning is required; execute cleaning schedule procedure.",
+      "labels": {
+        "sop_id": "SOP-075"
+      }
+    },
+    {
+      "incident_id": "INC-076",
+      "text": "Weekly calibration check is due; perform weekly sensor calibration verification.",
+      "labels": {
+        "sop_id": "SOP-076"
+      }
+    },
+    {
+      "incident_id": "INC-077",
+      "text": "Monthly equipment check is required; conduct monthly equipment audit.",
+      "labels": {
+        "sop_id": "SOP-077"
+      }
+    },
+    {
+      "incident_id": "INC-078",
+      "text": "Unusual noise is coming from the machine; investigate noise using protocol.",
+      "labels": {
+        "sop_id": "SOP-078"
+      }
+    },
+    {
+      "incident_id": "INC-079",
+      "text": "Smoke or burning smell detected near machine; respond to smoke detection emergency.",
+      "labels": {
+        "sop_id": "SOP-079"
+      }
+    },
+    {
+      "incident_id": "INC-080",
+      "text": "Electrical sparking observed from machine; respond to sparking observation immediately.",
+      "labels": {
+        "sop_id": "SOP-080"
+      }
+    },
+    {
+      "incident_id": "INC-081",
+      "text": "One of the buttons appears stuck or unresponsive; investigate stuck button issue.",
+      "labels": {
+        "sop_id": "SOP-081"
+      }
+    },
+    {
+      "incident_id": "INC-082",
+      "text": "Light sensor is giving incorrect readings compared to actual light status; check for sensor obstruction.",
+      "labels": {
+        "sop_id": "SOP-082"
+      }
+    },
+    {
+      "incident_id": "INC-083",
+      "text": "Foreign object detected inside the machine; perform foreign object removal procedure.",
+      "labels": {
+        "sop_id": "SOP-083"
+      }
+    },
+    {
+      "incident_id": "INC-084",
+      "text": "Sensor readings are intermittent possibly due to loose cable; detect and fix loose cable.",
+      "labels": {
+        "sop_id": "SOP-084"
+      }
+    },
+    {
+      "incident_id": "INC-085",
+      "text": "Sensors may be affected by humidity; check humidity effect on sensor readings.",
+      "labels": {
+        "sop_id": "SOP-085"
+      }
+    },
+    {
+      "incident_id": "INC-086",
+      "text": "Machine is cold after extended shutdown period; perform cold start procedure.",
+      "labels": {
+        "sop_id": "SOP-086"
+      }
+    },
+    {
+      "incident_id": "INC-087",
+      "text": "Power fluctuation may have affected machine operation; respond to power fluctuation event.",
+      "labels": {
+        "sop_id": "SOP-087"
+      }
+    },
+    {
+      "incident_id": "INC-088",
+      "text": "Light pattern on machine indicates an error code; investigate error code pattern.",
+      "labels": {
+        "sop_id": "SOP-088"
+      }
+    },
+    {
+      "incident_id": "INC-089",
+      "text": "Machine failed to start when green button was pressed; perform startup failure recovery.",
+      "labels": {
+        "sop_id": "SOP-089"
+      }
+    },
+    {
+      "incident_id": "INC-090",
+      "text": "Machine is not responding to red emergency stop button; respond to shutdown failure.",
+      "labels": {
+        "sop_id": "SOP-090"
+      }
+    },
+    {
+      "incident_id": "INC-091",
+      "text": "Sensor is showing zero reading when it should have a value; perform sensor zero calibration.",
+      "labels": {
+        "sop_id": "SOP-091"
+      }
+    },
+    {
+      "incident_id": "INC-092",
+      "text": "Sensor is showing maximum value unexpectedly; investigate sensor maximum reading issue.",
+      "labels": {
+        "sop_id": "SOP-092"
+      }
+    },
+    {
+      "incident_id": "INC-093",
+      "text": "Tools were left at machine after maintenance; execute tool return protocol.",
+      "labels": {
+        "sop_id": "SOP-093"
+      }
+    },
+    {
+      "incident_id": "INC-094",
+      "text": "Safety goggles need cleaning before use; perform safety goggles cleaning.",
+      "labels": {
+        "sop_id": "SOP-094"
+      }
+    },
+    {
+      "incident_id": "INC-095",
+      "text": "Container bin is full and needs emptying; execute container bin emptying procedure.",
+      "labels": {
+        "sop_id": "SOP-095"
+      }
+    },
+    {
+      "incident_id": "INC-096",
+      "text": "Lubricant bottle appears to be running low; check lubricant bottle refill status.",
+      "labels": {
+        "sop_id": "SOP-096"
+      }
+    },
+    {
+      "incident_id": "INC-097",
+      "text": "Multiple sensors are showing no reading at all; respond to simultaneous sensor failure.",
+      "labels": {
+        "sop_id": "SOP-097"
+      }
+    },
+    {
+      "incident_id": "INC-098",
+      "text": "All buttons need function verification; perform routine button test cycle.",
+      "labels": {
+        "sop_id": "SOP-098"
+      }
+    },
+    {
+      "incident_id": "INC-099",
+      "text": "Full system verification is required; execute comprehensive system check.",
+      "labels": {
+        "sop_id": "SOP-099"
+      }
+    },
+    {
+      "incident_id": "INC-100",
+      "text": "Red light is flashing with alarm sound indicating emergency; execute emergency response protocol immediately.",
+      "labels": {
+        "sop_id": "SOP-100"
+      }
+    }
+  ]
+}

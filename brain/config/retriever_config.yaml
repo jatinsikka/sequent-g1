@@ -1,0 +1,45 @@
+# Dual Encoder Retriever Configuration
+# Updated for 100 SOPs and diverse incident types
+
+# Model settings
+model:
+  name: "bert-base-uncased"  # Pre-trained model to use
+  
+# Data settings
+data:
+  train_json: "src/data/sop_examples.json"  # Path to training data (100 SOPs)
+  train_key: "sop_examples"       # Key in JSON file containing array of SOPs
+  validation_split: 0.1          # Fraction for validation set
+  
+# Training settings
+# Recommended for 100 SOPs: higher epochs help with convergence
+# With ~100 SOPs per epoch, ~100 epochs = ~10000 SOP pairs processed
+# Increase if training loss plateaus, or decrease if overfitting
+training:
+  epochs: 20                    # Number of training epochs (increased for better semantic convergence)
+  batch_size: 8                    # Batch size (increased from 2 for better gradient estimation)
+  learning_rate: 0.00005           # Learning rate (decreased slightly for stability with larger batches)
+  warmup_steps: 100                # Linear warmup steps (helps training stability)
+  max_length: 256                  # Max token length for BERT
+  
+# Contrastive loss settings (InfoNCE)
+loss:
+  temperature: 0.07                # Contrastive temperature (lower = sharper predictions)
+  use_all_negatives: true          # Use all negatives in batch (batch size determines negatives)
+  
+# Output settings
+output:
+  out_dir: "artifacts/retriever_bert"     # Directory to save models and index
+  save_every_epochs: 5                    # Save checkpoint every N epochs
+  
+# Index settings (FAISS)
+index:
+  index_dir: "artifacts/retriever_bert/index"  # Directory for FAISS index
+  top_k: 5                         # Default number of top results to retrieve
+  # Recommended: rebuild index after training for best retrieval performance
+  
+# Evaluation settings
+eval:
+  reranker_enabled: true           # Use DeBERTa cross-encoder for reranking
+  reranker_top_k: 10               # Rerank from top-10 candidates
+

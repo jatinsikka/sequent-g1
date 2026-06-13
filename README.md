@@ -1,62 +1,59 @@
-# RL Loco-Manipulation on the Unitree G1
+# Sequent
 
-Task-level reinforcement learning (reach, grasp, lift, button-press) layered on top of the
-[AMO](https://amo-humanoid.github.io/) whole-body controller, simulated in MuJoCo on the Unitree G1 humanoid.
+**SOP-driven, verified loco-manipulation on a humanoid.** Tell it what's wrong; it retrieves the right procedure, plans the steps, executes them on a Unitree G1 in simulation, and — the part nobody else does — *verifies each step against the physics* instead of assuming it worked.
 
-![v5.5 best deterministic episode](v55_best.gif)
+> Repo: `sequent-g1`. Part of [Sequent Robotics](https://sequent-robotics.vercel.app).
 
-## Current status
-
-`v5.5` is the first policy with nonzero **deterministic** success on the full reach-grasp-lift task:
-**40% grasp / 30% lift / 0% falls** over 20 random-spawn episodes (grasp typically within ~0.5 s; tool held
-rigidly with no levitation). Full iteration history lives in [TRAINING_LOG.md](TRAINING_LOG.md); the latest
-overnight analysis is in [MORNING_REPORT.md](MORNING_REPORT.md). Checkpoint of record:
-`checkpoints/v55_final.zip`.
-
-## Architecture
-
-- **L1 — AMO** (`amo_jit.pt`, `adapter_jit.pt`): pretrained whole-body controller (legs + torso, 50 Hz),
-  used as-is for balance and locomotion.
-- **L2 — task policies** (this repo): PPO policies commanding the arm on top of AMO. Honest contact-gated
-  grasping (no latch-across-gap), closeness-scaled approach incentives, lift-dominant reward, adaptive
-  spawn curriculum.
-
-## Key files
-
-| File | Purpose |
-|---|---|
-| `env_wrapper.py` / `env_wrapper_button.py` / `env_wrapper_universal.py` | Gym-style envs wrapping MuJoCo + the AMO controller |
-| `reward_fn.py` | Task reward (contact-gated grasp, calm-approach, lift-dominant) |
-| `train.py` | Main PPO training (reach-grasp-lift) |
-| `train_button.py` | Button-press task training |
-| `_eval_policy.py` | Deterministic N-episode eval harness (metrics + GIF render) |
-| `_viewer.py` | Live MuJoCo viewer driven by the real AMO controller |
-| `g1.xml`, `interactive_objects.xml`, `meshes/` | Scene description (G1 + factory cell) |
-
-## Quickstart
-
-```bash
-pip install -r requirements.txt
-
-# train (reach-grasp-lift)
-python train.py --total_timesteps 400000 --curriculum true --run_name v5.x-grasp
-
-# evaluate a checkpoint deterministically (the only metric that counts)
-python _eval_policy.py --model checkpoints/v55_final.zip --episodes 20 --gif eval.gif
-
-# watch live
-python _viewer.py
+```
+ "Machine A pressure is low"
+            │
+            ▼
+   ┌──────────────────┐   retrieves over a 100-SOP library
+   │  BRAIN (brain/)   │   emits a typed, step-by-step plan
+   │  retrieval + LLM  │   (walk_to · grasp · press_button · …)
+   │  planner          │
+   └────────┬─────────┘
+            │  JSON plan: ordered skills + pre/postconditions
+            ▼
+   ┌──────────────────┐   gates every step: precondition → run →
+   │  VERIFIER         │   postcondition measured against mjData →
+   │  (verifier.py)    │   retry / halt with a structured report
+   └────────┬─────────┘
+            │
+            ▼
+   ┌──────────────────┐   RL skills on the AMO whole-body controller
+   │  BODY (skills)    │   G1, 29 DoF, MuJoCo
+   └──────────────────┘
 ```
 
-## Conventions
+## Why this exists
 
-- Success claims come from **deterministic** evals only — exploration luck is not skill.
-- Every training iteration gets a row in `TRAINING_LOG.md` and a named wandb run (`vX.Y-task-MMDD`).
-- Videos are frame-checked before any claim of success.
+Modern policy pipelines fail **silently** — NVIDIA's own G1 locomanipulation demos report 75–85% success, with nothing in the loop that notices the other 15–25%. Capability is commoditizing fast (Isaac Lab Mimic, GRAIL); *knowing whether the robot actually did the thing* is not. Sequent is the verification layer: the skills are commodity and swappable, the trust layer above them is the contribution.
 
-## Attribution & license
+The verifier earns this on day one — pointed at our own best grasp policy, it caught a reward-hacked checkpoint that **claimed** 15–55% grasp success but **verified** at 0% (grabs the tool, never lifts it). See `TRAINING_LOG.md`.
 
-- AMO controller weights and interface: [AMO — Adaptive Motion Optimization](https://amo-humanoid.github.io/)
-  (Li, Cheng, Huang, Wang — RSS 2025), Apache License 2.0. See [LICENSE](LICENSE).
-- Unitree G1 model and meshes derive from Unitree's robot description (BSD-3-Clause).
-- Everything else (environments, rewards, training/eval code) © 2026, released under Apache License 2.0.
+## Repository layout
+
+| Path | What |
+|---|---|
+| `brain/` | SOP retrieval (100-SOP library) + LLM planner → typed JSON plans. From the Fall-2025 DL project; LLM layer being refreshed to a frontier model, execution being de-stubbed. |
+| `verifier.py` | Skill contracts: physics-checked pre/postconditions vs. `mjData`. |
+| `verify_policy.py` | Claimed-vs-verified evaluation of a trained policy. |
+| `train.py`, `env_wrapper*.py`, `reward_fn.py` | RL skills (grasp, button-press) on the AMO controller. |
+| `g1.xml`, `meshes/`, `*.xml` | G1 model + scene. |
+| `amo_jit.pt`, `adapter_jit.pt` | Frozen AMO whole-body controller (Ze et al., RSS 2025). CPU-patched variants for cloud training. |
+| `TRAINING_LOG.md`, `AZURE_COST_LOG.md` | Per-run results and cloud spend. |
+
+## Status
+
+- ✅ Whole-body control + walking (AMO), grasp skill (RL), cloud training pipeline, verifier v0
+- 🚧 No-early-stop eval (give the lift check its runway), planner de-stub (brain → real skills), button-press skill, the end-to-end demo
+
+## Roadmap
+
+- **v0 (Aug 31, 2026):** typed command → retrieved SOP → verified end-to-end execution on one task. Ugly is fine.
+- **v1 (Dec 15, 2026):** robust; 90-second demo video, clean repo, short writeup.
+
+## Credits
+
+AMO controller: Ze et al., RSS 2025. Built by Jatin Sikka. Apache 2.0.

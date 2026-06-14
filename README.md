@@ -48,7 +48,8 @@ The verifier earns this on day one — pointed at our own best grasp policy, it 
 
 - ✅ Whole-body control + walking (AMO), grasp skill (RL, **v5.5 = 55% verified**), cloud training pipeline
 - ✅ Verifier + no-early-stop eval; **verifying executor** (`executor.py`, `run_task.py`): command → plan → verified step-by-step execution, halts with a report on failure
-- 🚧 Real brain planner wired into `run_task` (currently a keyword stub), more real skills (walk_to, press_button), the demo video
+- ✅ **SOP-driven spine** (`brain_bridge.py`): incident → TF-IDF retrieval over the 100-SOP library → typed plan → verified execution (numpy-only, no API)
+- 🚧 Frontier-LLM planner (replaces the bridge's retrieval + step-mapper), more real skills (walk_to, press_button), the demo video
 
 ## Roadmap
 

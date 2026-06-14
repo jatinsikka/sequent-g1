@@ -55,12 +55,21 @@ def main():
     p.add_argument("--episodes", type=int, default=20)
     p.add_argument("--min_lift", type=float, default=0.05)
     p.add_argument("--sustain_steps", type=int, default=25)
+    p.add_argument("--early_stop", action="store_true",
+                   help="let the env terminate on its success flag (default: run the "
+                        "full horizon so sustained-lift can be measured)")
     args = p.parse_args()
 
     config = get_training_config()
     env = make_env(config)
+    # By default, disable the env's success-termination so the LiftMonitor gets its
+    # runway: the policy keeps acting after a lift, and we see whether it HOLDS or drops.
+    env.unwrapped.no_early_success_stop = not args.early_stop
     model = PPO.load(args.model, device=config.device)
     contract = grasp_contract()
+    print(f"[verify] early_stop={args.early_stop} (no_early_success_stop="
+          f"{env.unwrapped.no_early_success_stop}) | min_lift={args.min_lift}m "
+          f"sustained {args.sustain_steps} steps\n")
 
     claimed = verified = pre_failures = 0
     for ep in range(args.episodes):

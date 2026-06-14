@@ -749,8 +749,12 @@ class G1RLEnv(gym.Env):
         time_exceeded = self.episode_time >= self.max_episode_time
         timeout = self.episode_steps >= self.max_episode_steps
         
-        # Terminate on table collision (after grace period)
-        terminated = fell or success or time_exceeded or table_collision_termination
+        # Terminate on table collision (after grace period).
+        # no_early_success_stop: keep running after "success" so a verifier can
+        # measure whether the lift is SUSTAINED (held) rather than a one-frame spike.
+        # Falls/time still terminate — a dropped object correctly fails the hold.
+        stop_on_success = not getattr(self, "no_early_success_stop", False)
+        terminated = fell or (success and stop_on_success) or time_exceeded or table_collision_termination
         truncated = timeout
         
         info = {

@@ -46,8 +46,9 @@ The verifier earns this on day one — pointed at our own best grasp policy, it 
 
 ## Status
 
-- ✅ Whole-body control + walking (AMO), grasp skill (RL), cloud training pipeline, verifier v0
-- 🚧 No-early-stop eval (give the lift check its runway), planner de-stub (brain → real skills), button-press skill, the end-to-end demo
+- ✅ Whole-body control + walking (AMO), grasp skill (RL, **v5.5 = 55% verified**), cloud training pipeline
+- ✅ Verifier + no-early-stop eval; **verifying executor** (`executor.py`, `run_task.py`): command → plan → verified step-by-step execution, halts with a report on failure
+- 🚧 Real brain planner wired into `run_task` (currently a keyword stub), more real skills (walk_to, press_button), the demo video
 
 ## Roadmap
 

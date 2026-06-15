@@ -31,7 +31,7 @@ from src.data.schemas import Plan, SKILLS  # noqa: E402
 
 from brain_bridge import retrieve_sop, _load_sops
 
-DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
 _BASE = "https://generativelanguage.googleapis.com/v1beta"
 
 SKILL_SPEC = """\

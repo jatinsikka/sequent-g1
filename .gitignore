@@ -23,3 +23,8 @@ _*.py
 !_viewer.py
 
 PRESENTATION.md
+
+# secrets — never commit API keys
+.env
+.gemini_key
+*_key.txt

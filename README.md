@@ -49,7 +49,8 @@ The verifier earns this on day one — pointed at our own best grasp policy, it 
 - ✅ Whole-body control + walking (AMO), grasp skill (RL, **v5.5 = 55% verified**), cloud training pipeline
 - ✅ Verifier + no-early-stop eval; **verifying executor** (`executor.py`, `run_task.py`): command → plan → verified step-by-step execution, halts with a report on failure
 - ✅ **SOP-driven spine** (`brain_bridge.py`): incident → TF-IDF retrieval over the 100-SOP library → typed plan → verified execution (numpy-only, no API)
-- 🚧 Frontier-LLM planner (replaces the bridge's retrieval + step-mapper), more real skills (walk_to, press_button), the demo video
+- ✅ **LLM planner** (`llm_planner.py`): Gemini (free tier, REST) selects the SOP + emits the typed plan; `run_task --planner auto` uses it when a key is set, else falls back to the bridge. (Needs a free Gemini key to run live.)
+- 🚧 More real skills (walk_to, press_button), the demo video
 
 ## Roadmap
 

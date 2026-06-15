@@ -2,6 +2,10 @@
 
 **SOP-driven, verified loco-manipulation on a humanoid.** Tell it what's wrong; it retrieves the right procedure, plans the steps, executes them on a Unitree G1 in simulation, and — the part nobody else does — *verifies each step against the physics* instead of assuming it worked.
 
+<p align="center">
+  <img src="v55_best.gif" alt="Unitree G1 performing verified loco-manipulation in MuJoCo" width="640">
+</p>
+
 > Repo: `sequent-g1`. Part of [Sequent Robotics](https://sequent-robotics.vercel.app).
 
 ```

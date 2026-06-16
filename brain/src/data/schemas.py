@@ -1,3 +1,10 @@
+"""
+Data contracts for the SOP planning pipeline: the SKILLS whitelist plus the
+SOPEntry / IncidentEntry / PlanStep / Plan schemas (Pydantic) that the retriever,
+planner, and executor all speak. From the Fall-2025 DL project.
+
+Author: Jatin Sikka
+"""
 from __future__ import annotations
 
 from pathlib import Path

@@ -6,6 +6,10 @@ This module wraps the HumanoidEnv class from play_amo.py into a Gymnasium
 
 The action space is continuous and matches the controls in play_amo.py:
   [vx, vy, yaw, height, torso_yaw, torso_pitch, torso_roll, arm_control_flag]
+
+Builds on the AMO whole-body controller (Ze et al., RSS 2025); the grasp task,
+reward shaping, and observations here are this project's own work.
+Author: Jatin Sikka
 """
 
 import numpy as np

@@ -7,6 +7,8 @@ Front door: natural-language incident -> retrieved SOP -> plan -> verified execu
 Planning today: the brain bridge (numpy TF-IDF retrieval over the 100-SOP library
 + deterministic step->skill mapping). Swapping in a frontier LLM for retrieval +
 planning is the "A" path; the executor below is already the real thing.
+
+Author: Jatin Sikka
 """
 
 import argparse
@@ -43,6 +45,7 @@ def plan_for(command: str, planner: str) -> Plan:
 
 
 def main():
+    """CLI entry: build a plan from --command (or load --plan), then run it through the verifying executor."""
     p = argparse.ArgumentParser()
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--command", help="natural-language incident")

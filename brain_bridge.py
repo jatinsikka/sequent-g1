@@ -8,6 +8,8 @@ sklearn/BERT retriever and Flan-T5 planner — both get replaced by a frontier
 LLM in the "A" path. What's real here is the spine: a natural-language incident
 selects a real SOP from the library, and that SOP's steps become an executable,
 verifiable plan.
+
+Author: Jatin Sikka
 """
 
 from __future__ import annotations
@@ -44,6 +46,7 @@ def _tok(s: str) -> List[str]:
 # ---- retrieval: numpy-free TF-IDF cosine over the SOP corpus -----------------
 
 def retrieve_sop(incident: str, sops: List[dict], k: int = 3) -> List[Tuple[dict, float]]:
+    """Rank SOPs by TF-IDF cosine similarity to the incident text; return the top-k (sop, score)."""
     docs = [_tok(_text(s)) for s in sops]
     N = len(docs)
     df: Counter = Counter()
@@ -75,6 +78,7 @@ def _find(pattern: str, text: str, default: str = "") -> str:
 
 
 def step_to_skill(step: str) -> PlanStep:
+    """Map one natural-language SOP step to a typed skill via keyword rules (the no-LLM fallback)."""
     s = step.lower()
     if "wait" in s:
         sec = _find(r"\d+", s, "1")
@@ -100,6 +104,7 @@ def step_to_skill(step: str) -> PlanStep:
 
 
 def incident_to_plan(incident: str) -> Tuple[Plan, dict, float]:
+    """Retrieve the best SOP and turn its steps into a typed Plan. Returns (plan, sop, score)."""
     sops = _load_sops()
     ranked = retrieve_sop(incident, sops)
     sop, score = ranked[0]

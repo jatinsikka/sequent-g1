@@ -14,6 +14,8 @@ the environment; model is GEMINI_MODEL (default below) or the --model arg.
 
     python llm_planner.py --list-models          # see what your key can use
     python llm_planner.py --command "..."        # dry-run: print the plan
+
+Author: Jatin Sikka
 """
 
 from __future__ import annotations
@@ -45,6 +47,7 @@ notify       {"level": str}      alert a human (tech / technician / operator)"""
 
 
 def _api_key() -> str:
+    """Get the Gemini key from env (GEMINI/GOOGLE_API_KEY) or the gitignored .gemini_key file."""
     key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:
         # fallback: a gitignored key file next to this module (see .gitignore)
@@ -60,6 +63,7 @@ def _api_key() -> str:
 
 
 def list_models() -> List[str]:
+    """List the model IDs this key can call generateContent on."""
     r = requests.get(f"{_BASE}/models", params={"key": _api_key()}, timeout=30)
     r.raise_for_status()
     out = []
@@ -70,6 +74,7 @@ def list_models() -> List[str]:
 
 
 def _call_gemini(prompt: str, model: str) -> str:
+    """POST the prompt to Gemini's REST API; return the raw response text (JSON per responseMimeType)."""
     url = f"{_BASE}/models/{model}:generateContent"
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
@@ -83,6 +88,7 @@ def _call_gemini(prompt: str, model: str) -> str:
 
 
 def _prompt(incident: str, candidates: List[dict]) -> str:
+    """Build the planning prompt: incident + candidate SOPs + skill spec -> ask for strict Plan JSON."""
     cand = "\n".join(
         f"- {s['sop_id']} | {s['title']} | condition: {s['condition']}\n    steps: {s['steps']}"
         for s in candidates
@@ -108,6 +114,8 @@ args (real button/sensor/object names from the SOP steps); preserve the SOP's or
 
 def plan_with_llm(incident: str, model: str = DEFAULT_MODEL, k: int = 5,
                   max_retries: int = 1) -> Tuple[Plan, str]:
+    """Retrieve the top-k candidate SOPs, have the LLM pick one and emit a validated Plan.
+    Returns (plan, chosen sop_id). Raises if the LLM can't produce valid JSON after retries."""
     sops = _load_sops()
     candidates = [s for s, _ in retrieve_sop(incident, sops, k=k)]
     prompt = _prompt(incident, candidates)

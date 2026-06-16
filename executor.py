@@ -12,6 +12,8 @@ v0 scope:
 
 Each real skill runs as its own reset->rollout->verify episode for now; chaining
 skills in one continuous sim is a v1 concern (noted, not hidden).
+
+Author: Jatin Sikka
 """
 
 from __future__ import annotations
@@ -73,6 +75,7 @@ def _fmt_args(args: Dict[str, Any]) -> str:
 class VerifyingExecutor:
     def __init__(self, grasp_model_path: str, device: Optional[str] = None,
                  max_retries: int = 2, min_lift: float = 0.05, sustain_steps: int = 25):
+        """Load the grasp policy and sim env once, reused across all plan steps."""
         config = get_training_config()
         if device:
             config.device = device
@@ -85,6 +88,7 @@ class VerifyingExecutor:
         self.sustain_steps = sustain_steps
 
     def run(self, plan: Plan) -> ExecReport:
+        """Run each plan step in order; halt on the first step that isn't verified or stubbed."""
         reports: List[StepReport] = []
         completed = True
         for i, step in enumerate(plan.steps):
@@ -100,6 +104,8 @@ class VerifyingExecutor:
         return ExecReport(plan.goal, reports, completed)
 
     def _run_grasp(self, index: int, step: PlanStep) -> StepReport:
+        """Run the real grasp policy: check preconditions, roll out, measure the lift.
+        Retry up to max_retries; if it never holds, report the failing postcondition."""
         contract = grasp_contract()
         attempts = 0
         last_pre: List[CheckResult] = []

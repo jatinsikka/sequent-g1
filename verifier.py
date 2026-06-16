@@ -9,6 +9,8 @@ can never read as a finished job.
 v0 scope: conditions for the grasp skill, evaluated against G1RLEnv.
 The contract interface is skill-agnostic; walk_to / carry_to / place add
 their own conditions without changing the executor.
+
+Author: Jatin Sikka
 """
 
 from dataclasses import dataclass, field

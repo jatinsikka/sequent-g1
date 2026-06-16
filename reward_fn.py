@@ -4,6 +4,8 @@ Reward function for G1 humanoid RL training.
 This module provides modular reward functions for:
   1. Grasping objects (RewardFunction) - distance to target, hand proximity
   2. Pressing buttons (ButtonPressRewardFunction) - button displacement, hand proximity
+
+Author: Jatin Sikka
 """
 
 import numpy as np

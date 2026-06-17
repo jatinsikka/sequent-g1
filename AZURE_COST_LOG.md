@@ -2,7 +2,9 @@
 
 Sponsorship credits: $10,000 (expires 2028-04-30). Quota: 65 vCPU regional (East US 2). GPU quota pending (A100 ticket filed 2026-06-12).
 
-**Rule: deallocate (`az vm deallocate -g sequent-rl-rg -n sequent-cpu32`) when idle — stopped-but-not-deallocated VMs still bill.**
+**Rule: deallocate when idle; stopped-but-not-deallocated VMs still bill. And deallocate only pauses compute (disk + public IP keep dripping ~$0.70/day), so DELETE the resource group when done for a while.**
+
+**STATUS 2026-06-17: `sequent-rl-rg` (VM, 128GB disk, public IP, NIC, VNET) DELETED. Final June spend ~$8.96. Idle drip stopped. Everything reproducible (repo on GitHub, v5.5 + v5.6 checkpoints local). Recreate via scripted setup when cloud compute is needed again. Future GPU path = AWS credits (~5 days out) or an Azure A10 request.**
 
 ## Resources
 
@@ -21,4 +23,4 @@ Sponsorship credits: $10,000 (expires 2028-04-30). Quota: 65 vCPU regional (East
 
 | Month | Credits used (portal) | Remaining |
 |---|---|---|
-| 2026-06 | — | $10,000 |
+| 2026-06 | ~$8.96 (VM run + idle drip; RG deleted 6/17) | ~$9,991 |

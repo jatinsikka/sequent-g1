@@ -1,0 +1,13 @@
+  INCIDENT (natural language):  "the machine is overheating, shut it down now"
+  RETRIEVED  SOP-002: Emergency Shutdown Procedure   (similarity 0.28)
+  1. walk_to({'target': 'machine'})
+  2. press_button({'button': 'red_button'})
+  3. wait({'seconds': 3})
+  4. read_sensor({'sensor': 'temperature_sensor'})
+  5. notify({'level': 'tech'})
+  1. walk_to       [VERIFIED]  arrived=True fell=False min_dist=0.00m
+  2. press_button  [VERIFIED]  depth=5.3cm held=79steps upright=True
+  3. wait          [done]      3s elapsed
+  4. read_sensor   [done]      temperature_sensor = nominal
+  5. notify        [done]      operator (tech)
+  SOP COMPLETE  -  every physical step physics-verified  ✅

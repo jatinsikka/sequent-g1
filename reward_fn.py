@@ -244,9 +244,13 @@ class ButtonPressRewardFunction:
     def __init__(
         self,
         button_position: Tuple[float, float, float] = (-0.45, -1.85, 1.0),  # Red button default
-        press_threshold: float = 0.02,  # Button pressed if displaced > 2cm
+        press_threshold: float = 0.02,  # Button counts as "pressed" if displaced > 2cm
+        target_press_depth: float = 0.05,  # A SOLID press: per-step press reward saturates here
         hand_proximity_weight: float = 10.0,  # Increased to encourage reaching
-        press_reward: float = 100.0,  # Big reward for actually pressing
+        press_reward: float = 100.0,  # Per-step reward at full target depth (scales with depth)
+        hold_bonus: float = 30.0,  # bp-v2: steep per-step income while past the press threshold
+        first_press_bonus: float = 50.0,  # One-time bonus on first crossing the threshold
+        balance_weight: float = 3.0,  # Penalty for base drifting off spawn (counter reach-recoil)
         action_penalty: float = 0.0001,  # Reduced to not discourage movement
         alive_bonus: float = 0.1,  # Reduced to make reaching more important
     ):
@@ -263,15 +267,20 @@ class ButtonPressRewardFunction:
         """
         self.button_position = np.array(button_position)
         self.press_threshold = press_threshold
+        self.target_press_depth = target_press_depth
         self.hand_proximity_weight = hand_proximity_weight
         self.press_reward = press_reward
+        self.hold_bonus = hold_bonus
+        self.first_press_bonus = first_press_bonus
+        self.balance_weight = balance_weight
         self.action_penalty = action_penalty
         self.alive_bonus = alive_bonus
-        
+
         # Track button state
         self.button_pressed = False
         self.max_button_displacement = 0.0
         self.prev_hand_distance = None
+        self.init_base_xy = None  # base xy at episode start, for the balance/recoil penalty
     
     def compute_reward(
         self,
@@ -313,23 +322,23 @@ class ButtonPressRewardFunction:
         r_approach = self._compute_approach_reward(left_hand_pos, right_hand_pos, target_pos)
         info['r_approach'] = r_approach
         
-        # 3. Button press reward
-        r_press = 0.0
+        # 3. Button press reward — DEPTH-MONOTONIC, no flat plateau.
+        # Per-step reward grows linearly with how deep the button is held, saturating
+        # at target_press_depth. A graze at the 2cm threshold earns far less than a
+        # solid 5cm press, so RL is pushed toward a firm, held press rather than a
+        # brittle threshold-graze (the failure mode seen on the grasp policy).
         self.max_button_displacement = max(self.max_button_displacement, button_displacement)
-        
-        if button_displacement > self.press_threshold:
-            if not self.button_pressed:
-                # First time pressing - big bonus!
-                r_press = self.press_reward
-                self.button_pressed = True
-                print(f"    [REWARD] Button pressed! Displacement: {button_displacement:.4f}m")
-            else:
-                # Continuing to hold - smaller reward
-                r_press = 10.0
-        else:
-            # Incremental reward for any displacement
-            r_press = button_displacement * 200.0  # Scale up small displacements
-        
+        depth_frac = np.clip(button_displacement / self.target_press_depth, 0.0, 1.0)
+        r_press = self.press_reward * depth_frac
+        # bp-v3: reverted v2's hold_bonus CLIFF (it destabilized value learning -> regression).
+        # The depth term above is already a SMOOTH sustained-hold reward: every step the
+        # button is held deep accumulates press_reward*depth_frac, no discontinuity. The new
+        # lever for bp-v3 is the BC warm-start (train_button_bc.py), not the reward.
+        if button_displacement > self.press_threshold and not self.button_pressed:
+            r_press += self.first_press_bonus  # one-time: it's doable
+            self.button_pressed = True
+            print(f"    [REWARD] Button pressed! Displacement: {button_displacement:.4f}m")
+
         info['r_press'] = r_press
         info['button_displacement'] = button_displacement
         info['button_pressed'] = self.button_pressed
@@ -338,16 +347,23 @@ class ButtonPressRewardFunction:
         r_action = -self.action_penalty * np.linalg.norm(action) ** 2
         info['r_action'] = r_action
         
-        # 5. Distance penalty - penalize being far from button
-        if right_hand_pos is not None:
-            dist_to_button = np.linalg.norm(right_hand_pos - target_pos)
-        elif left_hand_pos is not None:
-            dist_to_button = np.linalg.norm(left_hand_pos - target_pos)
-        else:
-            dist_to_button = 1.0
+        # 5. Distance penalty - penalize the ACTIVE (closest) hand being far from button.
+        # (Was hardcoded to right_hand, which is the FROZEN hand for left-side buttons.)
+        dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
+        dist_to_button = min(dists) if dists else 1.0
         r_distance_penalty = -dist_to_button * 2.0  # Penalty proportional to distance
         info['r_distance_penalty'] = r_distance_penalty
-        
+
+        # 6. Balance term — penalize the base drifting off its spawn xy. The arm reach
+        # recoils the pelvis ~8.6cm backward, which carries the hand short of the button;
+        # this nudges RL toward a reach that keeps the base planted.
+        if self.init_base_xy is None:
+            self.init_base_xy = np.array(position[:2], dtype=float)
+        base_drift = float(np.linalg.norm(np.array(position[:2]) - self.init_base_xy))
+        r_balance = -self.balance_weight * base_drift
+        info['r_balance'] = r_balance
+        info['base_drift'] = base_drift
+
         # Total reward
         total_reward = (
             self.alive_bonus
@@ -356,8 +372,9 @@ class ButtonPressRewardFunction:
             + r_press
             + r_action
             + r_distance_penalty
+            + r_balance
         )
-        
+
         return total_reward, info
     
     def _compute_hand_proximity_reward(
@@ -377,16 +394,18 @@ class ButtonPressRewardFunction:
             distances.append(np.linalg.norm(right_hand_pos - target_pos))
         
         min_dist = min(distances)
-        
-        # Linear reward that increases as hand gets closer
-        # At 1m away: reward = 0, at 0m: reward = 1
-        # This gives clear gradient even when far away
-        proximity_reward = max(0, 1.0 - min_dist)
-        
-        # Bonus exponential reward when very close (< 0.2m)
-        if min_dist < 0.2:
-            proximity_reward += np.exp(-10.0 * min_dist)  # Steep bonus near button
-        
+
+        # CONTACT-GATED proximity (bp-v1): pay NOTHING for hovering back. bp-v0 learned
+        # to park ~0.1m out and farm a fat far-field proximity reward instead of pressing.
+        # Only reward the hand inside a tight near-contact band, ramping steeply to contact,
+        # so committing to the press strictly beats parking. (Approach reward below still
+        # gives dense gradient to get the hand into the band.)
+        band = 0.10
+        if min_dist > band:
+            return 0.0
+        proximity_reward = (band - min_dist) / band  # 0 at band edge -> 1 at contact
+        if min_dist < 0.05:
+            proximity_reward += np.exp(-20.0 * min_dist)  # steep bonus right at the button
         return proximity_reward
     
     def _compute_approach_reward(
@@ -423,18 +442,20 @@ class ButtonPressRewardFunction:
         self.button_pressed = False
         self.max_button_displacement = 0.0
         self.prev_hand_distance = None
-    
+        self.init_base_xy = None
+
     def __repr__(self) -> str:
         return (
             f"ButtonPressRewardFunction(button_pos={self.button_position}, "
-            f"press_threshold={self.press_threshold})"
+            f"press_threshold={self.press_threshold}, "
+            f"target_press_depth={self.target_press_depth})"
         )
 
 
 # Button positions for easy reference
 BUTTON_POSITIONS = {
-    "button_red": np.array([-0.45, -1.85, 1.0]),
-    "button_green": np.array([-0.15, -1.85, 1.0]),
-    "button_yellow": np.array([0.15, -1.85, 1.0]),
-    "button_blue": np.array([0.45, -1.85, 1.0]),
+    "button_red": np.array([-0.45, -1.85, 0.9]),
+    "button_green": np.array([-0.15, -1.85, 0.9]),
+    "button_yellow": np.array([0.15, -1.85, 0.9]),
+    "button_blue": np.array([0.45, -1.85, 0.9]),
 }

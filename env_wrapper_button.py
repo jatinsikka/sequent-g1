@@ -153,7 +153,10 @@ class ButtonPressEnv(gym.Env):
         button_x = self.button_position[0]
         # Robot should be ~0.35m in front of buttons (buttons at y=-1.85)
         # Aligned with g1.xml keyframe position
-        self.robot_start_pos = np.array([button_x, -1.50, 0.793])
+        # Spawn ~0.2m closer than before (was y=-1.50) and nudge x to absorb the
+        # forward/lateral reach residual + the ~8.6cm pelvis recoil measured when the
+        # arm extends (diagnosed 2026-06-19, see _reachgrid.py / button-press memory).
+        self.robot_start_pos = np.array([button_x - 0.08, -1.62, 0.793])
         # -90° yaw rotation (facing -Y direction toward buttons)
         # Quaternion [w, x, y, z] for -90° around Z axis
         self.robot_start_quat = np.array([0.7071, 0, 0, -0.7071])
@@ -161,6 +164,13 @@ class ButtonPressEnv(gym.Env):
         # heading so dyaw=0; zeroing it while spawned ~90 deg rotated makes AMO fight
         # a persistent yaw error and topple (confirmed via _diag.py).
         self.target_yaw = float(quat_to_euler(self.robot_start_quat)[2])
+        # Forward torso-pitch command (AMO commands[5]); leans the whole body toward the
+        # panel so the hand can press the button face straight-on (natural press). AMO's
+        # adapter is conditioned on torso pitch (play_amo.py:323), so it balances the lean.
+        self.torso_lean = 0.0
+        # Direct waist-pitch (dof 14) bias on the control target — a STRONGER forward lean
+        # than AMO's command, to close the ~6cm depth gap for a straight-on press.
+        self.waist_lean = 0.0
         
         # Determine which arm to use based on button position
         # For buttons on the left (x < 0), use left arm (freeze right)
@@ -174,6 +184,23 @@ class ButtonPressEnv(gym.Env):
             self.freeze_arm = "left"  # Freeze left, use right
             print(f"[ENV] Button at x={button_x:.2f} -> Using RIGHT arm")
         
+        # Reach-ready default arm posture: bias the ACTIVE arm toward the button so
+        # the pressing configuration sits centered in the small (±0.5rad) action
+        # envelope. Diagnosed 2026-06-19: the neutral default pose + ±0.5rad action
+        # cannot raise the hand to button height, though FK shows the button IS
+        # reachable (0.031m). Offsets are (FK-winning joints − default) for the left
+        # arm reaching button_red; the active arm gets the bias, frozen arm stays neutral.
+        # Offsets are (natural-reach joints − default) for the LEFT arm reaching
+        # button_red at spawn y=-1.56, where "natural" = the reaching config closest
+        # to the neutral default (avoids contorted IK branches). Co-solved + dynamically
+        # verified to depress the button base-upright (_presssolve.py, 2026-06-19).
+        self.arm_reach_bias = np.zeros(self.num_arm_joints, dtype=np.float32)
+        _LEFT_REACH = np.array([0.02, -1.56, -0.80, -0.61], dtype=np.float32)
+        if self.freeze_arm == "right":   # left arm active (button on left, x<0)
+            self.arm_reach_bias[:4] = _LEFT_REACH
+        else:                            # right arm active (mirror roll & yaw sign)
+            self.arm_reach_bias[4:] = _LEFT_REACH * np.array([1, -1, -1, 1], dtype=np.float32)
+
         # Track initial button state for proper displacement calculation
         self.initial_button_displacement = None
         
@@ -219,6 +246,7 @@ class ButtonPressEnv(gym.Env):
         # MockViewer in headless mode has commands attribute
         self.env.viewer.commands[:] = 0.0
         self.env.viewer.commands[1] = self.target_yaw
+        self.env.viewer.commands[5] = self.torso_lean
         
         # Reset history buffers
         self.env.proprio_history = deque(maxlen=self.env.history_len)
@@ -232,6 +260,7 @@ class ButtonPressEnv(gym.Env):
         for _ in range(10):
             self.env.viewer.commands[:] = 0.0
             self.env.viewer.commands[1] = self.target_yaw
+            self.env.viewer.commands[5] = self.torso_lean
             self.env._extract_state()
             amo_obs = self.env._compute_observation()
             
@@ -248,7 +277,8 @@ class ButtonPressEnv(gym.Env):
             
             pd_target = self.env.default_dof_pos.copy()
             pd_target[:15] = scaled_leg_action + self.env.default_dof_pos[:15]
-            
+            pd_target[14] += self.waist_lean  # forward waist lean toward the panel
+
             for _ in range(self.env.sim_decimation):
                 torque = (pd_target - self.env.dof_pos) * self.env.stiffness - self.env.dof_vel * self.env.damping
                 torque = np.clip(torque, -self.env.torque_limits, self.env.torque_limits)
@@ -325,6 +355,7 @@ class ButtonPressEnv(gym.Env):
         # Use viewer.commands (MockViewer in headless mode has this)
         self.env.viewer.commands[:] = 0.0
         self.env.viewer.commands[1] = self.target_yaw
+        self.env.viewer.commands[5] = self.torso_lean
         self.env._extract_state()
         amo_obs = self.env._compute_observation()
         
@@ -349,7 +380,8 @@ class ButtonPressEnv(gym.Env):
         # Combine leg + arm actions
         pd_target = self.env.default_dof_pos.copy()
         pd_target[:15] = scaled_leg_action + self.env.default_dof_pos[:15]  # Legs from AMO
-        pd_target[15:] = self.env.default_dof_pos[15:] + scaled_arm_action  # Arms from RL
+        pd_target[14] += self.waist_lean  # forward waist lean toward the panel
+        pd_target[15:] = self.env.default_dof_pos[15:] + self.arm_reach_bias + scaled_arm_action  # reach-ready baseline + RL fine-tune
         
         # Update gait cycle (needed for standing balance)
         self.env.gait_cycle = np.remainder(

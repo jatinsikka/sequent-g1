@@ -583,7 +583,8 @@ class TrainingManager:
         if self.config.n_envs > 1:
             use_subproc = sys.platform != "win32" and self.config.device == "cpu"
             vec_cls = SubprocVecEnv if use_subproc else DummyVecEnv
-            env = vec_cls([make_env(i) for i in range(self.config.n_envs)])
+            kw = {"start_method": "spawn"} if use_subproc else {}
+            env = vec_cls([make_env(i) for i in range(self.config.n_envs)], **kw)
             mode_str = "headless" if self.config.headless else "with GUI"
             par_str = "parallel" if use_subproc else "sequential"
             print(f"[INFO] Created {self.config.n_envs} {par_str} environments ({mode_str})")

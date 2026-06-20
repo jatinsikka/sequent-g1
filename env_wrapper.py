@@ -692,6 +692,11 @@ class G1RLEnv(gym.Env):
         # mild global smoothness only -- enough to discourage shaking, NOT so high it
         # makes the policy timid and refuse to reach. Post-grasp flailing is handled
         # separately by the targeted velocity damping below, not by this term.
+        # Smoothness penalty. FINDING (2026-06-20, runs v6=0.15, v7=0.10, v8=phase-gated):
+        # the "yank" is COUPLED to v5.5's grasp strategy (a fast slap-grab) — every smoothness
+        # increase suppressed the slap AND the grasp together (0/12+ grasps, timid). You cannot
+        # smooth v5.5 by reward-tweak; a smooth grasp must be RE-LEARNED (from scratch/curriculum
+        # with smoothness shaped in from the start). Kept at v5.5's working 0.05; redesign queued.
         action_penalty += 0.05 * float(np.sum((_act - self.prev_rl_action) ** 2))
         self.prev_rl_action = _act.copy()
         

@@ -5,10 +5,10 @@ logs and returns True (silent success). Here a step only counts if the simulator
 agrees it happened; otherwise the executor retries, then halts with a report.
 
 v0 scope:
-  - `pick`/`grasp` run the real RL grasp policy (v5.5) and verify against mjData.
-  - other skills (walk_to, press_button, ...) are HONESTLY stubbed: marked
-    `stubbed` in the report, never reported as `verified`. They get real runners
-    as the skill library grows.
+  - `pick`/`grasp` run the real RL grasp policy (v5.5); `walk_to` runs PID+AMO
+    navigation. Both verify against measured physics (mjData).
+  - remaining skills (press_button, place, read_sensor, ...) are HONESTLY stubbed:
+    marked `stubbed`, never reported as `verified`, until they get real runners.
 
 Each real skill runs as its own reset->rollout->verify episode for now; chaining
 skills in one continuous sim is a v1 concern (noted, not hidden).
@@ -33,7 +33,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "brain"))
 from src.data.schemas import Plan, PlanStep  # noqa: E402
 
 # Which plan skills currently have a real, verified runner.
-REAL_SKILLS = {"pick", "grasp"}
+REAL_SKILLS = {"pick", "grasp", "walk_to", "press_button"}
 
 
 @dataclass
@@ -92,8 +92,12 @@ class VerifyingExecutor:
         reports: List[StepReport] = []
         completed = True
         for i, step in enumerate(plan.steps):
-            if step.skill in REAL_SKILLS:
+            if step.skill in ("pick", "grasp"):
                 r = self._run_grasp(i, step)
+            elif step.skill == "walk_to":
+                r = self._run_walk(i, step)
+            elif step.skill == "press_button":
+                r = self._run_press_button(i, step)
             else:
                 r = StepReport(i, step.skill, step.args, "stubbed", 1,
                                detail="no verified runner yet")
@@ -134,3 +138,31 @@ class VerifyingExecutor:
         failed = "; ".join(str(r) for r in last_post if not r.ok)
         return StepReport(index, step.skill, step.args, "postcondition_failed",
                           attempts, last_pre, last_post, failed)
+
+    def _run_press_button(self, index: int, step: PlanStep) -> StepReport:
+        """Run the real press_button RL policy (bp-v4); verified if the button is held
+        past threshold for >=25 steps with the base upright (measured, not claimed)."""
+        from skills_manipulation import run_press_button
+        raw = step.args.get("button", "red_button")
+        btn = "button_" + str(raw).replace("_button", "")
+        res = run_press_button(btn)
+        if res["pressed"]:
+            detail = (f"pressed '{btn}' (depth {res['max_disp']*100:.1f}cm, "
+                      f"held {res['held_steps']} steps, upright)")
+            return StepReport(index, step.skill, step.args, "verified", 1, detail=detail)
+        detail = (f"did not verify '{btn}': depth={res['max_disp']*100:.1f}cm "
+                  f"held={res['held_steps']}/25 fell={res['fell']}")
+        return StepReport(index, step.skill, step.args, "postcondition_failed", 1, detail=detail)
+
+    def _run_walk(self, index: int, step: PlanStep) -> StepReport:
+        """Run the real walk_to skill: PID+AMO navigation to the target.
+        Verified if the robot arrives within the threshold and stays upright."""
+        from skills_locomotion import run_walk_to
+        target = step.args.get("target", "table")
+        res = run_walk_to(target)
+        if res["arrived"] and not res["fell"]:
+            detail = f"arrived at '{target}' (min_dist {res['min_dist']:.2f}m, {res['steps']} steps, upright)"
+            return StepReport(index, step.skill, step.args, "verified", 1, detail=detail)
+        detail = (f"did not reach '{target}': arrived={res['arrived']} fell={res['fell']} "
+                  f"min_dist={res['min_dist']:.2f}m")
+        return StepReport(index, step.skill, step.args, "postcondition_failed", 1, detail=detail)

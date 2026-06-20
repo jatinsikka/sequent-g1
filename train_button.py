@@ -11,6 +11,7 @@ Usage:
 
 import argparse
 import os
+import sys
 import numpy as np
 import torch
 try:
@@ -21,6 +22,7 @@ from datetime import datetime
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback, BaseCallback
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 
 from env_wrapper_button import ButtonPressEnv
 from reward_fn import ButtonPressRewardFunction, BUTTON_POSITIONS
@@ -202,6 +204,7 @@ def train_button_press(
     freeze_arm: str = "left",
     use_wandb: bool = True,
     checkpoint_dir: str = "checkpoints_button",
+    n_envs: int = 1,
 ):
     """
     Train a policy to press a button.
@@ -246,34 +249,48 @@ def train_button_press(
         )
         print(f"[W&B] Run started: {run.name}")
     
-    # Create reward function
-    reward_fn = ButtonPressRewardFunction(
-        button_position=button_pos,
-        press_threshold=0.02,  # 2cm displacement to count as pressed
-        hand_proximity_weight=5.0,
-        press_reward=50.0,
-    )
-    
-    # Create environment
-    env = ButtonPressEnv(
-        button_name=button_key,
-        reward_fn=reward_fn,
-        freeze_arm=freeze_arm,
-        max_episode_steps=200,  # ~4 seconds per episode
-        headless=True,
-    )
-    
-    print(f"[ENV] Created ButtonPressEnv")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    def make_env(rank: int):
+        """Build one env instance with its OWN reward fn (no shared state across workers)."""
+        def _init():
+            rfn = ButtonPressRewardFunction(
+                button_position=button_pos,
+                press_threshold=0.02,  # 2cm displacement to count as pressed
+                hand_proximity_weight=5.0,
+                press_reward=50.0,
+            )
+            return ButtonPressEnv(
+                button_name=button_key,
+                reward_fn=rfn,
+                freeze_arm=freeze_arm,
+                max_episode_steps=200,  # ~4 seconds per episode
+                headless=True,
+                device=device,
+            )
+        return _init
+
+    # SubprocVecEnv = true parallelism on Linux + CPU (the Azure path: 32 cores ≈ 32×
+    # throughput). On Windows or CUDA, subprocess workers can't share the JIT context,
+    # so fall back to DummyVecEnv (sequential) — which is why local runs single-threaded.
+    use_subproc = n_envs > 1 and sys.platform != "win32" and device == "cpu"
+    vec_cls = SubprocVecEnv if use_subproc else DummyVecEnv
+    env = vec_cls([make_env(i) for i in range(n_envs)])
+    print(f"[ENV] Created {n_envs} env(s) via {vec_cls.__name__} on {device}")
     print(f"[ENV] Observation space: {env.observation_space.shape}")
     print(f"[ENV] Action space: {env.action_space.shape}")
     
+    # With n_envs parallel envs the rollout buffer is n_steps*n_envs; widen the
+    # minibatch to match (32 envs -> 32768 buffer, 1024 batch = 32 minibatches, as v5.6).
+    batch_size = 1024 if n_envs > 1 else 64
+
     # Create PPO model
     model = PPO(
         "MlpPolicy",
         env,
         learning_rate=learning_rate,
         n_steps=1024,
-        batch_size=64,
+        batch_size=batch_size,
         n_epochs=10,
         gamma=0.99,
         gae_lambda=0.95,
@@ -287,8 +304,10 @@ def train_button_press(
     )
     
     # Callbacks
+    # save_freq counts env.step() calls (each steps all n_envs); divide so we still
+    # checkpoint roughly every ~20k total timesteps regardless of n_envs.
     checkpoint_callback = CheckpointCallback(
-        save_freq=10000,
+        save_freq=max(20000 // max(n_envs, 1), 1),
         save_path=checkpoint_dir,
         name_prefix=f"ppo_button_{button}",
     )
@@ -341,15 +360,18 @@ def main():
                         help="Which arm to freeze")
     parser.add_argument("--no_wandb", action="store_true",
                         help="Disable W&B logging")
-    
+    parser.add_argument("--n_envs", type=int, default=1,
+                        help="Number of parallel envs (use 32 on the Azure F32as_v7 VM)")
+
     args = parser.parse_args()
-    
+
     train_button_press(
         button=args.button,
         total_timesteps=args.timesteps,
         learning_rate=args.lr,
         freeze_arm=args.freeze_arm,
         use_wandb=not args.no_wandb,
+        n_envs=args.n_envs,
     )
 
 

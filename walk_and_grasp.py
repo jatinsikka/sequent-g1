@@ -36,10 +36,10 @@ OBJECT_POSITIONS = {
     "purple_object": np.array([1.4, 1.45, 0.74]),
     
     # Control panel buttons (y=-1.85, z=1.0)
-    "button_red":    np.array([-0.45, -1.85, 1.0]),
-    "button_green":  np.array([-0.15, -1.85, 1.0]),
-    "button_yellow": np.array([0.15, -1.85, 1.0]),
-    "button_blue":   np.array([0.45, -1.85, 1.0]),
+    "button_red":    np.array([-0.45, -1.85, 0.9]),
+    "button_green":  np.array([-0.15, -1.85, 0.9]),
+    "button_yellow": np.array([0.15, -1.85, 0.9]),
+    "button_blue":   np.array([0.45, -1.85, 0.9]),
 }
 
 

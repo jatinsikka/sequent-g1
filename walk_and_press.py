@@ -17,7 +17,8 @@ env = HumanoidEnv(policy_jit=policy, robot_type="g1", device=dev, headless=True)
 pid = LocomotionPIDController(kp_pos=1.0, ki_pos=0.0, kd_pos=0.1, max_vel=0.6, min_vel=0.2)
 
 button = OBJECT_POSITIONS["button_red"]
-press_stop = 0.40            # start pressing when pelvis is this far (m) from the button (xy)
+press_stop = 0.30            # start pressing when pelvis is this far (m) from the button (xy)
+creep_vx = 0.12              # keep creeping forward into the press (momentum carries the reach in)
 approach_wp = compute_approach_waypoint(button, approach_distance=press_stop)
 m, d = env.model, env.data
 hand = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "left_rubber_hand")
@@ -37,14 +38,16 @@ for i in range(int(env.sim_duration / env.sim_dt)):
         if env.data.xpos[env.pelvis_id][2] < 0.4: print("FELL"); break
         dist = float(np.linalg.norm(approach_wp - rp))
         if phase == "walk" and dist < press_stop + 0.04:
-            phase = "press"; tgt_yaw = rpy[2]
+            phase = "press"; tgt_yaw = rpy[2]; press_t = 0
         # --- AMO leg control (both phases) ---
         if phase == "walk":
             bearing = np.arctan2(approach_wp[1]-rp[1], approach_wp[0]-rp[0])
             vx, vy, hd = pid.compute_action(current_pos=rp, current_yaw=rpy[2], target_pos=approach_wp, target_yaw=bearing, dt=env.control_dt)
             env.viewer.commands[0]=vx; env.viewer.commands[2]=vy; env.viewer.commands[1]=hd
         else:
+            press_t += 1
             env.viewer.commands[:] = 0.0; env.viewer.commands[1] = tgt_yaw
+            env.viewer.commands[0] = creep_vx if press_t < 30 else 0.0  # creep in then hold
         obs = env._compute_observation(); ot = torch.from_numpy(obs).float().unsqueeze(0).to(dev)
         with torch.no_grad():
             eh = torch.tensor(np.array(env.extra_history).flatten().copy(), dtype=torch.float).view(1,-1).to(dev)
@@ -67,7 +70,7 @@ for i in range(int(env.sim_duration / env.sim_dt)):
         if env._in_place_stand and np.any(np.abs(env.gait_cycle-0.25)<0.05): env.gait_cycle=np.array([0.25,0.25])
         if not env._in_place_stand and np.all(np.abs(env.gait_cycle-0.25)<0.05): env.gait_cycle=np.array([0.25,0.75])
         rpz = env.data.xpos[env.pelvis_id]
-        cam.lookat[:] = [rpz[0]*0.4+button[0]*0.6, rpz[1]*0.5+button[1]*0.5, 0.85]; cam.distance=3.0; cam.azimuth=135; cam.elevation=-12
+        cam.lookat[:] = [(rpz[0]+button[0])/2, (rpz[1]+button[1])/2, 0.85]; cam.distance=2.6; cam.azimuth=118; cam.elevation=-10
         ren.update_scene(d, camera=cam); frames.append(ren.render())
     torque = (pd-env.dof_pos)*env.stiffness - env.dof_vel*env.damping
     env.data.ctrl = np.clip(torque, -env.torque_limits, env.torque_limits); mujoco.mj_step(m, d)

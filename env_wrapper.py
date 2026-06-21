@@ -305,8 +305,11 @@ class G1RLEnv(gym.Env):
         # reaching policy instead of a memorized motion to one fixed point.
         _sj = self.env.model.jnt_qposadr[mujoco.mj_name2id(
             self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'screwdriver_joint')]
+        # Object on the REACHABLE pedestal (~12cm in front, chest-low) instead of 20-36cm onto
+        # the table. Reach-envelope map (2026-06-21): ~8cm reach here vs ~18cm at the table, so a
+        # moderate (non-spastic) grasp can work. Pedestal top is at [0.66, 1.02], z~0.78.
         self.env.data.qpos[_sj:_sj + 3] = np.array([
-            np.random.uniform(0.50, 0.72), np.random.uniform(1.10, 1.26), 0.75])
+            np.random.uniform(0.60, 0.72), np.random.uniform(0.98, 1.05), 0.80])
         self.env.data.qpos[_sj + 3:_sj + 7] = np.array([1.0, 0, 0, 0])
         self.env.data.qvel[:] = 0.0
         mujoco.mj_step(self.env.model, self.env.data)

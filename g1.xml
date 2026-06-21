@@ -318,6 +318,13 @@
       <geom name="right_table_shelf" type="box" size="0.41 0.27 0.012" pos="0 0 0.18" rgba="0.55 0.57 0.62 1" contype="0" conaffinity="0"/>
     </body>
 
+    <!-- ===== Grasp pedestal at the robot's REACHABLE spot (chest-low, ~12cm in front) ===== -->
+    <!-- Reach-envelope map (2026-06-21): the robot reaches ~7-8cm here vs ~18cm onto the low table. -->
+    <body name="grasp_pedestal" pos="0.66 1.02 0">
+      <geom name="grasp_pedestal_top" type="box" size="0.085 0.085 0.02" pos="0 0 0.76" rgba="0.52 0.54 0.60 1" contype="1" conaffinity="2"/>
+      <geom name="grasp_pedestal_post" type="box" size="0.035 0.035 0.38" pos="0 0 0.38" rgba="0.45 0.47 0.52 1" contype="0" conaffinity="0"/>
+    </body>
+
     <!-- ===== Clean-room shell (open front for the camera/robot) ===== -->
     <body name="cleanroom" pos="0 0 0">
       <geom name="wall_back"  type="box" size="12.5 0.05 2.5" pos="0 -12.0 2.5" rgba="0.72 0.75 0.80 1" contype="0" conaffinity="0"/>

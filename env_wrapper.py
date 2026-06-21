@@ -426,6 +426,7 @@ class G1RLEnv(gym.Env):
         # === LEG + TORSO CONTROL FROM AMO ===
         # Stand in place, but let the policy LEAN forward (torso pitch) to reach the table.
         self.env.viewer.commands[:] = 0.0
+        self.env.viewer.commands[0] = getattr(self, "walk_vx", 0.0)  # optional forward creep (walk-into-grasp: cancels base recoil)
         self.env.viewer.commands[5] = 0.6 * torso_cmd  # torso pitch lean (~ +/- 0.6 rad)
         self.env._extract_state()
         amo_obs = self.env._compute_observation()

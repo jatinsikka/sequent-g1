@@ -358,6 +358,7 @@ class G1RLEnv(gym.Env):
         
         # Reset target position to actual screwdriver position after simulation reset
         self.target_object_pos = self.env.data.xpos[self.screwdriver_body_id].copy()
+        self.initial_object_pos = self.target_object_pos.copy()  # resting pose, for anti-knock-off penalty
         
         # Reset reward function state
         if hasattr(self.reward_fn, 'reset'):
@@ -651,9 +652,9 @@ class G1RLEnv(gym.Env):
                     # range. A flat bonus here taught the policy to park at 0.15m and
                     # farm it forever (v5.2: 0/20 deterministic grasps, pure hovering).
                     # Scaling keeps the gradient pointing at the tool.
-                    grasp_ready_bonus = 20.0 * float(np.clip((0.18 - min_dist) / 0.13, 0.0, 1.0))
+                    grasp_ready_bonus = 35.0 * float(np.clip((0.18 - min_dist) / 0.13, 0.0, 1.0))  # reward a slow, close approach (gentle contact pays)
                 else:
-                    speed_penalty = 5.0 * (active_hand_vel - 1.0)  # punish swiping through fast
+                    speed_penalty = 7.0 * (active_hand_vel - 1.0)  # punish swiping through fast
         
         # === 6. GRASP AND LIFT REWARDS (MASSIVE) ===
         grasp_bonus = 0.0
@@ -725,21 +726,35 @@ class G1RLEnv(gym.Env):
         elif min_dist < 0.15:
             velocity_penalty = 0.1 * arm_speed
         
+        # === ANTI-KNOCK-OFF: punish disturbing the object before it is grasped ===
+        # The #1 real failure (audit 2026-06-21: ~80% of episodes): the fast slap sends the
+        # object flying off the table instead of latching (latch needs <1 m/s contact). Nothing
+        # used to penalize that, so slapping was free. Penalize the object being shoved sideways
+        # or dropped while NOT grasped -> the policy must approach gently enough to keep it put.
+        knockoff_penalty = 0.0
+        if not self.object_grasped and hasattr(self, "initial_object_pos"):
+            obj_horiz_disp = float(np.linalg.norm(screwdriver_pos[:2] - self.initial_object_pos[:2]))
+            obj_drop = max(0.0, float(self.initial_object_pos[2] - screwdriver_pos[2]))
+            # CAPPED + mild: a knock-off shouldn't be catastrophic (that made it avoid the object
+            # entirely -> timid misses). Discourage shoving the object without scaring it off contact.
+            knockoff_penalty = min(12.0, 22.0 * obj_horiz_disp + 35.0 * obj_drop)
+
         # === CALCULATE TOTAL REWARD ===
         reward = (
-            alive_bonus 
+            alive_bonus
             + milestone_bonus      # One-time bonuses for new best distances
             + proximity_reward     # Small continuous gradient
             + progress_reward      # Reward for getting closer
             + speed_reward
             + grasp_ready_bonus
             + grasp_bonus          # HUGE reward for grasping
-            + lift_bonus 
-            - action_penalty 
-            - collision_penalty 
+            + lift_bonus
+            - action_penalty
+            - collision_penalty
             - velocity_penalty
             - speed_penalty
             - hovering_penalty     # Penalty for hovering without grasping
+            - knockoff_penalty     # Penalty for swatting the object off the table
         )
         
         # (Removed the extra -10/collision: it made reaching over the table net-negative.)

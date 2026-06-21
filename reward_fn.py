@@ -454,7 +454,7 @@ class ButtonPressRewardFunction:
 
 # Button positions for easy reference
 BUTTON_POSITIONS = {
-    "button_red": np.array([-0.45, -1.85, 0.9]),
+    "button_red": np.array([-0.45, -1.85, 0.8]),
     "button_green": np.array([-0.15, -1.85, 0.9]),
     "button_yellow": np.array([0.15, -1.85, 0.9]),
     "button_blue": np.array([0.45, -1.85, 0.9]),

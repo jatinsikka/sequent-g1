@@ -23,7 +23,7 @@
     <!-- Push Button - Red Emergency (leftmost) -->
     <!-- FIXED housing (no joint) + a separate CAP body that slides INTO the machine (-Y)
          when pressed from the front. axis="0 -1 0" so a front push gives positive displacement. -->
-    <body name="push_button_red_housing" pos="-0.45 -1.85 0.9">
+    <body name="push_button_red_housing" pos="-0.45 -1.85 0.8">
       <!-- contype=2 to avoid collision with panel (contype=1), but robot hands (conaffinity includes 2) can push -->
       <geom name="push_button_red_base" type="cylinder" size="0.055 0.02" euler="1.5708 0 0" rgba="0.6 0.6 0.62 1" contype="2" conaffinity="2"/>
       <body name="push_button_red" pos="0 0 0">

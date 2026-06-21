@@ -247,16 +247,21 @@ def _extract_args_for_skill(skill: str, step_text: str) -> dict:
             return {"object": "tool"}  # Default
     
     elif skill == "place":
-        # Try to extract location
-        if "shelf" in step_lower:
-            return {"object": "tool", "location": "machine_shelf"}
-        elif "table" in step_lower:
-            return {"object": "tool", "location": "table"}
-        else:
-            return {"object": "tool", "location": "shelf"}  # Default
+        # Keep the REAL object being placed (reuse pick's object extraction) + the location.
+        obj = _extract_args_for_skill("pick", step_text).get("object", "tool")
+        if "machine" in step_lower:   location = "machine"
+        elif "shelf" in step_lower:   location = "machine_shelf"
+        elif "table" in step_lower:   location = "table"
+        elif "bin" in step_lower or "container" in step_lower: location = "container_bin"
+        else:                          location = "table"
+        return {"object": obj, "location": location}
     
     elif skill == "wait":
-        # Extract wait duration
+        # Parse the actual duration from the step ("Wait 5 seconds" -> 5; minutes -> *60).
+        m = re.search(r"(\d+)\s*(second|sec|minute|min)", step_lower)
+        if m:
+            n = int(m.group(1))
+            return {"seconds": n * 60 if m.group(2).startswith("min") else n}
         return {"seconds": 3}
     
     elif skill == "notify":
@@ -269,6 +274,55 @@ def _extract_args_for_skill(skill: str, step_text: str) -> dict:
             return {"level": "tech"}  # Default
     
     return {}
+
+
+# ======================================================================================
+# FAITHFUL planner  (canonical: the plan IS the SOP, mapped 1:1 to robot skills)
+# ======================================================================================
+# Keyword evidence per skill. Multi-word/longer phrases are more specific, so we score by
+# the matched phrase length -- "pick up" beats a stray "press", "re-read" maps to read, etc.
+SKILL_KEYWORDS = {
+    "walk_to":      ["walk to", "walk", "go to", "move to", "proceed to", "head to", "navigate", "travel", "approach"],
+    "pick":         ["pick up", "pick", "grab", "take", "collect", "retrieve", "remove", "lift up"],
+    "place":        ["place", "put down", "put", "set down", "deposit", "position", "return", "replace", "install", "mount", "insert"],
+    "press_button": ["press", "push", "click", "activate", "trigger", "hold down"],
+    "read_sensor":  ["re-read", "read", "check", "monitor", "observe", "measure", "inspect", "verify", "confirm", "gauge", "indicator", "display", "look at"],
+    "wait":         ["wait", "pause", "delay", "hold for", "allow", "let it"],
+    "notify":       ["notify", "report", "alert", "inform", "log", "record", "escalate", "call", "document"],
+}
+
+
+def _classify_step(step: str) -> tuple:
+    """Map ONE SOP step (a natural-language imperative) to (skill, args), independently.
+    Scores each skill by matched-keyword specificity (phrase length) and picks the strongest;
+    a step with no action evidence falls back to `notify` (a safe operational step). Running
+    this PER STEP is what makes the plan a faithful 1:1 translation of the SOP."""
+    sl = step.lower()
+    # WORD-BOUNDARY match so "press" doesn't fire on "pressure", "read" not on "ready", etc.
+    scores = {sk: max([len(kw) for kw in kws if re.search(r"\b" + re.escape(kw) + r"\b", sl)] or [0])
+              for sk, kws in SKILL_KEYWORDS.items()}
+    best = max(scores, key=scores.get)
+    if scores[best] == 0:
+        best = "notify"
+    return best, _extract_args_for_skill(best, step)
+
+
+def plan_from_sop(sop_steps: List[str]) -> List[dict]:
+    """FAITHFUL planner — the canonical SOP→plan mapping.
+
+    Translate a retrieved SOP into an executable skill chain where EACH SOP step becomes
+    exactly one plan step, IN ORDER, with repeats preserved. The plan therefore *is* the SOP
+    expressed in robot skills, so the verifying executor walks the SOP step-by-step. Every
+    plan step carries its source `sop_step` so execution is fully traceable/auditable.
+
+    (Contrast with the legacy `_extract_skills_from_sop`, which deduped skills and dropped
+    repeated steps — it did not faithfully follow the SOP.)
+    """
+    plan: List[dict] = []
+    for i, step in enumerate(sop_steps):
+        skill, args = _classify_step(step)
+        plan.append({"skill": skill, "args": args, "sop_step": step.strip(), "index": i})
+    return plan
 
 
 def _load_lora_model():

@@ -62,11 +62,14 @@ def retrieve_topk(
     id_to_text = {s.sop_id: _synthesize_text(s) for s in sops}
     id_to_sop = {s.sop_id: s for s in sops}
     
-    # Apply keyword boosting and re-rank
+    # Re-rank. For the semantic (sbert) encoder, a small keyword nudge breaks ties WITHOUT
+    # overriding meaning; for TF-IDF (lexical), a stronger boost helps. Pure lexical override
+    # was hurting sbert (e.g. "intake vent" → "Intake Cover" over the correct cleaning SOP).
+    nudge = 0.25 if embed_type == "sbert" else 1.0   # scale the per-match weight
     boosted_results = []
     for sop_id, score in results:
-        boost = _keyword_boost(incident_text, id_to_text.get(sop_id, ""))
-        boosted_score = score * boost
+        raw_boost = _keyword_boost(incident_text, id_to_text.get(sop_id, "")) - 1.0  # the +X fraction
+        boosted_score = score * (1.0 + nudge * raw_boost)
         boosted_results.append((sop_id, boosted_score))
     
     # Sort by boosted score and return top-k

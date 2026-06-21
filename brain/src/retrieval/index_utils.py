@@ -52,6 +52,20 @@ def _tfidf_vectorize(texts: Sequence[str], vectorizer=None):
         return X.toarray().astype(np.float32), vectorizer
 
 
+_SBERT_MODEL = None
+_SBERT_NAME = "all-MiniLM-L6-v2"
+
+
+def _sbert_encode(texts: Sequence[str]) -> np.ndarray:
+    """Semantic sentence embeddings via sentence-transformers (cached model).
+    Far better than TF-IDF on paraphrased incidents that share meaning but not words."""
+    global _SBERT_MODEL
+    if _SBERT_MODEL is None:
+        from sentence_transformers import SentenceTransformer
+        _SBERT_MODEL = SentenceTransformer(_SBERT_NAME)
+    return _SBERT_MODEL.encode(list(texts), convert_to_numpy=True, show_progress_bar=False).astype(np.float32)
+
+
 @dataclass
 class IndexPaths:
     root: Path
@@ -88,50 +102,12 @@ def build_and_save_index(
 
     console.log(f"[bold]Indexing {len(texts)} SOP texts[/bold]")
     try:
-        # Try to produce embeddings via transformers if available
-        from transformers import AutoModel, AutoTokenizer
-        import torch
-
-        # Try to load trained sop_encoder first; fallback to pre-trained bert-base-uncased
-        # out.root is artifacts/retriever_bert/index, so parent.parent gives us project root
-        artifact_dir = out.root.parent  # This is artifacts/retriever_bert/
-        sop_encoder_path = artifact_dir / "sop_encoder"
-        tokenizer_path = artifact_dir / "tokenizer"
-        
-        console.log(f"[dim]Looking for trained models in: {artifact_dir}[/dim]")
-        console.log(f"[dim]SOP encoder path: {sop_encoder_path}[/dim]")
-        console.log(f"[dim]Tokenizer path: {tokenizer_path}[/dim]")
-        console.log(f"[dim]SOP encoder exists: {sop_encoder_path.exists()}[/dim]")
-        console.log(f"[dim]Tokenizer exists: {tokenizer_path.exists()}[/dim]")
-        
-        if sop_encoder_path.exists() and tokenizer_path.exists():
-            console.log(f"[dim]Loading trained SOP encoder and tokenizer[/dim]")
-            model_name = str(sop_encoder_path)
-            tokenizer_name = str(tokenizer_path)
-        else:
-            console.log(f"[dim]No trained SOP encoder found; using pre-trained bert-base-uncased[/dim]")
-            model_name = "bert-base-uncased"
-            tokenizer_name = "bert-base-uncased"
-        
-        console.log(f"[dim]Loading tokenizer and model (may download on first run)...[/dim]")
-        tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-        model = AutoModel.from_pretrained(model_name)
-        model.eval()
-        all_vecs: List[np.ndarray] = []
-        with torch.no_grad():
-            for i in track(range(0, len(texts), 8), description="Embedding (BERT)"):
-                batch = texts[i : i + 8]
-                tok = tokenizer(batch, padding=True, truncation=True, return_tensors="pt")
-                out_hidden = model(**tok).last_hidden_state  # [B, T, H]
-                cls = out_hidden[:, 0, :]  # [CLS]
-                vec = cls.cpu().numpy().astype(np.float32)
-                all_vecs.append(vec)
-        embeddings = _normalize(np.vstack(all_vecs))
-        console.log("Built embeddings with BERT.")
-        # Save embed type for BERT
+        # Primary: semantic sentence embeddings (sentence-transformers, all-MiniLM-L6-v2).
+        embeddings = _normalize(_sbert_encode(texts))
         with open(out.embed_type, "w") as f:
-            json.dump({"type": "bert"}, f)
-    except Exception as e:  # Offline or no weights
+            json.dump({"type": "sbert"}, f)
+        console.log(f"[green]Built embeddings with sentence-transformers ({_SBERT_NAME}).[/green]")
+    except Exception as e:  # Offline or no weights -> TF-IDF
         import traceback
         import pickle
         console.log(f"[yellow]Falling back to TF-IDF embeddings due to: {type(e).__name__}: {e}[/yellow]")
@@ -203,7 +179,9 @@ def search(
 ) -> List[List[Tuple[str, float]]]:
     """Search top-k cosine similar items."""
     # Compute query embeddings
-    if embed_type == "tfidf" and vectorizer is not None:
+    if embed_type == "sbert":
+        query_vecs = _normalize(_sbert_encode(query_texts))
+    elif embed_type == "tfidf" and vectorizer is not None:
         # Use the saved TF-IDF vectorizer
         query_vecs, _ = _tfidf_vectorize(query_texts, vectorizer)
         query_vecs = _normalize(query_vecs)

@@ -12,17 +12,9 @@ from typing import Any, Dict, List, Optional, Sequence, Type, TypeVar
 
 from pydantic import BaseModel, Field, ValidationError
 
-# Allowed skills across the project
-# Updated for Unitree G1 humanoid robot with manufacturing machine environment
-SKILLS: List[str] = [
-    "walk_to",        # Navigate to a location (machine, table, etc.)
-    "press_button",   # Press buttons (red_button, green_button, blue_button, yellow_button)
-    "wait",           # Wait for a duration
-    "read_sensor",    # Read sensor values (pressure, temperature, vibration, light)
-    "pick",           # Pick up objects from table
-    "place",          # Place objects at a location
-    "notify",         # Notify technician/operator
-]
+# The skill whitelist is defined ONCE in the skill registry (single source of truth,
+# with per-skill descriptions, args, pre/postconditions, and honest verification status).
+from src.data.skill_registry import SKILL_REGISTRY, SKILLS  # noqa: E402,F401
 
 
 class SOPEntry(BaseModel):

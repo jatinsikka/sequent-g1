@@ -8,7 +8,7 @@ import sys, os, json, warnings, numpy as np
 warnings.filterwarnings("ignore")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "brain"))
 from src.retrieval.infer_retrieve import retrieve_topk
-from src.planner.infer_plan import _extract_skills_from_sop
+from src.planner.infer_plan import plan_from_sop
 from src.data.schemas import SKILLS
 
 SOPS = {s["sop_id"]: s for s in json.load(open(os.path.join(os.path.dirname(__file__),
@@ -22,9 +22,11 @@ def run_sop(query):
     print(f"  RETRIEVED  {sop['sop_id']}: {sop['title']}   (similarity {top['score']:.2f})")
     print(f"  condition: {sop['condition']}")
 
-    steps = _extract_skills_from_sop(sop["steps"], SKILLS)
-    bar("PLAN  (retrieved SOP  ->  executable skill chain)")
-    for i, st in enumerate(steps): print(f"  {i+1}. {st['skill']}({st['args']})")
+    steps = plan_from_sop(sop["steps"])   # FAITHFUL: one plan step per SOP step, in order
+    bar("PLAN  (retrieved SOP  ->  executable skill chain, 1:1 and traceable)")
+    print(f"  {len(sop['steps'])} SOP steps  ->  {len(steps)} skill steps (faithful translation)\n")
+    for st in steps:
+        print(f"  {st['index']+1:2d}. {st['skill']:13s}{str(st['args']):42s} <- SOP: \"{st['sop_step']}\"")
 
     bar("EXECUTION  (physical steps verified against MEASURED physics)")
     all_ok = True

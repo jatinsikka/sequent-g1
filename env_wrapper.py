@@ -726,6 +726,15 @@ class G1RLEnv(gym.Env):
         elif min_dist < 0.15:
             velocity_penalty = 0.1 * arm_speed
         
+        # === APPROACH-FROM-ABOVE: the knock-off is a SIDEWAYS slap; coming over the top and
+        # descending onto the object lets the table stop it so it can't be swatted off. Reward
+        # the hand being above the object when close (no fingers on this G1, so this geometry is
+        # the only way to a non-knock-off latch). ===
+        above_bonus = 0.0
+        if not self.object_grasped and min_dist < 0.22:
+            hand_above = float(active_hand_pos[2] - screwdriver_pos[2])
+            above_bonus = 12.0 * float(np.clip(hand_above / 0.12, 0.0, 1.0))
+
         # === ANTI-KNOCK-OFF: punish disturbing the object before it is grasped ===
         # The #1 real failure (audit 2026-06-21: ~80% of episodes): the fast slap sends the
         # object flying off the table instead of latching (latch needs <1 m/s contact). Nothing
@@ -755,6 +764,7 @@ class G1RLEnv(gym.Env):
             - speed_penalty
             - hovering_penalty     # Penalty for hovering without grasping
             - knockoff_penalty     # Penalty for swatting the object off the table
+            + above_bonus          # Reward approaching from above (descend onto it, don't slap sideways)
         )
         
         # (Removed the extra -10/collision: it made reaching over the table net-negative.)

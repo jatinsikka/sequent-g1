@@ -307,21 +307,50 @@ def _classify_step(step: str) -> tuple:
     return best, _extract_args_for_skill(best, step)
 
 
+def _skill_location(skill, args, step_text):
+    """Where the robot must physically BE to perform this skill — used to infer the navigation
+    that human SOPs leave implicit. Returns None for skills needing no movement (wait/notify)."""
+    sl = step_text.lower()
+    if skill in ("press_button", "read_sensor"):
+        return "machine"
+    if skill == "pick":
+        if "shelf" in sl:
+            return "shelf"
+        if "machine" in sl:
+            return "machine"
+        return "table"                       # objects are picked from the table by default
+    if skill == "place":
+        loc = args.get("location", "machine")
+        return {"machine_shelf": "shelf", "container_bin": "bin"}.get(loc, loc)
+    return None                              # wait / notify: stay put
+
+
 def plan_from_sop(sop_steps: List[str]) -> List[dict]:
-    """FAITHFUL planner — the canonical SOP→plan mapping.
+    """FAITHFUL + LOCATION-AWARE planner — the canonical SOP→plan mapping.
 
-    Translate a retrieved SOP into an executable skill chain where EACH SOP step becomes
-    exactly one plan step, IN ORDER, with repeats preserved. The plan therefore *is* the SOP
-    expressed in robot skills, so the verifying executor walks the SOP step-by-step. Every
-    plan step carries its source `sop_step` so execution is fully traceable/auditable.
+    Real SOPs are written for humans, so they OMIT the obvious physical moves ("walk to the
+    machine") — a human just does that. This planner therefore does two things:
+      1. maps each WRITTEN SOP step to a robot skill, in order, repeats preserved; and
+      2. INFERS the navigation a human leaves implicit — before any step that must happen at a
+         location, it inserts `walk_to(location)` if the robot isn't already there.
 
-    (Contrast with the legacy `_extract_skills_from_sop`, which deduped skills and dropped
-    repeated steps — it did not faithfully follow the SOP.)
+    Every plan step is tagged `source`: "sop" (written in the procedure) or "inferred" (the
+    system supplied it). Inferred steps carry `sop_step=None`. This is what turns a natural
+    human SOP into a fully executable, verifiable robot plan.
     """
     plan: List[dict] = []
+    current_loc = None
     for i, step in enumerate(sop_steps):
         skill, args = _classify_step(step)
-        plan.append({"skill": skill, "args": args, "sop_step": step.strip(), "index": i})
+        if skill == "walk_to":                       # explicit navigation (rare) — honor it
+            current_loc = args.get("target")
+            plan.append({"skill": skill, "args": args, "sop_step": step.strip(), "source": "sop", "index": i})
+            continue
+        loc = _skill_location(skill, args, step)
+        if loc is not None and loc != current_loc:   # infer the implicit "go there"
+            plan.append({"skill": "walk_to", "args": {"target": loc}, "sop_step": None, "source": "inferred", "index": i})
+            current_loc = loc
+        plan.append({"skill": skill, "args": args, "sop_step": step.strip(), "source": "sop", "index": i})
     return plan
 
 

@@ -28,3 +28,9 @@ PRESENTATION.md
 .env
 .gemini_key
 *_key.txt
+
+# archived scratch + media (local only)
+archive/
+
+# compiled MuJoCo models (large, rebuilt from build_grasp_model.py)
+*.mjb

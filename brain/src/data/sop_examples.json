@@ -5,7 +5,6 @@
       "title": "Low Pressure Warning",
       "condition": "Yellow light is flashing and pressure_sensor reads below threshold",
       "steps": [
-        "Walk to machine",
         "Read pressure_sensor",
         "press blue_button",
         "Wait 3 seconds",
@@ -25,7 +24,6 @@
       "title": "Emergency Shutdown Procedure",
       "condition": "Red light is solid and machine is overheating",
       "steps": [
-        "Walk to machine",
         "Press red_button immediately",
         "Wait 5 seconds for shutdown",
         "Read temperature_sensor",
@@ -42,7 +40,6 @@
       "title": "Machine Startup Sequence",
       "condition": "Green light is off and machine is idle",
       "steps": [
-        "Walk to machine",
         "Read red_light is off",
         "Read yellow_light is off",
         "Press green_button to start",
@@ -63,7 +60,6 @@
       "title": "High Temperature Alert",
       "condition": "Yellow light is on and temperature_sensor reads above threshold",
       "steps": [
-        "Walk to machine",
         "Read temperature_sensor",
         "press red_button",
         "Wait 10 seconds for cooldown",
@@ -83,7 +79,6 @@
       "title": "Vibration Anomaly Detection",
       "condition": "Yellow light is flashing and vibration_sensor reads abnormal",
       "steps": [
-        "Walk to machine",
         "Read vibration_sensor",
         "Press blue_button for diagnostic mode",
         "Wait 5 seconds",
@@ -103,7 +98,6 @@
       "title": "Diagnostic Mode Activation",
       "condition": "Machine requires diagnostic check",
       "steps": [
-        "Walk to machine",
         "Press blue_button to enter diagnostic mode",
         "Wait 3 seconds",
         "Read pressure_sensor",
@@ -124,7 +118,6 @@
       "title": "Warning Light Reset",
       "condition": "Yellow light is solid after issue resolved",
       "steps": [
-        "Walk to machine",
         "Read all sensor readings are normal",
         "Press yellow_button to reset warning",
         "Wait 2 seconds",
@@ -142,9 +135,7 @@
       "title": "Intake Cover Inspection",
       "condition": "Yellow light is on and intake may be blocked",
       "steps": [
-        "Walk to machine",
         "Pick up intake_cover from table",
-        "Walk to intake_cover for debris",
         "Read light_sensor",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on machine",
@@ -166,9 +157,7 @@
       "title": "Lubrication Procedure",
       "condition": "Vibration_sensor reads high due to friction",
       "steps": [
-        "Walk to table",
         "Pick up lubricant_bottle",
-        "Walk to machine",
         "Pick up lubricant_bottle",
         "Place lubricant_bottle on machine",
         "Wait 5 seconds",
@@ -186,7 +175,6 @@
       "title": "Fault Light Investigation",
       "condition": "Red light is solid indicating fault",
       "steps": [
-        "Walk to machine",
         "Press red_button to stop machine",
         "Press blue_button for diagnostic mode",
         "Read all sensors",
@@ -206,11 +194,8 @@
       "title": "Battery Replacement",
       "condition": "Machine displays low power warning",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
-        "Walk to table",
         "Pick up battery",
-        "Walk to machine",
         "Pick up battery",
         "Place battery on machine",
         "Press green_button to restart",
@@ -229,11 +214,8 @@
       "title": "Fuse Replacement Procedure",
       "condition": "Red light is on and machine is unresponsive",
       "steps": [
-        "Walk to machine",
         "Press red_button to ensure shutdown",
-        "Walk to table",
         "Pick up spare_fuses",
-        "Walk to machine",
         "Pick up spare_fuses",
         "Place spare_fuses on machine",
         "Press green_button to restart",
@@ -252,9 +234,7 @@
       "title": "Sensor Cleaning Protocol",
       "condition": "Light_sensor readings are erratic",
       "steps": [
-        "Walk to table",
         "Pick up cleaning_cloth",
-        "Walk to machine",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on light_sensor surface",
         "Wait 2 seconds",
@@ -272,7 +252,6 @@
       "title": "Pressure Sensor Calibration Check",
       "condition": "Pressure_sensor readings seem inaccurate",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic mode",
         "Read pressure_sensor multiple times",
         "Read pressure_sensor",
@@ -291,7 +270,6 @@
       "title": "Temperature Sensor Verification",
       "condition": "Temperature_sensor readings fluctuate unexpectedly",
       "steps": [
-        "Walk to machine",
         "Read temperature_sensor",
         "Wait 10 seconds",
         "Re-read temperature_sensor",
@@ -311,9 +289,7 @@
       "title": "Machine Surface Cleaning",
       "condition": "Machine surface is dirty affecting operation",
       "steps": [
-        "Walk to table",
         "Pick up cleaning_cloth",
-        "Walk to machine",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on machine surface thoroughly",
         "Pick up cleaning_brush",
@@ -332,11 +308,8 @@
       "title": "Cable Management Check",
       "condition": "Cables appear loose or tangled",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
-        "Walk to table",
         "Pick up cable_ties",
-        "Walk to machine",
         "Pick up cable_ties",
         "Place cable_ties on machine",
         "Press green_button to restart"
@@ -353,10 +326,8 @@
       "title": "Safety Equipment Check",
       "condition": "Safety inspection required before maintenance",
       "steps": [
-        "Walk to table",
         "Pick up safety_goggles",
         "Pick up safety_goggles",
-        "Walk to machine",
         "Press red_button to shutdown",
         "Read light_sensor",
         "Notify technician of inspection results"
@@ -372,9 +343,7 @@
       "title": "Bolt Tightening Procedure",
       "condition": "Vibration_sensor high due to loose bolts",
       "steps": [
-        "Walk to table",
         "Pick up wrench",
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up wrench",
         "Place wrench on machine",
@@ -395,9 +364,7 @@
       "title": "Panel Screw Adjustment",
       "condition": "Panel is loose on machine",
       "steps": [
-        "Walk to table",
         "Pick up screwdriver",
-        "Walk to machine",
         "Pick up screwdriver",
         "Place screwdriver on machine",
         "Read light_sensor",
@@ -414,12 +381,9 @@
       "title": "Debris Collection Procedure",
       "condition": "Debris accumulating around machine",
       "steps": [
-        "Walk to table",
         "Pick up container_bin",
-        "Walk to machine",
         "Pick up container_bin",
         "Place container_bin on table",
-        "Walk to disposal area",
         "Pick up container_bin",
         "Place container_bin on table",
         "Place container_bin on table"
@@ -434,7 +398,6 @@
       "title": "Light Sensor Diagnostic",
       "condition": "Light_sensor not detecting indicator status",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic mode",
         "Read light_sensor",
         "Read green_light detection",
@@ -456,9 +419,7 @@
       "title": "Bracket Adjustment",
       "condition": "Bracket is misaligned causing vibration",
       "steps": [
-        "Walk to table",
         "Pick up wrench",
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up wrench",
         "Place wrench on machine",
@@ -479,7 +440,6 @@
       "title": "Intake Blockage Clearance",
       "condition": "Intake is blocked causing pressure drop",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up intake_cover",
         "Place intake_cover on table",
@@ -504,7 +464,6 @@
       "title": "All Sensor Health Check",
       "condition": "Routine sensor verification required",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic mode",
         "Read pressure_sensor",
         "Read temperature_sensor",
@@ -527,7 +486,6 @@
       "title": "Green Light Verification",
       "condition": "Green light not illuminating after startup",
       "steps": [
-        "Walk to machine",
         "Press green_button again",
         "Wait 3 seconds",
         "Read light_sensor for green_light status",
@@ -547,7 +505,6 @@
       "title": "Yellow Warning Acknowledgment",
       "condition": "Yellow light is on with no apparent issue",
       "steps": [
-        "Walk to machine",
         "Read all sensors",
         "Read all readings are normal",
         "Press yellow_button to acknowledge warning",
@@ -565,7 +522,6 @@
       "title": "Controlled Restart After Fault",
       "condition": "Red light was on but issue has been resolved",
       "steps": [
-        "Walk to machine",
         "Read red_light is now off",
         "Press blue_button for diagnostic check",
         "Read light_sensor",
@@ -587,7 +543,6 @@
       "title": "Pre-Maintenance Shutdown",
       "condition": "Machine needs maintenance shutdown",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Wait 5 seconds",
         "Read light_sensor",
@@ -608,7 +563,6 @@
       "title": "Post-Maintenance Startup",
       "condition": "Maintenance complete, machine needs restart",
       "steps": [
-        "Walk to machine",
         "Pick up safety_goggles",
         "Place safety_goggles on table",
         "Press green_button to start",
@@ -629,7 +583,6 @@
       "title": "Excessive Vibration Response",
       "condition": "Vibration_sensor reads critical level",
       "steps": [
-        "Walk to machine",
         "Press red_button immediately",
         "Wait 5 seconds",
         "Read vibration_sensor",
@@ -648,7 +601,6 @@
       "title": "Overheating Prevention",
       "condition": "Temperature_sensor approaching critical threshold",
       "steps": [
-        "Walk to machine",
         "Read temperature_sensor",
         "Press blue_button for mode select",
         "Wait 5 seconds",
@@ -668,9 +620,7 @@
       "title": "Intermittent Sensor Reading Fix",
       "condition": "Pressure_sensor giving intermittent readings",
       "steps": [
-        "Walk to table",
         "Pick up cleaning_cloth",
-        "Walk to machine",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on pressure_sensor contacts",
         "Wait 3 seconds",
@@ -688,9 +638,7 @@
       "title": "Dust Accumulation Cleaning",
       "condition": "Sensors covered with dust",
       "steps": [
-        "Walk to table",
         "Pick up cleaning_brush",
-        "Walk to machine",
         "Pick up cleaning_brush",
         "Place cleaning_brush on machine",
         "Pick up cleaning_cloth",
@@ -709,7 +657,6 @@
       "title": "Mode Selection Procedure",
       "condition": "Machine needs mode change",
       "steps": [
-        "Walk to machine",
         "Press blue_button once for mode 1",
         "Press blue_button twice for mode 2",
         "Press blue_button three times for mode 3",
@@ -727,7 +674,6 @@
       "title": "Rapid Shutdown Protocol",
       "condition": "Multiple warning lights flashing",
       "steps": [
-        "Walk to machine quickly",
         "Press red_button immediately",
         "Wait 3 seconds",
         "Read light_sensor",
@@ -747,7 +693,6 @@
       "title": "Gradual Pressure Build Check",
       "condition": "Pressure_sensor shows slow pressure increase",
       "steps": [
-        "Walk to machine",
         "Read pressure_sensor",
         "Wait 30 seconds",
         "Re-read pressure_sensor",
@@ -767,7 +712,6 @@
       "title": "Cooling Period Monitoring",
       "condition": "Machine cooling down after shutdown",
       "steps": [
-        "Walk to machine",
         "Read temperature_sensor",
         "Wait 60 seconds",
         "Re-read temperature_sensor",
@@ -785,11 +729,9 @@
       "title": "Screwdriver Maintenance Task",
       "condition": "Access panel needs opening for inspection",
       "steps": [
-        "Walk to table",
         "Pick up screwdriver",
         "Pick up safety_goggles",
         "Pick up safety_goggles",
-        "Walk to machine",
         "Pick up panel",
         "Place panel on table",
         "Read light_sensor",
@@ -807,9 +749,7 @@
       "title": "Wrench Tightening Inspection",
       "condition": "Machine components need tightening check",
       "steps": [
-        "Walk to table",
         "Pick up wrench",
-        "Walk to machine",
         "Press red_button to shutdown",
         "Read light_sensor",
         "Pick up wrench",
@@ -830,13 +770,10 @@
       "title": "Intake Cover Replacement",
       "condition": "Intake cover is damaged",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up damaged",
         "Place damaged on table",
-        "Walk to table",
         "Pick up new intake_cover",
-        "Walk to machine",
         "Pick up intake_cover",
         "Place intake_cover on machine",
         "Press green_button to restart"
@@ -853,11 +790,8 @@
       "title": "Lubricant Level Check",
       "condition": "Machine sounds dry during operation",
       "steps": [
-        "Walk to machine",
         "Read vibration_sensor",
-        "Walk to table",
         "Pick up lubricant_bottle",
-        "Walk to machine",
         "Pick up lubricant_bottle",
         "Place lubricant_bottle on machine",
         "Wait 5 seconds",
@@ -874,7 +808,6 @@
       "title": "Blue Button Diagnostic Cycle",
       "condition": "Full diagnostic cycle required",
       "steps": [
-        "Walk to machine",
         "Press blue_button to start diagnostic",
         "Wait for diagnostic cycle completion",
         "Read light_sensor for status",
@@ -893,7 +826,6 @@
       "title": "Multiple Sensor Anomaly Response",
       "condition": "Multiple sensors showing abnormal readings",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Read pressure_sensor",
         "Read temperature_sensor",
@@ -914,7 +846,6 @@
       "title": "Routine Start of Day Check",
       "condition": "Machine idle at start of shift",
       "steps": [
-        "Walk to machine",
         "Read all lights are off",
         "Press green_button to start",
         "Wait 5 seconds",
@@ -933,7 +864,6 @@
       "title": "End of Day Shutdown",
       "condition": "End of shift shutdown required",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Wait 5 seconds",
         "Read light_sensor",
@@ -952,10 +882,8 @@
       "title": "Cleaning Brush Deep Clean",
       "condition": "Machine requires deep cleaning",
       "steps": [
-        "Walk to table",
         "Pick up cleaning_brush",
         "Pick up cleaning_cloth",
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up cleaning_brush",
         "Place cleaning_brush on machine",
@@ -975,9 +903,7 @@
       "title": "Container Bin Parts Collection",
       "condition": "Loose parts need collection",
       "steps": [
-        "Walk to table",
         "Pick up container_bin",
-        "Walk to machine area",
         "Pick up container_bin",
         "Place container_bin on table",
         "Pick up container_bin",
@@ -995,12 +921,9 @@
       "title": "Safety Goggles Requirement Check",
       "condition": "Safety check before hazardous operation",
       "steps": [
-        "Walk to table",
         "Pick up safety_goggles",
-        "Walk to safety_goggles for damage",
         "Read light_sensor",
         "Pick up safety_goggles",
-        "Walk to machine",
         "Read light_sensor",
         "Notify technician to proceed"
       ],
@@ -1014,9 +937,7 @@
       "title": "Cable Tie Organization",
       "condition": "Cables need reorganization",
       "steps": [
-        "Walk to table",
         "Pick up cable_ties",
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up cable_ties",
         "Place cable_ties on machine",
@@ -1036,7 +957,6 @@
       "title": "Pressure Drop Emergency",
       "condition": "Pressure_sensor shows sudden pressure drop",
       "steps": [
-        "Walk to machine",
         "Press red_button immediately",
         "Read pressure_sensor",
         "Read light_sensor",
@@ -1056,7 +976,6 @@
       "title": "Temperature Spike Response",
       "condition": "Temperature_sensor shows rapid temperature increase",
       "steps": [
-        "Walk to machine",
         "Press red_button immediately",
         "Wait 10 seconds",
         "Read temperature_sensor",
@@ -1077,7 +996,6 @@
       "title": "Vibration Pattern Analysis",
       "condition": "Vibration_sensor shows unusual pattern",
       "steps": [
-        "Walk to machine",
         "Read vibration_sensor",
         "Press blue_button for diagnostic",
         "Wait 10 seconds",
@@ -1097,7 +1015,6 @@
       "title": "Light Indicator Test",
       "condition": "All indicator lights need testing",
       "steps": [
-        "Walk to machine",
         "Press blue_button for test mode",
         "Read red_light illuminates",
         "Read yellow_light illuminates",
@@ -1118,7 +1035,6 @@
       "title": "Spare Fuse Inventory Check",
       "condition": "Fuse inventory needs verification",
       "steps": [
-        "Walk to table",
         "Read light_sensor",
         "Read light_sensor",
         "Notify technician of status",
@@ -1135,9 +1051,7 @@
       "title": "Battery Status Check",
       "condition": "Battery backup needs verification",
       "steps": [
-        "Walk to table",
         "Pick up battery",
-        "Walk to battery for damage",
         "Read light_sensor",
         "Read light_sensor",
         "Notify technician of status",
@@ -1152,7 +1066,6 @@
       "title": "Red Button Function Test",
       "condition": "Emergency stop function needs testing",
       "steps": [
-        "Walk to machine",
         "Press green_button to start",
         "Read light_sensor",
         "Press red_button to test emergency stop",
@@ -1173,7 +1086,6 @@
       "title": "Green Button Function Test",
       "condition": "Start function needs testing",
       "steps": [
-        "Walk to machine",
         "Read light_sensor",
         "Press green_button to start",
         "Wait 3 seconds",
@@ -1192,7 +1104,6 @@
       "title": "Yellow Button Function Test",
       "condition": "Warning reset function needs testing",
       "steps": [
-        "Walk to machine",
         "Read yellow_light is on",
         "Press yellow_button to reset",
         "Wait 2 seconds",
@@ -1210,7 +1121,6 @@
       "title": "Blue Button Function Test",
       "condition": "Diagnostic function needs testing",
       "steps": [
-        "Walk to machine",
         "Press blue_button to enter diagnostic",
         "Read light_sensor",
         "Press blue_button to cycle modes",
@@ -1227,7 +1137,6 @@
       "title": "Pressure Threshold Adjustment",
       "condition": "Pressure_sensor threshold needs verification",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic",
         "Read pressure_sensor current value",
         "Read pressure_sensor",
@@ -1247,7 +1156,6 @@
       "title": "Temperature Threshold Verification",
       "condition": "Temperature_sensor threshold needs checking",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic",
         "Read temperature_sensor current value",
         "Read pressure_sensor",
@@ -1267,7 +1175,6 @@
       "title": "Vibration Threshold Check",
       "condition": "Vibration_sensor threshold verification needed",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic",
         "Read vibration_sensor current value",
         "Read pressure_sensor",
@@ -1286,7 +1193,6 @@
       "title": "Simultaneous Light Warning",
       "condition": "Red and yellow lights are both on",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Read all sensors",
         "Read light_sensor",
@@ -1308,7 +1214,6 @@
       "title": "Blinking Red Light Response",
       "condition": "Red light is blinking indicating intermittent fault",
       "steps": [
-        "Walk to machine",
         "Read light_sensor",
         "Press blue_button for diagnostic",
         "Read all sensors",
@@ -1328,7 +1233,6 @@
       "title": "Blinking Yellow Light Response",
       "condition": "Yellow light is blinking indicating warning",
       "steps": [
-        "Walk to machine",
         "Read all sensors",
         "Read light_sensor",
         "Notify technician of findings",
@@ -1348,7 +1252,6 @@
       "title": "Blinking Green Light Investigation",
       "condition": "Green light is blinking instead of solid",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic",
         "Read all sensors",
         "Read light_sensor",
@@ -1368,7 +1271,6 @@
       "title": "All Lights Off Investigation",
       "condition": "No indicator lights are illuminated",
       "steps": [
-        "Walk to machine",
         "Read light_sensor",
         "Read light_sensor",
         "Read light_sensor",
@@ -1388,9 +1290,7 @@
       "title": "Sensor Connection Verification",
       "condition": "Sensor readings show disconnection",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
-        "Walk to sensor connections",
         "Read light_sensor",
         "Pick up wrench",
         "Place wrench on machine",
@@ -1409,11 +1309,9 @@
       "title": "Intake Cover Seal Check",
       "condition": "Pressure_sensor shows slow leak",
       "steps": [
-        "Walk to machine",
         "Read pressure_sensor",
         "Pick up intake_cover",
         "Place intake_cover on table",
-        "Walk to seal condition",
         "Read light_sensor",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on seal with cleaning_cloth",
@@ -1433,10 +1331,7 @@
       "title": "Bolt Vibration Source Check",
       "condition": "Specific bolt causing vibration",
       "steps": [
-        "Walk to table",
         "Pick up wrench",
-        "Walk to machine",
-        "Walk to machine",
         "Read light_sensor",
         "Pick up wrench",
         "Place wrench on machine",
@@ -1455,11 +1350,9 @@
       "title": "Panel Inspection Access",
       "condition": "Panel needs removal for inspection",
       "steps": [
-        "Walk to table",
         "Pick up screwdriver",
         "Pick up safety_goggles",
         "Pick up safety_goggles",
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up panel",
         "Place panel on table",
@@ -1478,11 +1371,8 @@
       "title": "Bracket Alignment Check",
       "condition": "Bracket misalignment suspected",
       "steps": [
-        "Walk to table",
         "Pick up wrench",
-        "Walk to machine",
         "Press red_button to shutdown",
-        "Walk to bracket alignment",
         "Read light_sensor",
         "Pick up wrench",
         "Place wrench on machine",
@@ -1501,9 +1391,7 @@
       "title": "Lubricant Application Schedule",
       "condition": "Scheduled lubrication required",
       "steps": [
-        "Walk to table",
         "Pick up lubricant_bottle",
-        "Walk to machine",
         "Pick up lubricant_bottle",
         "Place lubricant_bottle on machine",
         "Wait 5 seconds for absorption",
@@ -1521,10 +1409,8 @@
       "title": "Cleaning Schedule Execution",
       "condition": "Scheduled cleaning required",
       "steps": [
-        "Walk to table",
         "Pick up cleaning_brush",
         "Pick up cleaning_cloth",
-        "Walk to machine",
         "Pick up cleaning_brush",
         "Place cleaning_brush on machine",
         "Pick up cleaning_cloth",
@@ -1542,7 +1428,6 @@
       "title": "Weekly Sensor Calibration",
       "condition": "Weekly calibration check due",
       "steps": [
-        "Walk to machine",
         "Press blue_button for diagnostic",
         "Read pressure_sensor",
         "Read temperature_sensor",
@@ -1565,7 +1450,6 @@
       "title": "Monthly Equipment Audit",
       "condition": "Monthly equipment check required",
       "steps": [
-        "Walk to table",
         "Read light_sensor",
         "Read light_sensor",
         "Read light_sensor",
@@ -1585,7 +1469,6 @@
       "title": "Noise Investigation Protocol",
       "condition": "Unusual noise detected from machine",
       "steps": [
-        "Walk to machine",
         "Read vibration_sensor",
         "Press blue_button for diagnostic",
         "Read light_sensor",
@@ -1607,7 +1490,6 @@
       "title": "Smoke Detection Response",
       "condition": "Smoke or burning smell detected",
       "steps": [
-        "Walk to machine immediately",
         "Press red_button to emergency stop",
         "Read temperature_sensor",
         "Read light_sensor",
@@ -1626,7 +1508,6 @@
       "title": "Sparking Observation Response",
       "condition": "Electrical sparking observed",
       "steps": [
-        "Walk to machine",
         "Press red_button immediately",
         "Notify technician of safety warning",
         "Read light_sensor",
@@ -1643,7 +1524,6 @@
       "title": "Stuck Button Investigation",
       "condition": "Button appears stuck or unresponsive",
       "steps": [
-        "Walk to machine",
         "Read light_sensor",
         "Notify technician of findings",
         "Press blue_button gently",
@@ -1663,8 +1543,6 @@
       "title": "Light Sensor Obstruction Check",
       "condition": "Light_sensor gives incorrect readings",
       "steps": [
-        "Walk to machine",
-        "Walk to light_sensor for obstruction",
         "Read light_sensor",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on light_sensor with cleaning_cloth",
@@ -1684,10 +1562,8 @@
       "title": "Foreign Object Removal",
       "condition": "Foreign object detected in machine",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Pick up safety_goggles",
-        "Walk to machine",
         "Read light_sensor",
         "Pick up object",
         "Place object on table",
@@ -1707,9 +1583,7 @@
       "title": "Loose Cable Detection",
       "condition": "Sensor readings intermittent due to loose cable",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
-        "Walk to all cable connections",
         "Read light_sensor",
         "Pick up cable_ties from table",
         "Pick up cable_ties",
@@ -1729,7 +1603,6 @@
       "title": "Humidity Effect Check",
       "condition": "Sensors affected by humidity",
       "steps": [
-        "Walk to machine",
         "Read all sensors",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on machine",
@@ -1748,7 +1621,6 @@
       "title": "Cold Start Procedure",
       "condition": "Machine cold after extended shutdown",
       "steps": [
-        "Walk to machine",
         "Press green_button to start",
         "Wait 10 seconds for warm-up",
         "Read temperature_sensor",
@@ -1768,7 +1640,6 @@
       "title": "Power Fluctuation Response",
       "condition": "Power fluctuation affected machine",
       "steps": [
-        "Walk to machine",
         "Read all indicator lights",
         "Press blue_button for diagnostic",
         "Read all sensors",
@@ -1786,7 +1657,6 @@
       "title": "Error Code Investigation",
       "condition": "Light pattern indicates error code",
       "steps": [
-        "Walk to machine",
         "Read light_sensor",
         "Read light_sensor",
         "Press blue_button for more info",
@@ -1806,7 +1676,6 @@
       "title": "Startup Failure Recovery",
       "condition": "Machine fails to start on green_button press",
       "steps": [
-        "Walk to machine",
         "Press green_button again",
         "Wait 5 seconds",
         "Read light_sensor",
@@ -1827,7 +1696,6 @@
       "title": "Shutdown Failure Response",
       "condition": "Machine not responding to red_button",
       "steps": [
-        "Walk to machine",
         "Press and hold red_button for 5 seconds",
         "Wait for forced shutdown",
         "Pick up battery",
@@ -1845,7 +1713,6 @@
       "title": "Sensor Zero Calibration",
       "condition": "Sensor shows zero when it should not",
       "steps": [
-        "Walk to machine",
         "Read affected sensor",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on sensor with cleaning_cloth",
@@ -1864,7 +1731,6 @@
       "title": "Sensor Maximum Reading",
       "condition": "Sensor shows maximum value unexpectedly",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Read affected sensor",
         "Pick up cleaning_cloth",
@@ -1885,12 +1751,10 @@
       "title": "Tool Return Protocol",
       "condition": "Tools left at machine after maintenance",
       "steps": [
-        "Walk to machine",
         "Pick up container_bin",
         "Place container_bin on table",
         "Pick up wrench if present",
         "Pick up screwdriver if present",
-        "Walk to table",
         "Place all tools to proper positions",
         "Notify technician of status"
       ],
@@ -1905,12 +1769,10 @@
       "title": "Safety Goggles Cleaning",
       "condition": "Safety goggles need cleaning before use",
       "steps": [
-        "Walk to table",
         "Pick up safety_goggles",
         "Pick up cleaning_cloth",
         "Pick up cleaning_cloth",
         "Place cleaning_cloth on safety_goggles lenses",
-        "Walk to for scratches",
         "Read light_sensor",
         "Place safety_goggles on table",
         "Place cleaning_cloth on table"
@@ -1925,12 +1787,9 @@
       "title": "Container Bin Emptying",
       "condition": "Container bin is full",
       "steps": [
-        "Walk to table",
         "Pick up container_bin",
-        "Walk to disposal area",
         "Pick up container_bin",
         "Place container_bin on table",
-        "Walk to table",
         "Place container_bin",
         "Notify technician of status"
       ],
@@ -1943,7 +1802,6 @@
       "title": "Lubricant Bottle Refill Check",
       "condition": "Lubricant bottle appears low",
       "steps": [
-        "Walk to table",
         "Pick up lubricant_bottle",
         "Read light_sensor",
         "If low, notify for refill",
@@ -1959,7 +1817,6 @@
       "title": "Simultaneous Sensor Failure",
       "condition": "Multiple sensors showing no reading",
       "steps": [
-        "Walk to machine",
         "Press red_button to shutdown",
         "Read all sensor connections",
         "Read power to sensors",
@@ -1978,7 +1835,6 @@
       "title": "Routine Button Test Cycle",
       "condition": "All buttons need function verification",
       "steps": [
-        "Walk to machine",
         "Press blue_button",
         "Wait 2 seconds",
         "Press blue_button",
@@ -2002,7 +1858,6 @@
       "title": "Comprehensive System Check",
       "condition": "Full system verification required",
       "steps": [
-        "Walk to machine",
         "Press green_button to start",
         "Read light_sensor",
         "Read all sensors",
@@ -2024,7 +1879,6 @@
       "title": "Emergency Response Protocol",
       "condition": "Red light flashing with alarm sound",
       "steps": [
-        "Walk to machine immediately",
         "Press red_button to emergency stop",
         "Read all sensors",
         "Read light_sensor",

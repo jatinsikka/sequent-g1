@@ -213,9 +213,10 @@ class ButtonPressEnv(gym.Env):
         mujoco.mj_resetDataKeyframe(self.env.model, self.env.data, 0)
         
         # Position robot in front of button panel
-        # Find pelvis (robot root) in qpos - it's after the interactive objects
-        # Based on keyframe structure: objects take indices 0-45, robot starts at 46
-        robot_qpos_start = 46
+        # Find pelvis (robot root) in qpos dynamically — the interactive-objects block
+        # changed size when the lever joint was added, so the old hardcoded 46 is unsafe.
+        robot_qpos_start = self.env.model.jnt_qposadr[mujoco.mj_name2id(
+            self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'pelvis')]
         self.env.data.qpos[robot_qpos_start:robot_qpos_start+3] = self.robot_start_pos
         # -90° yaw to face -Y direction (toward buttons)
         # Using quaternion defined in __init__

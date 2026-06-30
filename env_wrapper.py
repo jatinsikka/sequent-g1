@@ -297,7 +297,8 @@ class G1RLEnv(gym.Env):
         # Reset MuJoCo simulation to initial keyframe (home position)
         mujoco.mj_resetDataKeyframe(self.env.model, self.env.data, 0)
         # Spawn at the right table, facing +Y, within comfortable arm reach.
-        _rq = 46
+        _rq = self.env.model.jnt_qposadr[mujoco.mj_name2id(
+            self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'pelvis')]
         self.env.data.qpos[_rq:_rq + 3] = np.array([0.6, spawn_y, 0.793])
         self.env.data.qpos[_rq + 3:_rq + 7] = np.array([0.7071, 0, 0, 0.7071])
         # DOMAIN RANDOMIZATION: place the screwdriver at a random reachable spot on the

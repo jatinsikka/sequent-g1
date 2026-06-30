@@ -452,6 +452,161 @@ class ButtonPressRewardFunction:
         )
 
 
+class LeverPressRewardFunction:
+    """
+    Reward function for the LEVER task — the twin of ButtonPressRewardFunction.
+
+    Instead of driving a slide-joint displacement, the robot reaches the lever
+    handle and rotates its HINGE toward a target angle. Mirrors the button reward
+    structure exactly:
+      - contact-gated hand->handle proximity (pay nothing for hovering back)
+      - dense approach shaping (move hand toward the handle)
+      - DEPTH-MONOTONIC angle reward: per-step reward grows with how close the
+        hinge angle is to the target (saturating at target), so a firm held turn
+        beats a brittle graze.
+      - one-time bonus on first crossing the success angle band
+      - balance term penalizing base drift off spawn (counter reach-recoil)
+    """
+
+    def __init__(
+        self,
+        handle_position=(0.6, -1.72, 0.87),     # lever grip world pos at angle 0 (default)
+        target_angle: float = 0.9,               # rotate hinge to ~0.9 rad (~52 deg)
+        angle_tol: float = 0.10,                 # success: within ~0.1 rad of target, held
+        hand_proximity_weight: float = 10.0,
+        rotate_reward: float = 100.0,            # per-step reward at full target angle
+        first_turn_bonus: float = 50.0,          # one-time bonus on first reaching the success band
+        balance_weight: float = 3.0,
+        action_penalty: float = 0.0001,
+        alive_bonus: float = 0.1,
+    ):
+        self.handle_position = np.array(handle_position)
+        self.target_angle = target_angle
+        self.angle_tol = angle_tol
+        self.hand_proximity_weight = hand_proximity_weight
+        self.rotate_reward = rotate_reward
+        self.first_turn_bonus = first_turn_bonus
+        self.balance_weight = balance_weight
+        self.action_penalty = action_penalty
+        self.alive_bonus = alive_bonus
+
+        self.lever_turned = False
+        self.max_lever_angle = 0.0
+        self.prev_hand_distance = None
+        self.init_base_xy = None
+
+    def compute_reward(
+        self,
+        position: np.ndarray,
+        rpy: np.ndarray,
+        ang_vel: np.ndarray,
+        action: np.ndarray,
+        left_hand_pos: Optional[np.ndarray] = None,
+        right_hand_pos: Optional[np.ndarray] = None,
+        lever_angle: float = 0.0,
+        current_handle_pos: Optional[np.ndarray] = None,
+    ) -> Tuple[float, dict]:
+        info = {}
+        target_pos = current_handle_pos if current_handle_pos is not None else self.handle_position
+
+        # 1. Contact-gated hand proximity to the handle
+        r_hand = self._compute_hand_proximity_reward(left_hand_pos, right_hand_pos, target_pos)
+        info['r_hand_proximity'] = r_hand
+
+        # 2. Approach velocity reward (move hand toward handle)
+        r_approach = self._compute_approach_reward(left_hand_pos, right_hand_pos, target_pos)
+        info['r_approach'] = r_approach
+
+        # 3. Lever rotation reward — depth-monotonic toward target angle, no flat plateau.
+        self.max_lever_angle = max(self.max_lever_angle, lever_angle)
+        angle_frac = float(np.clip(lever_angle / self.target_angle, 0.0, 1.0))
+        r_rotate = self.rotate_reward * angle_frac
+        # success band: within tol of target
+        if abs(lever_angle - self.target_angle) < self.angle_tol and not self.lever_turned:
+            r_rotate += self.first_turn_bonus
+            self.lever_turned = True
+            print(f"    [REWARD] Lever turned! Angle: {lever_angle:.4f} rad (target {self.target_angle:.2f})")
+        info['r_rotate'] = r_rotate
+        info['lever_angle'] = lever_angle
+        info['lever_turned'] = self.lever_turned
+
+        # 4. Action penalty
+        r_action = -self.action_penalty * np.linalg.norm(action) ** 2
+        info['r_action'] = r_action
+
+        # 5. Distance penalty — active (closest) hand far from handle
+        dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
+        dist_to_handle = min(dists) if dists else 1.0
+        r_distance_penalty = -dist_to_handle * 2.0
+        info['r_distance_penalty'] = r_distance_penalty
+
+        # 6. Balance term — penalize base drifting off spawn xy
+        if self.init_base_xy is None:
+            self.init_base_xy = np.array(position[:2], dtype=float)
+        base_drift = float(np.linalg.norm(np.array(position[:2]) - self.init_base_xy))
+        r_balance = -self.balance_weight * base_drift
+        info['r_balance'] = r_balance
+        info['base_drift'] = base_drift
+
+        total_reward = (
+            self.alive_bonus
+            + self.hand_proximity_weight * r_hand
+            + r_approach
+            + r_rotate
+            + r_action
+            + r_distance_penalty
+            + r_balance
+        )
+        return total_reward, info
+
+    def _compute_hand_proximity_reward(self, left_hand_pos, right_hand_pos, target_pos):
+        if left_hand_pos is None and right_hand_pos is None:
+            return 0.0
+        distances = []
+        if left_hand_pos is not None:
+            distances.append(np.linalg.norm(left_hand_pos - target_pos))
+        if right_hand_pos is not None:
+            distances.append(np.linalg.norm(right_hand_pos - target_pos))
+        min_dist = min(distances)
+        band = 0.10
+        if min_dist > band:
+            return 0.0
+        proximity_reward = (band - min_dist) / band
+        if min_dist < 0.05:
+            proximity_reward += np.exp(-20.0 * min_dist)
+        return proximity_reward
+
+    def _compute_approach_reward(self, left_hand_pos, right_hand_pos, target_pos):
+        if left_hand_pos is None and right_hand_pos is None:
+            return 0.0
+        distances = []
+        if left_hand_pos is not None:
+            distances.append(np.linalg.norm(left_hand_pos - target_pos))
+        if right_hand_pos is not None:
+            distances.append(np.linalg.norm(right_hand_pos - target_pos))
+        current_dist = min(distances)
+        if self.prev_hand_distance is None:
+            self.prev_hand_distance = current_dist
+            return 0.0
+        approach_reward = (self.prev_hand_distance - current_dist) * 50.0
+        self.prev_hand_distance = current_dist
+        return approach_reward
+
+    def reset(self):
+        self.lever_turned = False
+        self.max_lever_angle = 0.0
+        self.prev_hand_distance = None
+        self.init_base_xy = None
+
+    def __repr__(self) -> str:
+        return (f"LeverPressRewardFunction(handle_pos={self.handle_position}, "
+                f"target_angle={self.target_angle}, angle_tol={self.angle_tol})")
+
+
+# Lever handle position (grip world pos at rest angle), for easy reference
+LEVER_POSITION = np.array([0.6, -1.72, 0.87])
+
+
 # Button positions for easy reference
 BUTTON_POSITIONS = {
     "button_red": np.array([-0.45, -1.85, 0.8]),

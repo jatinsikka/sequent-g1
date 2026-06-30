@@ -240,7 +240,8 @@ class UniversalManipulationEnv(gym.Env):
         # Position robot near target
         if self.randomize_robot_position:
             robot_pos = self._get_robot_position_for_target(self.current_target_name)
-            robot_qpos_start = 46  # After interactive objects
+            robot_qpos_start = self.env.model.jnt_qposadr[mujoco.mj_name2id(
+                self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'pelvis')]  # robust to interactive-obj count
             self.env.data.qpos[robot_qpos_start:robot_qpos_start+3] = robot_pos
             
             # Face toward target

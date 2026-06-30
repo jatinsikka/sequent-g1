@@ -47,4 +47,5 @@ _demo_plan.json
 *.npz
 *.npy
 *.zip
+*.pt
 brain/artifacts/

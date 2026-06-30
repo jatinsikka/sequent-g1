@@ -1,6 +1,6 @@
 <mujoco model="g1_mocap">
   <compiler angle="radian" meshdir="meshes" eulerseq="xyz"/>
-  <include file="interactive_objects.xml"/>
+  
   <option timestep='0.001' iterations='50' solver='PGS' gravity='0 0 -9.81' viscosity='0.0001'>
     </option>
     <size njmax="500" nconmax="100" />

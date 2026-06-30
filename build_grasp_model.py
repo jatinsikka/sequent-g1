@@ -88,6 +88,41 @@ if VARIANT == "table":
     bg = addbox(gb, "grasp_box_geom", [0, 0, 0], [0.025, 0.025, 0.025], [0.85, 0.30, 0.20, 1])
     bg.mass = 0.10
     OUT = "g1_robotiq_table.mjb"
+elif VARIANT == "lever":
+    # ---- LEVER on the workstation table: a fixed mount + a hinged handle the arm rotates ----
+    # Pivot placed where the grasp box sits (within the validated right-hand reach band). Hinge axis
+    # = world X (horizontal), so the handle swings in the Y-Z plane (toward/away from the robot).
+    # grasp_box must EXIST (the table env code path looks it up), but for the lever task it would
+    # collide with the handle, so park it off to the side / out of the workspace (env also disables it).
+    gb = wb.add_body(); gb.name = "grasp_box"; gb.pos = [1.40, 1.40, 0.80]
+    gb.add_freejoint()
+    bg = addbox(gb, "grasp_box_geom", [0, 0, 0], [0.025, 0.025, 0.025], [0.85, 0.30, 0.20, 1])
+    bg.mass = 0.10
+
+    PIV = [0.80, 1.15, 0.74]                     # hinge pivot AT the box's proven-reachable spot (the arm
+    #   reaches the grasp_box at ~(0.80,1.20,0.75) and lifts to ~0.87, so a handle whose tip sits ~(0.80,1.15,
+    #   0.80) is inside the demonstrated reach band). The prior (0.78,0.90,0.79) was too close+high: an IK
+    #   operability probe showed the hand stalling 17cm short of the handle, so the lever never moved. [reach fix]
+    # fixed mount: a small post the hinge body is anchored to
+    mnt = wb.add_body(); mnt.name = "lever_mount"; mnt.pos = [PIV[0], PIV[1], PIV[2]]
+    mg = mnt.add_geom(); mg.name = "lever_mount_geom"; mg.type = mujoco.mjtGeom.mjGEOM_BOX
+    mg.pos = [0, 0, -0.025]; mg.size = [0.03, 0.03, 0.025]; mg.rgba = [0.35, 0.37, 0.42, 1]
+    mg.contype = 2; mg.conaffinity = 2
+    # hinged handle body: rotates about world X at the pivot
+    lv = mnt.add_body(); lv.name = "lever_arm"; lv.pos = [0, 0, 0]
+    jt = lv.add_joint(); jt.name = "lever_hinge"; jt.type = mujoco.mjtJoint.mjJNT_HINGE
+    jt.axis = [-1, 0, 0]; jt.range = [0.0, 1.4]   # +angle swings the top toward +Y = AWAY from the robot,
+    #   which is the only direction the robot (standing at low Y) can push it. (axis +X made +angle go toward
+    #   the robot, so the arm could only drive it into the 0 clamp.)
+    jt.damping = 0.5; jt.stiffness = 0.6; jt.springref = 0.0   # mild: holds at 0 but the arm can drive it
+    jt.actfrclimited = mujoco.mjtLimited.mjLIMITED_FALSE       # avoid inherited bad actfrcrange default
+    # handle = a capsule ~12cm long standing up (+Z at angle 0). Its geom frame is offset so the
+    # capsule body extends from the pivot upward; pushing the top in -Y rotates the hinge toward +angle.
+    hg = lv.add_geom(); hg.name = "lever_handle"; hg.type = mujoco.mjtGeom.mjGEOM_CAPSULE
+    hg.fromto = [0, 0, 0, 0, 0, 0.08]; hg.size = [0.014, 0, 0]   # radius 1.4cm, length 8cm
+    hg.rgba = [0.90, 0.55, 0.10, 1]; hg.mass = 0.05
+    hg.contype = 2; hg.conaffinity = 2; hg.friction = [1.0, 0.05, 0.005]
+    OUT = "g1_robotiq_lever.mjb"
 elif VARIANT == "bench":
     # ---- reachable WORKBENCH in front of the fixed robot + the original SCREWDRIVER lying on top ----
     CX, CY, TOP = -0.415, -1.10, 0.78        # bench top-surface height (chosen near the validated reach band)

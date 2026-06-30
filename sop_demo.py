@@ -7,9 +7,8 @@ Run:  PYTHONPATH=brain python sop_demo.py "the machine is overheating, shut it d
 import sys, os, json, warnings, numpy as np
 warnings.filterwarnings("ignore")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "brain"))
-from src.retrieval.infer_retrieve import retrieve_topk
-from src.planner.infer_plan import plan_from_sop
 from src.data.schemas import SKILLS
+from llm_planner import plan_with_llm   # frontier-LLM planner (Claude/Gemini) + keyword fallback
 
 SOPS = {s["sop_id"]: s for s in json.load(open(os.path.join(os.path.dirname(__file__),
         "brain/src/data/sop_examples.json")))["sop_examples"]}
@@ -18,15 +17,17 @@ def bar(t): print("\n" + "=" * 66 + "\n  " + t + "\n" + "=" * 66)
 
 def run_sop(query):
     bar(f'INCIDENT (natural language):  "{query}"')
-    top = retrieve_topk(query, k=1)[0]; sop = SOPS[top["sop_id"]]
-    print(f"  RETRIEVED  {sop['sop_id']}: {sop['title']}   (similarity {top['score']:.2f})")
-    print(f"  condition: {sop['condition']}")
+    plan, sop_id, how = plan_with_llm(query)               # retrieve top-k -> LLM picks the SOP + translates
+    sop = SOPS.get(sop_id, {})
+    print(f"  CHOSEN SOP  {sop_id}: {sop.get('title','?')}")
+    print(f"  condition:  {sop.get('condition','?')}")
+    print(f"  planner:    {how}")
 
-    steps = plan_from_sop(sop["steps"])   # FAITHFUL: one plan step per SOP step, in order
-    bar("PLAN  (retrieved SOP  ->  executable skill chain, 1:1 and traceable)")
-    print(f"  {len(sop['steps'])} SOP steps  ->  {len(steps)} skill steps (faithful translation)\n")
-    for st in steps:
-        print(f"  {st['index']+1:2d}. {st['skill']:13s}{str(st['args']):42s} <- SOP: \"{st['sop_step']}\"")
+    steps = [{"skill": s.skill, "args": s.args} for s in plan.steps]
+    bar("PLAN  (LLM reasons over the top-k retrieved SOPs -> skill chain w/ inferred navigation)")
+    print(f"  {len(steps)} skill steps\n")
+    for i, st in enumerate(steps):
+        print(f"  {i+1:2d}. {st['skill']:13s}{str(st['args']):42s}")
 
     bar("EXECUTION  (physical steps verified against MEASURED physics)")
     all_ok = True

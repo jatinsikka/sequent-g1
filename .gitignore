@@ -34,3 +34,17 @@ archive/
 
 # compiled MuJoCo models (large, rebuilt from build_grasp_model.py)
 *.mjb
+
+# RL training runs (checkpoints/curves are large + regenerable)
+runs/
+
+# external dependency clone (not ours to vendor)
+mujoco_menagerie/
+_demo_plan.json
+
+# rollout videos + demo capture + saved policies (regenerable, large)
+*.mp4
+*.npz
+*.npy
+*.zip
+brain/artifacts/

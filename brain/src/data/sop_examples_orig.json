@@ -1,0 +1,2045 @@
+{
+  "sop_examples": [
+    {
+      "sop_id": "SOP-001",
+      "title": "Low Pressure Warning",
+      "condition": "Yellow light is flashing and pressure_sensor reads below threshold",
+      "steps": [
+        "Walk to machine",
+        "Read pressure_sensor",
+        "press blue_button",
+        "Wait 3 seconds",
+        "Re-read pressure_sensor",
+        "Press yellow_button to reset warning",
+        "Notify technician if unchanged"
+      ],
+      "equipment": [
+        "machine",
+        "pressure_sensor",
+        "blue_button",
+        "yellow_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-002",
+      "title": "Emergency Shutdown Procedure",
+      "condition": "Red light is solid and machine is overheating",
+      "steps": [
+        "Walk to machine",
+        "Press red_button immediately",
+        "Wait 5 seconds for shutdown",
+        "Read temperature_sensor",
+        "Notify technician of shutdown event"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "temperature_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-003",
+      "title": "Machine Startup Sequence",
+      "condition": "Green light is off and machine is idle",
+      "steps": [
+        "Walk to machine",
+        "Read red_light is off",
+        "Read yellow_light is off",
+        "Press green_button to start",
+        "Wait 3 seconds",
+        "Read light_sensor",
+        "Read all sensors to confirm normal operation"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "green_light",
+        "red_light",
+        "yellow_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-004",
+      "title": "High Temperature Alert",
+      "condition": "Yellow light is on and temperature_sensor reads above threshold",
+      "steps": [
+        "Walk to machine",
+        "Read temperature_sensor",
+        "press red_button",
+        "Wait 10 seconds for cooldown",
+        "Re-read temperature_sensor",
+        "Press yellow_button to reset warning",
+        "Notify technician if still high"
+      ],
+      "equipment": [
+        "machine",
+        "temperature_sensor",
+        "red_button",
+        "yellow_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-005",
+      "title": "Vibration Anomaly Detection",
+      "condition": "Yellow light is flashing and vibration_sensor reads abnormal",
+      "steps": [
+        "Walk to machine",
+        "Read vibration_sensor",
+        "Press blue_button for diagnostic mode",
+        "Wait 5 seconds",
+        "Re-read vibration_sensor",
+        "Press yellow_button to reset warning",
+        "Notify technician if vibration persists"
+      ],
+      "equipment": [
+        "machine",
+        "vibration_sensor",
+        "blue_button",
+        "yellow_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-006",
+      "title": "Diagnostic Mode Activation",
+      "condition": "Machine requires diagnostic check",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button to enter diagnostic mode",
+        "Wait 3 seconds",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Read vibration_sensor",
+        "Press blue_button to exit diagnostic mode"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "pressure_sensor",
+        "temperature_sensor",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-007",
+      "title": "Warning Light Reset",
+      "condition": "Yellow light is solid after issue resolved",
+      "steps": [
+        "Walk to machine",
+        "Read all sensor readings are normal",
+        "Press yellow_button to reset warning",
+        "Wait 2 seconds",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "yellow_button",
+        "yellow_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-008",
+      "title": "Intake Cover Inspection",
+      "condition": "Yellow light is on and intake may be blocked",
+      "steps": [
+        "Walk to machine",
+        "Pick up intake_cover from table",
+        "Walk to intake_cover for debris",
+        "Read light_sensor",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on machine",
+        "Pick up intake_cover",
+        "Place intake_cover on machine",
+        "Press yellow_button to reset warning",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "intake_cover",
+        "cleaning_cloth",
+        "yellow_button",
+        "yellow_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-009",
+      "title": "Lubrication Procedure",
+      "condition": "Vibration_sensor reads high due to friction",
+      "steps": [
+        "Walk to table",
+        "Pick up lubricant_bottle",
+        "Walk to machine",
+        "Pick up lubricant_bottle",
+        "Place lubricant_bottle on machine",
+        "Wait 5 seconds",
+        "Read vibration_sensor",
+        "Place lubricant_bottle on table"
+      ],
+      "equipment": [
+        "machine",
+        "lubricant_bottle",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-010",
+      "title": "Fault Light Investigation",
+      "condition": "Red light is solid indicating fault",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to stop machine",
+        "Press blue_button for diagnostic mode",
+        "Read all sensors",
+        "Read light_sensor",
+        "Notify technician of findings",
+        "Notify technician with fault details"
+      ],
+      "equipment": [
+        "machine",
+        "red_light",
+        "red_button",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-011",
+      "title": "Battery Replacement",
+      "condition": "Machine displays low power warning",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Walk to table",
+        "Pick up battery",
+        "Walk to machine",
+        "Pick up battery",
+        "Place battery on machine",
+        "Press green_button to restart",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "battery",
+        "red_button",
+        "green_button",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-012",
+      "title": "Fuse Replacement Procedure",
+      "condition": "Red light is on and machine is unresponsive",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to ensure shutdown",
+        "Walk to table",
+        "Pick up spare_fuses",
+        "Walk to machine",
+        "Pick up spare_fuses",
+        "Place spare_fuses on machine",
+        "Press green_button to restart",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "spare_fuses",
+        "red_button",
+        "green_button",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-013",
+      "title": "Sensor Cleaning Protocol",
+      "condition": "Light_sensor readings are erratic",
+      "steps": [
+        "Walk to table",
+        "Pick up cleaning_cloth",
+        "Walk to machine",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on light_sensor surface",
+        "Wait 2 seconds",
+        "Read light_sensor",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_cloth",
+        "light_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-014",
+      "title": "Pressure Sensor Calibration Check",
+      "condition": "Pressure_sensor readings seem inaccurate",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic mode",
+        "Read pressure_sensor multiple times",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Press blue_button to exit diagnostic mode",
+        "Notify technician if calibration needed"
+      ],
+      "equipment": [
+        "machine",
+        "pressure_sensor",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-015",
+      "title": "Temperature Sensor Verification",
+      "condition": "Temperature_sensor readings fluctuate unexpectedly",
+      "steps": [
+        "Walk to machine",
+        "Read temperature_sensor",
+        "Wait 10 seconds",
+        "Re-read temperature_sensor",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Press blue_button for diagnostic if unstable",
+        "Notify technician if issue persists"
+      ],
+      "equipment": [
+        "machine",
+        "temperature_sensor",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-016",
+      "title": "Machine Surface Cleaning",
+      "condition": "Machine surface is dirty affecting operation",
+      "steps": [
+        "Walk to table",
+        "Pick up cleaning_cloth",
+        "Walk to machine",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on machine surface thoroughly",
+        "Pick up cleaning_brush",
+        "Place cleaning_brush on machine",
+        "Place cleaning_cloth on table",
+        "Place cleaning_brush on table"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_cloth",
+        "cleaning_brush"
+      ]
+    },
+    {
+      "sop_id": "SOP-017",
+      "title": "Cable Management Check",
+      "condition": "Cables appear loose or tangled",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Walk to table",
+        "Pick up cable_ties",
+        "Walk to machine",
+        "Pick up cable_ties",
+        "Place cable_ties on machine",
+        "Press green_button to restart"
+      ],
+      "equipment": [
+        "machine",
+        "cable_ties",
+        "red_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-018",
+      "title": "Safety Equipment Check",
+      "condition": "Safety inspection required before maintenance",
+      "steps": [
+        "Walk to table",
+        "Pick up safety_goggles",
+        "Pick up safety_goggles",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Read light_sensor",
+        "Notify technician of inspection results"
+      ],
+      "equipment": [
+        "safety_goggles",
+        "machine",
+        "red_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-019",
+      "title": "Bolt Tightening Procedure",
+      "condition": "Vibration_sensor high due to loose bolts",
+      "steps": [
+        "Walk to table",
+        "Pick up wrench",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up wrench",
+        "Place wrench on machine",
+        "Press green_button to restart",
+        "Read vibration_sensor to confirm fix"
+      ],
+      "equipment": [
+        "machine",
+        "wrench",
+        "bolt",
+        "red_button",
+        "green_button",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-020",
+      "title": "Panel Screw Adjustment",
+      "condition": "Panel is loose on machine",
+      "steps": [
+        "Walk to table",
+        "Pick up screwdriver",
+        "Walk to machine",
+        "Pick up screwdriver",
+        "Place screwdriver on machine",
+        "Read light_sensor",
+        "Place screwdriver on table"
+      ],
+      "equipment": [
+        "machine",
+        "screwdriver",
+        "panel"
+      ]
+    },
+    {
+      "sop_id": "SOP-021",
+      "title": "Debris Collection Procedure",
+      "condition": "Debris accumulating around machine",
+      "steps": [
+        "Walk to table",
+        "Pick up container_bin",
+        "Walk to machine",
+        "Pick up container_bin",
+        "Place container_bin on table",
+        "Walk to disposal area",
+        "Pick up container_bin",
+        "Place container_bin on table",
+        "Place container_bin on table"
+      ],
+      "equipment": [
+        "machine",
+        "container_bin"
+      ]
+    },
+    {
+      "sop_id": "SOP-022",
+      "title": "Light Sensor Diagnostic",
+      "condition": "Light_sensor not detecting indicator status",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic mode",
+        "Read light_sensor",
+        "Read green_light detection",
+        "Read yellow_light detection",
+        "Read red_light detection",
+        "Press blue_button to exit diagnostic mode"
+      ],
+      "equipment": [
+        "machine",
+        "light_sensor",
+        "blue_button",
+        "green_light",
+        "yellow_light",
+        "red_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-023",
+      "title": "Bracket Adjustment",
+      "condition": "Bracket is misaligned causing vibration",
+      "steps": [
+        "Walk to table",
+        "Pick up wrench",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up wrench",
+        "Place wrench on machine",
+        "Press green_button to restart",
+        "Read vibration_sensor to verify fix"
+      ],
+      "equipment": [
+        "machine",
+        "wrench",
+        "bracket",
+        "red_button",
+        "green_button",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-024",
+      "title": "Intake Blockage Clearance",
+      "condition": "Intake is blocked causing pressure drop",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up intake_cover",
+        "Place intake_cover on table",
+        "Pick up cleaning_brush",
+        "Place cleaning_brush on machine",
+        "Pick up intake_cover",
+        "Place intake_cover on machine",
+        "Press green_button to restart",
+        "Read pressure_sensor to confirm"
+      ],
+      "equipment": [
+        "machine",
+        "intake_cover",
+        "cleaning_brush",
+        "red_button",
+        "green_button",
+        "pressure_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-025",
+      "title": "All Sensor Health Check",
+      "condition": "Routine sensor verification required",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic mode",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Read vibration_sensor",
+        "Read light_sensor",
+        "Press blue_button to exit diagnostic mode",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "pressure_sensor",
+        "temperature_sensor",
+        "vibration_sensor",
+        "light_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-026",
+      "title": "Green Light Verification",
+      "condition": "Green light not illuminating after startup",
+      "steps": [
+        "Walk to machine",
+        "Press green_button again",
+        "Wait 3 seconds",
+        "Read light_sensor for green_light status",
+        "press red_button to shutdown",
+        "Notify technician of light failure"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "green_light",
+        "red_button",
+        "light_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-027",
+      "title": "Yellow Warning Acknowledgment",
+      "condition": "Yellow light is on with no apparent issue",
+      "steps": [
+        "Walk to machine",
+        "Read all sensors",
+        "Read all readings are normal",
+        "Press yellow_button to acknowledge warning",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "yellow_light",
+        "yellow_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-028",
+      "title": "Controlled Restart After Fault",
+      "condition": "Red light was on but issue has been resolved",
+      "steps": [
+        "Walk to machine",
+        "Read red_light is now off",
+        "Press blue_button for diagnostic check",
+        "Read light_sensor",
+        "Press green_button to restart",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Wait 5 seconds"
+      ],
+      "equipment": [
+        "machine",
+        "red_light",
+        "blue_button",
+        "green_button",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-029",
+      "title": "Pre-Maintenance Shutdown",
+      "condition": "Machine needs maintenance shutdown",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Wait 5 seconds",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Notify technician machine is safe",
+        "Pick up safety_goggles"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "red_light",
+        "green_light",
+        "safety_goggles"
+      ]
+    },
+    {
+      "sop_id": "SOP-030",
+      "title": "Post-Maintenance Startup",
+      "condition": "Maintenance complete, machine needs restart",
+      "steps": [
+        "Walk to machine",
+        "Pick up safety_goggles",
+        "Place safety_goggles on table",
+        "Press green_button to start",
+        "Wait 5 seconds",
+        "Read light_sensor",
+        "Read all sensors",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "safety_goggles",
+        "green_button",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-031",
+      "title": "Excessive Vibration Response",
+      "condition": "Vibration_sensor reads critical level",
+      "steps": [
+        "Walk to machine",
+        "Press red_button immediately",
+        "Wait 5 seconds",
+        "Read vibration_sensor",
+        "Press blue_button for diagnostic",
+        "Notify technician of critical vibration"
+      ],
+      "equipment": [
+        "machine",
+        "vibration_sensor",
+        "red_button",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-032",
+      "title": "Overheating Prevention",
+      "condition": "Temperature_sensor approaching critical threshold",
+      "steps": [
+        "Walk to machine",
+        "Read temperature_sensor",
+        "Press blue_button for mode select",
+        "Wait 5 seconds",
+        "Re-read temperature_sensor",
+        "press red_button",
+        "Notify technician of thermal issue"
+      ],
+      "equipment": [
+        "machine",
+        "temperature_sensor",
+        "blue_button",
+        "red_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-033",
+      "title": "Intermittent Sensor Reading Fix",
+      "condition": "Pressure_sensor giving intermittent readings",
+      "steps": [
+        "Walk to table",
+        "Pick up cleaning_cloth",
+        "Walk to machine",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on pressure_sensor contacts",
+        "Wait 3 seconds",
+        "Read pressure_sensor",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_cloth",
+        "pressure_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-034",
+      "title": "Dust Accumulation Cleaning",
+      "condition": "Sensors covered with dust",
+      "steps": [
+        "Walk to table",
+        "Pick up cleaning_brush",
+        "Walk to machine",
+        "Pick up cleaning_brush",
+        "Place cleaning_brush on machine",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on machine",
+        "Read sensor readings",
+        "Place tools on table"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_brush",
+        "cleaning_cloth"
+      ]
+    },
+    {
+      "sop_id": "SOP-035",
+      "title": "Mode Selection Procedure",
+      "condition": "Machine needs mode change",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button once for mode 1",
+        "Press blue_button twice for mode 2",
+        "Press blue_button three times for mode 3",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "light_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-036",
+      "title": "Rapid Shutdown Protocol",
+      "condition": "Multiple warning lights flashing",
+      "steps": [
+        "Walk to machine quickly",
+        "Press red_button immediately",
+        "Wait 3 seconds",
+        "Read light_sensor",
+        "Read all sensors",
+        "Notify technician of emergency shutdown"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "red_light",
+        "yellow_light",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-037",
+      "title": "Gradual Pressure Build Check",
+      "condition": "Pressure_sensor shows slow pressure increase",
+      "steps": [
+        "Walk to machine",
+        "Read pressure_sensor",
+        "Wait 30 seconds",
+        "Re-read pressure_sensor",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Press blue_button if abnormal increase",
+        "Notify technician if pressure too high"
+      ],
+      "equipment": [
+        "machine",
+        "pressure_sensor",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-038",
+      "title": "Cooling Period Monitoring",
+      "condition": "Machine cooling down after shutdown",
+      "steps": [
+        "Walk to machine",
+        "Read temperature_sensor",
+        "Wait 60 seconds",
+        "Re-read temperature_sensor",
+        "Read light_sensor",
+        "Notify technician of status",
+        "Notify technician when safe temperature reached"
+      ],
+      "equipment": [
+        "machine",
+        "temperature_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-039",
+      "title": "Screwdriver Maintenance Task",
+      "condition": "Access panel needs opening for inspection",
+      "steps": [
+        "Walk to table",
+        "Pick up screwdriver",
+        "Pick up safety_goggles",
+        "Pick up safety_goggles",
+        "Walk to machine",
+        "Pick up panel",
+        "Place panel on table",
+        "Read light_sensor",
+        "Place screwdriver on table"
+      ],
+      "equipment": [
+        "machine",
+        "screwdriver",
+        "safety_goggles",
+        "panel"
+      ]
+    },
+    {
+      "sop_id": "SOP-040",
+      "title": "Wrench Tightening Inspection",
+      "condition": "Machine components need tightening check",
+      "steps": [
+        "Walk to table",
+        "Pick up wrench",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Read light_sensor",
+        "Pick up wrench",
+        "Place wrench on machine",
+        "Press green_button to restart",
+        "Place wrench on table"
+      ],
+      "equipment": [
+        "machine",
+        "wrench",
+        "bolt",
+        "red_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-041",
+      "title": "Intake Cover Replacement",
+      "condition": "Intake cover is damaged",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up damaged",
+        "Place damaged on table",
+        "Walk to table",
+        "Pick up new intake_cover",
+        "Walk to machine",
+        "Pick up intake_cover",
+        "Place intake_cover on machine",
+        "Press green_button to restart"
+      ],
+      "equipment": [
+        "machine",
+        "intake_cover",
+        "red_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-042",
+      "title": "Lubricant Level Check",
+      "condition": "Machine sounds dry during operation",
+      "steps": [
+        "Walk to machine",
+        "Read vibration_sensor",
+        "Walk to table",
+        "Pick up lubricant_bottle",
+        "Walk to machine",
+        "Pick up lubricant_bottle",
+        "Place lubricant_bottle on machine",
+        "Wait 5 seconds",
+        "Re-read vibration_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "lubricant_bottle",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-043",
+      "title": "Blue Button Diagnostic Cycle",
+      "condition": "Full diagnostic cycle required",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button to start diagnostic",
+        "Wait for diagnostic cycle completion",
+        "Read light_sensor for status",
+        "Press blue_button to view results",
+        "Notify technician of status",
+        "Press blue_button to exit"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "light_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-044",
+      "title": "Multiple Sensor Anomaly Response",
+      "condition": "Multiple sensors showing abnormal readings",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Read vibration_sensor",
+        "Notify technician of status",
+        "Notify technician immediately"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "pressure_sensor",
+        "temperature_sensor",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-045",
+      "title": "Routine Start of Day Check",
+      "condition": "Machine idle at start of shift",
+      "steps": [
+        "Walk to machine",
+        "Read all lights are off",
+        "Press green_button to start",
+        "Wait 5 seconds",
+        "Read light_sensor",
+        "Read all sensors",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-046",
+      "title": "End of Day Shutdown",
+      "condition": "End of shift shutdown required",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Wait 5 seconds",
+        "Read light_sensor",
+        "Read temperature_sensor",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "temperature_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-047",
+      "title": "Cleaning Brush Deep Clean",
+      "condition": "Machine requires deep cleaning",
+      "steps": [
+        "Walk to table",
+        "Pick up cleaning_brush",
+        "Pick up cleaning_cloth",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up cleaning_brush",
+        "Place cleaning_brush on machine",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on with cleaning_cloth",
+        "Place tools on table"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_brush",
+        "cleaning_cloth",
+        "red_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-048",
+      "title": "Container Bin Parts Collection",
+      "condition": "Loose parts need collection",
+      "steps": [
+        "Walk to table",
+        "Pick up container_bin",
+        "Walk to machine area",
+        "Pick up container_bin",
+        "Place container_bin on table",
+        "Pick up container_bin",
+        "Place container_bin on table",
+        "Place container_bin on table",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "container_bin",
+        "machine"
+      ]
+    },
+    {
+      "sop_id": "SOP-049",
+      "title": "Safety Goggles Requirement Check",
+      "condition": "Safety check before hazardous operation",
+      "steps": [
+        "Walk to table",
+        "Pick up safety_goggles",
+        "Walk to safety_goggles for damage",
+        "Read light_sensor",
+        "Pick up safety_goggles",
+        "Walk to machine",
+        "Read light_sensor",
+        "Notify technician to proceed"
+      ],
+      "equipment": [
+        "safety_goggles",
+        "machine"
+      ]
+    },
+    {
+      "sop_id": "SOP-050",
+      "title": "Cable Tie Organization",
+      "condition": "Cables need reorganization",
+      "steps": [
+        "Walk to table",
+        "Pick up cable_ties",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up cable_ties",
+        "Place cable_ties on machine",
+        "Read light_sensor",
+        "Press green_button to restart",
+        "Place unused cable_ties to table"
+      ],
+      "equipment": [
+        "machine",
+        "cable_ties",
+        "red_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-051",
+      "title": "Pressure Drop Emergency",
+      "condition": "Pressure_sensor shows sudden pressure drop",
+      "steps": [
+        "Walk to machine",
+        "Press red_button immediately",
+        "Read pressure_sensor",
+        "Read light_sensor",
+        "Press blue_button for diagnostic",
+        "Notify technician of pressure emergency"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "pressure_sensor",
+        "intake_cover",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-052",
+      "title": "Temperature Spike Response",
+      "condition": "Temperature_sensor shows rapid temperature increase",
+      "steps": [
+        "Walk to machine",
+        "Press red_button immediately",
+        "Wait 10 seconds",
+        "Read temperature_sensor",
+        "Read temperature_sensor",
+        "Wait 10 seconds",
+        "Read temperature_sensor",
+        "Notify technician of temperature spike",
+        "Notify technician of safety warning"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "temperature_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-053",
+      "title": "Vibration Pattern Analysis",
+      "condition": "Vibration_sensor shows unusual pattern",
+      "steps": [
+        "Walk to machine",
+        "Read vibration_sensor",
+        "Press blue_button for diagnostic",
+        "Wait 10 seconds",
+        "Re-read vibration_sensor",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "vibration_sensor",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-054",
+      "title": "Light Indicator Test",
+      "condition": "All indicator lights need testing",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for test mode",
+        "Read red_light illuminates",
+        "Read yellow_light illuminates",
+        "Read green_light illuminates",
+        "Press blue_button to exit test mode",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "red_light",
+        "yellow_light",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-055",
+      "title": "Spare Fuse Inventory Check",
+      "condition": "Fuse inventory needs verification",
+      "steps": [
+        "Walk to table",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Notify technician of status",
+        "Notify if spare_fuses low",
+        "Place spare_fuses on table"
+      ],
+      "equipment": [
+        "spare_fuses",
+        "machine"
+      ]
+    },
+    {
+      "sop_id": "SOP-056",
+      "title": "Battery Status Check",
+      "condition": "Battery backup needs verification",
+      "steps": [
+        "Walk to table",
+        "Pick up battery",
+        "Walk to battery for damage",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Notify technician of status",
+        "Place battery on table"
+      ],
+      "equipment": [
+        "battery"
+      ]
+    },
+    {
+      "sop_id": "SOP-057",
+      "title": "Red Button Function Test",
+      "condition": "Emergency stop function needs testing",
+      "steps": [
+        "Walk to machine",
+        "Press green_button to start",
+        "Read light_sensor",
+        "Press red_button to test emergency stop",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "green_light",
+        "red_button",
+        "red_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-058",
+      "title": "Green Button Function Test",
+      "condition": "Start function needs testing",
+      "steps": [
+        "Walk to machine",
+        "Read light_sensor",
+        "Press green_button to start",
+        "Wait 3 seconds",
+        "Read light_sensor",
+        "Read all sensors",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-059",
+      "title": "Yellow Button Function Test",
+      "condition": "Warning reset function needs testing",
+      "steps": [
+        "Walk to machine",
+        "Read yellow_light is on",
+        "Press yellow_button to reset",
+        "Wait 2 seconds",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "yellow_button",
+        "yellow_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-060",
+      "title": "Blue Button Function Test",
+      "condition": "Diagnostic function needs testing",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button to enter diagnostic",
+        "Read light_sensor",
+        "Press blue_button to cycle modes",
+        "Press blue_button to exit",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-061",
+      "title": "Pressure Threshold Adjustment",
+      "condition": "Pressure_sensor threshold needs verification",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic",
+        "Read pressure_sensor current value",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Notify technician of status",
+        "Press blue_button to exit",
+        "Notify technician if adjustment needed"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "pressure_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-062",
+      "title": "Temperature Threshold Verification",
+      "condition": "Temperature_sensor threshold needs checking",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic",
+        "Read temperature_sensor current value",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Notify technician of status",
+        "Press blue_button to exit",
+        "Notify technician if out of range"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "temperature_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-063",
+      "title": "Vibration Threshold Check",
+      "condition": "Vibration_sensor threshold verification needed",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic",
+        "Read vibration_sensor current value",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Notify technician of status",
+        "Press blue_button to exit"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-064",
+      "title": "Simultaneous Light Warning",
+      "condition": "Red and yellow lights are both on",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Read all sensors",
+        "Read light_sensor",
+        "Notify technician of findings",
+        "Press blue_button for diagnostic",
+        "Notify technician of status",
+        "Notify technician immediately"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "red_light",
+        "yellow_light",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-065",
+      "title": "Blinking Red Light Response",
+      "condition": "Red light is blinking indicating intermittent fault",
+      "steps": [
+        "Walk to machine",
+        "Read light_sensor",
+        "Press blue_button for diagnostic",
+        "Read all sensors",
+        "Notify technician of status",
+        "Press yellow_button to attempt reset",
+        "Notify technician if blinking continues"
+      ],
+      "equipment": [
+        "machine",
+        "red_light",
+        "blue_button",
+        "yellow_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-066",
+      "title": "Blinking Yellow Light Response",
+      "condition": "Yellow light is blinking indicating warning",
+      "steps": [
+        "Walk to machine",
+        "Read all sensors",
+        "Read light_sensor",
+        "Notify technician of findings",
+        "Press yellow_button to acknowledge",
+        "Wait 3 seconds",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "yellow_light",
+        "yellow_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-067",
+      "title": "Blinking Green Light Investigation",
+      "condition": "Green light is blinking instead of solid",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic",
+        "Read all sensors",
+        "Read light_sensor",
+        "Press green_button again",
+        "Read light_sensor",
+        "Notify technician if still blinking"
+      ],
+      "equipment": [
+        "machine",
+        "green_light",
+        "blue_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-068",
+      "title": "All Lights Off Investigation",
+      "condition": "No indicator lights are illuminated",
+      "steps": [
+        "Walk to machine",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Press green_button",
+        "If no response, notify technician",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "battery",
+        "spare_fuses"
+      ]
+    },
+    {
+      "sop_id": "SOP-069",
+      "title": "Sensor Connection Verification",
+      "condition": "Sensor readings show disconnection",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Walk to sensor connections",
+        "Read light_sensor",
+        "Pick up wrench",
+        "Place wrench on machine",
+        "Press green_button to restart",
+        "Read all sensors",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-070",
+      "title": "Intake Cover Seal Check",
+      "condition": "Pressure_sensor shows slow leak",
+      "steps": [
+        "Walk to machine",
+        "Read pressure_sensor",
+        "Pick up intake_cover",
+        "Place intake_cover on table",
+        "Walk to seal condition",
+        "Read light_sensor",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on seal with cleaning_cloth",
+        "Pick up intake_cover",
+        "Place intake_cover on machine",
+        "Re-read pressure_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "pressure_sensor",
+        "intake_cover",
+        "cleaning_cloth"
+      ]
+    },
+    {
+      "sop_id": "SOP-071",
+      "title": "Bolt Vibration Source Check",
+      "condition": "Specific bolt causing vibration",
+      "steps": [
+        "Walk to table",
+        "Pick up wrench",
+        "Walk to machine",
+        "Walk to machine",
+        "Read light_sensor",
+        "Pick up wrench",
+        "Place wrench on machine",
+        "Read vibration_sensor",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "wrench",
+        "bolt",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-072",
+      "title": "Panel Inspection Access",
+      "condition": "Panel needs removal for inspection",
+      "steps": [
+        "Walk to table",
+        "Pick up screwdriver",
+        "Pick up safety_goggles",
+        "Pick up safety_goggles",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up panel",
+        "Place panel on table",
+        "Read light_sensor"
+      ],
+      "equipment": [
+        "machine",
+        "screwdriver",
+        "safety_goggles",
+        "panel",
+        "red_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-073",
+      "title": "Bracket Alignment Check",
+      "condition": "Bracket misalignment suspected",
+      "steps": [
+        "Walk to table",
+        "Pick up wrench",
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Walk to bracket alignment",
+        "Read light_sensor",
+        "Pick up wrench",
+        "Place wrench on machine",
+        "Press green_button to restart"
+      ],
+      "equipment": [
+        "machine",
+        "wrench",
+        "bracket",
+        "red_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-074",
+      "title": "Lubricant Application Schedule",
+      "condition": "Scheduled lubrication required",
+      "steps": [
+        "Walk to table",
+        "Pick up lubricant_bottle",
+        "Walk to machine",
+        "Pick up lubricant_bottle",
+        "Place lubricant_bottle on machine",
+        "Wait 5 seconds for absorption",
+        "Read vibration_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "lubricant_bottle",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-075",
+      "title": "Cleaning Schedule Execution",
+      "condition": "Scheduled cleaning required",
+      "steps": [
+        "Walk to table",
+        "Pick up cleaning_brush",
+        "Pick up cleaning_cloth",
+        "Walk to machine",
+        "Pick up cleaning_brush",
+        "Place cleaning_brush on machine",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on surfaces with cleaning_cloth",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_brush",
+        "cleaning_cloth"
+      ]
+    },
+    {
+      "sop_id": "SOP-076",
+      "title": "Weekly Sensor Calibration",
+      "condition": "Weekly calibration check due",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button for diagnostic",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Read vibration_sensor",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Notify technician of status",
+        "Notify technician if drift detected"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "pressure_sensor",
+        "temperature_sensor",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-077",
+      "title": "Monthly Equipment Audit",
+      "condition": "Monthly equipment check required",
+      "steps": [
+        "Walk to table",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "wrench",
+        "screwdriver",
+        "spare_fuses",
+        "lubricant_bottle"
+      ]
+    },
+    {
+      "sop_id": "SOP-078",
+      "title": "Noise Investigation Protocol",
+      "condition": "Unusual noise detected from machine",
+      "steps": [
+        "Walk to machine",
+        "Read vibration_sensor",
+        "Press blue_button for diagnostic",
+        "Read light_sensor",
+        "Notify technician of findings",
+        "Pick up lubricant_bottle",
+        "Place lubricant_bottle on machine",
+        "Re-read vibration_sensor",
+        "Notify technician if noise persists"
+      ],
+      "equipment": [
+        "machine",
+        "vibration_sensor",
+        "blue_button",
+        "lubricant_bottle"
+      ]
+    },
+    {
+      "sop_id": "SOP-079",
+      "title": "Smoke Detection Response",
+      "condition": "Smoke or burning smell detected",
+      "steps": [
+        "Walk to machine immediately",
+        "Press red_button to emergency stop",
+        "Read temperature_sensor",
+        "Read light_sensor",
+        "Notify technician of safety warning",
+        "Notify technician immediately",
+        "Notify technician to evacuate"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "temperature_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-080",
+      "title": "Sparking Observation Response",
+      "condition": "Electrical sparking observed",
+      "steps": [
+        "Walk to machine",
+        "Press red_button immediately",
+        "Notify technician of safety warning",
+        "Read light_sensor",
+        "Notify technician of electrical issue",
+        "Notify technician of safety warning"
+      ],
+      "equipment": [
+        "machine",
+        "red_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-081",
+      "title": "Stuck Button Investigation",
+      "condition": "Button appears stuck or unresponsive",
+      "steps": [
+        "Walk to machine",
+        "Read light_sensor",
+        "Notify technician of findings",
+        "Press blue_button gently",
+        "Pick up cleaning_brush",
+        "Place cleaning_brush on machine",
+        "Press blue_button",
+        "Wait 2 seconds",
+        "Notify technician if still stuck"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_brush"
+      ]
+    },
+    {
+      "sop_id": "SOP-082",
+      "title": "Light Sensor Obstruction Check",
+      "condition": "Light_sensor gives incorrect readings",
+      "steps": [
+        "Walk to machine",
+        "Walk to light_sensor for obstruction",
+        "Read light_sensor",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on light_sensor with cleaning_cloth",
+        "Read light_sensor",
+        "Read pressure_sensor",
+        "Read temperature_sensor",
+        "Notify technician if mismatch persists"
+      ],
+      "equipment": [
+        "machine",
+        "light_sensor",
+        "cleaning_cloth"
+      ]
+    },
+    {
+      "sop_id": "SOP-083",
+      "title": "Foreign Object Removal",
+      "condition": "Foreign object detected in machine",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Pick up safety_goggles",
+        "Walk to machine",
+        "Read light_sensor",
+        "Pick up object",
+        "Place object on table",
+        "Place object in container_bin",
+        "Press green_button to restart"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "safety_goggles",
+        "container_bin",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-084",
+      "title": "Loose Cable Detection",
+      "condition": "Sensor readings intermittent due to loose cable",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Walk to all cable connections",
+        "Read light_sensor",
+        "Pick up cable_ties from table",
+        "Pick up cable_ties",
+        "Place cable_ties on machine",
+        "Press green_button to restart",
+        "Read sensor readings stable"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "cable_ties",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-085",
+      "title": "Humidity Effect Check",
+      "condition": "Sensors affected by humidity",
+      "steps": [
+        "Walk to machine",
+        "Read all sensors",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on machine",
+        "Wait 2 minutes",
+        "Re-read all sensors",
+        "Notify technician of status",
+        "Notify technician if readings unstable"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_cloth"
+      ]
+    },
+    {
+      "sop_id": "SOP-086",
+      "title": "Cold Start Procedure",
+      "condition": "Machine cold after extended shutdown",
+      "steps": [
+        "Walk to machine",
+        "Press green_button to start",
+        "Wait 10 seconds for warm-up",
+        "Read temperature_sensor",
+        "Read vibration_sensor",
+        "Wait 60 seconds for warm-up",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "temperature_sensor",
+        "vibration_sensor"
+      ]
+    },
+    {
+      "sop_id": "SOP-087",
+      "title": "Power Fluctuation Response",
+      "condition": "Power fluctuation affected machine",
+      "steps": [
+        "Walk to machine",
+        "Read all indicator lights",
+        "Press blue_button for diagnostic",
+        "Read all sensors",
+        "Read light_sensor",
+        "Notify technician of status",
+        "Notify technician if issues found"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-088",
+      "title": "Error Code Investigation",
+      "condition": "Light pattern indicates error code",
+      "steps": [
+        "Walk to machine",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Press blue_button for more info",
+        "Notify technician of status",
+        "Notify technician with error details"
+      ],
+      "equipment": [
+        "machine",
+        "blue_button",
+        "red_light",
+        "yellow_light",
+        "green_light"
+      ]
+    },
+    {
+      "sop_id": "SOP-089",
+      "title": "Startup Failure Recovery",
+      "condition": "Machine fails to start on green_button press",
+      "steps": [
+        "Walk to machine",
+        "Press green_button again",
+        "Wait 5 seconds",
+        "Read light_sensor",
+        "Read light_sensor",
+        "Press blue_button for diagnostic",
+        "Notify technician if still unresponsive"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "battery",
+        "spare_fuses",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-090",
+      "title": "Shutdown Failure Response",
+      "condition": "Machine not responding to red_button",
+      "steps": [
+        "Walk to machine",
+        "Press and hold red_button for 5 seconds",
+        "Wait for forced shutdown",
+        "Pick up battery",
+        "Notify technician immediately",
+        "Notify technician of safety warning"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "battery"
+      ]
+    },
+    {
+      "sop_id": "SOP-091",
+      "title": "Sensor Zero Calibration",
+      "condition": "Sensor shows zero when it should not",
+      "steps": [
+        "Walk to machine",
+        "Read affected sensor",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on sensor with cleaning_cloth",
+        "Press blue_button for diagnostic",
+        "Re-read sensor",
+        "Notify technician if still zero"
+      ],
+      "equipment": [
+        "machine",
+        "cleaning_cloth",
+        "blue_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-092",
+      "title": "Sensor Maximum Reading",
+      "condition": "Sensor shows maximum value unexpectedly",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Read affected sensor",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on sensor with cleaning_cloth",
+        "Press green_button to restart",
+        "Re-read sensor",
+        "Notify technician if still maxed"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "green_button",
+        "cleaning_cloth"
+      ]
+    },
+    {
+      "sop_id": "SOP-093",
+      "title": "Tool Return Protocol",
+      "condition": "Tools left at machine after maintenance",
+      "steps": [
+        "Walk to machine",
+        "Pick up container_bin",
+        "Place container_bin on table",
+        "Pick up wrench if present",
+        "Pick up screwdriver if present",
+        "Walk to table",
+        "Place all tools to proper positions",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "wrench",
+        "screwdriver"
+      ]
+    },
+    {
+      "sop_id": "SOP-094",
+      "title": "Safety Goggles Cleaning",
+      "condition": "Safety goggles need cleaning before use",
+      "steps": [
+        "Walk to table",
+        "Pick up safety_goggles",
+        "Pick up cleaning_cloth",
+        "Pick up cleaning_cloth",
+        "Place cleaning_cloth on safety_goggles lenses",
+        "Walk to for scratches",
+        "Read light_sensor",
+        "Place safety_goggles on table",
+        "Place cleaning_cloth on table"
+      ],
+      "equipment": [
+        "safety_goggles",
+        "cleaning_cloth"
+      ]
+    },
+    {
+      "sop_id": "SOP-095",
+      "title": "Container Bin Emptying",
+      "condition": "Container bin is full",
+      "steps": [
+        "Walk to table",
+        "Pick up container_bin",
+        "Walk to disposal area",
+        "Pick up container_bin",
+        "Place container_bin on table",
+        "Walk to table",
+        "Place container_bin",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "container_bin"
+      ]
+    },
+    {
+      "sop_id": "SOP-096",
+      "title": "Lubricant Bottle Refill Check",
+      "condition": "Lubricant bottle appears low",
+      "steps": [
+        "Walk to table",
+        "Pick up lubricant_bottle",
+        "Read light_sensor",
+        "If low, notify for refill",
+        "Place lubricant_bottle on table",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "lubricant_bottle"
+      ]
+    },
+    {
+      "sop_id": "SOP-097",
+      "title": "Simultaneous Sensor Failure",
+      "condition": "Multiple sensors showing no reading",
+      "steps": [
+        "Walk to machine",
+        "Press red_button to shutdown",
+        "Read all sensor connections",
+        "Read power to sensors",
+        "Press green_button to restart",
+        "Read all sensors",
+        "Notify technician if still failed"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "green_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-098",
+      "title": "Routine Button Test Cycle",
+      "condition": "All buttons need function verification",
+      "steps": [
+        "Walk to machine",
+        "Press blue_button",
+        "Wait 2 seconds",
+        "Press blue_button",
+        "Wait 2 seconds",
+        "Press blue_button",
+        "Wait 2 seconds",
+        "Press blue_button",
+        "Wait 2 seconds",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "blue_button",
+        "yellow_button",
+        "red_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-099",
+      "title": "Comprehensive System Check",
+      "condition": "Full system verification required",
+      "steps": [
+        "Walk to machine",
+        "Press green_button to start",
+        "Read light_sensor",
+        "Read all sensors",
+        "Press blue_button for diagnostic",
+        "Read light_sensor",
+        "Press red_button to shutdown",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "green_button",
+        "green_light",
+        "blue_button",
+        "red_button"
+      ]
+    },
+    {
+      "sop_id": "SOP-100",
+      "title": "Emergency Response Protocol",
+      "condition": "Red light flashing with alarm sound",
+      "steps": [
+        "Walk to machine immediately",
+        "Press red_button to emergency stop",
+        "Read all sensors",
+        "Read light_sensor",
+        "Notify technician of findings",
+        "Pick up safety_goggles",
+        "Notify technician of safety warning",
+        "Notify technician immediately",
+        "Notify technician of status"
+      ],
+      "equipment": [
+        "machine",
+        "red_button",
+        "red_light",
+        "safety_goggles"
+      ]
+    }
+  ]
+}

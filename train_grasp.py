@@ -25,9 +25,11 @@ from grasp_fixed_env import GraspFixedEnv
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def make_env(rank: int, seed: int = 0, robust: bool = False):
+def make_env(rank: int, seed: int = 0, robust: bool = False, scene: str = "pedestal",
+             grip_reset_prob: float = 0.0, grip_states: str | None = None):
     def _f():
-        env = GraspFixedEnv(robust=robust)
+        env = GraspFixedEnv(robust=robust, scene=scene,
+                            grip_reset_prob=grip_reset_prob, grip_states_path=grip_states)
         env.reset(seed=seed + rank)
         return env
     return _f
@@ -60,9 +62,9 @@ class RateLogger(BaseCallback):
         self.reset_acc()
 
 
-def evaluate(model, n_episodes=20, robust=False):
+def evaluate(model, n_episodes=20, robust=False, scene="pedestal"):
     """Deterministic eval -> grasp/lift/success rates (the number that counts)."""
-    env = GraspFixedEnv(robust=robust)
+    env = GraspFixedEnv(robust=robust, scene=scene)
     grasps = lifts = succ = 0; best_lifts = []
     for ep in range(n_episodes):
         obs, _ = env.reset(seed=10_000 + ep)
@@ -92,6 +94,9 @@ def main():
     p.add_argument("--resume", default=None)
     p.add_argument("--no_subproc", action="store_true")
     p.add_argument("--robust", action="store_true", help="heavier 250g tool + realistic friction")
+    p.add_argument("--scene", default="pedestal", choices=["pedestal", "table"])
+    p.add_argument("--grip_reset_prob", type=float, default=0.0, help="frac of episodes starting from a demo gripped state")
+    p.add_argument("--grip_states", default=None, help="path to _grip_states.npz (demo gripped states)")
     p.add_argument("--smoke", action="store_true")
     a = p.parse_args()
 
@@ -102,7 +107,8 @@ def main():
     os.makedirs(os.path.join(run_dir, "ckpts"), exist_ok=True)
 
     vec_cls = DummyVecEnv if a.no_subproc else SubprocVecEnv
-    env = vec_cls([make_env(i, robust=a.robust) for i in range(a.n_envs)])
+    env = vec_cls([make_env(i, robust=a.robust, scene=a.scene,
+                            grip_reset_prob=a.grip_reset_prob, grip_states=a.grip_states) for i in range(a.n_envs)])
     env = VecMonitor(env, os.path.join(run_dir, "monitor"))
 
     logger = configure(run_dir, ["stdout", "csv"])
@@ -128,7 +134,7 @@ def main():
     print(f"[saved] {final}.zip")
 
     print("[eval] deterministic, 20 episodes ...")
-    res = evaluate(model, 20, robust=a.robust)
+    res = evaluate(model, 20, robust=a.robust, scene=a.scene)
     print("[RESULT]", {k: round(v, 3) for k, v in res.items()})
     env.close()
 

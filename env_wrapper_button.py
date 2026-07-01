@@ -170,6 +170,14 @@ class ButtonPressEnv(gym.Env):
         self.episode_steps = 0
         self.episode_return = 0.0
         self.action_scale = 0.5  # Increased for larger arm movements
+        # unified-press motion shaping: LOW-PASS the arm command so the arm PHYSICALLY can't flail
+        # (a reward penalty alone got reward-hacked — the policy flailed to bump the button). Plus a
+        # strong torso-avoidance penalty.
+        self.arm_alpha = 0.12                 # low-pass: arm target eases toward the RL target (no snap/flail)
+        self._filt_arm = np.zeros(self.num_arm_joints, dtype=np.float32)
+        self.smooth_w = 0.0; self.torso_w = 12.0
+        self.right_elbow_id = mujoco.mj_name2id(self.env.model, mujoco.mjtObj.mjOBJ_BODY, "right_elbow_link")
+        self._prev_action = np.zeros(self.num_arm_joints, dtype=np.float32)
         
         # Robot positioning for button panel
         # Position robot DIRECTLY in front of the target button
@@ -357,6 +365,8 @@ class ButtonPressEnv(gym.Env):
         # Reset env state
         self.env._extract_state()
         self.env.last_action = np.zeros(self.env.num_dofs, dtype=np.float32)
+        self._prev_action = np.zeros(self.num_arm_joints, dtype=np.float32)
+        self._filt_arm = np.zeros(self.num_arm_joints, dtype=np.float32)
         self.env.arm_action = self.env.default_dof_pos[15:].copy()
         self.env.prev_arm_action = self.env.default_dof_pos[15:].copy()
         self.env.arm_blend = 0.0
@@ -493,6 +503,9 @@ class ButtonPressEnv(gym.Env):
         
         # Scale action
         scaled_arm_action = action * self.action_scale
+        if self.unified:                                    # LOW-PASS -> arm eases to the target, cannot flail
+            self._filt_arm = (1 - self.arm_alpha) * self._filt_arm + self.arm_alpha * scaled_arm_action
+            scaled_arm_action = self._filt_arm
         
         # === LEG CONTROL FROM AMO (standing still) ===
         # Zero velocity commands = stand in place (but keep heading setpoint)
@@ -572,7 +585,16 @@ class ButtonPressEnv(gym.Env):
             button_displacement=button_displacement,
             current_button_pos=button_pos,
         )
-        
+
+        # --- unified-press motion shaping (Jatin: kill the jerky flail + arm-through-torso) ---
+        if self.unified:
+            jerk = float(np.linalg.norm(action[4:] - self._prev_action[4:]))      # right-arm action CHANGE
+            reward -= self.smooth_w * jerk                                        # -> one smooth push, not oscillation
+            if self.right_elbow_id >= 0:
+                eb = self.env.data.xpos[self.right_elbow_id][:2]; pv = self.env.data.xpos[self.env.pelvis_id][:2]
+                reward -= self.torso_w * max(0.0, 0.11 - float(np.linalg.norm(eb - pv)))  # keep elbow off the torso axis
+            self._prev_action = np.asarray(action, np.float32).copy()
+
         self.episode_return += reward
         
         # Check termination

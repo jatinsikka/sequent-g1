@@ -92,27 +92,42 @@ for _pb in ["rg_left_pad", "rg_right_pad"]:
         _g2.contype = 3; _g2.conaffinity = 3   # bits {1,2}: collide with mask-1 world AND mask-2 buttons/lever
         _g2 = _b.next_geom(_g2)
 
-# --- optional: a grasp box on a small pedestal within the right-hand reach-down zone ---
-# (for CHECK 2 pick de-risk). Home right grasp-point ~[-0.13,-1.31,0.57]; shoulder ~[-0.31,-1.45,1.09].
-# A reach-down-and-forward target: box atop a short pedestal in front of the right hand.
+# --- strengthen the gripper grip force so a held box doesn't slip during the lift ---
+# The Robotiq tendon actuator ships with forcerange -5..5, marginal for holding a lifted box.
+# Raise it so the CLOSED gripper clamps firmly (still a compliant tendon pinch, just more force).
+for _a in spec.actuators:
+    if _a.name == "rg_fingers_actuator":
+        _a.forcerange = [-40, 40]
+
+# --- optional: a grasp box on the REAL right_workstation table (no pedestal) ---
+# The unified pick must use the actual workstation, matching the fixed-base grasp: the
+# right_workstation is at (0.9,1.4,0) with its table-top surface at world z=0.725 (top geom
+# local z=0.7, half-height 0.025). The box sits on the top at a spot within the humanoid's
+# right-hand reach when it STANDS AT THE TABLE facing +Y (like the fixed-base grasp base).
 import sys
 WITH_BOX = ("--pick" in sys.argv)
 if WITH_BOX:
     wb = spec.worldbody
-    # box directly BELOW the home right grasp-point (~[-0.13,-1.31,0.57]) -> a clean straight
-    # reach-DOWN pick, the natural motion (and the disturbance we want to de-risk). ~11cm drop.
-    SPOT = [-0.14, -1.31, 0.52]     # box center: at the right gripper's verified reach-down frontier
-    BOX_HALF = 0.025
-    PED_H = (SPOT[2] - BOX_HALF) / 2.0     # pedestal from floor up to the box bottom
-    ped = wb.add_body(); ped.name = "pick_pedestal"; ped.pos = [SPOT[0], SPOT[1], 0.0]
-    pg = ped.add_geom(); pg.name = "pick_pedestal_geom"; pg.type = mujoco.mjtGeom.mjGEOM_BOX
-    pg.pos = [0,0,PED_H]; pg.size = [0.06, 0.06, PED_H]; pg.rgba = [0.4,0.4,0.46,1]
-    pg.contype = 1; pg.conaffinity = 15; pg.friction = [1.0,0.05,0.005]
+    TABLE_TOP = 0.725                      # right_workstation top surface (world z)
+    # a stable ~6cm CUBE: wide enough NOT to tip when touched (a tall thin box tips over),
+    # and tall enough that its CENTER (grasp point) sits ~3cm above the table — at the top-down
+    # gripper's reachable floor, so the pads bracket the box without the fingers hitting the
+    # table (a short flat box forced the pad-mid 2cm high and shoved the box on close).
+    # 4.4cm-wide (grippable — well inside the 85mm Robotiq stroke), 6cm-tall block: the height
+    # lifts the grasp center ~3cm above the table (clear of the fingers-hit-table problem) while
+    # the 4.4cm base keeps it stable (a 3.6cm-wide tall box tipped when touched).
+    BOX_HW = 0.019    # half-width (3.8cm): narrow enough that the closing Robotiq pads CLAMP it
+    #                   (firm normal force -> friction hold), wide enough that it doesn't slip
+    #                   through the pads during the close.
+    BOX_HZ = 0.030    # half-height (6cm) -> grasp center clear of the table
+    SPOT = [0.80, 1.20, TABLE_TOP + BOX_HZ]   # box center on the table top
     bx = wb.add_body(); bx.name = "pick_box"; bx.pos = SPOT
     bx.add_freejoint()
     bg = bx.add_geom(); bg.name = "pick_box_geom"; bg.type = mujoco.mjtGeom.mjGEOM_BOX
-    bg.size = [0.022, 0.022, 0.025]; bg.rgba = [0.85,0.30,0.20,1]; bg.mass = 0.05
+    # narrow in X (the jaw axis) for a firm clamp, wider in Y for a stable base (won't tip)
+    bg.size = [BOX_HW, 0.025, BOX_HZ]; bg.rgba = [0.85,0.30,0.20,1]; bg.mass = 0.04
     bg.contype = 1; bg.conaffinity = 15; bg.friction = [4.0, 0.2, 0.02]
+    bg.solref = [0.003, 1.0]; bg.solimp = [0.96, 0.97, 0.001, 0.5, 2.0]   # STIFF contact -> box rests ON the table, no sink-through
     # extend the keyframe qpos with the box freejoint home (pos + identity quat)
     key = spec.key[0]
     key.qpos = list(key.qpos) + [SPOT[0], SPOT[1], SPOT[2], 1.0, 0.0, 0.0, 0.0]

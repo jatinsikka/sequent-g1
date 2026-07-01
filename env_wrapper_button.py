@@ -57,6 +57,7 @@ class ButtonPressEnv(gym.Env):
         device: str = None,
         unified: bool = True,
         reset_in_contact: bool = True,
+        curriculum: bool = False,
     ):
         """
         Initialize button press environment.
@@ -83,6 +84,10 @@ class ButtonPressEnv(gym.Env):
         self.max_episode_steps = max_episode_steps
         self.headless = headless
         self.reset_in_contact = reset_in_contact
+        self.curriculum = curriculum
+        self._cached_a4_c = None; self._cached_w3_c = None   # contact pose (solved once per worker; servo is slow)
+        self.curriculum_frac_max = 0.0   # grows 0->1: RL seats between contact-pose (0) and rest-pose (1); the
+        #                                  reach it must learn grows as this rises. Bumped by the training callback.
         self.unified = unified
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         
@@ -434,6 +439,27 @@ class ButtonPressEnv(gym.Env):
             # re-baseline displacement AFTER the servo (any seating displacement is the new zero)
             self.initial_button_displacement = self.env.data.qpos[self.button_joint_id]
 
+        elif self.unified and self.curriculum:
+            # CURRICULUM reach+press: seat the arm between the CONTACT pose (frac 0) and the REST
+            # pose (frac 1); frac ~ U[0, curriculum_frac_max]. As curriculum_frac_max grows 0->1
+            # (callback bumps it on success), RL must reach from progressively farther — ending at
+            # the rest pose (what the end-to-end demo hands it). Wrist pre-oriented to the contact
+            # tilt; RL drives the 4 arm DOF to reach + press. Reward = dense reach + depth + hold.
+            if self._cached_a4_c is None:                # the CONTACT pose (progressive servo; a single IK solve
+                self._cached_a4_c = self._servo_to_contact().copy()   #  undershoots the raised cap). Once per worker.
+                self._cached_w3_c = self._solved_wrist.copy()
+            a4_c = self._cached_a4_c; w3_c = self._cached_w3_c
+            a4_rest = self.env.default_dof_pos[19:23].copy()
+            frac = float(np.random.uniform(0.0, max(1e-3, self.curriculum_frac_max)))
+            a4_start = (1.0 - frac) * a4_c + frac * a4_rest   # frac 0 = contact, 1 = rest pose
+            self.arm_reach_bias[4:] = (a4_start - self.env.default_dof_pos[19:23]).astype(np.float32)
+            self.env.wrist_target = w3_c.copy()          # pad pre-oriented for the contact face
+            self._solved_wrist = w3_c.copy()
+            for _ in range(60):                          # settle the arm to the start pose (boosted-hold), AMO balancing
+                self._amo_arm_step(a4_start, wrist_target=w3_c)
+            self.initial_button_displacement = self.env.data.qpos[self.button_joint_id]
+            self._cur_frac = frac
+
         # Reset episode tracking
         self.episode_steps = 0
         self.episode_return = 0.0
@@ -442,7 +468,11 @@ class ButtonPressEnv(gym.Env):
         self.reward_fn.reset()
 
         return self._get_obs(), {}
-    
+
+    def set_curriculum_frac(self, f: float):
+        """Advance the reach curriculum (called by the training callback via env_method)."""
+        self.curriculum_frac_max = float(np.clip(f, 0.0, 1.0))
+
     def _right_hand_pos(self) -> np.ndarray:
         """Right 'hand' contact point: gripper pad-midpoint (unified) or rubber hand."""
         if self.unified:
@@ -551,7 +581,7 @@ class ButtonPressEnv(gym.Env):
             self.env.gait_cycle = np.array([0.25, 0.75])
 
         # Step simulation. Use boosted right-arm hold stiffness for the contact-hold task.
-        stiff = self._arm_hold_stiffness if (self.unified and self.reset_in_contact) else self.env.stiffness
+        stiff = self._arm_hold_stiffness if (self.unified and (self.reset_in_contact or self.curriculum)) else self.env.stiffness
         for _ in range(self.env.sim_decimation):
             torque = (pd_target - self.env.dof_pos) * stiff - self.env.dof_vel * self.env.damping
             torque = np.clip(torque, -self.env.torque_limits, self.env.torque_limits)
@@ -572,7 +602,11 @@ class ButtonPressEnv(gym.Env):
         
         # Get button state (relative displacement from initial)
         button_displacement = self._get_button_displacement()
-        button_pos = self.env.data.xpos[self.button_body_id]
+        # reach target = the CAP face (what the pad contacts), NOT the button-body origin — the origin
+        # sits ~7.7cm behind the pad, a fixed offset that never closes and crushes the reach gradient.
+        if not hasattr(self, "_cap_gid"):
+            self._cap_gid = mujoco.mj_name2id(self.env.model, mujoco.mjtObj.mjOBJ_GEOM, self.cap_geom_name)
+        button_pos = self.env.data.geom_xpos[self._cap_gid].copy()
         
         # Compute reward
         reward, info = self.reward_fn.compute_reward(
@@ -616,7 +650,11 @@ class ButtonPressEnv(gym.Env):
         # Truncation: max steps
         if self.episode_steps >= self.max_episode_steps:
             truncated = True
-        
+
+        if terminated or truncated:   # per-episode success + current curriculum level (for the callback)
+            info['is_success'] = bool(self.reward_fn.button_pressed)
+            info['curriculum_frac_max'] = self.curriculum_frac_max
+
         # (gait is already advanced once per control step above, matching walk_and_grasp;
         #  the previous duplicate gait update here advanced it twice per step and was removed)
         

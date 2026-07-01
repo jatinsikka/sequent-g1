@@ -19,6 +19,7 @@ try:
 except Exception:  # wandb pulls in pkg_resources, which is absent on setuptools>=81
     wandb = None
 from datetime import datetime
+from collections import deque
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback, BaseCallback
@@ -197,6 +198,37 @@ class ButtonPressCallback(BaseCallback):
         self.episode_count += 1
 
 
+class CurriculumCallback(BaseCallback):
+    """Success-gated REACH curriculum. curriculum_frac_max grows 0->1: at 0 the arm starts on
+    the button (trivial), at 1 it starts at the rest pose (full reach). Each rollout, if the
+    recent success rate clears the threshold, advance frac_max — so RL learns to reach from
+    progressively farther, ending at the rest pose the end-to-end demo hands it. THIS is what
+    makes the reach itself RL instead of IK."""
+    def __init__(self, bump=0.1, thresh=0.62, window=200, verbose=1):
+        super().__init__(verbose)
+        self.bump = bump; self.thresh = thresh
+        self.successes = deque(maxlen=window)
+        self.frac_max = 0.0
+
+    def _on_step(self) -> bool:
+        for info in self.locals.get("infos", []):
+            if "is_success" in info:
+                self.successes.append(1.0 if info["is_success"] else 0.0)
+        return True
+
+    def _on_rollout_end(self) -> None:
+        if len(self.successes) < 40:
+            return
+        rate = float(np.mean(self.successes))
+        if rate >= self.thresh and self.frac_max < 1.0:
+            self.frac_max = min(1.0, round(self.frac_max + self.bump, 3))
+            self.training_env.env_method("set_curriculum_frac", self.frac_max)
+            self.successes.clear()
+            print(f"[CURRICULUM] success {rate:.2f} -> ADVANCE frac_max = {self.frac_max:.2f}", flush=True)
+        else:
+            print(f"[CURRICULUM] frac_max {self.frac_max:.2f}  recent success {rate:.2f}", flush=True)
+
+
 def train_button_press(
     button: str = "red",
     total_timesteps: int = 100000,
@@ -205,6 +237,7 @@ def train_button_press(
     use_wandb: bool = True,
     checkpoint_dir: str = "checkpoints_button",
     n_envs: int = 1,
+    curriculum: bool = False,
 ):
     """
     Train a policy to press a button.
@@ -267,6 +300,8 @@ def train_button_press(
                 max_episode_steps=200,  # ~4 seconds per episode
                 headless=True,
                 device=device,
+                reset_in_contact=not curriculum,   # curriculum uses its own seat-at-distance reset
+                curriculum=curriculum,
             )
         return _init
 
@@ -295,7 +330,7 @@ def train_button_press(
         gamma=0.99,
         gae_lambda=0.95,
         clip_range=0.2,
-        ent_coef=0.05,  # Encourage exploration
+        ent_coef=0.02,  # lowered for more deterministic convergence at the hard reach levels
         vf_coef=0.5,
         max_grad_norm=0.5,
         policy_kwargs={"net_arch": [128, 128]},
@@ -313,6 +348,7 @@ def train_button_press(
     )
     
     progress_callback = ButtonPressCallback(eval_freq=2000)
+    curriculum_callback = CurriculumCallback() if curriculum else None
     
     video_callback = VideoRecorderCallback(
         button_name=button_key,
@@ -326,7 +362,7 @@ def train_button_press(
     try:
         model.learn(
             total_timesteps=total_timesteps,
-            callback=[checkpoint_callback, progress_callback, video_callback],
+            callback=[c for c in (checkpoint_callback, progress_callback, video_callback, curriculum_callback) if c is not None],
             progress_bar=True,
         )
     except KeyboardInterrupt:
@@ -362,6 +398,8 @@ def main():
                         help="Disable W&B logging")
     parser.add_argument("--n_envs", type=int, default=1,
                         help="Number of parallel envs (use 32 on the Azure F32as_v7 VM)")
+    parser.add_argument("--curriculum", action="store_true",
+                        help="Reach curriculum: RL learns to reach from progressively farther (not IK-seeded)")
 
     args = parser.parse_args()
 
@@ -372,6 +410,7 @@ def main():
         freeze_arm=args.freeze_arm,
         use_wandb=not args.no_wandb,
         n_envs=args.n_envs,
+        curriculum=args.curriculum,
     )
 
 

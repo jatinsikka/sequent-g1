@@ -371,7 +371,7 @@ class ButtonPressRewardFunction:
         else:
             dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
             dist_to_button = min(dists) if dists else 1.0
-            r_distance_penalty = -dist_to_button * 2.0  # Penalty proportional to distance
+            r_distance_penalty = -dist_to_button * 4.0  # Penalty proportional to distance (stronger pull to contact, anti-park)
         info['r_distance_penalty'] = r_distance_penalty
 
         # 6. Balance term — penalize the base drifting off its spawn xy. The arm reach
@@ -420,7 +420,9 @@ class ButtonPressRewardFunction:
         # Only reward the hand inside a tight near-contact band, ramping steeply to contact,
         # so committing to the press strictly beats parking. (Approach reward below still
         # gives dense gradient to get the hand into the band.)
-        band = 0.10
+        band = 0.05   # NARROW (anti-parking): proximity only near contact, no far plateau to sit on. The
+        #               far pull is r_approach (progress) + r_distance_penalty (potential), which PENALIZE a
+        #               parked hand (0 proximity + negative distance at 5cm) so RL must commit to the press.
         if min_dist > band:
             return 0.0
         proximity_reward = (band - min_dist) / band  # 0 at band edge -> 1 at contact

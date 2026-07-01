@@ -175,7 +175,7 @@ class ButtonPressEnv(gym.Env):
         # strong torso-avoidance penalty.
         self.arm_alpha = 0.12                 # low-pass: arm target eases toward the RL target (no snap/flail)
         self._filt_arm = np.zeros(self.num_arm_joints, dtype=np.float32)
-        self.smooth_w = 0.0; self.torso_w = 12.0
+        self.smooth_w = 0.0; self.torso_w = 12.0; self.base_w = 4.0
         self.right_elbow_id = mujoco.mj_name2id(self.env.model, mujoco.mjtObj.mjOBJ_BODY, "right_elbow_link")
         self._prev_action = np.zeros(self.num_arm_joints, dtype=np.float32)
         
@@ -593,6 +593,8 @@ class ButtonPressEnv(gym.Env):
             if self.right_elbow_id >= 0:
                 eb = self.env.data.xpos[self.right_elbow_id][:2]; pv = self.env.data.xpos[self.env.pelvis_id][:2]
                 reward -= self.torso_w * max(0.0, 0.11 - float(np.linalg.norm(eb - pv)))  # keep elbow off the torso axis
+            reward -= self.base_w * float(np.linalg.norm(self.env.data.qvel[0:2]))  # damp base rock/recoil so the
+            #   press push-back doesn't rock the robot forward into the machine (Jatin: steadier base, no overshoot)
             self._prev_action = np.asarray(action, np.float32).copy()
 
         self.episode_return += reward

@@ -20,7 +20,11 @@ from collections import deque
 from typing import Tuple, Dict, Any, Optional
 
 from play_amo import HumanoidEnv, quat_to_euler
+from unified_env import UnifiedHumanoidEnv
 from reward_fn import LeverPressRewardFunction, LEVER_POSITION
+
+# gripper tendon command: keep the gripper CLOSED so it is a solid pusher for levering.
+GRIP_CLOSED = 255.0
 
 
 class LeverPressEnv(gym.Env):
@@ -44,6 +48,8 @@ class LeverPressEnv(gym.Env):
         max_episode_steps: int = 200,
         headless: bool = True,
         device: str = None,
+        unified: bool = True,
+        reset_in_contact: bool = True,
     ):
         super().__init__()
 
@@ -51,14 +57,19 @@ class LeverPressEnv(gym.Env):
         self.freeze_arm = freeze_arm.lower()
         self.max_episode_steps = max_episode_steps
         self.headless = headless
+        self.unified = unified
+        self.reset_in_contact = reset_in_contact
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
         # Lever handle reference position (grip world pos at rest angle)
         self.handle_position = LEVER_POSITION.copy()
 
+        # Initialize reward function. With reset-in-contact, use the contact-mode shaping
+        # (dense angle-toward-target + hold, reach/approach/distance terms disabled).
         if reward_fn is None:
             self.reward_fn = LeverPressRewardFunction(
-                handle_position=self.handle_position, target_angle=target_angle
+                handle_position=self.handle_position, target_angle=target_angle,
+                contact_mode=bool(unified and reset_in_contact),
             )
         else:
             self.reward_fn = reward_fn
@@ -66,8 +77,10 @@ class LeverPressEnv(gym.Env):
         # Load AMO policy for leg control
         self.policy_jit = torch.jit.load("amo_jit.pt", map_location=self.device)
 
-        # Create underlying HumanoidEnv (loads g1.xml, which includes the lever)
-        self.env = HumanoidEnv(
+        # Create underlying HumanoidEnv. unified -> gripper-humanoid (g1_amo_gripper.mjb,
+        # which still includes the lever) with explicit-address AMO DOF reads.
+        EnvCls = UnifiedHumanoidEnv if self.unified else HumanoidEnv
+        self.env = EnvCls(
             policy_jit=self.policy_jit,
             robot_type="g1",
             device=self.device,
@@ -131,11 +144,14 @@ class LeverPressEnv(gym.Env):
         self.episode_return = 0.0
         self.action_scale = 0.5
 
-        # Robot positioning — mirror the button stance. The lever grip is at x=0.6, so
-        # stand directly in front of it (same -0.08 x nudge the button env uses to absorb
-        # reach/recoil residual). Buttons at y=-1.85 spawn the robot at y=-1.62.
+        # Robot positioning. The lever grip protrudes at x=0.6, further OUT laterally than the
+        # buttons — reaching it from the button-style x=lever_x-0.08 stance needs shoulder
+        # roll/yaw torque beyond the 25 Nm arm limit, so the gripper sags ~15cm short. Spawning
+        # the robot DIRECTLY in front of the lever (x=lever_x, shoulder over the grip) makes it
+        # a strong forward (shoulder-pitch) reach instead — a dynamic-hold spawn sweep put the
+        # gripper within ~5cm of the grip at x=lever_x, vs 10-15cm at lever_x-0.08.
         lever_x = self.handle_position[0]
-        self.robot_start_pos = np.array([lever_x - 0.08, -1.62, 0.793])
+        self.robot_start_pos = np.array([lever_x, -1.62, 0.793])
         self.robot_start_quat = np.array([0.7071, 0, 0, -0.7071])  # -90deg yaw, facing -Y
         self.target_yaw = float(quat_to_euler(self.robot_start_quat)[2])
         self.torso_lean = 0.0
@@ -150,20 +166,113 @@ class LeverPressEnv(gym.Env):
             print(f"[ENV] Lever at x={lever_x:.2f} -> Using RIGHT arm")
 
         # Reach-ready default arm posture: bias the ACTIVE arm toward the handle so the
-        # reaching configuration sits centered in the small action envelope. Same proven
-        # left-arm reach offsets the button env uses, mirrored for the active arm.
+        # reaching configuration sits centered in the small action envelope.
+        #
+        # LEVER-ARM FIX (unified gripper): the old right-arm bias was the LEFT button-reach
+        # MIRRORED, which used a huge shoulder_roll (+1.56) and swung the gripper ACROSS the
+        # torso to x<torso_center — a contorted, self-colliding pose that also plunged past
+        # the protruding lever into the panel (y=-1.84 vs lever tip y=-1.69). Replaced with
+        # a bias solved by IK (gripper pad-midpoint -> lever grip [0.60,-1.66,0.80]) that
+        # reaches OUT to the lever at x=0.60 without crossing the torso. Uses shoulder_PITCH
+        # to extend forward rather than shoulder_ROLL to cross. (build_unified/solve_lever_reach.)
         self.arm_reach_bias = np.zeros(self.num_arm_joints, dtype=np.float32)
         _LEFT_REACH = np.array([0.02, -1.56, -0.80, -0.61], dtype=np.float32)
-        if self.freeze_arm == "right":   # left arm active
+        _RIGHT_LEVER_REACH = np.array([0.852, 0.065, 1.095, -0.583], dtype=np.float32)
+        if self.freeze_arm == "right":   # left arm active (lever on the left, x<0)
             self.arm_reach_bias[:4] = _LEFT_REACH
-        else:                            # right arm active (mirror roll & yaw sign)
-            self.arm_reach_bias[4:] = _LEFT_REACH * np.array([1, -1, -1, 1], dtype=np.float32)
+        else:                            # right arm active (lever at x=0.6) — IK-solved, no torso cross
+            self.arm_reach_bias[4:] = _RIGHT_LEVER_REACH
+
+        self._solved_wrist = np.zeros(3)
+        # ARM-HOLD stiffness + torque limit (unified reset-in-contact): boost ONLY the 4 right
+        # shoulder/elbow gains so the arm can statically HOLD the reach onto the lever grip
+        # (legs/waist/left-arm untouched -> AMO balance unaffected). The lever grip at x=0.60 is
+        # a further LATERAL reach than the button (x=0.45); the default ±25 Nm arm limit
+        # saturates and the pad sags ~2cm off the knob, so we also raise the right-arm torque
+        # ceiling to ±60 Nm for the hold (matches build_grasp_model's arm force authority).
+        if self.unified:
+            self._arm_hold_stiffness = self.env.stiffness.astype(float).copy()
+            self._arm_hold_stiffness[19:23] *= 4.0
+            self._arm_hold_tlim = self.env.torque_limits.astype(float).copy()
+            self._arm_hold_tlim[19:23] = 60.0
+
+    def _amo_arm_step(self, arm_qtarget_right, wrist_target=None, grip_cmd=GRIP_CLOSED):
+        """One control step for the reset IK servo: AMO drives the legs (balance) while the 4
+        RIGHT shoulder/elbow joints PD-track `arm_qtarget_right` (boosted hold); wrist held
+        toward `wrist_target` + gripper CLOSED via apply_ctrl. Mirrors the button env's servo."""
+        if wrist_target is not None:
+            self.env.wrist_target = np.asarray(wrist_target, dtype=float)
+        self.env.viewer.commands[:] = 0.0
+        self.env.viewer.commands[1] = self.target_yaw
+        self.env.viewer.commands[5] = self.torso_lean
+        self.env._extract_state()
+        amo_obs = self.env._compute_observation()
+        obs_tensor = torch.from_numpy(amo_obs).float().unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            extra_hist = torch.tensor(
+                np.array(self.env.extra_history).flatten().copy(), dtype=torch.float
+            ).view(1, -1).to(self.device)
+            leg_action = self.policy_jit(obs_tensor, extra_hist).cpu().numpy().squeeze()
+        leg_action = np.clip(leg_action, -40.0, 40.0)
+        scaled_leg = leg_action * self.env.action_scale
+        self.env.last_action = np.concatenate([
+            leg_action.copy(),
+            (self.env.dof_pos[15:] - self.env.default_dof_pos[15:]) / self.env.action_scale])
+        pd_target = self.env.default_dof_pos.copy()
+        pd_target[:15] = scaled_leg + self.env.default_dof_pos[:15]
+        pd_target[14] += self.waist_lean
+        pd_target[19:23] = arm_qtarget_right   # right shoulder/elbow (AMO dofs 19..22)
+        self.env.gait_cycle = np.remainder(
+            self.env.gait_cycle + self.env.control_dt * self.env.gait_freq, 1.0)
+        if self.env._in_place_stand and np.any(np.abs(self.env.gait_cycle - 0.25) < 0.05):
+            self.env.gait_cycle = np.array([0.25, 0.25])
+        stiff = getattr(self, "_arm_hold_stiffness", self.env.stiffness)
+        tlim = getattr(self, "_arm_hold_tlim", self.env.torque_limits)
+        for _ in range(self.env.sim_decimation):
+            torque = (pd_target - self.env.dof_pos) * stiff - self.env.dof_vel * self.env.damping
+            torque = np.clip(torque, -tlim, tlim)
+            self.env.apply_ctrl(torque, grip_cmd)
+            mujoco.mj_step(self.env.model, self.env.data)
+            self.env._extract_state()
+
+    def _servo_to_contact(self):
+        """IK-servo (7-DOF arm+wrist, boosted hold) the CLOSED gripper onto the lever GRIP,
+        AMO balancing throughout. The lever grip is a sphere on a shaft that PROTRUDES toward
+        the robot (+Y), so a progressive straight-in approach seats the pad on the knob.
+        Stops at LIGHT contact (lever just begins to turn) so the full arc is left for RL.
+        Returns the solved 4-DOF right-arm qpos to plant into arm_reach_bias."""
+        def grip(): return self.env.data.geom_xpos[self.grip_geom_id].copy()
+
+        # Approach the grip knob straight-in from the +Y (robot) side at decreasing standoff,
+        # boosted-hold settle each step. The grip is a knob on a soft hinge (stiffness 20) that
+        # deflects when touched, so we solve IK fresh to the (current) grip each standoff and
+        # keep the SOLVED arm pose; contact is reached when the pad is at the grip or the hinge
+        # just begins to move. Slightly BELOW the knob so a later push drives it UP (+angle).
+        a4 = self.env.data.qpos[self.env.rarm_qadr].copy()
+        w3 = self.env.wrist_target.copy()
+        # advance to the knob and then aim slightly INTO it (past center in -Y) so the closed
+        # pads seat ON the knob (radius 3.5cm) rather than hovering ~2cm off its front face.
+        for standoff in [0.14, 0.10, 0.07, 0.05, 0.03, 0.01, -0.015]:
+            tgt = grip() + np.array([0.0, standoff, -0.005])
+            a4, w3, err = self.env.solve_right_arm7_ik(tgt)
+            for _ in range(60):
+                self._amo_arm_step(a4, wrist_target=w3)
+            gp = self.env.gripper_point()
+            # stop once seated ON the knob (pad within the knob radius) or the hinge turned
+            if np.linalg.norm(gp - grip()) < 0.035 or float(self.env.data.qpos[self.lever_qadr]) > 0.04:
+                break
+        self._solved_wrist = w3.copy()
+        return a4
 
     def reset(self, seed=None, options=None) -> Tuple[np.ndarray, Dict]:
         if seed is not None:
             np.random.seed(seed)
 
         mujoco.mj_resetDataKeyframe(self.env.model, self.env.data, 0)
+
+        # reset the wrist hold to level (the reset-in-contact servo may have tilted it last episode)
+        if self.unified:
+            self.env.wrist_target = np.zeros(3)
 
         # Position robot in front of the lever — pelvis qadr found dynamically.
         robot_qpos_start = self.env.model.jnt_qposadr[mujoco.mj_name2id(
@@ -224,15 +333,33 @@ class LeverPressEnv(gym.Env):
             for _ in range(self.env.sim_decimation):
                 torque = (pd_target - self.env.dof_pos) * self.env.stiffness - self.env.dof_vel * self.env.damping
                 torque = np.clip(torque, -self.env.torque_limits, self.env.torque_limits)
-                self.env.data.ctrl = torque
+                if self.unified:
+                    self.env.apply_ctrl(torque, GRIP_CLOSED)
+                else:
+                    self.env.data.ctrl = torque
                 mujoco.mj_step(self.env.model, self.env.data)
                 self.env._extract_state()
+
+        # RESET-IN-CONTACT: IK the CLOSED gripper onto the lever grip so the episode STARTS
+        # touching it. Plant the solved right-arm pose into arm_reach_bias + the solved wrist
+        # into wrist_target so zero-action HOLDS contact; RL only has to push the lever through
+        # its arc + hold at target.
+        if self.unified and self.reset_in_contact:
+            solved_right = self._servo_to_contact()
+            self.arm_reach_bias[4:] = (solved_right - self.env.default_dof_pos[19:23]).astype(np.float32)
+            self.env.wrist_target = self._solved_wrist.copy()
 
         self.episode_steps = 0
         self.episode_return = 0.0
         self.reward_fn.reset()
 
         return self._get_obs(), {}
+
+    def _right_hand_pos(self) -> np.ndarray:
+        """Right 'hand' contact point: gripper pad-midpoint (unified) or rubber hand."""
+        if self.unified:
+            return self.env.gripper_point()
+        return self.env.data.xpos[self.right_hand_id]
 
     def _get_lever_angle(self) -> float:
         """Get the lever hinge angle (rad)."""
@@ -248,7 +375,7 @@ class LeverPressEnv(gym.Env):
         arm_vel = self.env.dof_vel[self.arm_joint_start:self.arm_joint_end]
 
         left_hand_pos = self.env.data.xpos[self.left_hand_id]
-        right_hand_pos = self.env.data.xpos[self.right_hand_id]
+        right_hand_pos = self._right_hand_pos()
 
         handle_pos = self._get_handle_pos()
         left_to_handle = handle_pos - left_hand_pos
@@ -319,10 +446,18 @@ class LeverPressEnv(gym.Env):
         if not self.env._in_place_stand and np.all(np.abs(self.env.gait_cycle - 0.25) < 0.05):
             self.env.gait_cycle = np.array([0.25, 0.75])
 
+        # boosted right-arm hold stiffness + torque ceiling for the contact-hold task
+        if self.unified and self.reset_in_contact:
+            stiff = self._arm_hold_stiffness; tlim = self._arm_hold_tlim
+        else:
+            stiff = self.env.stiffness; tlim = self.env.torque_limits
         for _ in range(self.env.sim_decimation):
-            torque = (pd_target - self.env.dof_pos) * self.env.stiffness - self.env.dof_vel * self.env.damping
-            torque = np.clip(torque, -self.env.torque_limits, self.env.torque_limits)
-            self.env.data.ctrl = torque
+            torque = (pd_target - self.env.dof_pos) * stiff - self.env.dof_vel * self.env.damping
+            torque = np.clip(torque, -tlim, tlim)
+            if self.unified:
+                self.env.apply_ctrl(torque, GRIP_CLOSED)
+            else:
+                self.env.data.ctrl = torque
             mujoco.mj_step(self.env.model, self.env.data)
             self.env._extract_state()
 
@@ -332,7 +467,7 @@ class LeverPressEnv(gym.Env):
         ang_vel = self.env.ang_vel
 
         left_hand_pos = self.env.data.xpos[self.left_hand_id]
-        right_hand_pos = self.env.data.xpos[self.right_hand_id]
+        right_hand_pos = self._right_hand_pos()
 
         lever_angle = self._get_lever_angle()
         handle_pos = self._get_handle_pos()

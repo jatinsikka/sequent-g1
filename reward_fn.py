@@ -253,6 +253,7 @@ class ButtonPressRewardFunction:
         balance_weight: float = 3.0,  # Penalty for base drifting off spawn (counter reach-recoil)
         action_penalty: float = 0.0001,  # Reduced to not discourage movement
         alive_bonus: float = 0.1,  # Reduced to make reaching more important
+        contact_mode: bool = False,  # RESET-IN-CONTACT reward shaping (see below)
     ):
         """
         Initialize button press reward function.
@@ -268,6 +269,15 @@ class ButtonPressRewardFunction:
         self.button_position = np.array(button_position)
         self.press_threshold = press_threshold
         self.target_press_depth = target_press_depth
+        # CONTACT MODE (reset-in-contact): the episode STARTS with the gripper on the button,
+        # so RL only has to push-in + HOLD. Zero the reach/approach/distance terms (they'd pay
+        # the policy to retract and "re-approach", fighting the press), and keep the dense
+        # depth-monotonic press + first-press bonus + a per-step HOLD income past the threshold
+        # + the balance/upright penalties. This is the clean "IK reach + RL contact" split.
+        self.contact_mode = contact_mode
+        if contact_mode:
+            hand_proximity_weight = 0.0
+            hold_bonus = max(hold_bonus, 30.0)   # steep sustained-hold income while pressed
         self.hand_proximity_weight = hand_proximity_weight
         self.press_reward = press_reward
         self.hold_bonus = hold_bonus
@@ -339,6 +349,11 @@ class ButtonPressRewardFunction:
             self.button_pressed = True
             print(f"    [REWARD] Button pressed! Displacement: {button_displacement:.4f}m")
 
+        # CONTACT MODE: steady per-step HOLD income while the button is held past threshold,
+        # scaled by how deep it's held — pushes RL toward a firm SUSTAINED press from contact.
+        if self.contact_mode and button_displacement > self.press_threshold:
+            r_press += self.hold_bonus * depth_frac
+
         info['r_press'] = r_press
         info['button_displacement'] = button_displacement
         info['button_pressed'] = self.button_pressed
@@ -349,9 +364,14 @@ class ButtonPressRewardFunction:
         
         # 5. Distance penalty - penalize the ACTIVE (closest) hand being far from button.
         # (Was hardcoded to right_hand, which is the FROZEN hand for left-side buttons.)
-        dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
-        dist_to_button = min(dists) if dists else 1.0
-        r_distance_penalty = -dist_to_button * 2.0  # Penalty proportional to distance
+        # In contact mode the episode starts on the button, so a distance penalty would just
+        # punish the (fixed) gripper-pad-vs-button-center offset every step — disable it.
+        if self.contact_mode:
+            r_distance_penalty = 0.0
+        else:
+            dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
+            dist_to_button = min(dists) if dists else 1.0
+            r_distance_penalty = -dist_to_button * 2.0  # Penalty proportional to distance
         info['r_distance_penalty'] = r_distance_penalty
 
         # 6. Balance term — penalize the base drifting off its spawn xy. The arm reach
@@ -476,13 +496,25 @@ class LeverPressRewardFunction:
         hand_proximity_weight: float = 10.0,
         rotate_reward: float = 100.0,            # per-step reward at full target angle
         first_turn_bonus: float = 50.0,          # one-time bonus on first reaching the success band
+        hold_bonus: float = 30.0,                # per-step hold income while at/near target angle
         balance_weight: float = 3.0,
         action_penalty: float = 0.0001,
         alive_bonus: float = 0.1,
+        contact_mode: bool = False,              # RESET-IN-CONTACT reward shaping (see below)
     ):
         self.handle_position = np.array(handle_position)
         self.target_angle = target_angle
         self.angle_tol = angle_tol
+        # CONTACT MODE (reset-in-contact): the episode STARTS with the gripper on the lever
+        # grip, so RL only has to drive the hinge through its arc + HOLD at target. Zero the
+        # reach/approach/distance terms (they'd pay the policy to retract and "re-approach",
+        # fighting the turn), keep the dense angle-toward-target reward + first-turn bonus + a
+        # per-step HOLD income near target + the balance/upright penalties.
+        self.contact_mode = contact_mode
+        if contact_mode:
+            hand_proximity_weight = 0.0
+            hold_bonus = max(hold_bonus, 30.0)
+        self.hold_bonus = hold_bonus
         self.hand_proximity_weight = hand_proximity_weight
         self.rotate_reward = rotate_reward
         self.first_turn_bonus = first_turn_bonus
@@ -526,6 +558,10 @@ class LeverPressRewardFunction:
             r_rotate += self.first_turn_bonus
             self.lever_turned = True
             print(f"    [REWARD] Lever turned! Angle: {lever_angle:.4f} rad (target {self.target_angle:.2f})")
+        # CONTACT MODE: steady per-step HOLD income while the hinge is held near/past target,
+        # scaled by how far it's turned — pushes RL toward a firm SUSTAINED turn from contact.
+        if self.contact_mode and lever_angle > (self.target_angle - self.angle_tol):
+            r_rotate += self.hold_bonus * angle_frac
         info['r_rotate'] = r_rotate
         info['lever_angle'] = lever_angle
         info['lever_turned'] = self.lever_turned
@@ -534,10 +570,15 @@ class LeverPressRewardFunction:
         r_action = -self.action_penalty * np.linalg.norm(action) ** 2
         info['r_action'] = r_action
 
-        # 5. Distance penalty — active (closest) hand far from handle
-        dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
-        dist_to_handle = min(dists) if dists else 1.0
-        r_distance_penalty = -dist_to_handle * 2.0
+        # 5. Distance penalty — active (closest) hand far from handle. In contact mode the
+        # episode starts on the grip, so a distance penalty would just punish the fixed
+        # gripper-pad-vs-grip offset every step — disable it.
+        if self.contact_mode:
+            r_distance_penalty = 0.0
+        else:
+            dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
+            dist_to_handle = min(dists) if dists else 1.0
+            r_distance_penalty = -dist_to_handle * 2.0
         info['r_distance_penalty'] = r_distance_penalty
 
         # 6. Balance term — penalize base drifting off spawn xy

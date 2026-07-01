@@ -49,3 +49,5 @@ Running cost tally start: ~$15–18 (pre-overnight VM time). VM restarted for ov
 **Cost:** ~$22 (incl. ~$3 on the pre-OMP-fix slow run). VM deallocated.
 **Awaits Jatin:** (1) end-to-end SOP demo — cross-rig architectural call; (2) website styling + deploy; (3) any specific further training.
 
+
+- **UNIFIED DEMO stitched** (`_unified_demo.mp4`): one robot doing pick(IK)+press(RL)+lever(RL). Both RL skills verified. Concatenated clips (same robot) — NOT yet one continuous run; walk not yet included. Continuous integration (walk->pick->press->lever, one scene) = next polish. Cost ~$30, VM deallocated.

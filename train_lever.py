@@ -31,6 +31,7 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 
 from lever_press_env import LeverPressEnv
 from reward_fn import LeverPressRewardFunction, LEVER_POSITION
+from train_button import CurriculumCallback   # success-gated reach curriculum (shared with button)
 
 
 class VideoRecorderCallback(BaseCallback):
@@ -164,6 +165,7 @@ def train_lever(
     use_wandb: bool = True,
     checkpoint_dir: str = "checkpoints_lever",
     n_envs: int = 1,
+    curriculum: bool = False,
 ):
     print(f"\n=== Lever Training ===")
     print(f"Lever handle at ({LEVER_POSITION[0]:.2f}, {LEVER_POSITION[1]:.2f}, {LEVER_POSITION[2]:.2f})")
@@ -200,12 +202,19 @@ def train_lever(
                 max_episode_steps=200,
                 headless=True,
                 device=device,
+                reset_in_contact=not curriculum,   # curriculum uses its own seat-at-distance reset
+                curriculum=curriculum,
             )
         return _init
 
     use_subproc = n_envs > 1 and sys.platform != "win32" and device == "cpu"
     vec_cls = SubprocVecEnv if use_subproc else DummyVecEnv
     env = vec_cls([make_env(i) for i in range(n_envs)])
+    if use_subproc:
+        # workers are capped at 1 thread via OMP_NUM_THREADS (right — they'd thrash); but that
+        # also caps the LEARNER's gradient update to 1 core. Raise it for the main process only
+        # (workers already forked with their own 1-thread limit).
+        torch.set_num_threads(16)
     print(f"[ENV] Created {n_envs} env(s) via {vec_cls.__name__} on {device}")
     print(f"[ENV] Observation space: {env.observation_space.shape}")
     print(f"[ENV] Action space: {env.action_space.shape}")
@@ -236,6 +245,7 @@ def train_lever(
         name_prefix="ppo_lever",
     )
     progress_callback = LeverCallback(eval_freq=2000)
+    curriculum_callback = CurriculumCallback() if curriculum else None
     video_callback = VideoRecorderCallback(
         target_angle=target_angle, eval_freq=2500, video_length=200, use_wandb=use_wandb,
     )
@@ -244,7 +254,7 @@ def train_lever(
     try:
         model.learn(
             total_timesteps=total_timesteps,
-            callback=[checkpoint_callback, progress_callback, video_callback],
+            callback=[c for c in (checkpoint_callback, progress_callback, video_callback, curriculum_callback) if c is not None],
             progress_bar=True,
         )
     except KeyboardInterrupt:
@@ -273,6 +283,8 @@ def main():
     parser.add_argument("--n_envs", type=int, default=1, help="Number of parallel envs")
     parser.add_argument("--smoke", action="store_true",
                         help="Quick sanity run: 2000 steps, no W&B")
+    parser.add_argument("--curriculum", action="store_true",
+                        help="Reach curriculum: RL learns to reach from progressively farther (not IK-seeded)")
     args = parser.parse_args()
 
     if args.smoke:
@@ -285,6 +297,7 @@ def main():
             learning_rate=args.lr,
             use_wandb=not args.no_wandb,
             n_envs=args.n_envs,
+            curriculum=args.curriculum,
         )
 
 

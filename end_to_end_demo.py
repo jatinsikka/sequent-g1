@@ -17,13 +17,11 @@ from env_wrapper_button import ButtonPressEnv, GRIP_CLOSED
 ckpt = sys.argv[1] if len(sys.argv) > 1 else "checkpoints_button/curr_v2_latest.zip"
 model = PPO.load(ckpt, device="cpu")
 env = ButtonPressEnv(button_name="button_yellow", unified=True, reset_in_contact=False, curriculum=True, headless=True)
-env.set_curriculum_frac(1.0)
-obs, _ = env.reset(seed=0)     # robot at panel, arm at REST (frac 1.0), press set up, contact pose cached
+env.set_curriculum_frac(0.0)   # frac 0 -> NOMINAL stance (stance noise scales with frac) for the reference
+obs, _ = env.reset(seed=0)     # robot at panel; this reset also caches the servo contact pose (wrist tilt)
 e = env.env
 dev = env.device               # AMO policy device — match it in the manual walk loop
-# capture the rest-pose press setup produced by the reset
-press_bias = env.arm_reach_bias.copy()
-press_wrist = env._solved_wrist.copy()
+press_wrist = env._cached_w3_c.copy()   # the wrist tilt the policy trained with (from the cached servo)
 a4_rest = e.default_dof_pos[19:23].copy()
 target_yaw = env.target_yaw
 
@@ -66,11 +64,21 @@ from scipy.spatial.transform import Rotation as _R
 _p = e.data.xpos[e.pelvis_id]; _yaw = _R.from_matrix(e.data.xmat[e.pelvis_id].reshape(3,3)).as_euler('xyz')[2]
 print(f"after walk: pelvis xy=({_p[0]:.3f},{_p[1]:.3f}) yaw={_yaw:.2f} | press-stance xy=({env.robot_start_pos[0]:.3f},{press_y:.3f}) yaw={target_yaw:.2f}")
 
-# ARRIVED at the panel -> clean press setup at the exact trained stance (the RL press is stance-
-# sensitive; the reset re-seats the arm at the rest pose + settles AMO the way the policy expects).
-# The RL policy then does the whole reach -> contact -> press from the rest pose. That part is RL.
-env.set_curriculum_frac(1.0)
-obs, _ = env.reset(seed=0)
+# ARRIVED at the panel -> NO TELEPORT: the base stays wherever the walk landed (the policy is
+# stance-robust — trained with +-4cm/+-5deg arrival noise). Replicate only the ARM setup the
+# curriculum reset does at frac 1.0: rest-pose bias (zero), the trained wrist tilt, and a short
+# stand-settle (walk -> stand transition). Then the RL policy does the whole reach -> press.
+e._in_place_stand = True
+env.arm_reach_bias[4:] = 0.0                       # frac 1.0 start = the true rest pose
+e.wrist_target = press_wrist.copy()
+env._filt_arm = np.zeros(env.num_arm_joints, dtype=np.float32)
+env._prev_action = np.zeros(env.num_arm_joints, dtype=np.float32)
+env.episode_steps = 0
+env.reward_fn.reset()
+env.initial_button_displacement = e.data.qpos[env.button_joint_id]
+for _ in range(30):                                # AMO settles from walk to stand (the "arrival")
+    amo_step(0.0, a4_rest, press_wrist); frames.append(shot())
+obs = env._get_obs()
 maxpress = 0.0
 for t in range(200):
     a, _ = model.predict(obs, deterministic=True)

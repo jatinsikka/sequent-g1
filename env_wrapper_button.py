@@ -354,6 +354,22 @@ class ButtonPressEnv(gym.Env):
         # -90° yaw to face -Y direction (toward buttons)
         # Using quaternion defined in __init__
         self.env.data.qpos[robot_qpos_start+3:robot_qpos_start+7] = self.robot_start_quat
+        if self.curriculum:
+            # STANCE ROBUSTNESS: randomize the arrival stance (up to +-4cm xy, +-5deg yaw) so the
+            # policy tolerates wherever the walk actually lands — no reset/teleport needed at the
+            # walk->press handoff in the end-to-end demo. Noise SCALES with the curriculum level
+            # (zero at frac 0) so the easy contact bootstrap stays easy — full-noise-at-level-0
+            # killed the bootstrap (v3 stalled 0.03 at 500k). Heading setpoint stays nominal.
+            k = self.curriculum_frac_max
+            self.env.data.qpos[robot_qpos_start:robot_qpos_start+2] += k * np.random.uniform(-0.04, 0.04, 2)
+            dyaw = k * np.random.uniform(-0.09, 0.09)
+            qz = np.array([np.cos(dyaw/2), 0.0, 0.0, np.sin(dyaw/2)])
+            q0 = self.env.data.qpos[robot_qpos_start+3:robot_qpos_start+7].copy()
+            # quaternion multiply qz * q0 (perturb yaw about world z)
+            w1,x1,y1,z1 = qz; w2,x2,y2,z2 = q0
+            self.env.data.qpos[robot_qpos_start+3:robot_qpos_start+7] = [
+                w1*w2 - x1*x2 - y1*y2 - z1*z2, w1*x2 + x1*w2 + y1*z2 - z1*y2,
+                w1*y2 - x1*z2 + y1*w2 + z1*x2, w1*z2 + x1*y2 - y1*x2 + z1*w2]
         
         # IMPORTANT: Zero out velocities for stable start
         self.env.data.qvel[:] = 0.0

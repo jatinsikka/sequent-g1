@@ -50,6 +50,7 @@ class LeverPressEnv(gym.Env):
         device: str = None,
         unified: bool = True,
         reset_in_contact: bool = True,
+        curriculum: bool = False,
     ):
         super().__init__()
 
@@ -59,6 +60,12 @@ class LeverPressEnv(gym.Env):
         self.headless = headless
         self.unified = unified
         self.reset_in_contact = reset_in_contact
+        # REACH CURRICULUM (ported from the button): arm starts interpolated between the
+        # contact pose (frac 0) and the rest pose (frac 1); frac_max grows on success via the
+        # training callback. Makes the reach itself RL instead of an IK seed.
+        self.curriculum = curriculum
+        self.curriculum_frac_max = 0.0
+        self._cached_a4_c = None; self._cached_w3_c = None
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
         # Lever handle reference position (grip world pos at rest angle)
@@ -196,6 +203,15 @@ class LeverPressEnv(gym.Env):
             self._arm_hold_tlim = self.env.torque_limits.astype(float).copy()
             self._arm_hold_tlim[19:23] = 60.0
 
+        # motion shaping (ported from the button env): LOW-PASS the arm command so the arm
+        # physically can't flail (a reward penalty alone gets hacked) + torso-avoidance +
+        # base-stability penalties. Kills Jatin's body-rocking/jerk failure mode.
+        self.arm_alpha = 0.12
+        self._filt_arm = np.zeros(self.num_arm_joints, dtype=np.float32)
+        self.torso_w = 12.0; self.base_w = 4.0
+        self.right_elbow_id = mujoco.mj_name2id(self.env.model, mujoco.mjtObj.mjOBJ_BODY, "right_elbow_link")
+        self._prev_action = np.zeros(self.num_arm_joints, dtype=np.float32)
+
     def _amo_arm_step(self, arm_qtarget_right, wrist_target=None, grip_cmd=GRIP_CLOSED):
         """One control step for the reset IK servo: AMO drives the legs (balance) while the 4
         RIGHT shoulder/elbow joints PD-track `arm_qtarget_right` (boosted hold); wrist held
@@ -279,6 +295,18 @@ class LeverPressEnv(gym.Env):
             self.env.model, mujoco.mjtObj.mjOBJ_JOINT, 'pelvis')]
         self.env.data.qpos[robot_qpos_start:robot_qpos_start+3] = self.robot_start_pos
         self.env.data.qpos[robot_qpos_start+3:robot_qpos_start+7] = self.robot_start_quat
+        if self.curriculum:
+            # STANCE ROBUSTNESS (ported from button): randomize arrival stance up to +-4cm/+-5deg
+            # so the policy tolerates wherever the walk lands. Noise SCALES with curriculum level
+            # (zero at frac 0 — keeps the contact bootstrap easy). Heading setpoint stays nominal.
+            k = self.curriculum_frac_max
+            self.env.data.qpos[robot_qpos_start:robot_qpos_start+2] += k * np.random.uniform(-0.04, 0.04, 2)
+            dyaw = k * np.random.uniform(-0.09, 0.09)
+            qz = np.array([np.cos(dyaw/2), 0.0, 0.0, np.sin(dyaw/2)])
+            w1,x1,y1,z1 = qz; w2,x2,y2,z2 = self.env.data.qpos[robot_qpos_start+3:robot_qpos_start+7].copy()
+            self.env.data.qpos[robot_qpos_start+3:robot_qpos_start+7] = [
+                w1*w2 - x1*x2 - y1*y2 - z1*z2, w1*x2 + x1*w2 + y1*z2 - z1*y2,
+                w1*y2 - x1*z2 + y1*w2 + z1*x2, w1*z2 + x1*y2 - y1*x2 + z1*w2]
 
         self.env.data.qvel[:] = 0.0
 
@@ -349,11 +377,35 @@ class LeverPressEnv(gym.Env):
             self.arm_reach_bias[4:] = (solved_right - self.env.default_dof_pos[19:23]).astype(np.float32)
             self.env.wrist_target = self._solved_wrist.copy()
 
+        elif self.unified and self.curriculum:
+            # CURRICULUM reach+turn (ported from button): seat the arm between the CONTACT pose
+            # (frac 0) and the REST pose (frac 1); frac ~ U[0, frac_max]. RL learns the reach
+            # from progressively farther, ending at the rest pose the end-to-end demo hands it.
+            if self._cached_a4_c is None:
+                self._cached_a4_c = self._servo_to_contact().copy()
+                self._cached_w3_c = self._solved_wrist.copy()
+            a4_c = self._cached_a4_c; w3_c = self._cached_w3_c
+            a4_rest = self.env.default_dof_pos[19:23].copy()
+            frac = float(np.random.uniform(0.0, max(1e-3, self.curriculum_frac_max)))
+            a4_start = (1.0 - frac) * a4_c + frac * a4_rest
+            self.arm_reach_bias[4:] = (a4_start - self.env.default_dof_pos[19:23]).astype(np.float32)
+            self.env.wrist_target = w3_c.copy()
+            self._solved_wrist = w3_c.copy()
+            for _ in range(60):
+                self._amo_arm_step(a4_start, wrist_target=w3_c)
+            self._cur_frac = frac
+
         self.episode_steps = 0
         self.episode_return = 0.0
         self.reward_fn.reset()
+        self._prev_action = np.zeros(self.num_arm_joints, dtype=np.float32)
+        self._filt_arm = np.zeros(self.num_arm_joints, dtype=np.float32)
 
         return self._get_obs(), {}
+
+    def set_curriculum_frac(self, f: float):
+        """Advance the reach curriculum (called by the training callback via env_method)."""
+        self.curriculum_frac_max = float(np.clip(f, 0.0, 1.0))
 
     def _right_hand_pos(self) -> np.ndarray:
         """Right 'hand' contact point: gripper pad-midpoint (unified) or rubber hand."""
@@ -409,6 +461,9 @@ class LeverPressEnv(gym.Env):
             action[4:] = 0.0
 
         scaled_arm_action = action * self.action_scale
+        if self.unified:                                    # LOW-PASS -> arm eases to the target, cannot flail
+            self._filt_arm = (1 - self.arm_alpha) * self._filt_arm + self.arm_alpha * scaled_arm_action
+            scaled_arm_action = self._filt_arm
 
         # === LEG CONTROL FROM AMO (standing still) — verbatim from button env ===
         self.env.viewer.commands[:] = 0.0
@@ -447,7 +502,7 @@ class LeverPressEnv(gym.Env):
             self.env.gait_cycle = np.array([0.25, 0.75])
 
         # boosted right-arm hold stiffness + torque ceiling for the contact-hold task
-        if self.unified and self.reset_in_contact:
+        if self.unified and (self.reset_in_contact or self.curriculum):
             stiff = self._arm_hold_stiffness; tlim = self._arm_hold_tlim
         else:
             stiff = self.env.stiffness; tlim = self.env.torque_limits
@@ -483,6 +538,15 @@ class LeverPressEnv(gym.Env):
             current_handle_pos=handle_pos,
         )
 
+        # motion shaping (ported from button): torso-avoidance + base-stability. The low-pass
+        # above already prevents flailing at the control level.
+        if self.unified:
+            if self.right_elbow_id >= 0:
+                eb = self.env.data.xpos[self.right_elbow_id][:2]; pv = self.env.data.xpos[self.env.pelvis_id][:2]
+                reward -= self.torso_w * max(0.0, 0.11 - float(np.linalg.norm(eb - pv)))
+            reward -= self.base_w * float(np.linalg.norm(self.env.data.qvel[0:2]))
+            self._prev_action = np.asarray(action, np.float32).copy()
+
         self.episode_return += reward
 
         terminated = False
@@ -497,6 +561,10 @@ class LeverPressEnv(gym.Env):
 
         if self.episode_steps >= self.max_episode_steps:
             truncated = True
+
+        if terminated or truncated:   # per-episode success for the curriculum callback
+            info['is_success'] = bool(self.reward_fn.lever_turned)
+            info['curriculum_frac_max'] = self.curriculum_frac_max
 
         if not self.headless and hasattr(self.env, 'viewer') and self.env.viewer is not None:
             self.env.viewer.cam.lookat = robot_pos.astype(np.float32)

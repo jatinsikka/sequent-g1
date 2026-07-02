@@ -349,9 +349,10 @@ class ButtonPressRewardFunction:
             self.button_pressed = True
             print(f"    [REWARD] Button pressed! Displacement: {button_displacement:.4f}m")
 
-        # CONTACT MODE: steady per-step HOLD income while the button is held past threshold,
-        # scaled by how deep it's held — pushes RL toward a firm SUSTAINED press from contact.
-        if self.contact_mode and button_displacement > self.press_threshold:
+        # HOLD income: steady per-step income while the button is held past threshold, scaled by
+        # depth — pushes RL toward a firm SUSTAINED press. Was contact_mode-only; now ALWAYS on
+        # (the curriculum run never got it, which is why the learned press retracted after pressing).
+        if button_displacement > self.press_threshold:
             r_press += self.hold_bonus * depth_frac
 
         info['r_press'] = r_press
@@ -560,9 +561,10 @@ class LeverPressRewardFunction:
             r_rotate += self.first_turn_bonus
             self.lever_turned = True
             print(f"    [REWARD] Lever turned! Angle: {lever_angle:.4f} rad (target {self.target_angle:.2f})")
-        # CONTACT MODE: steady per-step HOLD income while the hinge is held near/past target,
-        # scaled by how far it's turned — pushes RL toward a firm SUSTAINED turn from contact.
-        if self.contact_mode and lever_angle > (self.target_angle - self.angle_tol):
+        # HOLD income: steady per-step income while the hinge is held near/past target, scaled
+        # by how far it's turned — pushes RL toward a firm SUSTAINED turn. Always on (was
+        # contact_mode-only; the button curriculum retracted after pressing for the same reason).
+        if lever_angle > (self.target_angle - self.angle_tol):
             r_rotate += self.hold_bonus * angle_frac
         info['r_rotate'] = r_rotate
         info['lever_angle'] = lever_angle
@@ -580,7 +582,7 @@ class LeverPressRewardFunction:
         else:
             dists = [np.linalg.norm(h - target_pos) for h in (left_hand_pos, right_hand_pos) if h is not None]
             dist_to_handle = min(dists) if dists else 1.0
-            r_distance_penalty = -dist_to_handle * 2.0
+            r_distance_penalty = -dist_to_handle * 4.0   # stronger pull to contact (anti-park)
         info['r_distance_penalty'] = r_distance_penalty
 
         # 6. Balance term — penalize base drifting off spawn xy
@@ -611,7 +613,8 @@ class LeverPressRewardFunction:
         if right_hand_pos is not None:
             distances.append(np.linalg.norm(right_hand_pos - target_pos))
         min_dist = min(distances)
-        band = 0.10
+        band = 0.05   # NARROW (anti-parking, same lesson as the button curriculum): no far
+        #               proximity plateau to camp on; the far pull is approach + distance-penalty.
         if min_dist > band:
             return 0.0
         proximity_reward = (band - min_dist) / band

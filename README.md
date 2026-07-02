@@ -3,7 +3,7 @@
 **SOP-driven, verified loco-manipulation on a humanoid.** Tell it what's wrong; it retrieves the right procedure, plans the steps, executes them on a Unitree G1 in simulation, and — the part nobody else does — *verifies each step against the physics* instead of assuming it worked.
 
 <p align="center">
-  <img src="v55_best.gif" alt="Unitree G1 performing verified loco-manipulation in MuJoCo" width="640">
+  <img src="demo_reach_press.gif" alt="Unitree G1: RL curriculum policy reaches from the rest pose and presses the panel button (no IK seed)" width="640">
 </p>
 
 > Repo: `sequent-g1`. Part of [Sequent Robotics](https://sequent-robotics.vercel.app).
@@ -50,11 +50,12 @@ The verifier earns this on day one — pointed at our own best grasp policy, it 
 
 ## Status
 
-- ✅ Whole-body control + walking (AMO), grasp skill (RL, **v5.5 = 55% verified**), cloud training pipeline
+- ✅ **One unified robot**: walking AMO humanoid + Robotiq 2F-85 grafted on the right wrist — every skill runs on the same embodiment (`build_unified_model.py`, `unified_env.py`)
+- ✅ **RL reach-and-press via curriculum** (`train_button.py --curriculum`): the arm starts between the contact pose and the true rest pose, and the start distance grows with success — the deterministic policy reaches ~19 cm from rest and presses 28–31 mm, **no IK seed**. Key fixes: reach reward targets the button *cap face* (not the body origin) + an anti-parking proximity band. Smoothness is forced at the control level (low-pass on the arm command; jerk 0.83 → 0.001) — a reward-only anti-jerk penalty got hacked.
+- ✅ **Pick from the real table** — a controller, not RL: DLS-IK reach + force-gated latch, held lift, block stays on the tabletop
 - ✅ Verifier + no-early-stop eval; **verifying executor** (`executor.py`, `run_task.py`): command → plan → verified step-by-step execution, halts with a report on failure
-- ✅ **SOP-driven spine** (`brain_bridge.py`): incident → TF-IDF retrieval over the 100-SOP library → typed plan → verified execution (numpy-only, no API)
-- ✅ **LLM planner** (`llm_planner.py`): Gemini (free tier, REST, `gemini-3.1-flash-lite`) selects the SOP + emits the typed plan; `run_task --planner auto` uses it when a key is set, else falls back to the bridge. Validated end-to-end: "Machine A pressure is low" → SOP-001 → 7-step plan; "pick the screwdriver, place on the shelf" → SOP-093 → `pick` verified.
-- 🚧 More real skills (walk_to, press_button), the demo video
+- ✅ **SOP-driven spine** (`brain_bridge.py`) + **LLM planner** (`llm_planner.py`): incident → SOP retrieval → typed plan → verified execution
+- 🚧 Press hold + stance-robustness retrain (seamless walk→press handoff), lever on the same curriculum, one-take end-to-end demo
 
 ## Roadmap
 

@@ -204,7 +204,10 @@ class CurriculumCallback(BaseCallback):
     recent success rate clears the threshold, advance frac_max — so RL learns to reach from
     progressively farther, ending at the rest pose the end-to-end demo hands it. THIS is what
     makes the reach itself RL instead of IK."""
-    def __init__(self, bump=0.1, thresh=0.62, window=200, verbose=1):
+    def __init__(self, bump=0.1, thresh=0.55, window=200, verbose=1):
+        # thresh 0.62->0.55: with always-on hold income the stochastic success plateaus ~0.5-0.56
+        # at each level (v4 sat 3.7M steps at level 0 without advancing); 0.55 still clears the
+        # v1 too-fast-advance failure (that was 0.5 WITHOUT the anti-parking reward fixes).
         super().__init__(verbose)
         self.bump = bump; self.thresh = thresh
         self.successes = deque(maxlen=window)
@@ -311,6 +314,11 @@ def train_button_press(
     use_subproc = n_envs > 1 and sys.platform != "win32" and device == "cpu"
     vec_cls = SubprocVecEnv if use_subproc else DummyVecEnv
     env = vec_cls([make_env(i) for i in range(n_envs)])
+    if use_subproc:
+        # workers are capped at 1 thread via OMP_NUM_THREADS (right — they'd thrash); but that
+        # also caps the LEARNER's gradient update to 1 core. Raise it for the main process only
+        # (workers already forked with their own 1-thread limit).
+        torch.set_num_threads(16)
     print(f"[ENV] Created {n_envs} env(s) via {vec_cls.__name__} on {device}")
     print(f"[ENV] Observation space: {env.observation_space.shape}")
     print(f"[ENV] Action space: {env.action_space.shape}")

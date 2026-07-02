@@ -2,35 +2,40 @@
 
 An end-to-end system that retrieves Standard Operating Procedures (SOPs) from natural language incident descriptions and generates executable robot plans. Built as the "brain" of a larger autonomous robotics project — this repo handles perception-to-plan, while the physical execution runs on a [Unitree G1 humanoid via MuJoCo](https://github.com/jatinsikka/mujoco_G1_AMO).
 
-> **Status:** Active development. The DL pipeline is functional; integration with the MuJoCo execution side is ongoing.
+> **Status:** WIRED INTO THE RUNTIME. The live path (used by `sop_demo.py` / `run_task.py` via
+> `../brain_bridge.py`) is: **hybrid retrieval** (semantic `all-MiniLM-L6-v2` interleaved with
+> lexical TF-IDF over the 100-SOP library) → an LLM picks the SOP from the merged top-5 →
+> **faithful planner** (`plan_from_sop`: one skill per written SOP step, in order, repeats
+> preserved, `walk_to` navigation inferred). The BERT dual-encoder / Flan-T5-LoRA stack below is
+> the original course-project design — kept for reference, not what runs.
 
-## How It Works
+## How It Works (current runtime path)
 
 ```
-Incident Description ──► Dual-Encoder Retriever ──► Top-K SOPs ──► LoRA Planner ──► JSON Plan ──► Robot Execution
-                           (BERT + InfoNCE)           (FAISS)       (Flan-T5)        (7 skills)     (MuJoCo stub)
+Incident ──► Hybrid Retriever ─────► Top-5 SOPs ──► LLM planner ─────► JSON Plan ──► Verified Execution
+             (MiniLM ⊕ TF-IDF)                      (plan_from_sop      (7 skills)    (../executor.py)
+                                                     as fallback)
 ```
 
-1. **Retrieval** — A dual-encoder BERT model, trained with contrastive learning (InfoNCE loss), encodes incident text and SOP documents into a shared embedding space. FAISS indexes all SOPs for sub-millisecond lookup.
-2. **Planning** — A Flan-T5 model fine-tuned with LoRA takes the retrieved SOP and generates a structured JSON plan constrained to 7 robot primitives (`walk_to`, `press_button`, `wait`, `read_sensor`, `pick`, `place`, `notify`).
-3. **Execution** — Plans are validated against a skill whitelist and dispatched to a MuJoCo skill API (currently mocked; real integration via the companion repo).
+## Results (historical — course project, NOT reproduced in this repo)
 
-## Results
+> ⚠️ The numbers below are from the Fall-2025 course project report. The trained checkpoints and
+> eval harness behind them are **not in this repo**, and we have not reproduced them here — they
+> are kept for provenance only and are not claims of this system. (Policy: we only publish
+> numbers we measured ourselves.)
 
 | Model | Recall@1 | Recall@5 | MRR | Latency |
 |-------|----------|----------|-----|---------|
-| **Trained Dual-Encoder BERT** | **0.96** | **0.99** | **0.98** | **58ms** |
+| Trained Dual-Encoder BERT | 0.96 | 0.99 | 0.98 | 58ms |
 | TF-IDF (baseline) | 0.96 | 0.99 | 0.98 | 1.6ms |
 | Pretrained BERT (zero-shot) | 0.22 | 0.50 | 0.31 | 60ms |
 | Ollama RAG (zero-shot) | 0.95 | 1.00 | 0.97 | 2297ms |
 
 | Planner Metric | Heuristic Baseline | Flan-T5 + LoRA |
 |----------------|-------------------|----------------|
-| Plan F1 | 0.45 | **0.78** |
-| Execution Success | 0.60 | **0.95** |
-| Valid JSON Rate | 0.80 | **0.98** |
-
-Training the dual-encoder on just 100 SOPs improves Recall@1 by **336%** over pretrained BERT. The LoRA planner trains only **0.2%** of parameters (0.5M / 250M) and achieves 78% F1.
+| Plan F1 | 0.45 | 0.78 |
+| Execution Success | 0.60 | 0.95 |
+| Valid JSON Rate | 0.80 | 0.98 |
 
 ## Dataset
 

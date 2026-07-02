@@ -40,7 +40,7 @@ The verifier earns this on day one — pointed at our own best grasp policy, it 
 
 | Path | What |
 |---|---|
-| `brain/` | SOP retrieval (100-SOP library) + LLM planner → typed JSON plans. From the Fall-2025 DL project; LLM layer being refreshed to a frontier model, execution being de-stubbed. |
+| `brain/` | SOP retrieval (100-SOP library): semantic MiniLM retriever + faithful SOP→plan mapper (`plan_from_sop`) + skill registry. Wired into the runtime via `brain_bridge.py` (hybrid semantic+lexical retrieval). |
 | `verifier.py` | Skill contracts: physics-checked pre/postconditions vs. `mjData`. |
 | `verify_policy.py` | Claimed-vs-verified evaluation of a trained policy. |
 | `train.py`, `env_wrapper*.py`, `reward_fn.py` | RL skills (grasp, button-press) on the AMO controller. |
@@ -54,7 +54,7 @@ The verifier earns this on day one — pointed at our own best grasp policy, it 
 - ✅ **RL reach-and-press via curriculum** (`train_button.py --curriculum`): the arm starts between the contact pose and the true rest pose, and the start distance grows with success — the deterministic policy reaches ~19 cm from rest and presses 28–31 mm, **no IK seed**. Key fixes: reach reward targets the button *cap face* (not the body origin) + an anti-parking proximity band. Smoothness is forced at the control level (low-pass on the arm command; jerk 0.83 → 0.001) — a reward-only anti-jerk penalty got hacked.
 - ✅ **Pick from the real table** — a controller, not RL: DLS-IK reach + force-gated latch, held lift, block stays on the tabletop
 - ✅ Verifier + no-early-stop eval; **verifying executor** (`executor.py`, `run_task.py`): command → plan → verified step-by-step execution, halts with a report on failure
-- ✅ **SOP-driven spine** (`brain_bridge.py`) + **LLM planner** (`llm_planner.py`): incident → SOP retrieval → typed plan → verified execution
+- ✅ **SOP-driven spine** (`brain_bridge.py`) + **LLM planner** (`llm_planner.py`): incident → **hybrid retrieval** over the 100-SOP library (semantic MiniLM interleaved with lexical TF-IDF — semantic wins paraphrases, lexical wins exact titles; the LLM picks from the merged top-5) → **faithful step-by-step plan** (`plan_from_sop`: one skill per written SOP step, in order, with inferred `walk_to` navigation) → verified execution
 - 🚧 Press hold + stance-robustness retrain (seamless walk→press handoff), lever on the same curriculum, one-take end-to-end demo
 
 ## Roadmap

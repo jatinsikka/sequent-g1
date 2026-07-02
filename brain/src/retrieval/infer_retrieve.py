@@ -57,7 +57,10 @@ def retrieve_topk(
         console.log("[yellow]Index not found. Building now...[/yellow]")
         build_and_save_index(texts, ids, out)
     emb, id_list, faiss_index, embed_type, vectorizer = load_index(out)
-    results = search([incident_text], emb, id_list, faiss_index, top_k=k*2, embed_type=embed_type, vectorizer=vectorizer)[0]  # Get 2x more, then re-rank
+    # Score the FULL corpus (100 SOPs = trivial), then keyword-re-rank. A top-2k pool let the
+    # right SOP fall outside the pool where the keyword boost could never rescue it
+    # ("pressure is low" -> SOP-001 ranked ~15th raw, unreachable with k*2=6).
+    results = search([incident_text], emb, id_list, faiss_index, top_k=len(id_list), embed_type=embed_type, vectorizer=vectorizer)[0]
     
     id_to_text = {s.sop_id: _synthesize_text(s) for s in sops}
     id_to_sop = {s.sop_id: s for s in sops}

@@ -43,10 +43,33 @@ def _tok(s: str) -> List[str]:
     return _TOKEN.findall(s.lower())
 
 
-# ---- retrieval: numpy-free TF-IDF cosine over the SOP corpus -----------------
+# ---- retrieval: SEMANTIC (sentence-transformers, the upgraded brain) with ----
+# ---- the numpy TF-IDF cosine as the no-dependency fallback -------------------
 
 def retrieve_sop(incident: str, sops: List[dict], k: int = 3) -> List[Tuple[dict, float]]:
-    """Rank SOPs by TF-IDF cosine similarity to the incident text; return the top-k (sop, score)."""
+    """HYBRID retrieval: interleave the SEMANTIC ranking (brain/src MiniLM retriever — wins
+    paraphrases: smoke -> Smoke Detection) with the lexical TF-IDF ranking (wins exact title
+    matches: 'pressure is low' -> Low Pressure Warning), dedup, top-k. The LLM planner picks
+    the SOP from this candidate set, so what matters is that the right SOP is IN it — each
+    ranker's best candidates are guaranteed a slot. Falls back to pure lexical if the
+    semantic stack is unavailable."""
+    lex = _retrieve_sop_tfidf(incident, sops, k=max(k, 3))
+    try:
+        from src.retrieval.infer_retrieve import retrieve_topk
+        by_id = {s["sop_id"]: s for s in sops}
+        sem = [(by_id[r["sop_id"]], float(r["score"])) for r in retrieve_topk(incident, k=max(k, 3))
+               if r["sop_id"] in by_id]
+    except Exception:
+        sem = []  # semantic stack missing/broken -> lexical only
+    merged, seen = [], set()
+    for pair in [p for ab in zip(sem, lex) for p in ab] + sem + lex:   # interleave sem/lex, then leftovers
+        if pair[0]["sop_id"] not in seen:
+            seen.add(pair[0]["sop_id"]); merged.append(pair)
+    return merged[:k] if merged else lex[:k]
+
+
+def _retrieve_sop_tfidf(incident: str, sops: List[dict], k: int = 3) -> List[Tuple[dict, float]]:
+    """Fallback: rank SOPs by TF-IDF cosine similarity to the incident text; top-k (sop, score)."""
     docs = [_tok(_text(s)) for s in sops]
     N = len(docs)
     df: Counter = Counter()
@@ -104,10 +127,16 @@ def step_to_skill(step: str) -> PlanStep:
 
 
 def incident_to_plan(incident: str) -> Tuple[Plan, dict, float]:
-    """Retrieve the best SOP and turn its steps into a typed Plan. Returns (plan, sop, score)."""
+    """Retrieve the best SOP and turn its steps into a typed Plan. Returns (plan, sop, score).
+    Uses the FAITHFUL planner (plan_from_sop: one skill per written SOP step, in order, with
+    inferred walk_to navigation) — the keyword step_to_skill loop is the fallback."""
     sops = _load_sops()
     ranked = retrieve_sop(incident, sops)
     sop, score = ranked[0]
-    steps = [step_to_skill(st) for st in sop.get("steps", [])]
+    try:
+        from src.planner.infer_plan import plan_from_sop
+        steps = [PlanStep(skill=s["skill"], args=s["args"]) for s in plan_from_sop(sop.get("steps", []))]
+    except Exception:
+        steps = [step_to_skill(st) for st in sop.get("steps", [])]
     plan = Plan(goal=f"{incident}  [SOP {sop['sop_id']}: {sop['title']}]", steps=steps)
     return plan, sop, score

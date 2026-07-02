@@ -33,3 +33,14 @@
 - Don't deploy the website or do other outward-facing actions without Jatin — prepare + flag.
 - If something is genuinely ambiguous/visual and blocks progress, leave the best-judgment call + a clear note for Jatin rather than stalling.
 - Keep this file + a running log of what happened each iteration (append to `OVERNIGHT_LOG.md`).
+
+## E2E Demo Gate Plan (2026-07-02, Jatin-approved process: he verifies each gate video before the next)
+- G1 PRESS solo: v9 (envelope 0.8) eval + hold + MEASURED center-strike -> video. [pending v9]
+- G2 LEVER solo: lever5 breaker pull-down (rest 1.05 -> 0.15, latch) -> video; bar = real arm motion, ~50deg throw. [training]
+- G3 WALK->PRESS continuous (no-teleport handoff). [after G1]
+- G4 WALK->PICK continuous (approved pick, walked into). [tomorrow]
+- G5 WALK->LEVER continuous. [after G2]
+- G6 ONE-TAKE: walk->table pick->carry->panel press->lever pull, following cam. [after all]
+- G7 SOP-driven wrapper (NL->SOP->plan->verified exec) + site/GitHub final video.
+- RULES: root-cause before retrain; visual judgments go to Jatin with the specific question.
+- OPEN (Jatin): carry the part to the panel vs place back? (rec: carry)

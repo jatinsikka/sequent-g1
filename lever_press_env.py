@@ -39,11 +39,12 @@ class LeverPressEnv(gym.Env):
     LEVER_JOINT = "lever_handle_joint"
     LEVER_BODY = "lever_handle"
     LEVER_GRIP_BODY = "lever_grip"  # the geom/body the hand actually contacts
+    REST_ANGLE = 1.05               # handle rests latched UP (breaker-style); task = pull DOWN
 
     def __init__(
         self,
         reward_fn: Optional[LeverPressRewardFunction] = None,
-        target_angle: float = 0.9,
+        target_angle: float = 0.15,
         freeze_arm: str = "left",
         max_episode_steps: int = 200,
         headless: bool = True,
@@ -65,6 +66,7 @@ class LeverPressEnv(gym.Env):
         # training callback. Makes the reach itself RL instead of an IK seed.
         self.curriculum = curriculum
         self.curriculum_frac_max = 0.0
+        self.curriculum_frac_min = 0.0
         self._cached_a4_c = None; self._cached_w3_c = None
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -149,7 +151,9 @@ class LeverPressEnv(gym.Env):
         # Episode tracking
         self.episode_steps = 0
         self.episode_return = 0.0
-        self.action_scale = 0.5
+        self.action_scale = 1.2  # 0.5 -> 1.2: the lever contact pose is up to 1.1 rad (shoulder_yaw) from
+        # rest — far beyond a +-0.5 envelope, so reaching the lever from rest was PHYSICALLY impossible
+        # for the policy. 1.2 covers it; the low-pass keeps the motion smooth (lever is a gross motion).
 
         # Robot positioning. The lever grip protrudes at x=0.6, further OUT laterally than the
         # buttons — reaching it from the button-style x=lever_x-0.08 stance needs shoulder
@@ -266,17 +270,21 @@ class LeverPressEnv(gym.Env):
         # just begins to move. Slightly BELOW the knob so a later push drives it UP (+angle).
         a4 = self.env.data.qpos[self.env.rarm_qadr].copy()
         w3 = self.env.wrist_target.copy()
-        # advance to the knob and then aim slightly INTO it (past center in -Y) so the closed
-        # pads seat ON the knob (radius 3.5cm) rather than hovering ~2cm off its front face.
-        for standoff in [0.14, 0.10, 0.07, 0.05, 0.03, 0.01, -0.015]:
-            tgt = grip() + np.array([0.0, standoff, -0.005])
+        # seat the pad ON TOP of the knob (sphere r=3.5cm): approach ABOVE it (+z ~ 5.5cm = past
+        # the sphere top) at decreasing +Y standoff, then LOWER onto the crown. A downward push
+        # then drives the handle DOWN through the arc (seating in FRONT just slides on the face).
+        for standoff in [0.14, 0.10, 0.06, 0.03, 0.0]:
+            tgt = grip() + np.array([0.0, standoff, 0.055])
             a4, w3, err = self.env.solve_right_arm7_ik(tgt)
-            for _ in range(60):
+            for _ in range(50):
                 self._amo_arm_step(a4, wrist_target=w3)
-            gp = self.env.gripper_point()
-            # stop once seated ON the knob (pad within the knob radius) or the hinge turned
-            if np.linalg.norm(gp - grip()) < 0.035 or float(self.env.data.qpos[self.lever_qadr]) > 0.04:
-                break
+        for drop in [0.045, 0.035, 0.028]:               # lower onto the crown until light contact
+            tgt = grip() + np.array([0.0, 0.0, drop])
+            a4, w3, err = self.env.solve_right_arm7_ik(tgt)
+            for _ in range(40):
+                self._amo_arm_step(a4, wrist_target=w3)
+            if float(self.env.data.qpos[self.lever_qadr]) < self.REST_ANGLE - 0.04:
+                break                                     # hinge just moved -> touching the crown
         self._solved_wrist = w3.copy()
         return a4
 
@@ -310,8 +318,9 @@ class LeverPressEnv(gym.Env):
 
         self.env.data.qvel[:] = 0.0
 
-        # Reset lever to closed (angle 0)
-        self.env.data.qpos[self.lever_qadr] = 0.0
+        # Reset lever LATCHED UP (breaker-style rest; friction holds it against gravity).
+        # The task is to PULL IT DOWN to ~0.15 rad — gravity assists, the latch holds the result.
+        self.env.data.qpos[self.lever_qadr] = self.REST_ANGLE
 
         mujoco.mj_forward(self.env.model, self.env.data)
 
@@ -378,15 +387,26 @@ class LeverPressEnv(gym.Env):
             self.env.wrist_target = self._solved_wrist.copy()
 
         elif self.unified and self.curriculum:
-            # CURRICULUM reach+turn (ported from button): seat the arm between the CONTACT pose
-            # (frac 0) and the REST pose (frac 1); frac ~ U[0, frac_max]. RL learns the reach
-            # from progressively farther, ending at the rest pose the end-to-end demo hands it.
-            if self._cached_a4_c is None:
-                self._cached_a4_c = self._servo_to_contact().copy()
-                self._cached_w3_c = self._solved_wrist.copy()
-            a4_c = self._cached_a4_c; w3_c = self._cached_w3_c
+            # 2-AXIS CURRICULUM: one frac drives BOTH how far the arm starts from the knob AND
+            # how far the LEVER starts from thrown. At frac 0 the lever starts one nudge from
+            # done with the pad on it (trivial bootstrap — the 0.63-rad full arc was undiscoverable
+            # by exploration: lever6 sat at 0.00). At frac 1: lever latched fully UP + arm at rest.
+            frac = float(np.random.uniform(min(self.curriculum_frac_min, self.curriculum_frac_max),
+                                           max(1e-3, self.curriculum_frac_max)))
+            start_angle = self.target_angle + 0.10 + (self.REST_ANGLE - self.target_angle - 0.10) * frac
+            self.env.data.qpos[self.lever_qadr] = start_angle
+            mujoco.mj_forward(self.env.model, self.env.data)
+            # contact pose depends on the lever angle -> lazily cache the servo per angle-bucket
+            if not hasattr(self, "_a4c_by_bucket"):
+                self._a4c_by_bucket = {}
+            bucket = round(frac * 5) / 5.0
+            if bucket not in self._a4c_by_bucket:
+                a4b = self._servo_to_contact().copy()
+                self._a4c_by_bucket[bucket] = (a4b, self._solved_wrist.copy())
+                self.env.data.qpos[self.lever_qadr] = start_angle   # servo may have moved it; restore
+                mujoco.mj_forward(self.env.model, self.env.data)
+            a4_c, w3_c = self._a4c_by_bucket[bucket]
             a4_rest = self.env.default_dof_pos[19:23].copy()
-            frac = float(np.random.uniform(0.0, max(1e-3, self.curriculum_frac_max)))
             a4_start = (1.0 - frac) * a4_c + frac * a4_rest
             self.arm_reach_bias[4:] = (a4_start - self.env.default_dof_pos[19:23]).astype(np.float32)
             self.env.wrist_target = w3_c.copy()
@@ -394,6 +414,9 @@ class LeverPressEnv(gym.Env):
             for _ in range(60):
                 self._amo_arm_step(a4_start, wrist_target=w3_c)
             self._cur_frac = frac
+            # RE-BASELINE the throw reward at the SEATED angle (no free income from the seat's
+            # own depression — lever5's policy retreated and farmed it).
+            self.reward_fn.rest_angle = float(max(self._get_lever_angle(), self.target_angle + 0.2))
 
         self.episode_steps = 0
         self.episode_return = 0.0

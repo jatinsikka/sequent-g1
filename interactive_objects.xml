@@ -79,7 +79,12 @@
       <geom name="lever_bracket" type="box" size="0.03 0.025 0.05" pos="0 -0.02 0" rgba="0.30 0.32 0.36 1" contype="2" conaffinity="2"/>
       <geom name="lever_pivot" type="cylinder" size="0.022 0.035" pos="0 0 0" euler="0 1.5708 0" rgba="0.5 0.5 0.55 1" contype="2" conaffinity="2"/>
       <body name="lever_handle" pos="0 0 0">
-        <joint name="lever_handle_joint" class="interactive" type="hinge" axis="1 0 0" range="0 1.2" damping="3" stiffness="20"/>
+        <!-- LATCHING lever (like a real panel lever): NO return spring + joint friction, so it
+             HOLDS wherever it's pushed. The spring version punished every partial push (the pad
+             slips off the knob at ~0.25 rad and the spring erased the progress) — with a latch,
+             partial pushes ACCUMULATE (ratchet) and the throw is learnable + stays visibly thrown.
+             Friction 1.5 >> handle gravity torque (~0.15 Nm), so it stays put at any angle. -->
+        <joint name="lever_handle_joint" class="interactive" type="hinge" axis="1 0 0" range="0 1.2" damping="2" stiffness="0" frictionloss="1.5"/>
         <!-- shaft points OUT toward the robot (+Y) at angle 0 (grip at y~-1.69, reachable at 3.8cm).
              The robot pushes the grip UP, swinging the handle up through the arc (+angle). This is the
              ONLY direction a side-pushing arm can both reach AND drive (tested: down/up-handle throws

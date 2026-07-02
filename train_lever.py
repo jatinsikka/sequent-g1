@@ -274,8 +274,8 @@ def train_lever(
 
 def main():
     parser = argparse.ArgumentParser(description="Train lever rotation policy")
-    parser.add_argument("--target_angle", type=float, default=0.9,
-                        help="Target hinge angle in rad")
+    parser.add_argument("--target_angle", type=float, default=0.15,
+                        help="Target hinge angle in rad (breaker-style: pull DOWN from rest 1.05 to here)")
     parser.add_argument("--timesteps", type=int, default=100000,
                         help="Total training timesteps")
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate")

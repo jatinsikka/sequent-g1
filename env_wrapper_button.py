@@ -88,6 +88,8 @@ class ButtonPressEnv(gym.Env):
         self._cached_a4_c = None; self._cached_w3_c = None   # contact pose (solved once per worker; servo is slow)
         self.curriculum_frac_max = 0.0   # grows 0->1: RL seats between contact-pose (0) and rest-pose (1); the
         #                                  reach it must learn grows as this rises. Bumped by the training callback.
+        self.curriculum_frac_min = 0.0   # floor for the draw: set >0 to CONCENTRATE training on far starts
+        #                                  (the demo hands the policy the rest pose = the far edge).
         self.unified = unified
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         
@@ -174,7 +176,10 @@ class ButtonPressEnv(gym.Env):
         # Episode tracking
         self.episode_steps = 0
         self.episode_return = 0.0
-        self.action_scale = 0.5  # Increased for larger arm movements
+        self.action_scale = 0.8  # 0.5 -> 0.8: from TRUE rest the contact pose needs shoulder_yaw +0.51 /
+        # elbow -0.67 rad — beyond a +-0.5 envelope, so the policy PHYSICALLY couldn't reach the button
+        # from exact rest (the demo handoff failure + v8's far-edge stall). 0.8 covers it with margin;
+        # the low-pass keeps motion smooth despite the larger scale.
         # unified-press motion shaping: LOW-PASS the arm command so the arm PHYSICALLY can't flail
         # (a reward penalty alone got reward-hacked — the policy flailed to bump the button). Plus a
         # strong torso-avoidance penalty.
@@ -466,7 +471,8 @@ class ButtonPressEnv(gym.Env):
                 self._cached_w3_c = self._solved_wrist.copy()
             a4_c = self._cached_a4_c; w3_c = self._cached_w3_c
             a4_rest = self.env.default_dof_pos[19:23].copy()
-            frac = float(np.random.uniform(0.0, max(1e-3, self.curriculum_frac_max)))
+            lo = min(self.curriculum_frac_min, self.curriculum_frac_max)
+            frac = float(np.random.uniform(lo, max(1e-3, self.curriculum_frac_max)))
             a4_start = (1.0 - frac) * a4_c + frac * a4_rest   # frac 0 = contact, 1 = rest pose
             self.arm_reach_bias[4:] = (a4_start - self.env.default_dof_pos[19:23]).astype(np.float32)
             self.env.wrist_target = w3_c.copy()          # pad pre-oriented for the contact face
@@ -488,6 +494,10 @@ class ButtonPressEnv(gym.Env):
     def set_curriculum_frac(self, f: float):
         """Advance the reach curriculum (called by the training callback via env_method)."""
         self.curriculum_frac_max = float(np.clip(f, 0.0, 1.0))
+
+    def set_curriculum_frac_min(self, f: float):
+        """Floor the draw (concentrate training on far starts)."""
+        self.curriculum_frac_min = float(np.clip(f, 0.0, 1.0))
 
     def _right_hand_pos(self) -> np.ndarray:
         """Right 'hand' contact point: gripper pad-midpoint (unified) or rubber hand."""

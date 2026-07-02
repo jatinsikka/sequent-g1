@@ -204,14 +204,23 @@ class CurriculumCallback(BaseCallback):
     recent success rate clears the threshold, advance frac_max — so RL learns to reach from
     progressively farther, ending at the rest pose the end-to-end demo hands it. THIS is what
     makes the reach itself RL instead of IK."""
-    def __init__(self, bump=0.1, thresh=0.55, window=200, verbose=1):
+    def __init__(self, bump=0.1, thresh=0.55, window=200, verbose=1, start=0.0):
         # thresh 0.62->0.55: with always-on hold income the stochastic success plateaus ~0.5-0.56
         # at each level (v4 sat 3.7M steps at level 0 without advancing); 0.55 still clears the
         # v1 too-fast-advance failure (that was 0.5 WITHOUT the anti-parking reward fixes).
+        # start>0: begin at that level (resume/fine-tune a policy that already mastered the reach).
         super().__init__(verbose)
         self.bump = bump; self.thresh = thresh
         self.successes = deque(maxlen=window)
-        self.frac_max = 0.0
+        self.frac_max = float(start)
+
+    def _on_training_start(self) -> None:
+        if self.frac_max > 0:
+            self.training_env.env_method("set_curriculum_frac", self.frac_max)
+            print(f"[CURRICULUM] starting at frac_max = {self.frac_max:.2f}", flush=True)
+        if getattr(self, "frac_min", 0.0) > 0:
+            self.training_env.env_method("set_curriculum_frac_min", self.frac_min)
+            print(f"[CURRICULUM] draw floor frac_min = {self.frac_min:.2f}", flush=True)
 
     def _on_step(self) -> bool:
         for info in self.locals.get("infos", []):
@@ -241,6 +250,9 @@ def train_button_press(
     checkpoint_dir: str = "checkpoints_button",
     n_envs: int = 1,
     curriculum: bool = False,
+    resume: str = None,
+    start_frac: float = 0.0,
+    frac_min: float = 0.0,
 ):
     """
     Train a policy to press a button.
@@ -327,8 +339,13 @@ def train_button_press(
     # minibatch to match (32 envs -> 32768 buffer, 1024 batch = 32 minibatches, as v5.6).
     batch_size = 1024 if n_envs > 1 else 64
 
-    # Create PPO model
-    model = PPO(
+    # Create PPO model (or RESUME: keep the learned policy/value, fresh optimizer state comes along;
+    # used to carry the learned reach across reward retunes instead of relearning from scratch)
+    if resume:
+        model = PPO.load(resume, env=env, device=device)
+        print(f"[RESUME] loaded {resume} at {model.num_timesteps} steps")
+    else:
+        model = PPO(
         "MlpPolicy",
         env,
         learning_rate=learning_rate,
@@ -356,7 +373,9 @@ def train_button_press(
     )
     
     progress_callback = ButtonPressCallback(eval_freq=2000)
-    curriculum_callback = CurriculumCallback() if curriculum else None
+    curriculum_callback = CurriculumCallback(start=start_frac) if curriculum else None
+    if curriculum_callback is not None:
+        curriculum_callback.frac_min = frac_min
     
     video_callback = VideoRecorderCallback(
         button_name=button_key,
@@ -408,6 +427,12 @@ def main():
                         help="Number of parallel envs (use 32 on the Azure F32as_v7 VM)")
     parser.add_argument("--curriculum", action="store_true",
                         help="Reach curriculum: RL learns to reach from progressively farther (not IK-seeded)")
+    parser.add_argument("--resume", type=str, default=None,
+                        help="Checkpoint .zip to resume from (keeps the learned policy across reward retunes)")
+    parser.add_argument("--start_frac", type=float, default=0.0,
+                        help="Curriculum level to START at (fine-tune a resumed policy at full range with 1.0)")
+    parser.add_argument("--frac_min", type=float, default=0.0,
+                        help="Draw floor: concentrate training on far starts (demo = rest pose = far edge)")
 
     args = parser.parse_args()
 
@@ -419,6 +444,9 @@ def main():
         use_wandb=not args.no_wandb,
         n_envs=args.n_envs,
         curriculum=args.curriculum,
+        resume=args.resume,
+        start_frac=args.start_frac,
+        frac_min=args.frac_min,
     )
 
 

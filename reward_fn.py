@@ -248,7 +248,8 @@ class ButtonPressRewardFunction:
         target_press_depth: float = 0.05,  # A SOLID press: per-step press reward saturates here
         hand_proximity_weight: float = 10.0,  # Increased to encourage reaching
         press_reward: float = 100.0,  # Per-step reward at full target depth (scales with depth)
-        hold_bonus: float = 30.0,  # bp-v2: steep per-step income while past the press threshold
+        hold_bonus: float = 15.0,  # halved from 30: at 30 the hold income dominated and the curriculum
+        #                            stalled at frac 0.30 for 3M+ steps (success capped under the gate)
         first_press_bonus: float = 50.0,  # One-time bonus on first crossing the threshold
         balance_weight: float = 3.0,  # Penalty for base drifting off spawn (counter reach-recoil)
         action_penalty: float = 0.0001,  # Reduced to not discourage movement
@@ -494,7 +495,8 @@ class LeverPressRewardFunction:
     def __init__(
         self,
         handle_position=(0.6, -1.72, 0.87),     # lever grip world pos at angle 0 (default)
-        target_angle: float = 0.9,               # rotate hinge to ~0.9 rad (~52 deg)
+        target_angle: float = 0.15,              # BREAKER-STYLE: pull DOWN to ~0.15 rad (from rest UP)
+        rest_angle: float = 1.05,                # handle rests latched UP; gravity assists the pull-down
         angle_tol: float = 0.10,                 # success: within ~0.1 rad of target, held
         hand_proximity_weight: float = 10.0,
         rotate_reward: float = 100.0,            # per-step reward at full target angle
@@ -507,6 +509,7 @@ class LeverPressRewardFunction:
     ):
         self.handle_position = np.array(handle_position)
         self.target_angle = target_angle
+        self.rest_angle = rest_angle
         self.angle_tol = angle_tol
         # CONTACT MODE (reset-in-contact): the episode STARTS with the gripper on the lever
         # grip, so RL only has to drive the hinge through its arc + HOLD at target. Zero the
@@ -552,19 +555,21 @@ class LeverPressRewardFunction:
         r_approach = self._compute_approach_reward(left_hand_pos, right_hand_pos, target_pos)
         info['r_approach'] = r_approach
 
-        # 3. Lever rotation reward — depth-monotonic toward target angle, no flat plateau.
+        # 3. Lever rotation reward — depth-monotonic PROGRESS toward the target, no flat plateau.
+        # Direction-agnostic: progress = how far along rest->target the hinge has traveled
+        # (breaker-style pull-DOWN: rest 1.05 -> target 0.15, so progress grows as angle FALLS).
         self.max_lever_angle = max(self.max_lever_angle, lever_angle)
-        angle_frac = float(np.clip(lever_angle / self.target_angle, 0.0, 1.0))
+        angle_frac = float(np.clip((self.rest_angle - lever_angle) / (self.rest_angle - self.target_angle), 0.0, 1.0))
         r_rotate = self.rotate_reward * angle_frac
         # success band: within tol of target
         if abs(lever_angle - self.target_angle) < self.angle_tol and not self.lever_turned:
             r_rotate += self.first_turn_bonus
             self.lever_turned = True
             print(f"    [REWARD] Lever turned! Angle: {lever_angle:.4f} rad (target {self.target_angle:.2f})")
-        # HOLD income: steady per-step income while the hinge is held near/past target, scaled
-        # by how far it's turned — pushes RL toward a firm SUSTAINED turn. Always on (was
-        # contact_mode-only; the button curriculum retracted after pressing for the same reason).
-        if lever_angle > (self.target_angle - self.angle_tol):
+        # HOLD income: steady per-step income while the hinge is at/past target, scaled by
+        # progress — pushes RL toward a firm completed throw. Always on. (Direction-agnostic:
+        # gate on progress, not raw angle.)
+        if angle_frac >= 1.0 - (self.angle_tol / abs(self.rest_angle - self.target_angle)):
             r_rotate += self.hold_bonus * angle_frac
         info['r_rotate'] = r_rotate
         info['lever_angle'] = lever_angle

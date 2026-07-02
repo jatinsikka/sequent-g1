@@ -28,6 +28,7 @@ target_yaw = env.target_yaw
 pel = e.model.jnt_qposadr[mujoco.mj_name2id(e.model, mujoco.mjtObj.mjOBJ_JOINT, 'pelvis')]
 press_y = float(e.data.qpos[pel + 1])           # the arrival (press) y
 e.data.qpos[pel + 1] += 0.60                     # teleport BACK (+Y) to start the walk
+e.data.qpos[pel] += 0.02                         # pre-compensate the walk's consistent x-drift (~2cm)
 e.data.qvel[:] = 0.0
 mujoco.mj_forward(e.model, e.data)
 
@@ -56,7 +57,9 @@ frames = []
 e._in_place_stand = False
 for _ in range(8): amo_step(0.0, a4_rest, np.zeros(3))
 for t in range(400):
-    if float(e.data.qpos[pel + 1]) <= press_y + 0.04: break
+    # walk in until slightly CLOSER than the nominal stance: the walk's stopping momentum leaves
+    # the pelvis ~4cm shy otherwise, putting the rest-pose reach beyond trained competence (~25cm)
+    if float(e.data.qpos[pel + 1]) <= press_y - 0.035: break
     amo_step(0.34, a4_rest, np.zeros(3))
     if t % 2 == 0: frames.append(shot())
 walk_frames = len(frames)
@@ -76,11 +79,13 @@ env._prev_action = np.zeros(env.num_arm_joints, dtype=np.float32)
 env.episode_steps = 0
 env.reward_fn.reset()
 env.initial_button_displacement = e.data.qpos[env.button_joint_id]
-for _ in range(30):                                # AMO settles from walk to stand (the "arrival")
-    amo_step(0.0, a4_rest, press_wrist); frames.append(shot())
+for i in range(80):                                # AMO settles from walk to stand (the "arrival") —
+    env._amo_arm_step(a4_rest, wrist_target=press_wrist)   # the ENV's own settle (boosted arm-hold +
+    if i % 2 == 0: frames.append(shot())           # wrist tilt), long enough to converge like training's
 obs = env._get_obs()
 maxpress = 0.0
-for t in range(200):
+env.max_episode_steps = 400   # give the reach+press room (the walk-in start is farther than eval's)
+for t in range(400):
     a, _ = model.predict(obs, deterministic=True)
     obs, r, term, trunc, info = env.step(a)
     maxpress = max(maxpress, env._get_button_displacement())

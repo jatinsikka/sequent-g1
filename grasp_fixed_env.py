@@ -134,7 +134,7 @@ class GraspFixedEnv(gym.Env):
         #   force-hold latch does the holding now, so the squeeze only needs to register a pinch (no crush)
         self.GRIP_FORCE = 5.0       # N each pad must exert for a grasp to count (kills the lopsided shove)
 
-        # ---- force-gated grip HOLD (the honest middle ground, not a rigid weld) ----
+        # ---- force-gated grip HOLD (between a free grip and a rigid weld) ----
         # MuJoCo friction cannot hold the box: a full close crushes it to ~700N normal and it extrudes
         # ("watermelon seed"), so it always slides out. Instead, once a genuine two-sided pinch is earned
         # (both pads >= GRIP_FORCE), we apply a CAPPED holding force that keeps the box riding the grip —
@@ -165,7 +165,7 @@ class GraspFixedEnv(gym.Env):
         m.opt.iterations = max(int(m.opt.iterations), 150)                  # resolve stiff contacts
         m.opt.ls_iterations = max(int(m.opt.ls_iterations), 50)
 
-        # ---- robustness mode: heavier tool + realistic friction (the honest test) ----
+        # ---- robustness mode: heavier tool + realistic friction (the harder test) ----
         # default (light 50g tool, friction 3.0) flatters the grip; robust=True makes it earn it.
         if robust:
             ratio = 0.25 / max(m.body_mass[self.tool_bid], 1e-6)            # -> 250g tool

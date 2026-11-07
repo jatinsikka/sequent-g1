@@ -2,7 +2,7 @@
 LLM planner — language incident -> retrieved SOPs -> a frontier LLM picks the right SOP and
 translates it into a typed, executable robot-skill plan (with the navigation human SOPs leave implicit).
 
-WHY THIS EXISTS (the honest story, see docs/notes/PLANNER_EVOLUTION.md):
+Background (see docs/notes/PLANNER_EVOLUTION.md):
   The original planner was built from scratch — a keyword classifier + a fine-tuned Flan-T5 (LoRA).
   It was brittle (exact-keyword matching didn't generalize to novel phrasings) and the small model
   couldn't reliably emit valid structured plans (the codebase is full of JSON-repair/salvage hacks).

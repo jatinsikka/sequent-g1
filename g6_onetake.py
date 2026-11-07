@@ -1,7 +1,7 @@
 """
 G6-lite — ONE CONTINUOUS SIM, ONE TAKE: the G1 WALKS to the workstation table, PICKS the
 red box (IK + force-gated latch), CARRIES it while WALKING ~2.5m (180-deg turn) to the
-control panel, PLACES the box down clear of the press path (side release, short honest drop),
+control panel, PLACES the box down clear of the press path (side release, short drop),
 PRESSES the yellow button ONCE with the RL curriculum policy, then lowers
 the arm to REST — box latched in the gripper through the carry. No cuts, no teleports after
 the walk starts (the press handoff uses end_to_end_demo's reset + full-snapshot restore).
@@ -376,7 +376,7 @@ if carry_fall:
 # 2d) PLACE the box down before pressing (a human doesn't press with a full hand — and 'place'
 # is one of the 7 skills). Release at the robot's SIDE (+X, y >= pelvis_y — AWAY from the
 # machine face; run 7 aimed pelvis+[0.28,-0.18] and shoved the box INTO the panel), from
-# whatever height the arm comfortably reaches — a short drop to the floor is honest, the arm
+# whatever height the arm comfortably reaches — a short drop to the floor is acceptable, the arm
 # cannot reach the floor from standing. CRITICAL: zero d.xfrc_applied on release — run 7's
 # box hung "wedged" at z=0.58 because the last capped-40N latch force kept being applied on
 # every mj_step after LATCH["on"]=False (latch_force only clears xfrc in its drop-gate), and

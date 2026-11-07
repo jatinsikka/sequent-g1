@@ -676,7 +676,7 @@ def _lever_handoff(met, lx, ly, step_lever_txt, i_lever_step):
             d.qpos[lever_qadr] = start_angle
             mujoco.mj_forward(m, d); e._extract_state()
         else:
-            print(f"  HONESTY GUARD: lever at {lever_angle():.2f} (knocked) — NOT restoring on camera")
+            print(f"  LEVER GUARD: lever at {lever_angle():.2f} (knocked) — NOT restoring on camera")
         for j in range(20):
             lever_arm_step(a4_start, w3_c, rec=(j % 2 == 0))
     else:
@@ -685,7 +685,7 @@ def _lever_handoff(met, lx, ly, step_lever_txt, i_lever_step):
             d.qpos[lever_qadr] = start_angle
             mujoco.mj_forward(m, d); e._extract_state()
         else:
-            print(f"  HONESTY GUARD: lever at {lever_angle():.2f} (knocked) — NOT restoring on camera")
+            print(f"  LEVER GUARD: lever at {lever_angle():.2f} (knocked) — NOT restoring on camera")
         for j in range(60):
             lever_arm_step(a4_start, w3_c, rec=(j % 2 == 0))
     met["start_angle"] = float(start_angle)

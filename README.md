@@ -8,7 +8,8 @@ A simulated Unitree G1 humanoid that takes a plant-floor incident ticket written
 </p>
 
 <p align="center">
-  <a href="https://sequentrobotics.com">Project site</a> ·
+  <a href="https://jatinsikka.github.io/sequent-g1/">Project page</a> ·
+  <a href="https://sequentrobotics.com">Website</a> ·
   <a href="docs/PAPER.md">Paper</a> ·
   <a href="brain/benchmark/REPRO_REPORT.md">Retrieval reproduction report</a> ·
   <a href="TRAINING_LOG.md">Training log</a>

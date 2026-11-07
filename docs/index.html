@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sequent</title>
+<meta name="description" content="A simulated Unitree G1 humanoid that takes a plain-language plant-floor ticket, retrieves the matching procedure out of 1,012, and executes it, with every step verified against the physics state.">
+<meta property="og:title" content="Sequent: SOP-Driven, Physics-Verified Loco-Manipulation on a Simulated Humanoid">
+<meta property="og:description" content="Plain-language ticket → retrieved procedure → humanoid execution, with every step verified from simulator state.">
+<meta property="og:image" content="https://sequentrobotics.com/static/videos/onetake.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231c5cab'/%3E%3Crect x='7' y='9' width='18' height='3' fill='%23fff'/%3E%3Crect x='7' y='15' width='18' height='3' fill='%23fff'/%3E%3Crect x='7' y='21' width='18' height='3' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #ffffff; --ink: #1a1a1a; --soft: #4a4a4a; --muted: #767676; --rule: #e4e4e1;
+    --accent: #1c5cab; --chip: #f2f1ed; --pass: #1f7a3f; --fail: #b3261e; --code: #f6f6f4;
+    --maxw: 920px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161616; --ink: #ecebe7; --soft: #c4c3bd; --muted: #9a9993; --rule: #2e2e2c;
+            --accent: #6aa5ec; --chip: #242422; --pass: #5cc27f; --fail: #f2847c; --code: #1f1f1d; }
+    img.fig { background: #fff; border-radius: 6px; }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width: var(--maxw); margin: 0 auto; padding: 0 16px 64px; }
+  header { text-align: center; padding: 56px 0 8px; }
+  h1 { font-size: clamp(1.7rem, 4.2vw, 2.5rem); line-height: 1.2; margin: 0 0 14px; letter-spacing: -0.01em; }
+  h1 .name { color: var(--accent); }
+  .authors { font-size: 1.1rem; margin: 0; }
+  .authors a { color: var(--ink); }
+  .affil { color: var(--muted); margin: 2px 0 20px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 8px; }
+  .links a { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px;
+             background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+  .links a:hover { background: var(--accent); }
+  h2 { font-size: 1.5rem; margin: 56px 0 14px; text-align: center; }
+  h3 { font-size: 1.1rem; margin: 28px 0 8px; }
+  p, li { color: var(--soft); }
+  a { color: var(--accent); }
+  video, img.fig { width: 100%; height: auto; display: block; border-radius: 8px; }
+  video { background: #000; }
+  .cap { font-size: 0.92rem; color: var(--muted); margin: 8px 0 0; line-height: 1.5; }
+  .cap b { color: var(--ink); }
+  .teaser { margin-top: 28px; }
+  .abstract { text-align: justify; hyphens: auto; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 6px; }
+  @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
+  .stat { background: var(--chip); border-radius: 10px; padding: 14px 16px; text-align: center; }
+  .stat .v { font-size: 1.7rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+  .stat .l { font-size: 0.88rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 14px 0; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); color: var(--soft); vertical-align: top; }
+  th { color: var(--ink); font-weight: 600; }
+  td.ok { color: var(--pass); font-weight: 700; white-space: nowrap; }
+  td.no { color: var(--fail); font-weight: 700; white-space: nowrap; }
+  .tablewrap { overflow-x: auto; }
+  .hacks { display: grid; grid-template-columns: 1fr 1.4fr; gap: 22px; align-items: start; }
+  @media (max-width: 640px) { .hacks { grid-template-columns: 1fr; } }
+  .hacks ul { margin: 0; padding-left: 20px; }
+  .hacks li { margin-bottom: 8px; }
+  pre { background: var(--code); border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; color: var(--ink); }
+  footer { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--rule); }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1><span class="name">Sequent</span>: SOP-Driven, Physics-Verified Loco-Manipulation on a Simulated Humanoid</h1>
+  <p class="authors"><a href="https://jatinsikka.me">Jatin Sikka</a></p>
+  <p class="affil">The University of Texas at Austin</p>
+  <div class="links">
+    <a href="https://github.com/jatinsikka/sequent-g1/blob/main/docs/PAPER.md">Paper</a>
+    <a href="https://github.com/jatinsikka/sequent-g1">Code</a>
+    <a href="https://github.com/jatinsikka/sequent-g1/blob/main/brain/benchmark/REPRO_REPORT.md">Reproduction report</a>
+  </div>
+</header>
+
+<section class="teaser">
+  <video src="static/videos/onetake.mp4" poster="static/videos/onetake.jpg" autoplay muted loop playsinline controls preload="metadata"></video>
+  <p class="cap"><b>One continuous simulation, no cuts.</b> A Unitree G1 walks to the table, picks the box, carries it to the panel with a 180° turn, places it, presses the button with an RL policy, and returns to rest. Every step is checked against the simulator state.</p>
+</section>
+
+<h2>Abstract</h2>
+<p class="abstract">Sequent takes a plant-floor incident ticket written the way an operator would write it, retrieves the matching Standard Operating Procedure out of 1,012, turns its steps into robot skills, and executes them on a simulated Unitree G1 in one continuous MuJoCo run. A verifier checks every step against measured physics rather than the policy's own report, so a step that fails is reported as failed. The retriever is a transformer bi-encoder fine-tuned with a contrastive loss: on vague operator tickets it ranks the right procedure first 58% of the time, against 36% for BM25 and 41% for the same model without fine-tuning, and the gain holds on procedures and machines never seen in training. The body uses controllers where the problem is geometric (walking, grasping) and reinforcement learning where it is contact-rich (pressing a button, pulling a lever). Every reward hack we hit along the way was caught by watching rollouts, not by a metric.</p>
+
+<h2>Method</h2>
+<img class="fig" src="figures/fig_pipeline.png" alt="Pipeline: ticket, fine-tuned retriever over 1,012 SOPs, rule-based planner, verifier, verdict; G1 skills walk (AMO policy), pick/place (IK and force-gated latch), press (PPO), lever (BC, DAgger, PPO)">
+<p class="cap"><b>Only the retriever and three of the skills are learned.</b> The ticket is matched to an SOP by the fine-tuned retriever; the planner maps each written step to a skill; the verifier runs each skill inside a pre/postcondition contract measured from simulator state and reports a verdict.</p>
+
+<h2>Retrieval</h2>
+<p>The benchmark has 1,012 synthetic SOPs across 46 equipment families, 22 look-alike procedures per machine, with 2,338 incidents written in vague, symptom-first operator language. The retriever is <code>all-MiniLM-L6-v2</code> (22.7M parameters) fine-tuned on 1,859 incident→SOP pairs in about two minutes on a laptop.</p>
+<div class="stats">
+  <div class="stat"><div class="v">0.58</div><div class="l">right SOP first, vague tickets<br>(BM25 0.36, untuned 0.41)</div></div>
+  <div class="stat"><div class="v">0.66 / 0.61</div><div class="l">on SOPs / machines never seen<br>in training (untuned 0.47 / 0.42)</div></div>
+  <div class="stat"><div class="v">0.92</div><div class="l">clear tickets from an<br>informed operator</div></div>
+</div>
+<img class="fig" src="figures/fig_retrieval.png" alt="Bar chart of R@1 for TF-IDF, BM25, untuned MiniLM, untuned bge-small and fine-tuned MiniLM on vague tickets, the same tickets with the machine named, and clear informed-operator tickets">
+<p class="cap"><b>Fine-tuning matters most when operators write vaguely.</b> R@1 over the full 1,012-SOP index; fine-tuned bars are mean ± std over 3 seeds. Clear tickets are easy for every method. Most remaining errors pick the right problem on the wrong machine, even when the ticket names the machine. The informed-operator tickets were written by the author.</p>
+
+<h2>Skills</h2>
+<div class="grid">
+  <div>
+    <video src="static/videos/pick.mp4" poster="static/videos/pick.jpg" muted loop playsinline controls preload="none"></video>
+    <p class="cap"><b>Pick: a controller, not RL.</b> IK to the box; the latch engages only when both finger pads measure contact force. 11 of 12 held lifts.</p>
+  </div>
+  <div>
+    <video src="static/videos/press.mp4" poster="static/videos/press.jpg" muted loop playsinline controls preload="none"></video>
+    <p class="cap"><b>Press: PPO with a curriculum.</b> Reaches about 19 cm from the rest pose and presses 29–40 mm, 8 of 8 deterministic starts.</p>
+  </div>
+  <div>
+    <video src="static/videos/lever.mp4" poster="static/videos/lever.jpg" muted loop playsinline controls preload="none"></video>
+    <p class="cap"><b>Lever: partial.</b> BC → DAgger → PPO. Completed the throw in 1 of 2 deterministic episodes, with jerky motion; the policy cannot observe a per-episode reach offset.</p>
+  </div>
+  <div>
+    <video src="static/videos/ticket.mp4" poster="static/videos/ticket.jpg" muted loop playsinline controls preload="none"></video>
+    <p class="cap"><b>Ticket to robot.</b> A held-out ticket goes through the retriever and planner; the robot walks and presses. Steps it has no body for (wait, read, notify) are shown as captions.</p>
+  </div>
+</div>
+
+<h2>The full run</h2>
+<video src="static/videos/finale.mp4" poster="static/videos/finale.jpg" muted playsinline controls preload="none"></video>
+<p class="cap"><b>One ticket, five actions, one take.</b> The SOP for this run was written for the demo, and keyword search also retrieves it, so this shows the pipeline end to end rather than retrieval accuracy. The recording is take 3 of 3, the weakest: place drifts, the press misses and the lever springs back, and the verifier reports each as failed. The best take:</p>
+<div class="tablewrap">
+<table>
+  <tr><th>Step</th><th>Measured outcome</th><th>Verdict</th></tr>
+  <tr><td>pick</td><td>box gripped, lifted, held</td><td class="ok">✓ pass</td></tr>
+  <tr><td>carry / place</td><td>carried to the panel, placed upright</td><td class="ok">✓ pass</td></tr>
+  <tr><td>press</td><td>33.8 mm press, held</td><td class="ok">✓ pass</td></tr>
+  <tr><td>lever</td><td>reached 0.443 rad; success needs under 0.25 rad (best of 4 stance variants)</td><td class="no">✗ fail</td></tr>
+  <tr><td>notify</td><td>verdict card sent: <b>“PARTIALLY RESOLVED”</b></td><td class="ok">✓ pass</td></tr>
+</table>
+</div>
+
+<h2>What broke</h2>
+<div class="hacks">
+  <div>
+    <video src="static/videos/hack_fling.mp4" poster="static/videos/hack_fling.jpg" autoplay muted loop playsinline preload="metadata"></video>
+    <p class="cap"><b>The reward paid for height, so the policy flung the tool.</b> Pure RL grasp, 1.5M steps: the "lift" metric looked great; the video shows a ballistic toss.</p>
+  </div>
+  <div>
+    <p>Every one of these was found by watching rendered rollouts. None was caught by a metric.</p>
+    <ul>
+      <li><b>Parking:</b> a proximity reward near the button taught the policy to hover 5 cm short and collect it indefinitely.</li>
+      <li><b>Pumping:</b> a per-step depth reward made press, release, press again profitable. Fix: end the episode on success.</li>
+      <li><b>Seat farming:</b> the lever's 0.17 rad of free travel paid a linear progress reward for sitting in it.</li>
+      <li><b>Air-swinging:</b> once pressing-once was enforced, the arm kept moving after the press while the hold counter ran.</li>
+      <li><b>Ballistic pop:</b> on the gripper humanoid, the RL grasp variants we tried scored 0% verified; their lifts were the box popping out of a crushing pinch. Grasping became a controller.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Limitations and next steps</h2>
+<ul>
+  <li><b>Simulation only</b>, MuJoCo. Next: move the body to Isaac Lab for faster contact training, then hardware.</li>
+  <li><b>Synthetic corpus</b> from one generator; there is no evaluation on real maintenance tickets yet.</li>
+  <li><b>The retriever always acts</b> on its closest SOP. Next: refuse or ask “which machine?” when the top match is weak or nearly tied, and filter by the machine ID a real ticket carries.</li>
+  <li><b>The lever is partial</b> (about 1 in 2); the fix, adding the reach offset to the observation, is designed but not trained.</li>
+</ul>
+
+<h2>BibTeX</h2>
+<pre>@misc{sikka2026sequent,
+  author = {Jatin Sikka},
+  title  = {Sequent: SOP-Driven, Physics-Verified Loco-Manipulation on a Simulated Humanoid},
+  year   = {2026},
+  url    = {https://sequentrobotics.com}
+}</pre>
+
+<footer>
+  The AMO whole-body controller is by Ze et al. (RSS 2025). Code under Apache 2.0. Updated November 2026.
+</footer>
+
+</main>
+</body>
+</html>

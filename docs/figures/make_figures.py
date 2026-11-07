@@ -5,6 +5,8 @@
 fig_retrieval.(png|pdf)  R@1 by method across three levels of ticket clarity
                          data: brain/benchmark/repro/results/tiered_eval.csv
 fig_pipeline.(png|pdf)   system diagram (no data)
+fig_envelope.(png|pdf)   required rest-to-contact joint offsets vs the action envelope
+                         data: docs/figures/data/action_envelope.csv
 
 Style follows the lab paper guide: text >= 20 pt, lines >= 3 px, every series distinguishable
 in black and white (hatching), color used only to separate the learned model from baselines
@@ -32,7 +34,7 @@ GREY_DARK, GREY_LIGHT = "#7d7c76", "#c9c8c2"
 
 plt.rcParams.update({
     "font.size": 20, "axes.titlesize": 22, "axes.labelsize": 22, "xtick.labelsize": 20,
-    "ytick.labelsize": 20, "legend.fontsize": 18, "font.family": "DejaVu Sans",
+    "ytick.labelsize": 20, "legend.fontsize": 20, "font.family": "DejaVu Sans",
     "axes.edgecolor": INK2, "axes.linewidth": 1.5, "text.color": INK, "axes.labelcolor": INK,
     "xtick.color": INK2, "ytick.color": INK2, "savefig.facecolor": SURFACE, "figure.facecolor": SURFACE,
     "hatch.linewidth": 1.5,
@@ -130,6 +132,27 @@ def fig_pipeline():
     save(fig, "fig_pipeline")
 
 
+def fig_envelope():
+    df = pd.read_csv(HERE / "data" / "action_envelope.csv")
+    labels = [f"{t}: {j}" for t, j in zip(df.task, df.joint)]
+    fig, ax = plt.subplots(figsize=(13.5, 5.6))
+    y = np.arange(len(df))[::-1]
+    ax.barh(y, df.required_offset_rad, height=0.55, color=BLUE_MID, edgecolor=INK, linewidth=1.5, zorder=2)
+    for yy, v in zip(y, df.required_offset_rad):
+        ax.text(v + 0.02, yy, f"{v:.2f}", va="center", fontsize=19, color=INK)
+    for x, style, lab in [(0.5, "--", "original envelope (0.5)"), (0.8, ":", "widened, press (0.8)"),
+                          (1.2, "-.", "widened, lever (1.2)")]:
+        ax.axvline(x, color=INK if x == 0.5 else INK2, linestyle=style, linewidth=3, label=lab, zorder=3)
+    ax.set_yticks(y, labels)
+    ax.set_xlabel("Rest-to-contact joint offset (rad)")
+    ax.set_xlim(0, 1.35)
+    ax.xaxis.grid(True, color="#e6e5e0", linewidth=1.2, zorder=0)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(loc="lower left", bbox_to_anchor=(0, 1.02), ncol=3, frameon=False, fontsize=20, handlelength=2.4, columnspacing=1.2)
+    save(fig, "fig_envelope")
+
+
 if __name__ == "__main__":
     fig_retrieval()
     fig_pipeline()
+    fig_envelope()

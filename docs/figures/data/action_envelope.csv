@@ -1,0 +1,4 @@
+task,joint,required_offset_rad
+press,shoulder yaw,0.511
+press,elbow,0.672
+lever,largest joint,1.1

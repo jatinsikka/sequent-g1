@@ -56,3 +56,6 @@ brain/benchmark/repro/results/scores_*.npz
 !docs/figures/*.png
 !docs/media/*.gif
 !docs/static/videos/*.mp4
+
+# LaTeX build log (docs/build_paper.py)
+docs/paper.log

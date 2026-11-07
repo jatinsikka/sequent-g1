@@ -1,0 +1,596 @@
+{
+  "family": "Liquid Filling Machine",
+  "sops": [
+    {
+      "ref": "fill_level_low",
+      "title": "Supply Level Below Low Setpoint",
+      "condition": "The fill level sensor reads below the low-level setpoint continuously for more than 30 seconds during an active fill cycle.",
+      "steps": [
+        "walk_to supply_tank_area",
+        "read_sensor supply_tank_level_sensor",
+        "notify fill_operator",
+        "walk_to control_panel",
+        "press_button refill_request_button",
+        "wait 60",
+        "read_sensor fill_level_sensor"
+      ],
+      "equipment": ["supply_tank_level_sensor", "fill_level_sensor", "control_panel", "refill_request_button"]
+    },
+    {
+      "ref": "fill_level_sudden_drop",
+      "title": "Sudden Fill Level Collapse",
+      "condition": "The fill level sensor reading drops by more than 40 percent within 5 seconds during normal operation, indicating supply line separation or rupture upstream.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button emergency_stop_button",
+        "notify maintenance_supervisor",
+        "walk_to fill_manifold",
+        "read_sensor fill_line_pressure_sensor",
+        "notify shift_lead",
+        "read_sensor fill_level_sensor"
+      ],
+      "equipment": ["fill_level_sensor", "fill_line_pressure_sensor", "control_panel", "emergency_stop_button"]
+    },
+    {
+      "ref": "fill_level_high",
+      "title": "Fill Level Exceeds Upper Setpoint",
+      "condition": "The fill level sensor reading rises above the upper ceiling setpoint, indicating a risk of overfill into the fill vessel.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_fill_button",
+        "walk_to fill_station",
+        "read_sensor fill_level_sensor",
+        "notify quality_tech",
+        "wait 10",
+        "press_button drain_valve_button"
+      ],
+      "equipment": ["fill_level_sensor", "control_panel", "pause_fill_button", "drain_valve_button"]
+    },
+    {
+      "ref": "pump_pressure_low",
+      "title": "Pump Outlet Pressure Below Minimum Threshold",
+      "condition": "The pump outlet pressure sensor reads below the minimum operating threshold for more than 15 seconds, resulting in reduced but nonzero flow at the nozzles.",
+      "steps": [
+        "walk_to pump_station",
+        "read_sensor pump_outlet_pressure_sensor",
+        "read_sensor pump_inlet_pressure_sensor",
+        "walk_to control_panel",
+        "notify maintenance_tech",
+        "wait 20",
+        "press_button pump_reset_button"
+      ],
+      "equipment": ["pump_outlet_pressure_sensor", "pump_inlet_pressure_sensor", "control_panel", "pump_reset_button"]
+    },
+    {
+      "ref": "pump_pressure_high",
+      "title": "Pump Outlet Pressure Exceeds Maximum Ceiling",
+      "condition": "The pump outlet pressure sensor exceeds the maximum ceiling setpoint, indicating a downstream blockage that has halted or severely restricted nozzle flow.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_fill_button",
+        "walk_to pump_station",
+        "read_sensor pump_outlet_pressure_sensor",
+        "notify maintenance_tech",
+        "walk_to fill_manifold",
+        "read_sensor nozzle_backpressure_sensor"
+      ],
+      "equipment": ["pump_outlet_pressure_sensor", "nozzle_backpressure_sensor", "control_panel", "pause_fill_button"]
+    },
+    {
+      "ref": "nozzle_jam_partial",
+      "title": "Single Nozzle Partial Flow Restriction",
+      "condition": "One fill nozzle channel reports a flow rate below 50 percent of nominal while all adjacent channels are operating within normal range.",
+      "steps": [
+        "walk_to fill_station",
+        "read_sensor nozzle_flow_sensor",
+        "walk_to control_panel",
+        "press_button isolate_nozzle_button",
+        "notify maintenance_tech",
+        "walk_to nozzle_bank",
+        "pick nozzle_cleaning_probe"
+      ],
+      "equipment": ["nozzle_flow_sensor", "control_panel", "isolate_nozzle_button", "nozzle_cleaning_probe"]
+    },
+    {
+      "ref": "nozzle_jam_full",
+      "title": "Single Nozzle Complete Blockage",
+      "condition": "A fill nozzle channel reports zero flow for more than 10 seconds while the fill cycle is active and all other channels are flowing normally.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_fill_button",
+        "walk_to nozzle_bank",
+        "read_sensor nozzle_flow_sensor",
+        "pick blocked_nozzle_cap",
+        "place parts_tray",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["nozzle_flow_sensor", "control_panel", "stop_fill_button", "blocked_nozzle_cap", "parts_tray"]
+    },
+    {
+      "ref": "level_sensor_fault",
+      "title": "Fill Level Sensor Signal Fault",
+      "condition": "The fill level sensor returns an error code or an out-of-range value that does not correlate with the physically observable tank contents.",
+      "steps": [
+        "walk_to fill_station",
+        "read_sensor fill_level_sensor",
+        "walk_to control_panel",
+        "notify maintenance_tech",
+        "walk_to sensor_junction_box",
+        "read_sensor level_sensor_signal_tester",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["fill_level_sensor", "level_sensor_signal_tester", "control_panel", "sensor_junction_box"]
+    },
+    {
+      "ref": "minor_leak_nozzle",
+      "title": "Minor Nozzle Fitting Drip Within Containment",
+      "condition": "A slow drip or weep is detected at a nozzle-to-manifold fitting; accumulated fluid is confined to the drip tray and has not reached the floor.",
+      "steps": [
+        "walk_to fill_station",
+        "read_sensor drip_tray_sensor",
+        "walk_to control_panel",
+        "press_button isolate_nozzle_button",
+        "notify maintenance_tech",
+        "walk_to nozzle_bank",
+        "pick drip_tray_absorbent_pad"
+      ],
+      "equipment": ["drip_tray_sensor", "control_panel", "isolate_nozzle_button", "drip_tray_absorbent_pad"]
+    },
+    {
+      "ref": "major_rupture_line",
+      "title": "Fill Line Rupture With Floor Contamination",
+      "condition": "A fill line ruptures and releases product as an active spray beyond containment boundaries, with product detected on the floor.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button emergency_stop_button",
+        "notify maintenance_supervisor",
+        "notify safety_officer",
+        "walk_to fill_line_shutoff",
+        "press_button manual_shutoff_valve_button",
+        "walk_to spill_kit_station"
+      ],
+      "equipment": ["control_panel", "emergency_stop_button", "fill_line_shutoff", "manual_shutoff_valve_button", "spill_kit_station"]
+    },
+    {
+      "ref": "pump_seal_leak",
+      "title": "Pump Shaft Seal Slow Weep",
+      "condition": "The pump shaft seal shows slow fluid accumulation on the pump housing that has developed over multiple hours without active spraying or splashing.",
+      "steps": [
+        "walk_to pump_station",
+        "read_sensor pump_seal_drip_sensor",
+        "notify maintenance_tech",
+        "walk_to control_panel",
+        "press_button pump_isolate_button",
+        "wait 10",
+        "pick seal_drip_collection_pan"
+      ],
+      "equipment": ["pump_seal_drip_sensor", "control_panel", "pump_isolate_button", "seal_drip_collection_pan"]
+    },
+    {
+      "ref": "filter_change",
+      "title": "Inline Filter Differential Pressure Changeout",
+      "condition": "The inline filter differential pressure gauge reaches the change-out threshold or the scheduled replacement interval has elapsed.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_fill_button",
+        "walk_to filter_station",
+        "pick spent_filter_housing",
+        "place filter_disposal_bin",
+        "pick replacement_filter",
+        "place filter_housing"
+      ],
+      "equipment": ["control_panel", "pause_fill_button", "filter_station", "spent_filter_housing", "filter_disposal_bin", "replacement_filter", "filter_housing"]
+    },
+    {
+      "ref": "nozzle_cleaning",
+      "title": "Scheduled Nozzle Cleaning and Purge",
+      "condition": "The scheduled nozzle cleaning interval has been reached or visible residue or crust buildup is observed on external nozzle inspection.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_fill_button",
+        "walk_to nozzle_bank",
+        "pick nozzle_cleaning_brush",
+        "place nozzle_cleaning_basin",
+        "wait 120",
+        "notify quality_tech"
+      ],
+      "equipment": ["control_panel", "stop_fill_button", "nozzle_bank", "nozzle_cleaning_brush", "nozzle_cleaning_basin"]
+    },
+    {
+      "ref": "pump_lubrication",
+      "title": "Pump Bearing Scheduled Lubrication",
+      "condition": "The pump bearing lubrication interval has been reached per the preventive maintenance schedule.",
+      "steps": [
+        "walk_to maintenance_cart",
+        "pick grease_gun",
+        "walk_to pump_station",
+        "place grease_gun_on_bearing_port",
+        "wait 10",
+        "place grease_gun",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["maintenance_cart", "grease_gun", "pump_station", "grease_gun_on_bearing_port"]
+    },
+    {
+      "ref": "level_sensor_calibration",
+      "title": "Fill Level Sensor Zero and Span Calibration",
+      "condition": "The fill level sensor calibration is due per the maintenance schedule or immediately following sensor replacement.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_fill_button",
+        "walk_to fill_station",
+        "read_sensor fill_level_sensor",
+        "walk_to calibration_station",
+        "pick calibration_reference_gauge",
+        "notify quality_tech"
+      ],
+      "equipment": ["control_panel", "pause_fill_button", "fill_level_sensor", "calibration_station", "calibration_reference_gauge"]
+    },
+    {
+      "ref": "fill_volume_calibration",
+      "title": "Fill Volume Accuracy Verification and Adjustment",
+      "condition": "Fill volume accuracy check indicates drift outside acceptance tolerance, or scheduled volumetric calibration interval has elapsed.",
+      "steps": [
+        "walk_to fill_station",
+        "pick calibration_container",
+        "place fill_nozzle_position",
+        "press_button manual_fill_cycle_button",
+        "wait 30",
+        "read_sensor fill_weight_scale",
+        "notify quality_tech"
+      ],
+      "equipment": ["fill_station", "calibration_container", "fill_nozzle_position", "manual_fill_cycle_button", "fill_weight_scale"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout Before Maintenance Access",
+      "condition": "Any maintenance, repair, or adjustment work requiring physical access inside the filling machine guarding must be preceded by full energy isolation.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button main_power_disconnect_button",
+        "walk_to energy_isolation_panel",
+        "pick loto_lock",
+        "place loto_hasp",
+        "pick loto_tag",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "main_power_disconnect_button", "energy_isolation_panel", "loto_lock", "loto_hasp", "loto_tag"]
+    },
+    {
+      "ref": "product_spill_response",
+      "title": "Product Spill Outside Containment Floor Response",
+      "condition": "Product spillage is found on the floor outside primary containment but the fill line and pump are intact and there is no active spray.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_fill_button",
+        "notify safety_officer",
+        "walk_to spill_kit_station",
+        "pick spill_absorbent_bag",
+        "place spill_area",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["control_panel", "pause_fill_button", "spill_kit_station", "spill_absorbent_bag", "spill_area"]
+    },
+    {
+      "ref": "emergency_stop",
+      "title": "Emergency Stop Engagement and Recovery",
+      "condition": "An imminent personnel safety hazard or uncontrolled equipment condition requires immediate machine halt by engaging the nearest emergency stop device.",
+      "steps": [
+        "walk_to nearest_estop_station",
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "notify safety_officer",
+        "wait 30",
+        "read_sensor machine_status_indicator"
+      ],
+      "equipment": ["nearest_estop_station", "red_estop_button", "machine_status_indicator"]
+    },
+    {
+      "ref": "startup_sequence",
+      "title": "Beginning of Shift Startup Sequence",
+      "condition": "The liquid filling machine requires startup at the beginning of shift before production can commence.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button main_power_button",
+        "wait 30",
+        "read_sensor fill_level_sensor",
+        "read_sensor pump_outlet_pressure_sensor",
+        "press_button production_start_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["control_panel", "main_power_button", "fill_level_sensor", "pump_outlet_pressure_sensor", "production_start_button"]
+    },
+    {
+      "ref": "shutdown_sequence",
+      "title": "End of Shift Shutdown Sequence",
+      "condition": "The liquid filling machine requires an orderly shutdown at the end of shift after all production fill cycles are complete.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_fill_button",
+        "wait 15",
+        "press_button pump_off_button",
+        "press_button main_power_button",
+        "walk_to fill_station",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["control_panel", "stop_fill_button", "pump_off_button", "main_power_button", "fill_station"]
+    },
+    {
+      "ref": "fill_weight_inspection",
+      "title": "In-Process Fill Weight Quality Inspection",
+      "condition": "Periodic quality sampling of filled containers is required during active production to verify fill weight accuracy.",
+      "steps": [
+        "walk_to fill_station",
+        "pick filled_container_sample",
+        "walk_to quality_inspection_bench",
+        "place filled_container_sample",
+        "read_sensor fill_weight_scale",
+        "notify quality_tech",
+        "walk_to fill_station"
+      ],
+      "equipment": ["fill_station", "filled_container_sample", "quality_inspection_bench", "fill_weight_scale"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "i001",
+      "sop_ref": "fill_level_low",
+      "text": "Running line 2 this morning, about an hour into first shift the alarm started beeping. Tank had been getting ahead of itself draining — product usage got ahead of replenishment. Nothing dramatic, level just crept down below where it should be and the machine slowed."
+    },
+    {
+      "id": "i002",
+      "sop_ref": "fill_level_low",
+      "text": "Third shift left the supply tank barely half full. By 7am the indicator was reading under the low mark and filling had slowed way down. Had to call for a refill before we could keep going on line 3."
+    },
+    {
+      "id": "i003",
+      "sop_ref": "fill_level_low",
+      "text": "The unit by bay 4 kept flagging a product-low condition on and off for about 20 minutes this afternoon. Checked the gauge on the reservoir — yeah, it was draining down incrementally below where it needed to be. No sudden change, just gradual."
+    },
+    {
+      "id": "i004",
+      "sop_ref": "fill_level_sudden_drop",
+      "text": "I was watching the HMI on line 1 and the tank reading just fell off a cliff — dropped something like 60 percent in maybe 3 or 4 seconds. No alarm had even triggered yet. Clearly something upstream let go, not a normal drain situation at all."
+    },
+    {
+      "id": "i005",
+      "sop_ref": "fill_level_sudden_drop",
+      "text": "Second shift called in — the machine basically lost all its product in an instant. One moment reading fine, then practically empty. It wasn't a slow drain. Turns out a fitting blew upstream of the supply connection."
+    },
+    {
+      "id": "i006",
+      "sop_ref": "fill_level_sudden_drop",
+      "text": "The level on the screen on line 4 went from normal down to near zero in just a few seconds. Not like it was draining — it just vanished. We hit stop immediately. Looked like a line separation somewhere in the supply circuit."
+    },
+    {
+      "id": "i007",
+      "sop_ref": "fill_level_high",
+      "text": "The batch on line 3 was running and product started creeping up past the indicator's upper mark on the fill vessel. Machine hadn't stopped itself. Had to intervene before it went over the lip."
+    },
+    {
+      "id": "i008",
+      "sop_ref": "fill_level_high",
+      "text": "QC walked by and flagged it — the vessel on station 2 was reading above the high limit. The machine just kept going, didn't cut out on its own. We were watching it climb into territory where overflow becomes a real risk."
+    },
+    {
+      "id": "i009",
+      "sop_ref": "fill_level_high",
+      "text": "Running station 5 this afternoon, the level climbed past the green zone on the display and went into the red at the top. Machine was still trying to push more in even though the vessel was already too full. Caught it before any spill."
+    },
+    {
+      "id": "i010",
+      "sop_ref": "pump_pressure_low",
+      "text": "Line 4 filling was running but way slower than it should be. Containers were taking almost twice as long to fill. Not stopped — just sluggish, like the pump was tired. Pressure warning light came on at some point."
+    },
+    {
+      "id": "i011",
+      "sop_ref": "pump_pressure_low",
+      "text": "Maintenance got a call because the pump on the unit near bay 7 was underperforming. Output was there but at half-speed — flow was barely a trickle compared to spec. Machine was running, product was coming out, just very slowly."
+    },
+    {
+      "id": "i012",
+      "sop_ref": "pump_pressure_low",
+      "text": "Second shift noted fills were dragging on line 2. Pump sounded like it was straining but not stopping. Nothing alarming by sound, just not keeping pace. We checked and the outlet pressure was reading low on the gauge."
+    },
+    {
+      "id": "i013",
+      "sop_ref": "pump_pressure_high",
+      "text": "The pump on line 1 started hammering and the pressure alarm went solid red. Flow actually stopped coming out at the nozzles — something plugged downstream of the pump. Had to pause the whole line."
+    },
+    {
+      "id": "i014",
+      "sop_ref": "pump_pressure_high",
+      "text": "We had a situation on the south filler where the pump was clearly working hard — you could hear it — but nothing was coming out at the heads. Pressure gauge was pinned at the top. Definitely a clog somewhere in the manifold after the pump."
+    },
+    {
+      "id": "i015",
+      "sop_ref": "nozzle_jam_partial",
+      "text": "On the 6-head filler over by line 5, one of the nozzles was filling way slower than the rest. The other five heads were going fine. That one was just dribbling instead of dosing. Rest of the bank looked normal."
+    },
+    {
+      "id": "i016",
+      "sop_ref": "nozzle_jam_partial",
+      "text": "Third shift left a note that station 3 nozzle head number 4 was putting out maybe a third of what the others were doing during the whole run. Every other head was fine — just that one was dragging behind."
+    },
+    {
+      "id": "i017",
+      "sop_ref": "nozzle_jam_partial",
+      "text": "QC pulled samples and found one lane consistently coming up light while everything else was on target. Tracked it to the fill head for that lane — slow, not stopped. The adjacent heads were all at normal output."
+    },
+    {
+      "id": "i018",
+      "sop_ref": "nozzle_jam_full",
+      "text": "One nozzle on line 2 was completely dead this morning. The other heads were running fine. Nothing came out of that one at all during the whole cycle — total blockage. One lane producing empty containers."
+    },
+    {
+      "id": "i019",
+      "sop_ref": "nozzle_jam_full",
+      "text": "We got containers coming off the conveyor with zero product in one position. Checked that nozzle — bone dry, not even dripping. The head next to it was going strong. Had to take that channel out of service."
+    },
+    {
+      "id": "i020",
+      "sop_ref": "nozzle_jam_full",
+      "text": "Second shift found a whole lane of empties coming off line 4. Went to the nozzle — absolutely nothing. No output at all. The head right beside it was dosing perfectly. Cycle was still running, just that one head was completely out."
+    },
+    {
+      "id": "i021",
+      "sop_ref": "level_sensor_fault",
+      "text": "The fill level was showing a fault code on the display even though the tank looked about half full when I looked in the top. Stuck a dipstick in and the liquid was right there — gauge is just lying."
+    },
+    {
+      "id": "i022",
+      "sop_ref": "level_sensor_fault",
+      "text": "Machine kept alarming on level but when we actually checked the tank it was clearly at a good level visually. The reading on the screen was jumping around between weird numbers, nothing stable. Tank was fine — instrument was the problem."
+    },
+    {
+      "id": "i023",
+      "sop_ref": "level_sensor_fault",
+      "text": "Maintenance tech came by line 3 because the level indicator threw an out-of-range error. But the tank wasn't empty or full — liquid was right where it should be. The actual process was okay; the instrument was misbehaving."
+    },
+    {
+      "id": "i024",
+      "sop_ref": "minor_leak_nozzle",
+      "text": "Noticed a small drip coming from where one of the nozzle hoses connects to the manifold on line 5. Landing in the tray below, not hitting the floor. Slow drip — not spraying, not gushing, just seeping at the fitting."
+    },
+    {
+      "id": "i025",
+      "sop_ref": "minor_leak_nozzle",
+      "text": "The drip tray under head number 3 on the east filler had more product in it than usual at end of shift. Traced it to a seep at the fitting right above. All of it stayed in the containment — nothing on the floor at all."
+    },
+    {
+      "id": "i026",
+      "sop_ref": "major_rupture_line",
+      "text": "Line 3 had a blowout — one of the fill hoses let go completely and product was spraying all over the back of the machine and getting onto the floor. Someone hit the big red button right away and we called it in to maintenance and safety."
+    },
+    {
+      "id": "i027",
+      "sop_ref": "major_rupture_line",
+      "text": "There was product all over the floor around the filler on the east wall. It wasn't dripping — it was coming out hard, you could hear the hiss before you even saw it. Floor got soaked fast. Full stop, everyone back."
+    },
+    {
+      "id": "i028",
+      "sop_ref": "major_rupture_line",
+      "text": "Second shift had to clear the area around line 2 because product was actively spraying from a burst section of fill line and soaking everything nearby. Floor was a mess. Safety got called within a few minutes of it starting."
+    },
+    {
+      "id": "i029",
+      "sop_ref": "pump_seal_leak",
+      "text": "The pump body down on line 1 was wet around the shaft area. Not dripping fast — more like it was sweating over time. By end of shift there was a small puddle underneath it but nothing spraying or running."
+    },
+    {
+      "id": "i030",
+      "sop_ref": "pump_seal_leak",
+      "text": "During a walk-through maintenance noticed the pump casing near the drive end on line 4 was collecting fluid. Floor under it was damp but it wasn't running out — slow seep that had been building up all day. Wasn't obvious until someone walked close."
+    },
+    {
+      "id": "i031",
+      "sop_ref": "filter_change",
+      "text": "The differential pressure alarm on the inline filter skid over at the south filler went off during second shift. Filter has been in for a while anyway — due for a swap."
+    },
+    {
+      "id": "i032",
+      "sop_ref": "filter_change",
+      "text": "We had reduced throughput on line 4 and the pressure drop reading across the filter was high. That filter was clearly loaded up. Pulled it at the next break window and put a fresh one in."
+    },
+    {
+      "id": "i033",
+      "sop_ref": "nozzle_cleaning",
+      "text": "End of shift I could see buildup around the nozzle tips on line 2. Product had dried and was starting to crust around the openings. Cleaning was due by schedule and the visual confirmed it."
+    },
+    {
+      "id": "i034",
+      "sop_ref": "nozzle_cleaning",
+      "text": "Line 5 nozzles were dripping for a few seconds after each cycle ended — usually means there's residue buildup around the valve seats. Overdue for a proper clean-out by PM interval."
+    },
+    {
+      "id": "i035",
+      "sop_ref": "pump_lubrication",
+      "text": "PM came due on the main fill pump bearings on line 1. Nothing wrong mechanically — just greasing per the schedule before the interval runs out."
+    },
+    {
+      "id": "i036",
+      "sop_ref": "pump_lubrication",
+      "text": "Maintenance tech swung by the pump station on line 3 for the routine lube. Grease interval had run out per the PM sheet, so he worked through it before starting the next run."
+    },
+    {
+      "id": "i037",
+      "sop_ref": "level_sensor_calibration",
+      "text": "We just put in a new level sensor on line 3 after the old one failed. Had to get it zeroed and spanned before running any product — can't trust a fresh sensor right out of the box."
+    },
+    {
+      "id": "i038",
+      "sop_ref": "level_sensor_calibration",
+      "text": "Calibration on the tank level instrument over at the loading dock filler was overdue per the PM sheet. Quality signed off on pulling it for adjustment before we started the next shift."
+    },
+    {
+      "id": "i039",
+      "sop_ref": "fill_volume_calibration",
+      "text": "QC weighed samples off line 4 and found them consistently about 2 percent under target. Not a huge miss but outside tolerance. Called to have the dose adjusted before we keep running."
+    },
+    {
+      "id": "i040",
+      "sop_ref": "fill_volume_calibration",
+      "text": "Had containers coming off line 2 running a bit heavy this morning — QC caught it in the first inspection round. Dosing setup needed a trim. Pulled a reference container and ran through the adjustment."
+    },
+    {
+      "id": "i041",
+      "sop_ref": "lockout_tagout",
+      "text": "Had to go into the fill station on line 1 to replace a nozzle fitting that was weeping. Before anyone touched anything inside the guard perimeter we went through the full energy isolation — no shortcuts."
+    },
+    {
+      "id": "i042",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance crew was pulling the pump on line 3 for a seal overhaul. Went through the energy isolation steps before they started breaking any flanges. Standard practice before going into that zone."
+    },
+    {
+      "id": "i043",
+      "sop_ref": "product_spill_response",
+      "text": "Someone overfilled a sample container during a manual pull on line 4 and a bit of product got onto the floor nearby. Not a lot — no line damage, no spray — just a small puddle that needed to be dealt with."
+    },
+    {
+      "id": "i044",
+      "sop_ref": "product_spill_response",
+      "text": "Found a small puddle near the base of the filler on line 2. Looked like a container got tipped over at some point. Floor was wet but the machine was fine — no rupture, nothing active. Just needed cleanup."
+    },
+    {
+      "id": "i045",
+      "sop_ref": "emergency_stop",
+      "text": "A rag someone had left nearby got too close to the rotating parts on line 1. The operator closest to the panel hit the big red button to kill everything before it got pulled in. No injury, but we stopped hard."
+    },
+    {
+      "id": "i046",
+      "sop_ref": "emergency_stop",
+      "text": "Second shift operator saw someone's hand too close to the nozzle bank while a cycle was active and hit the stop without hesitating. Machine locked up immediately. Had to clear the e-stop and check everything before restarting."
+    },
+    {
+      "id": "i047",
+      "sop_ref": "startup_sequence",
+      "text": "Coming on at 6am, line 3 was cold and needed to be brought up for the day shift. Ran through the morning bring-up — powered on, checked readings, made sure everything was ready before allowing product to flow."
+    },
+    {
+      "id": "i048",
+      "sop_ref": "startup_sequence",
+      "text": "First shift got in and powered up line 1 for the day. Usual routine — energized the panel, waited for the system to initialize, checked the sensors, then got the go-ahead to start running."
+    },
+    {
+      "id": "i049",
+      "sop_ref": "shutdown_sequence",
+      "text": "End of second shift on line 2 — went through the usual wind-down. Stopped the fill cycle, let the pump coast down, then cut main power. Logged the shutdown time and headed out."
+    },
+    {
+      "id": "i050",
+      "sop_ref": "shutdown_sequence",
+      "text": "At the end of the day we did the normal close-down on line 4. Cycle stopped, pump off, then main power cut. Walked the station before leaving to make sure everything was secured."
+    },
+    {
+      "id": "i051",
+      "sop_ref": "fill_weight_inspection",
+      "text": "QC tech grabbed three containers off line 5 mid-shift to check their weights. Part of the normal inspection round — pulled them right off the conveyor and brought them to the bench."
+    },
+    {
+      "id": "i052",
+      "sop_ref": "fill_weight_inspection",
+      "text": "During active production on line 3, a sample was pulled and weighed on the bench scale to confirm accuracy. Routine periodic check — nothing prompted it, just the scheduled sampling interval coming due."
+    }
+  ]
+}

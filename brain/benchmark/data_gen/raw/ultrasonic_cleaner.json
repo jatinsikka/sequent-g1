@@ -1,0 +1,736 @@
+{
+  "family": "Ultrasonic Cleaner",
+  "sops": [
+    {
+      "ref": "tank_temp_low",
+      "title": "Tank Temperature Below Setpoint",
+      "condition": "The temperature sensor on the ultrasonic cleaning tank reads more than 5°C below the programmed setpoint (typically 55°C) during a sustained normal-operation window.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "read_sensor tank_temperature_sensor",
+        "press_button heater_boost_button",
+        "wait 120 seconds",
+        "read_sensor tank_temperature_sensor",
+        "notify maintenance_tech if temperature has not recovered to within 3°C of setpoint"
+      ],
+      "equipment": [
+        "tank_temperature_sensor",
+        "heater_boost_button",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "tank_temp_sudden_drop",
+      "title": "Sudden Tank Temperature Collapse",
+      "condition": "The tank temperature sensor shows a drop of 10°C or more within a 2-minute window, indicating possible heater element failure or catastrophic cold-load ingestion rather than gradual drift.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button pause_cycle_button",
+        "read_sensor tank_temperature_sensor",
+        "read_sensor heater_status_indicator",
+        "notify maintenance_tech immediately",
+        "press_button estop_button if heater_status_indicator reads FAULT"
+      ],
+      "equipment": [
+        "tank_temperature_sensor",
+        "heater_status_indicator",
+        "pause_cycle_button",
+        "estop_button",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "tank_temp_high",
+      "title": "Tank Temperature Overheat Alarm",
+      "condition": "The tank temperature sensor reads above the maximum safe operating ceiling (65°C), triggering the overheat alarm on the control panel during active operation.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "read_sensor tank_temperature_sensor",
+        "press_button heater_cutoff_button",
+        "press_button pause_cycle_button",
+        "wait 300 seconds",
+        "read_sensor tank_temperature_sensor",
+        "notify supervisor if temperature remains above 60°C after the cool-down wait"
+      ],
+      "equipment": [
+        "tank_temperature_sensor",
+        "heater_cutoff_button",
+        "pause_cycle_button",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "solution_level_low",
+      "title": "Tank Solution Level Low Warning",
+      "condition": "The solution level sensor triggers the amber low-level warning when the fluid drops below the 75% mark on the tank sight glass, while transducers remain fully submerged.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_station",
+        "read_sensor solution_level_sensor",
+        "pick cleaning_solution_drum",
+        "place cleaning_solution_drum at fill_port",
+        "press_button fill_pump_start_button",
+        "wait 60 seconds",
+        "read_sensor solution_level_sensor"
+      ],
+      "equipment": [
+        "solution_level_sensor",
+        "cleaning_solution_drum",
+        "fill_port",
+        "fill_pump_start_button",
+        "ultrasonic_cleaner_station"
+      ]
+    },
+    {
+      "ref": "solution_level_critical",
+      "title": "Tank Solution Level Critical Immediate Shutdown",
+      "condition": "The solution level sensor registers below the transducer-exposure threshold (50% of tank capacity), risking cavitation damage to transducer faces and incomplete part submersion.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button pause_cycle_button",
+        "press_button transducer_power_off_button",
+        "read_sensor solution_level_sensor",
+        "notify maintenance_tech immediately",
+        "pick cleaning_solution_drum",
+        "place cleaning_solution_drum at fill_port"
+      ],
+      "equipment": [
+        "solution_level_sensor",
+        "pause_cycle_button",
+        "transducer_power_off_button",
+        "cleaning_solution_drum",
+        "fill_port",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "minor_leak",
+      "title": "Minor Tank Fitting Leak Response",
+      "condition": "A small drip or seep is observed at a tank fitting, drain valve, or pipe joint with a fluid loss rate under 0.5 L/min and no continuous floor pooling outside the containment berm.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_station",
+        "read_sensor floor_leak_detector_sensor",
+        "pick absorbent_pad",
+        "place absorbent_pad at leak_location",
+        "notify maintenance_tech",
+        "press_button caution_beacon_button"
+      ],
+      "equipment": [
+        "floor_leak_detector_sensor",
+        "absorbent_pad",
+        "caution_beacon_button",
+        "ultrasonic_cleaner_station"
+      ]
+    },
+    {
+      "ref": "major_rupture",
+      "title": "Major Tank Rupture Emergency Response",
+      "condition": "A catastrophic breach of the tank wall, weld seam, or drain line produces significant fluid pooling on the floor outside the containment berm and activates the floor leak detector alarm.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button estop_button",
+        "walk_to area_evacuation_beacon",
+        "press_button area_evacuation_beacon_button",
+        "notify supervisor immediately",
+        "notify safety_officer immediately"
+      ],
+      "equipment": [
+        "estop_button",
+        "area_evacuation_beacon_button",
+        "floor_leak_detector_sensor",
+        "area_evacuation_beacon",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "transducer_fault",
+      "title": "Transducer Electrical Fault Alarm",
+      "condition": "The transducer fault indicator illuminates on the control panel, signaling an electrical open-circuit, short-circuit, or overcurrent condition in one or more transducer elements.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "read_sensor transducer_fault_indicator",
+        "press_button transducer_power_off_button",
+        "press_button pause_cycle_button",
+        "notify maintenance_tech",
+        "pick transducer_fault_log_sheet",
+        "place transducer_fault_log_sheet at maintenance_inbox"
+      ],
+      "equipment": [
+        "transducer_fault_indicator",
+        "transducer_power_off_button",
+        "pause_cycle_button",
+        "transducer_fault_log_sheet",
+        "maintenance_inbox",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "frequency_deviation",
+      "title": "Ultrasonic Frequency Out of Specification",
+      "condition": "The frequency monitor reads outside the ±2 kHz tolerance band around the 40 kHz nominal, indicating resonance drift without any transducer electrical fault code present on the panel.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "read_sensor frequency_monitor_display",
+        "press_button frequency_auto_tune_button",
+        "wait 30 seconds",
+        "read_sensor frequency_monitor_display",
+        "notify maintenance_tech if frequency remains outside 38-42 kHz band"
+      ],
+      "equipment": [
+        "frequency_monitor_display",
+        "frequency_auto_tune_button",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "power_unit_overload",
+      "title": "Ultrasonic Power Unit Overload Alarm",
+      "condition": "The power unit overload alarm activates, indicating the generator is drawing above rated current, without a concurrent transducer electrical fault code appearing on the panel.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "read_sensor power_unit_overload_indicator",
+        "press_button transducer_power_off_button",
+        "wait 60 seconds",
+        "press_button power_unit_reset_button",
+        "read_sensor power_unit_overload_indicator",
+        "notify maintenance_tech if overload indicator re-trips after reset"
+      ],
+      "equipment": [
+        "power_unit_overload_indicator",
+        "transducer_power_off_button",
+        "power_unit_reset_button",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "solution_change",
+      "title": "Full Solution Drain and Refill",
+      "condition": "Scheduled solution replacement is due per the weekly maintenance calendar, or solution contamination or discoloration has been confirmed by quality inspection.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_station",
+        "press_button drain_valve_open_button",
+        "wait 600 seconds",
+        "press_button drain_valve_close_button",
+        "pick cleaning_solution_drum",
+        "place cleaning_solution_drum at fill_port",
+        "press_button fill_pump_start_button"
+      ],
+      "equipment": [
+        "drain_valve_open_button",
+        "drain_valve_close_button",
+        "cleaning_solution_drum",
+        "fill_port",
+        "fill_pump_start_button",
+        "ultrasonic_cleaner_station"
+      ]
+    },
+    {
+      "ref": "transducer_inspection",
+      "title": "Periodic Transducer Surface Inspection and Cleaning",
+      "condition": "Monthly transducer inspection interval is due, or visual scale buildup or erosion is observed on transducer faces during a routine visual check with the tank drained.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button transducer_power_off_button",
+        "walk_to ultrasonic_cleaner_station",
+        "pick transducer_cleaning_brush",
+        "place transducer_cleaning_brush at transducer_array",
+        "read_sensor transducer_visual_inspection_port",
+        "notify maintenance_tech if erosion depth exceeds 2 mm on any face"
+      ],
+      "equipment": [
+        "transducer_power_off_button",
+        "transducer_cleaning_brush",
+        "transducer_array",
+        "transducer_visual_inspection_port",
+        "ultrasonic_cleaner_control_panel",
+        "ultrasonic_cleaner_station"
+      ]
+    },
+    {
+      "ref": "heater_element_check",
+      "title": "Immersion Heater Element Inspection",
+      "condition": "The quarterly heater inspection interval is reached, or the heater fails to bring the bath to setpoint within the standard 15-minute warm-up window.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button heater_cutoff_button",
+        "wait 300 seconds",
+        "walk_to ultrasonic_cleaner_station",
+        "read_sensor heater_element_resistance_probe",
+        "notify maintenance_tech if resistance reading falls outside the 18-22 ohm acceptable range"
+      ],
+      "equipment": [
+        "heater_cutoff_button",
+        "heater_element_resistance_probe",
+        "ultrasonic_cleaner_control_panel",
+        "ultrasonic_cleaner_station"
+      ]
+    },
+    {
+      "ref": "filter_replacement",
+      "title": "Filtration System Filter Cartridge Replacement",
+      "condition": "The filter differential-pressure indicator reads above 15 psi, indicating a loaded cartridge, or the bi-weekly scheduled replacement interval is reached.",
+      "steps": [
+        "walk_to filtration_unit",
+        "read_sensor filter_differential_pressure_sensor",
+        "pick replacement_filter_cartridge",
+        "place replacement_filter_cartridge at filter_housing",
+        "press_button filter_prime_button",
+        "read_sensor filter_differential_pressure_sensor"
+      ],
+      "equipment": [
+        "filter_differential_pressure_sensor",
+        "replacement_filter_cartridge",
+        "filter_housing",
+        "filter_prime_button",
+        "filtration_unit"
+      ]
+    },
+    {
+      "ref": "tank_calibration",
+      "title": "Ultrasonic Power and Frequency Calibration",
+      "condition": "The quarterly calibration interval is reached, or post-maintenance re-verification is required after transducer array replacement or generator service.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "pick calibration_hydrophone",
+        "place calibration_hydrophone at tank_center_fixture",
+        "press_button calibration_mode_button",
+        "read_sensor calibration_output_display",
+        "notify maintenance_tech if any acoustic power or frequency reading deviates more than 5% from the reference standard"
+      ],
+      "equipment": [
+        "calibration_hydrophone",
+        "tank_center_fixture",
+        "calibration_mode_button",
+        "calibration_output_display",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout Procedure for Maintenance Isolation",
+      "condition": "Any scheduled or corrective maintenance requiring physical access to the tank interior, immersion heater, transducer array, or drive electronics cabinet is about to begin.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button estop_button",
+        "walk_to main_power_disconnect",
+        "press_button main_power_disconnect_switch",
+        "pick loto_lock",
+        "place loto_lock at main_power_disconnect",
+        "notify maintenance_tech that machine isolation is confirmed"
+      ],
+      "equipment": [
+        "estop_button",
+        "main_power_disconnect_switch",
+        "loto_lock",
+        "main_power_disconnect",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "chemical_spill",
+      "title": "Cleaning Solution Spill Response",
+      "condition": "Cleaning solution has escaped the tank containment berm and is present on the plant floor, detected visually by the operator or triggered by the floor leak sensor alarm.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button pause_cycle_button",
+        "walk_to spill_kit_cabinet",
+        "pick chemical_spill_kit",
+        "place chemical_spill_kit at spill_location",
+        "notify safety_officer"
+      ],
+      "equipment": [
+        "pause_cycle_button",
+        "chemical_spill_kit",
+        "spill_kit_cabinet",
+        "floor_leak_detector_sensor",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "emergency_stop",
+      "title": "Emergency Stop Activation and Verification",
+      "condition": "An imminent safety hazard is observed at or near the ultrasonic cleaner — such as personnel contact risk, fire, or unknown loud event — requiring immediate cessation of all machine motion and energy output.",
+      "steps": [
+        "walk_to nearest_estop_station",
+        "press_button estop_button",
+        "read_sensor estop_status_indicator",
+        "notify supervisor immediately",
+        "wait 30 seconds",
+        "read_sensor estop_status_indicator"
+      ],
+      "equipment": [
+        "estop_button",
+        "estop_status_indicator",
+        "nearest_estop_station"
+      ]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Normal Ultrasonic Cleaner Startup Sequence",
+      "condition": "The cleaning system is in a fully de-energized state and must be brought to operational readiness at the start of a production shift or after a planned shutdown.",
+      "steps": [
+        "walk_to main_power_disconnect",
+        "press_button main_power_on_switch",
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button heater_start_button",
+        "wait 600 seconds",
+        "read_sensor tank_temperature_sensor",
+        "press_button transducer_power_on_button"
+      ],
+      "equipment": [
+        "main_power_on_switch",
+        "heater_start_button",
+        "transducer_power_on_button",
+        "tank_temperature_sensor",
+        "main_power_disconnect",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "Normal Ultrasonic Cleaner Shutdown Sequence",
+      "condition": "Production shift is ending or a planned shutdown is required, with the cleaning cycle complete and no parts remaining in the tank.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_control_panel",
+        "press_button transducer_power_off_button",
+        "press_button heater_cutoff_button",
+        "wait 300 seconds",
+        "press_button main_power_off_switch",
+        "walk_to main_power_disconnect",
+        "press_button main_power_disconnect_switch"
+      ],
+      "equipment": [
+        "transducer_power_off_button",
+        "heater_cutoff_button",
+        "main_power_off_switch",
+        "main_power_disconnect_switch",
+        "main_power_disconnect",
+        "ultrasonic_cleaner_control_panel"
+      ]
+    },
+    {
+      "ref": "cleanliness_inspection",
+      "title": "Post Clean Part Cleanliness Inspection",
+      "condition": "A batch of parts has completed the ultrasonic cleaning cycle and must be verified for surface cleanliness before transfer to the next production stage.",
+      "steps": [
+        "walk_to part_unload_station",
+        "pick inspection_uv_lamp",
+        "place inspection_uv_lamp at part_inspection_fixture",
+        "read_sensor cleanliness_uv_sensor",
+        "notify quality_inspector if any part fails the cleanliness threshold",
+        "pick rejected_parts_tray",
+        "place rejected_parts_tray at rework_area"
+      ],
+      "equipment": [
+        "inspection_uv_lamp",
+        "part_inspection_fixture",
+        "cleanliness_uv_sensor",
+        "rejected_parts_tray",
+        "rework_area",
+        "part_unload_station"
+      ]
+    },
+    {
+      "ref": "solution_concentration_check",
+      "title": "Cleaning Solution Concentration Verification",
+      "condition": "The start-of-shift solution check interval is reached, or a process quality alert has flagged potential solution degradation or over-dilution.",
+      "steps": [
+        "walk_to ultrasonic_cleaner_station",
+        "pick solution_sample_cup",
+        "place solution_sample_cup at solution_sample_port",
+        "pick refractometer",
+        "place refractometer at solution_sample_cup",
+        "read_sensor refractometer_display",
+        "notify maintenance_tech if reading is outside the 5 to 8 percent concentration range"
+      ],
+      "equipment": [
+        "solution_sample_cup",
+        "solution_sample_port",
+        "refractometer",
+        "refractometer_display",
+        "ultrasonic_cleaner_station"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-UC-001",
+      "sop_ref": "tank_temp_low",
+      "text": "Checked on the cleaner at station 4 around 9 AM and the bath felt cool. Looked at the gauge — it was sitting at 48 degrees when we run it at 55. Parts coming out with a light oily film. Nothing alarmed out, just reading low for a while."
+    },
+    {
+      "id": "INC-UC-002",
+      "sop_ref": "tank_temp_low",
+      "text": "Second shift here, the unit by bay 7 was only at 50°C when I checked around 2 AM. No fault codes, no lights, just the thermometer sitting low. Bumped the heat up and it crept back to normal over the next half hour."
+    },
+    {
+      "id": "INC-UC-003",
+      "sop_ref": "tank_temp_low",
+      "text": "The south-side wash unit has been 6 degrees under target all morning. No alarms firing. Parts aren't coming out as bright as they should — the residue you normally don't see is showing up on the inspection stand."
+    },
+    {
+      "id": "INC-UC-004",
+      "sop_ref": "tank_temp_sudden_drop",
+      "text": "We were mid-run and the bath temp just fell off a cliff — lost 12 degrees in under two minutes. Nothing gradual about it. Think the element gave out. Hit pause immediately and called maintenance."
+    },
+    {
+      "id": "INC-UC-005",
+      "sop_ref": "tank_temp_sudden_drop",
+      "text": "Right around 6:30 on first shift the cleaner near the unload dock went from 54 down to 41 degrees in what felt like seconds. It was not a slow drift. Killed the cycle and got the tech out — heater died mid-run."
+    },
+    {
+      "id": "INC-UC-006",
+      "sop_ref": "tank_temp_high",
+      "text": "The high-temp alarm went off on the cleaner near press 3. Panel was flashing, readout showed 68°C. Had to stop the run — nothing should be operating anywhere near that hot."
+    },
+    {
+      "id": "INC-UC-007",
+      "sop_ref": "tank_temp_high",
+      "text": "First thing this morning one of the cleaners smelled weird and the panel was lit up. Gauge said 71 degrees. Killed the heater immediately and let it cool down before we touched anything."
+    },
+    {
+      "id": "INC-UC-008",
+      "sop_ref": "tank_temp_high",
+      "text": "During a changeover the unit near station 9 had the overheat indicator on and the temp was at 66°C. Had to pull the parts already in the tank and hold the batch until it came back down to safe range."
+    },
+    {
+      "id": "INC-UC-009",
+      "sop_ref": "solution_level_low",
+      "text": "The sight glass on the cleaner at the end of line 2 was showing the fluid sitting pretty low — call it three-quarters. Yellow warning light was on but the transducers were still covered. Topped it off and kept running."
+    },
+    {
+      "id": "INC-UC-010",
+      "sop_ref": "solution_level_low",
+      "text": "Came in between shifts for a walk-around and the level indicator on the corner unit was blinking amber. Fluid looked low in the glass but nothing was exposed. Added chemical and the light cleared."
+    },
+    {
+      "id": "INC-UC-011",
+      "sop_ref": "solution_level_critical",
+      "text": "Fluid dropped so far you could see the tops of the transducer plates in the unit by the rinse station. The ultrasonics were making a high-pitched rattling sound I've never heard before. Killed the power to the transducers right away."
+    },
+    {
+      "id": "INC-UC-012",
+      "sop_ref": "solution_level_critical",
+      "text": "Start of third shift the bath was barely covering the bottom of the tank in cell 2. Transducers were running dry — you could hear them screaming. Stopped the process and got maintenance on the phone."
+    },
+    {
+      "id": "INC-UC-013",
+      "sop_ref": "solution_level_critical",
+      "text": "The fill line on the south dock cleaner must have been blocked overnight. By 10 AM the tank was about half full with ultrasonics still going. Parts weren't even fully submerged. Had to stop and refill before continuing."
+    },
+    {
+      "id": "INC-UC-014",
+      "sop_ref": "minor_leak",
+      "text": "Noticed a slow drip coming from one of the fittings on the side of the cleaner near bay 5. Maybe a few drops per minute. Nothing major, no puddle on the floor. Put a rag under it and left a note for maintenance."
+    },
+    {
+      "id": "INC-UC-015",
+      "sop_ref": "minor_leak",
+      "text": "The elbow joint on the return line at the back of the unit has a weep going. Been watching it for an hour and it hasn't gotten worse. Dripping into the berm, not onto the floor, but the seep is definitely real."
+    },
+    {
+      "id": "INC-UC-016",
+      "sop_ref": "major_rupture",
+      "text": "The whole side seam of the cleaner near the loading dock just let go. Fluid was everywhere — had to get everyone away from the area immediately. Floor sensor alarm was screaming. We hit the red button and evacuated that corner of the shop."
+    },
+    {
+      "id": "INC-UC-017",
+      "sop_ref": "major_rupture",
+      "text": "A drain-side pipe blew completely during the noon run on line 3. We're talking a serious flood situation, not a drip. The berm was overwhelmed. Called out a full area evacuation and got safety on the radio."
+    },
+    {
+      "id": "INC-UC-018",
+      "sop_ref": "major_rupture",
+      "text": "The cleaner by the loading dock dumped almost its entire tank onto the plant floor in about 30 seconds flat. The containment couldn't handle it. We hit estop, cleared the area, and notified the supervisor and the safety officer."
+    },
+    {
+      "id": "INC-UC-019",
+      "sop_ref": "transducer_fault",
+      "text": "Fault light on the generator box lit up on the unit in cell 3 and the panel showed a transducer error code. No weird sounds, no heat, just the alarm and a solid red LED. Shut down the ultrasonics and logged it."
+    },
+    {
+      "id": "INC-UC-020",
+      "sop_ref": "transducer_fault",
+      "text": "Mid-run on line 6 the control panel threw a transducer alarm — looked like an electrical fault based on the code displayed. The machine stopped itself but I powered down the generator manually as well and called the tech."
+    },
+    {
+      "id": "INC-UC-021",
+      "sop_ref": "transducer_fault",
+      "text": "Right after startup on the unit near press 8, got an overcurrent fault on the display. Transducer fault LED was solid, not blinking. Nothing was running hot or making noise — just the fault code sitting there."
+    },
+    {
+      "id": "INC-UC-022",
+      "sop_ref": "frequency_deviation",
+      "text": "The frequency readout on the unit by the rinse tank was sitting at 43.5 kHz all morning. No error code on the panel, just the gauge reading high. Cleaning results were noticeably off — parts coming out with more residue than usual."
+    },
+    {
+      "id": "INC-UC-023",
+      "sop_ref": "frequency_deviation",
+      "text": "Quality flagged that parts from the cleaner on line 6 weren't as clean as spec. Checked the frequency display and it had drifted down to 37.8 kHz — no alarm, no fault light, just quietly off-spec all shift."
+    },
+    {
+      "id": "INC-UC-024",
+      "sop_ref": "power_unit_overload",
+      "text": "The overload alarm on the power supply went off on the cleaner near press 8 but there was no transducer fault showing anywhere. Generator box felt hot to the touch. Tripped once, reset it, held for ten minutes then tripped again."
+    },
+    {
+      "id": "INC-UC-025",
+      "sop_ref": "power_unit_overload",
+      "text": "The generator box on the corner cleaner alarmed out — overload indicator lit up but transducer check came back clean, no shorts or opens. Had to cycle the reset twice before it would stay up."
+    },
+    {
+      "id": "INC-UC-026",
+      "sop_ref": "power_unit_overload",
+      "text": "During second shift the power unit on the unit by bay 2 started running louder than normal, then the overload light came on. No transducer codes. Reset it once and it held, but maintenance wants to look at the generator."
+    },
+    {
+      "id": "INC-UC-027",
+      "sop_ref": "solution_change",
+      "text": "Weekly flush was due on the unit at station 4. The fluid had gone dark brownish and smelled off — wasn't going to clean anything properly in that state. Drained it out completely and put in a fresh chemical mix."
+    },
+    {
+      "id": "INC-UC-028",
+      "sop_ref": "solution_change",
+      "text": "Maintenance flagged the cleaner near bay 2 for a full changeout after quality started seeing failures on the last two batches. The bath was murky. Emptied it completely, cleaned the tank walls, and refilled with fresh solution."
+    },
+    {
+      "id": "INC-UC-029",
+      "sop_ref": "transducer_inspection",
+      "text": "Monthly check on the transducer faces was due today on the unit in cell 1. Found scale buildup on two of the elements in the lower array. Took the brush to them and logged the condition in the maintenance book."
+    },
+    {
+      "id": "INC-UC-030",
+      "sop_ref": "transducer_inspection",
+      "text": "Start of month inspection on the line 5 cleaner — the transducer array had pitting on one face, maybe 1.5 mm deep. Not over the replacement limit but flagged it for monitoring next cycle."
+    },
+    {
+      "id": "INC-UC-031",
+      "sop_ref": "transducer_inspection",
+      "text": "During a scheduled downtime window someone noticed caked-on residue on the transducer surfaces in the unit near the parts wash entry — wasn't the monthly check date yet but we cleaned them off while we had the machine down anyway."
+    },
+    {
+      "id": "INC-UC-032",
+      "sop_ref": "heater_element_check",
+      "text": "Quarterly check on the immersion heater in unit 2 was on the schedule today. Resistance came back at 24 ohms — outside the normal band. Flagged it for replacement before it starts causing warm-up problems."
+    },
+    {
+      "id": "INC-UC-033",
+      "sop_ref": "heater_element_check",
+      "text": "The cleaner in the back corner took almost 40 minutes to reach operating temperature this morning, way longer than the usual 10 to 15. Did a resistance check on the element and the reading was off. Needs a replacement."
+    },
+    {
+      "id": "INC-UC-034",
+      "sop_ref": "filter_replacement",
+      "text": "The pressure gauge on the filter housing hit 17 psi this morning — normally sits around 8 to 10. Time to swap the cartridge before it starts bypassing dirty fluid back into the tank."
+    },
+    {
+      "id": "INC-UC-035",
+      "sop_ref": "filter_replacement",
+      "text": "Bi-weekly filter swap on the cleaner by cell 6 was due. Pulled the old cartridge and it was absolutely packed with metal fines. Got the new one in and the differential came right down to normal."
+    },
+    {
+      "id": "INC-UC-036",
+      "sop_ref": "filter_replacement",
+      "text": "The filtration unit on line 3 was showing elevated restriction — pressure differential indicator was in the red zone. Maintenance swapped the filter element during the lunch break and flow came back up immediately."
+    },
+    {
+      "id": "INC-UC-037",
+      "sop_ref": "tank_calibration",
+      "text": "Just finished replacing the generator on unit 1 and ran a post-install calibration with the hydrophone. Acoustic power output was 8% below reference — had to adjust before putting it back in service."
+    },
+    {
+      "id": "INC-UC-038",
+      "sop_ref": "tank_calibration",
+      "text": "Quarterly calibration was due on the cleaner at the east end of the shop. Frequency was within band but the acoustic power reading came out 6% under spec. Logged it and notified the tech for adjustment."
+    },
+    {
+      "id": "INC-UC-039",
+      "sop_ref": "lockout_tagout",
+      "text": "Needed to pull the transducer array for replacement on the unit in cell 4. Had to lock out the whole machine first — hit estop on the panel, threw the main disconnect, and put the lock on before anyone went near the tank."
+    },
+    {
+      "id": "INC-UC-040",
+      "sop_ref": "lockout_tagout",
+      "text": "Before maintenance could get inside the cleaner near bay 4 to descale the walls, the lockout sequence was run — estop first, then main breaker isolated and tagged. No hands in the tank until the lock was confirmed on the disconnect."
+    },
+    {
+      "id": "INC-UC-041",
+      "sop_ref": "lockout_tagout",
+      "text": "Scheduled drain and internal inspection on unit 3 this afternoon. Did the full isolation at the start of the window — main power cut and tagged before any crew went in. Standard practice before anyone climbs in that tank."
+    },
+    {
+      "id": "INC-UC-042",
+      "sop_ref": "chemical_spill",
+      "text": "A fitting came loose during fill on the unit at station 7 and dumped maybe two liters of cleaner on the floor outside the berm. Floor sensor alarmed. Got the spill kit out of the cabinet right away and notified safety."
+    },
+    {
+      "id": "INC-UC-043",
+      "sop_ref": "chemical_spill",
+      "text": "Second shift reported fluid in the aisle near the cleaner at station 7 — not inside the pan, out where people walk. Smelled like the cleaning chemical. Paused the machine and cleaned it up before anyone slipped on it."
+    },
+    {
+      "id": "INC-UC-044",
+      "sop_ref": "emergency_stop",
+      "text": "A technician's sleeve got too close to the loading mechanism while the cleaner was cycling. Someone hit the nearest red button immediately. Machine stopped dead. We cleared the area and waited for the supervisor before touching anything."
+    },
+    {
+      "id": "INC-UC-045",
+      "sop_ref": "emergency_stop",
+      "text": "Saw smoke coming from behind the control cabinet on the line 1 cleaner. Didn't wait to figure out the cause — hit estop and backed everyone off. Turned out to be a smoldering cable tie but we verified the panel was dead before we went back in."
+    },
+    {
+      "id": "INC-UC-046",
+      "sop_ref": "emergency_stop",
+      "text": "Heard a loud bang from the cleaner in cell 2, unknown source. Hit the nearest estop as a precaution. Turned out to be a pressure relief on the fill line that popped, but we verified everything was safe before attempting a restart."
+    },
+    {
+      "id": "INC-UC-047",
+      "sop_ref": "startup_procedure",
+      "text": "Start of first shift Monday, the line 4 cleaner was completely cold and off from the weekend. Went through the whole power-on sequence — got the bath heating, waited for it to come up to temp, then brought the ultrasonics online. Had parts running by 6:50 AM."
+    },
+    {
+      "id": "INC-UC-048",
+      "sop_ref": "startup_procedure",
+      "text": "Monday morning, brought all three cleaners online from fully off. The unit near the dock took a bit longer to warm up than the others but all three were at running temp and ultrasonics on by 6:45 AM."
+    },
+    {
+      "id": "INC-UC-049",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of second shift, took the cleaner down the normal way — turned off the transducers first, then the heater, let the bath cool a few minutes, then killed main power and pulled the disconnect. Ready for the night crew or maintenance."
+    },
+    {
+      "id": "INC-UC-050",
+      "sop_ref": "shutdown_procedure",
+      "text": "Planned maintenance window tonight so we shut the cleaner on line 2 down early. Ran the full power-down sequence in order and isolated the main breaker before the maintenance crew showed up so they could go straight to work."
+    },
+    {
+      "id": "INC-UC-051",
+      "sop_ref": "cleanliness_inspection",
+      "text": "After the cleaning run on line 3 this morning, ran the UV lamp over the batch before sending them to assembly. Found three parts with contamination showing up clearly under the light. Pulled them and sent them to the rework stand."
+    },
+    {
+      "id": "INC-UC-052",
+      "sop_ref": "cleanliness_inspection",
+      "text": "End of the morning run, did the standard part check with the UV lamp. Most of the batch looked fine but one part had a film on it that lit up under the light. Sent it back for another cycle rather than let it go to assembly."
+    },
+    {
+      "id": "INC-UC-053",
+      "sop_ref": "cleanliness_inspection",
+      "text": "Post-clean check on the batch from cell 5 — UV scan showed residue on about 10% of the parts, which is way above the usual rejection rate. Logged all the failures and moved the rejected tray to the rework station. Going to check the bath condition next."
+    },
+    {
+      "id": "INC-UC-054",
+      "sop_ref": "solution_concentration_check",
+      "text": "Start-of-shift check on the cleaner at station 2 — pulled a sample and ran it through the refractometer. Reading came back at 4.5%, which is under where we want it. Flagged it for the tech to adjust the concentration before running production."
+    },
+    {
+      "id": "INC-UC-055",
+      "sop_ref": "solution_concentration_check",
+      "text": "Quality alert came through about inconsistent cleaning results on the last batch. Pulled a sample from the unit on line 6 and checked it — refractometer said 9.2%, over the top of the acceptable range. Bath is too strong, needs dilution."
+    },
+    {
+      "id": "INC-UC-056",
+      "sop_ref": "solution_concentration_check",
+      "text": "Routine morning check on the fluid strength in the corner cleaner. Reading came back at 6.1% which is right in the middle of the range. Second shift hadn't logged their check so we recorded it for both and left a note."
+    }
+  ]
+}

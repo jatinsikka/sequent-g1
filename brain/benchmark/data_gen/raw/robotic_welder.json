@@ -1,0 +1,577 @@
+{
+  "family": "Robotic Welding Cell",
+  "sops": [
+    {
+      "ref": "wire_feed_jam",
+      "title": "Wire Feeder Jam Response",
+      "condition": "Wire feeder has stopped advancing wire entirely during an active weld cycle and the wire-jam fault indicator is illuminated on the feeder panel.",
+      "steps": [
+        "walk_to weld_cell_feeder_station",
+        "press_button feeder_stop_button",
+        "wait 5 seconds",
+        "pick wire_jam_clearing_rod",
+        "place wire_jam_clearing_rod at feeder_inlet_port",
+        "read_sensor wire_feed_rate_sensor",
+        "notify weld_technician"
+      ],
+      "equipment": ["weld_cell_feeder_station", "feeder_stop_button", "wire_jam_clearing_rod", "feeder_inlet_port", "wire_feed_rate_sensor", "weld_technician"]
+    },
+    {
+      "ref": "wire_underfeed",
+      "title": "Wire Feed Rate Below Setpoint",
+      "condition": "Wire feed rate sensor reads below the minimum operating setpoint of 5.0 m/min while the arc remains active and wire continues to move.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor wire_feed_rate_sensor",
+        "walk_to wire_drive_roll_access_door",
+        "pick drive_roll_tension_wrench",
+        "place drive_roll_tension_wrench at drive_roll_tensioner",
+        "read_sensor wire_feed_rate_sensor",
+        "notify weld_technician"
+      ],
+      "equipment": ["feeder_control_panel", "wire_feed_rate_sensor", "wire_drive_roll_access_door", "drive_roll_tension_wrench", "drive_roll_tensioner", "weld_technician"]
+    },
+    {
+      "ref": "wire_overfeed",
+      "title": "Wire Feed Rate Exceeds Maximum Setpoint",
+      "condition": "Wire feed rate sensor exceeds the maximum operating setpoint of 12.0 m/min, creating risk of wire birdnesting inside the feeder housing.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button feeder_stop_button",
+        "read_sensor wire_feed_rate_sensor",
+        "walk_to wire_drive_roll_access_door",
+        "pick drive_roll_tension_wrench",
+        "place drive_roll_tension_wrench at drive_roll_tensioner",
+        "notify weld_technician"
+      ],
+      "equipment": ["feeder_control_panel", "feeder_stop_button", "wire_feed_rate_sensor", "wire_drive_roll_access_door", "drive_roll_tension_wrench", "drive_roll_tensioner", "weld_technician"]
+    },
+    {
+      "ref": "weld_current_low",
+      "title": "Weld Current Below Programmed Setpoint",
+      "condition": "Weld current sensor reads more than 15 percent below the programmed amperage setpoint during an active weld pass without triggering a hard fault alarm.",
+      "steps": [
+        "walk_to weld_controller_panel",
+        "read_sensor weld_current_sensor",
+        "read_sensor contact_tip_wear_sensor",
+        "walk_to torch_service_station",
+        "pick contact_tip_inspection_tool",
+        "place contact_tip_inspection_tool at welding_torch",
+        "notify weld_technician"
+      ],
+      "equipment": ["weld_controller_panel", "weld_current_sensor", "contact_tip_wear_sensor", "torch_service_station", "contact_tip_inspection_tool", "welding_torch", "weld_technician"]
+    },
+    {
+      "ref": "weld_current_high",
+      "title": "Weld Current Overcurrent Alarm",
+      "condition": "Weld current sensor reads more than 20 percent above the programmed amperage setpoint and the controller activates an overcurrent alarm that halts the weld cycle.",
+      "steps": [
+        "walk_to weld_controller_panel",
+        "press_button weld_estop_button",
+        "read_sensor weld_current_sensor",
+        "read_sensor wire_feed_rate_sensor",
+        "walk_to feeder_control_panel",
+        "pick parameter_adjustment_keypad",
+        "notify weld_supervisor"
+      ],
+      "equipment": ["weld_controller_panel", "weld_estop_button", "weld_current_sensor", "wire_feed_rate_sensor", "feeder_control_panel", "parameter_adjustment_keypad", "weld_supervisor"]
+    },
+    {
+      "ref": "gas_pressure_low_warning",
+      "title": "Shielding Gas Low Pressure Warning",
+      "condition": "Shielding gas supply pressure sensor reads below the low-pressure warning threshold of 30 psi but remains above the critical shutoff threshold of 10 psi, and welding continues.",
+      "steps": [
+        "walk_to gas_supply_cabinet",
+        "read_sensor gas_supply_pressure_sensor",
+        "read_sensor gas_regulator_output_gauge",
+        "walk_to spare_gas_cylinder_rack",
+        "pick gas_cylinder_inspection_sheet",
+        "place gas_cylinder_inspection_sheet at gas_supply_cabinet",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["gas_supply_cabinet", "gas_supply_pressure_sensor", "gas_regulator_output_gauge", "spare_gas_cylinder_rack", "gas_cylinder_inspection_sheet", "maintenance_technician"]
+    },
+    {
+      "ref": "gas_pressure_loss_sudden",
+      "title": "Sudden Total Shielding Gas Pressure Loss",
+      "condition": "Shielding gas pressure drops from normal operating level to zero within 10 seconds, indicating a line rupture, failed regulator, or instantaneous cylinder depletion.",
+      "steps": [
+        "press_button weld_estop_button",
+        "walk_to gas_supply_cabinet",
+        "read_sensor gas_supply_pressure_sensor",
+        "walk_to gas_shutoff_valve_station",
+        "press_button gas_shutoff_valve_handle",
+        "pick gas_leak_detection_wand",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["weld_estop_button", "gas_supply_cabinet", "gas_supply_pressure_sensor", "gas_shutoff_valve_station", "gas_shutoff_valve_handle", "gas_leak_detection_wand", "maintenance_technician"]
+    },
+    {
+      "ref": "coolant_leak_minor",
+      "title": "Minor Torch Coolant Seepage",
+      "condition": "Coolant level sensor shows a gradual decline and inspection reveals seepage or isolated drips at torch coolant hose fittings with no pooling on the floor.",
+      "steps": [
+        "walk_to torch_service_station",
+        "read_sensor coolant_flow_sensor",
+        "read_sensor coolant_level_sensor",
+        "pick coolant_fitting_wrench",
+        "place coolant_fitting_wrench at torch_coolant_inlet_fitting",
+        "wait 10 seconds",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["torch_service_station", "coolant_flow_sensor", "coolant_level_sensor", "coolant_fitting_wrench", "torch_coolant_inlet_fitting", "maintenance_technician"]
+    },
+    {
+      "ref": "coolant_leak_major",
+      "title": "Major Coolant Line Rupture",
+      "condition": "Coolant flow sensor drops to zero and coolant is visibly pooling on the floor beneath the robot arm or torch body, indicating a hose burst or catastrophic fitting failure.",
+      "steps": [
+        "press_button weld_estop_button",
+        "walk_to coolant_shutoff_valve_station",
+        "press_button coolant_shutoff_valve_handle",
+        "walk_to spill_kit_cabinet",
+        "pick spill_absorbent_pad",
+        "place spill_absorbent_pad at coolant_spill_zone",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["weld_estop_button", "coolant_shutoff_valve_station", "coolant_shutoff_valve_handle", "spill_kit_cabinet", "spill_absorbent_pad", "coolant_spill_zone", "maintenance_technician"]
+    },
+    {
+      "ref": "weld_controller_comms_fault",
+      "title": "Weld Controller Communication Fault",
+      "condition": "Weld controller display shows a communication fault code indicating loss of Ethernet link to the robot controller, halting weld cycle initiation.",
+      "steps": [
+        "walk_to weld_controller_panel",
+        "read_sensor controller_comms_status_indicator",
+        "press_button controller_reset_button",
+        "wait 15 seconds",
+        "read_sensor controller_comms_status_indicator",
+        "walk_to network_switch_cabinet",
+        "notify weld_technician"
+      ],
+      "equipment": ["weld_controller_panel", "controller_comms_status_indicator", "controller_reset_button", "network_switch_cabinet", "weld_technician"]
+    },
+    {
+      "ref": "fixture_clamp_fault",
+      "title": "Fixture Clamp Position Sensor Fault",
+      "condition": "Fixture clamp position sensor reports a clamp-not-confirmed state that prevents weld cycle initiation even though the clamp appears physically closed.",
+      "steps": [
+        "walk_to fixture_control_panel",
+        "read_sensor fixture_clamp_position_sensor",
+        "press_button fixture_manual_clamp_button",
+        "wait 5 seconds",
+        "read_sensor fixture_clamp_position_sensor",
+        "pick fixture_inspection_mirror",
+        "notify weld_technician"
+      ],
+      "equipment": ["fixture_control_panel", "fixture_clamp_position_sensor", "fixture_manual_clamp_button", "fixture_inspection_mirror", "weld_technician"]
+    },
+    {
+      "ref": "robot_motor_overtemp",
+      "title": "Robot Axis Motor Overtemperature Alarm",
+      "condition": "Robot axis motor temperature sensor exceeds 85 degrees C and the controller activates a thermal protection alarm that stops all robot motion.",
+      "steps": [
+        "press_button robot_pause_button",
+        "walk_to robot_controller_cabinet",
+        "read_sensor robot_motor_temp_sensor",
+        "wait 300 seconds",
+        "read_sensor robot_motor_temp_sensor",
+        "press_button robot_resume_button",
+        "notify weld_technician"
+      ],
+      "equipment": ["robot_pause_button", "robot_controller_cabinet", "robot_motor_temp_sensor", "robot_resume_button", "weld_technician"]
+    },
+    {
+      "ref": "contact_tip_replacement",
+      "title": "Scheduled Contact Tip Replacement",
+      "condition": "Weld controller arc-on timer has reached the 500-minute contact-tip replacement interval and the scheduled maintenance flag is active on the controller display.",
+      "steps": [
+        "walk_to torch_service_station",
+        "pick contact_tip_removal_tool",
+        "place contact_tip_removal_tool at welding_torch",
+        "pick replacement_contact_tip",
+        "place replacement_contact_tip at welding_torch",
+        "read_sensor contact_tip_installation_sensor",
+        "notify weld_technician"
+      ],
+      "equipment": ["torch_service_station", "contact_tip_removal_tool", "welding_torch", "replacement_contact_tip", "contact_tip_installation_sensor", "weld_technician"]
+    },
+    {
+      "ref": "wire_liner_replacement",
+      "title": "Wire Conduit Liner Replacement",
+      "condition": "Wire liner inspection interval has elapsed or the wire-feed resistance sensor has risen above the liner-wear threshold, indicating conduit degradation.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button feeder_stop_button",
+        "pick wire_liner_removal_tool",
+        "place wire_liner_removal_tool at feeder_liner_inlet",
+        "pick replacement_wire_liner",
+        "place replacement_wire_liner at feeder_liner_channel",
+        "notify weld_technician"
+      ],
+      "equipment": ["feeder_control_panel", "feeder_stop_button", "wire_liner_removal_tool", "feeder_liner_inlet", "replacement_wire_liner", "feeder_liner_channel", "weld_technician"]
+    },
+    {
+      "ref": "wire_spool_changeover",
+      "title": "Wire Spool Empty Changeover",
+      "condition": "Wire spool weight sensor reads below the minimum threshold, indicating the spool is nearly depleted and must be replaced before the next weld cycle.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button feeder_stop_button",
+        "pick empty_wire_spool",
+        "place empty_wire_spool at spool_disposal_bin",
+        "pick replacement_wire_spool",
+        "place replacement_wire_spool at spool_hub",
+        "notify weld_technician"
+      ],
+      "equipment": ["feeder_control_panel", "feeder_stop_button", "empty_wire_spool", "spool_disposal_bin", "replacement_wire_spool", "spool_hub", "weld_technician"]
+    },
+    {
+      "ref": "weld_calibration",
+      "title": "Monthly Weld Parameter Calibration",
+      "condition": "Monthly weld parameter calibration flag has been activated on the weld controller display, indicating scheduled verification of current and voltage output accuracy is due.",
+      "steps": [
+        "walk_to weld_controller_panel",
+        "read_sensor weld_current_sensor",
+        "read_sensor weld_voltage_sensor",
+        "pick calibration_reference_coupon",
+        "place calibration_reference_coupon at weld_fixture_station",
+        "press_button calibration_run_button",
+        "notify weld_engineer"
+      ],
+      "equipment": ["weld_controller_panel", "weld_current_sensor", "weld_voltage_sensor", "calibration_reference_coupon", "weld_fixture_station", "calibration_run_button", "weld_engineer"]
+    },
+    {
+      "ref": "fixture_lubrication",
+      "title": "Fixture Slide and Clamp Lubrication",
+      "condition": "Fixture cycle counter has reached the 250-cycle lubrication interval as tracked by the cell controller, requiring grease application to slide rails and clamp pivot points.",
+      "steps": [
+        "walk_to fixture_lube_station",
+        "pick grease_cartridge",
+        "place grease_cartridge at fixture_slide_zerk_fitting",
+        "pick grease_cartridge",
+        "place grease_cartridge at fixture_clamp_pivot_zerk",
+        "read_sensor fixture_slide_resistance_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["fixture_lube_station", "grease_cartridge", "fixture_slide_zerk_fitting", "fixture_clamp_pivot_zerk", "fixture_slide_resistance_sensor", "maintenance_technician"]
+    },
+    {
+      "ref": "spatter_cleaning",
+      "title": "Weld Spatter Removal and Nozzle Cleaning",
+      "condition": "Weld spatter buildup counter has reached the cleaning threshold or the nozzle blockage sensor has activated, indicating the torch nozzle requires cleaning and anti-spatter treatment.",
+      "steps": [
+        "walk_to torch_service_station",
+        "pick spatter_removal_tool",
+        "place spatter_removal_tool at welding_nozzle",
+        "pick nozzle_dip_cup",
+        "place nozzle_dip_cup at welding_nozzle",
+        "read_sensor nozzle_blockage_sensor",
+        "notify weld_technician"
+      ],
+      "equipment": ["torch_service_station", "spatter_removal_tool", "welding_nozzle", "nozzle_dip_cup", "nozzle_blockage_sensor", "weld_technician"]
+    },
+    {
+      "ref": "loto_entry",
+      "title": "Lockout-Tagout for Cell Entry",
+      "condition": "Maintenance personnel must physically enter the robotic weld cell boundary for repair, inspection, or tooling change, requiring full energy isolation before entry.",
+      "steps": [
+        "walk_to cell_safety_panel",
+        "press_button cell_estop_button",
+        "press_button robot_power_off_button",
+        "pick lockout_hasp",
+        "place lockout_hasp at robot_power_disconnect_switch",
+        "pick personal_lock",
+        "notify area_supervisor"
+      ],
+      "equipment": ["cell_safety_panel", "cell_estop_button", "robot_power_off_button", "lockout_hasp", "robot_power_disconnect_switch", "personal_lock", "area_supervisor"]
+    },
+    {
+      "ref": "fire_weld_flash",
+      "title": "Weld Flash Fire Response",
+      "condition": "Smoke or flame is detected inside the weld cell by the fire detection sensor or is visually confirmed by an operator, indicating ignition from weld spatter or arc flash.",
+      "steps": [
+        "press_button cell_estop_button",
+        "walk_to fire_extinguisher_station",
+        "pick fire_extinguisher",
+        "walk_to weld_cell_boundary",
+        "press_button gas_shutoff_valve_handle",
+        "wait 10 seconds",
+        "notify area_supervisor"
+      ],
+      "equipment": ["cell_estop_button", "fire_extinguisher_station", "fire_extinguisher", "weld_cell_boundary", "gas_shutoff_valve_handle", "area_supervisor"]
+    },
+    {
+      "ref": "cell_startup",
+      "title": "Weld Cell Startup Sequence",
+      "condition": "The robotic weld cell has been powered down and must be brought to a production-ready state at the start of a shift or after a planned outage.",
+      "steps": [
+        "walk_to cell_safety_panel",
+        "read_sensor cell_interlock_status_sensor",
+        "press_button robot_power_on_button",
+        "wait 30 seconds",
+        "read_sensor weld_current_sensor",
+        "read_sensor gas_supply_pressure_sensor",
+        "notify weld_technician"
+      ],
+      "equipment": ["cell_safety_panel", "cell_interlock_status_sensor", "robot_power_on_button", "weld_current_sensor", "gas_supply_pressure_sensor", "weld_technician"]
+    },
+    {
+      "ref": "cell_shutdown",
+      "title": "Weld Cell Shutdown Sequence",
+      "condition": "Production shift has ended or an extended planned stop is scheduled and the robotic weld cell must be safely de-energized and secured.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button feeder_stop_button",
+        "walk_to weld_controller_panel",
+        "press_button weld_power_off_button",
+        "walk_to gas_shutoff_valve_station",
+        "press_button gas_shutoff_valve_handle",
+        "notify area_supervisor"
+      ],
+      "equipment": ["feeder_control_panel", "feeder_stop_button", "weld_controller_panel", "weld_power_off_button", "gas_shutoff_valve_station", "gas_shutoff_valve_handle", "area_supervisor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "wire_feed_jam",
+      "text": "Line 4 robot locked up solid mid-cycle, the MIG gun went completely dead. Wire stopped moving and we got that solid amber indicator on the feeder box. Happened right after the lunch break part changeover, second shift."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "wire_feed_jam",
+      "text": "Station 3 feeder just quit during first shift. Pulled the trigger on the gun and nothing came out—wire completely stuck, zero movement at all. Had to kill the whole cycle. Cell B."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "wire_feed_jam",
+      "text": "Cell B went down this morning, torch stopped dead mid-pass. Wire won't advance even a millimeter. The feeder panel indicator is on solid, not flashing. Tried jogging it manually and nothing."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "wire_underfeed",
+      "text": "Getting porosity on every third part off line 2. Wire is still coming through but it feels sluggish and the arc sounds sputtery. Feed rate display is low but definitely not zero—wire is moving, just not making rate."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "wire_underfeed",
+      "text": "Third shift flagged thin, starved-looking beads on cell C. Wire is feeding for sure, not stuck at all, but the rate meter is reading below where it should be. Like it can't keep up with the cycle."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "wire_overfeed",
+      "text": "Wire is birdnesting inside the feeder cabinet on line 1, piling up before it even gets to the gun. Motor sounds like it's running hot. Rate gauge is pegged at the top. Wire is not stuck—it's going way too fast."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "wire_overfeed",
+      "text": "Wire keeps tangling at the feeder inlet on cell A, curling up inside the housing. It's the opposite of a jam—the thing is running away, too much wire coming out too fast. Seen it twice this shift."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "weld_current_low",
+      "text": "Welds on station 2 look cold and undersized, beads barely fused to the base metal. Arc is running fine but it's like the heat just isn't there. Day shift QC flagged three pieces for incomplete fusion."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "weld_current_low",
+      "text": "Pulled three parts off line 3 this morning, all showing inadequate penetration. Robot is going through the full motion but welds look gray and stubby. No hard fault on the controller, just bad parts coming out."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "weld_current_low",
+      "text": "Arc on cell D is spitting more than normal and the beads look way too shallow. Feels like it's running at maybe half power. No full stop alarm but quality is clearly off. Contact tip looks suspect."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "weld_current_high",
+      "text": "Torch burned through two brackets in a row on line 5 this afternoon. Got a hard fault on the controller and it stopped mid-cycle. We're talking burn-through craters, not beads. Completely the opposite of the cold welds from last week."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "weld_current_high",
+      "text": "Parts are warping off line 2, welds are going right through the sheet metal. Controller threw an alarm and stopped. Way too much heat—nothing like the undersize bead issue we had before."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "gas_pressure_low_warning",
+      "text": "Yellow indicator came on at the gas panel over at line 3. Pressure is down but machine is still running. Welds are starting to show oxidation on the edges. Not a hard stop, nothing instantaneous—gradual creep down all morning."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "gas_pressure_low_warning",
+      "text": "Gas gauge on cell B has been sitting in the caution zone since about 10 AM. Machine is still cycling but welds are coming out dirty. It dropped gradually, not all at once. Still above the critical mark."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "gas_pressure_loss_sudden",
+      "text": "Everything on line 4 just went sideways—gas went from normal reading to zero in maybe ten seconds flat. Not a gradual thing at all, completely instantaneous. Had to hit e-stop right away, second shift."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "gas_pressure_loss_sudden",
+      "text": "Station 3 lost gas all at once mid-run during first shift. One second the gauge is fine, next second it's floored and the arc just sputtered out. Nothing like the gradual creep we dealt with on cell B last month."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "gas_pressure_loss_sudden",
+      "text": "Cell A dropped to zero gas pressure mid-cycle this morning, wasn't a slow drain. Gauge went straight down in seconds. Floor alarm came all at once, not a gradual warning buildup. Immediate hard stop."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "coolant_leak_minor",
+      "text": "Found a slow drip at the back of the torch body on cell B. Just a wet spot under the fitting area, nothing pooling on the floor at all. Been watching it since Monday, it's seeping not spraying."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "coolant_leak_minor",
+      "text": "Coolant reservoir on line 2 keeps going down a little every shift. Found a weeping fitting at the torch inlet—wet but not dripping fast. Small seep, no floor puddle, just started showing up this week."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "coolant_leak_major",
+      "text": "Coolant all over the floor under the robot arm on line 1, like someone left a hose running. Flow meter dropped to zero right away. Called it immediately and shut the cell down. This is nothing like the little drip we had last week—floor is covered."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "coolant_leak_major",
+      "text": "Big puddle at cell C during first shift. The torch hose let go and coolant is spraying out. Nothing like the seeping fitting we have been watching on cell B—this is a full rupture, running down the arm and onto the fixture deck."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "coolant_leak_major",
+      "text": "Station 4 robot looks like it's bleeding—coolant running down the arm and onto the floor. Flow sensor hit zero right when it happened. Real rupture somewhere, not a drip situation at all. Had to pull the cell."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "weld_controller_comms_fault",
+      "text": "Weld box on cell C is showing a red link error on the screen. Robot keeps trying to kick off a cycle but the weld controller won't handshake back. Screen says network link fault—nothing mechanical, no jam, no wire issue."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "weld_controller_comms_fault",
+      "text": "Line 2 controller dropped its connection partway through the afternoon run. Machine stopped mid-program and the display is showing a link fault. Everything mechanical looks fine—it's like the two boxes stopped talking to each other."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "fixture_clamp_fault",
+      "text": "Cell B won't start a weld cycle at all. Robot goes to home position and sits there waiting on something. Clamps look tight from outside the fence but the machine never gets the all-clear. Not a wire issue, not a comms error."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "fixture_clamp_fault",
+      "text": "Station 3 keeps aborting right before the torch moves in to the part. Everything looks seated visually but the cycle just stops and waits. Unrelated to the arc or wire—feels like the machine doesn't believe something is held down properly."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "robot_motor_overtemp",
+      "text": "Robot on line 1 slowed way down and then stopped clean—controller is showing a heat alarm on one of the motion axes. No crash, no jam, no program fault. Just been going flat out since 6 AM on a hot day."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "robot_motor_overtemp",
+      "text": "Cell A robot tripped a thermal alarm mid-cycle during second shift. Nothing hit anything, no collision fault, no wire issue. Machine has been running nonstop since startup and it's been a warm one in the plant today."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "contact_tip_replacement",
+      "text": "Coming up on the arc-time limit on torch 2 at line 3. Starting to see arc wander and tips look visually worn. Doing the planned swap before the afternoon run—not because of a fault, just the regular interval."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "contact_tip_replacement",
+      "text": "Preventive tip swap on cell B, counter says it's due today. Doing it between shifts as planned. No hard fault, no quality issue yet—just the standard interval replacement before it becomes a problem."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "wire_liner_replacement",
+      "text": "Wire resistance has been gradually climbing all week on line 4. Not jammed, not running slow or fast, just getting harder to push through the conduit. Doing the liner swap now before it becomes a real stoppage."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "wire_liner_replacement",
+      "text": "Cell C liner swap per the maintenance calendar. Wire was stuttering slightly on startup a couple times this week. Running the standard conduit replacement at end of shift—not an emergency, just the planned window."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "wire_spool_changeover",
+      "text": "Spool on line 2 feeder hit the low-weight mark during second shift. Pulling the nearly-empty coil and putting a fresh one on before the next run. Normal housekeeping, no fault."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "wire_spool_changeover",
+      "text": "Wire ran out on station 1 mid-afternoon, spool hub is empty. Regular changeover, no alarm beyond the empty indicator—just burned through the coil faster than expected on the long-weld stampings today."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "weld_calibration",
+      "text": "Monthly cal flag came up on line 3 weld box display this morning. Engineering wants it done before the new part number runs next week. Scheduling it during the planned window—machine is running fine, just due."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "weld_calibration",
+      "text": "Cell B controller is showing the scheduled verification reminder on the main screen. Doing it at end of shift today as planned—not because anything is reading off, just the regular monthly PM check."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "fixture_lubrication",
+      "text": "Cycle counter on station 2 hit 250 this morning, time for the fixture grease job. Slides are getting a little sticky when the clamps cycle open. Not broken, just due and starting to show."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "fixture_lubrication",
+      "text": "Line 4 fixture is starting to squeak on the slide when it opens, counter is at the lubrication interval. Doing the grease before it turns into actual drag resistance. Planned stop, nothing failed."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "spatter_cleaning",
+      "text": "Nozzle on cell A torch is packed with buildup, blockage indicator popped on the panel. Arc quality starting to drift and the counter hit the cleaning limit. Doing the clean and dip before the next shift."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "spatter_cleaning",
+      "text": "Line 3 torch nozzle is crusted over, you can see it from the operator station. Counter flagged it at shift change. Not a hard fault but arc is starting to wander. Cleaning it before first shift starts tomorrow."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "loto_entry",
+      "text": "Maintenance needs to get inside cell C to swap out a cracked fixture locating pin. Putting the full lockout on the main disconnect before anyone steps past the light curtain. Standard cell-entry process."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "loto_entry",
+      "text": "Tech going into line 2 to check the robot tool flange bolts after a minor contact event. Following the lockout steps before stepping inside the fence—nobody goes in without the lock on the disconnect. Normal protocol."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "fire_weld_flash",
+      "text": "Smoke coming out of the weld zone on line 1 during first shift. Looked like a small ignition from spatter hitting a rag someone left near the fixture. Pulled the cell down immediately and responded."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "fire_weld_flash",
+      "text": "Smoke alarm went off at cell B mid-afternoon. Welding arc flash ignited some debris sitting near the base of the torch. Not a big fire but definitely visible flame and smoke inside the cell. Had to respond right away."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "cell_startup",
+      "text": "Coming on for first shift at cell D, machine has been powered down overnight. Going through the checklist to bring it back up before parts start coming down the line. Normal morning startup, nothing wrong."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "cell_startup",
+      "text": "Line 3 was completely off for the long weekend, bringing it back online Monday morning. Running through startup—confirming gas is reading right and the arc is happy before kicking off the first cycle."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "cell_shutdown",
+      "text": "End of third shift on line 4, shutting the cell down for the overnight window. Going through the normal end-of-shift powerdown before everyone clears out. Nothing wrong, just the nightly routine."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "cell_shutdown",
+      "text": "Cell A going to standby at end of day Friday, production is done for the week. Running through the proper powerdown and securing gas before locking up the area. Standard end-of-week procedure."
+    }
+  ]
+}

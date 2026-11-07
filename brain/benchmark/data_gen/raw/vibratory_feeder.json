@@ -1,0 +1,581 @@
+{
+  "family": "Vibratory Bowl Feeder",
+  "sops": [
+    {
+      "ref": "bowl_jammed",
+      "title": "Bowl Track Jam Clearance",
+      "condition": "A part has become wedged crosswise or stacked in the bowl track, causing the feeder to stop delivering parts to the output chute.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button pause_button",
+        "walk_to bowl_track_access_door",
+        "pick jammed_part",
+        "place parts_return_bin",
+        "press_button resume_button"
+      ],
+      "equipment": ["feeder_control_panel", "pause_button", "bowl_track_access_door", "jammed_part", "parts_return_bin", "resume_button"]
+    },
+    {
+      "ref": "parts_bridging",
+      "title": "Intermittent Parts Bridging At Hopper Entry",
+      "condition": "Parts are bridging across the hopper entry funnel causing erratic, on-and-off feed while the feeder continues to run and the hopper is not empty.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor feed_rate_sensor",
+        "walk_to hopper_entry_access_port",
+        "pick bridge_clearing_rod",
+        "place hopper_entry_access_port",
+        "press_button agitation_pulse_button"
+      ],
+      "equipment": ["feeder_control_panel", "feed_rate_sensor", "hopper_entry_access_port", "bridge_clearing_rod", "agitation_pulse_button"]
+    },
+    {
+      "ref": "feed_rate_low",
+      "title": "Feed Rate Below Minimum Setpoint",
+      "condition": "The feed rate sensor reads below the minimum parts-per-minute setpoint for more than 30 consecutive seconds while the feeder drive coil remains energized and the bowl is not empty.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor feed_rate_sensor",
+        "read_sensor amplitude_sensor",
+        "press_button amplitude_increase_button",
+        "wait 15",
+        "read_sensor feed_rate_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["feeder_control_panel", "feed_rate_sensor", "amplitude_sensor", "amplitude_increase_button"]
+    },
+    {
+      "ref": "feed_rate_zero",
+      "title": "Sudden Feed Rate Collapse To Zero",
+      "condition": "The feed rate sensor drops abruptly to zero output in a single scan cycle while the drive coil remains energized and no jam alarm is active.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor feed_rate_sensor",
+        "read_sensor drive_coil_current_sensor",
+        "press_button emergency_stop_button",
+        "notify maintenance_supervisor",
+        "walk_to bowl_track_access_door",
+        "read_sensor bowl_track_obstruction_sensor"
+      ],
+      "equipment": ["feeder_control_panel", "feed_rate_sensor", "drive_coil_current_sensor", "emergency_stop_button", "bowl_track_access_door", "bowl_track_obstruction_sensor"]
+    },
+    {
+      "ref": "feed_rate_high",
+      "title": "Feed Rate Exceeds Maximum Ceiling",
+      "condition": "The feed rate sensor reads above the upper control limit, risking overflow of the downstream assembly accumulator.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor feed_rate_sensor",
+        "press_button amplitude_decrease_button",
+        "wait 10",
+        "read_sensor feed_rate_sensor",
+        "notify line_supervisor"
+      ],
+      "equipment": ["feeder_control_panel", "feed_rate_sensor", "amplitude_decrease_button"]
+    },
+    {
+      "ref": "drive_coil_overcurrent",
+      "title": "Drive Coil Overcurrent Fault",
+      "condition": "The drive coil current sensor exceeds maximum rated amperage, tripping overcurrent protection and cutting power to the feeder.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor drive_coil_current_sensor",
+        "press_button emergency_stop_button",
+        "notify electrical_technician",
+        "walk_to electrical_panel",
+        "read_sensor circuit_breaker_status_sensor"
+      ],
+      "equipment": ["feeder_control_panel", "drive_coil_current_sensor", "emergency_stop_button", "electrical_panel", "circuit_breaker_status_sensor"]
+    },
+    {
+      "ref": "drive_coil_undervoltage",
+      "title": "Drive Coil Voltage Below Operating Minimum",
+      "condition": "Supply voltage to the drive coil drops below the minimum operating threshold, causing weak or sluggish bowl vibration without tripping any overcurrent protection.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor drive_coil_voltage_sensor",
+        "walk_to electrical_panel",
+        "read_sensor main_supply_voltage_sensor",
+        "notify electrical_technician",
+        "wait 30",
+        "read_sensor drive_coil_voltage_sensor"
+      ],
+      "equipment": ["feeder_control_panel", "drive_coil_voltage_sensor", "electrical_panel", "main_supply_voltage_sensor"]
+    },
+    {
+      "ref": "level_sensor_alarm",
+      "title": "Parts Level Low Warning",
+      "condition": "The bowl parts level sensor crosses the low-level warning threshold, indicating supply is running down but the feeder is still running and output has not yet stopped.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor bowl_level_sensor",
+        "notify line_operator",
+        "walk_to parts_storage_rack",
+        "pick parts_refill_bin",
+        "place hopper_loading_port"
+      ],
+      "equipment": ["feeder_control_panel", "bowl_level_sensor", "parts_storage_rack", "parts_refill_bin", "hopper_loading_port"]
+    },
+    {
+      "ref": "parts_hopper_empty",
+      "title": "Parts Hopper Completely Empty Emergency",
+      "condition": "The parts level sensor reads zero and feeder output has stopped entirely because the hopper and bowl are fully depleted of parts.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor bowl_level_sensor",
+        "press_button pause_button",
+        "notify line_supervisor",
+        "walk_to parts_storage_rack",
+        "pick parts_refill_bin",
+        "place hopper_loading_port"
+      ],
+      "equipment": ["feeder_control_panel", "bowl_level_sensor", "pause_button", "parts_storage_rack", "parts_refill_bin", "hopper_loading_port"]
+    },
+    {
+      "ref": "orientation_fault",
+      "title": "Excessive Parts Orientation Reject Rate",
+      "condition": "The orientation sensor is rejecting and recirculating more than 15 percent of parts per cycle, indicating a bowl track tooling defect or an incorrect part loaded in the feeder.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor orientation_reject_rate_sensor",
+        "walk_to bowl_track_access_door",
+        "read_sensor part_type_verification_sensor",
+        "pick sample_parts_tray",
+        "place inspection_station",
+        "notify quality_engineer"
+      ],
+      "equipment": ["feeder_control_panel", "orientation_reject_rate_sensor", "bowl_track_access_door", "part_type_verification_sensor", "sample_parts_tray", "inspection_station"]
+    },
+    {
+      "ref": "noise_vibration_alarm",
+      "title": "Abnormal Vibration Warning",
+      "condition": "The vibration monitor reads above the normal operating band continuously for more than 60 seconds, indicating a developing mechanical issue while the feeder remains within safe operating limits.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor vibration_monitor_sensor",
+        "walk_to bowl_base_panel",
+        "read_sensor leaf_spring_tension_sensor",
+        "notify maintenance_tech",
+        "wait 60",
+        "read_sensor vibration_monitor_sensor"
+      ],
+      "equipment": ["feeder_control_panel", "vibration_monitor_sensor", "bowl_base_panel", "leaf_spring_tension_sensor"]
+    },
+    {
+      "ref": "noise_vibration_emergency",
+      "title": "Severe Vibration Emergency Stop",
+      "condition": "The vibration monitor spikes to the emergency shutdown threshold or a loud metallic impact is detected, posing immediate structural risk to the feeder mounting and surrounding equipment.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button emergency_stop_button",
+        "notify maintenance_supervisor",
+        "walk_to bowl_base_panel",
+        "read_sensor vibration_monitor_sensor",
+        "read_sensor mounting_bolt_sensor"
+      ],
+      "equipment": ["feeder_control_panel", "emergency_stop_button", "bowl_base_panel", "vibration_monitor_sensor", "mounting_bolt_sensor"]
+    },
+    {
+      "ref": "track_cleaning",
+      "title": "Scheduled Bowl Track Cleaning",
+      "condition": "Scheduled cleaning interval has been reached or contamination, oil film, or debris is observed on the bowl track surface.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button shutdown_button",
+        "walk_to lockout_tagout_station",
+        "pick lockout_kit",
+        "place electrical_panel_lockout_point",
+        "walk_to bowl_track_access_door",
+        "pick cleaning_brush_kit"
+      ],
+      "equipment": ["feeder_control_panel", "shutdown_button", "lockout_tagout_station", "lockout_kit", "electrical_panel_lockout_point", "bowl_track_access_door", "cleaning_brush_kit"]
+    },
+    {
+      "ref": "drive_coil_lubrication",
+      "title": "Drive Coil Spring Assembly Lubrication",
+      "condition": "Scheduled lubrication interval has been reached for the drive coil leaf spring mounting points and contact surfaces.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button shutdown_button",
+        "wait 30",
+        "walk_to parts_storage_rack",
+        "pick lubricant_applicator",
+        "place spring_assembly_lubrication_port",
+        "wait 10"
+      ],
+      "equipment": ["feeder_control_panel", "shutdown_button", "parts_storage_rack", "lubricant_applicator", "spring_assembly_lubrication_port"]
+    },
+    {
+      "ref": "spring_leaf_inspection",
+      "title": "Leaf Spring Inspection And Replacement",
+      "condition": "Scheduled leaf spring inspection interval is due or an abnormal vibration pattern suggests spring fatigue or physical damage to one or more leaf springs.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button shutdown_button",
+        "walk_to lockout_tagout_station",
+        "pick lockout_kit",
+        "place electrical_panel_lockout_point",
+        "walk_to bowl_base_panel",
+        "read_sensor leaf_spring_tension_sensor"
+      ],
+      "equipment": ["feeder_control_panel", "shutdown_button", "lockout_tagout_station", "lockout_kit", "electrical_panel_lockout_point", "bowl_base_panel", "leaf_spring_tension_sensor"]
+    },
+    {
+      "ref": "bowl_liner_replacement",
+      "title": "Bowl Liner Replacement",
+      "condition": "Bowl liner inspection reveals wear, cracking, or delamination beyond acceptable tolerance limits, or liner material fragments are found in the output stream.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button shutdown_button",
+        "walk_to lockout_tagout_station",
+        "pick lockout_kit",
+        "place electrical_panel_lockout_point",
+        "walk_to parts_storage_rack",
+        "pick replacement_bowl_liner"
+      ],
+      "equipment": ["feeder_control_panel", "shutdown_button", "lockout_tagout_station", "lockout_kit", "electrical_panel_lockout_point", "parts_storage_rack", "replacement_bowl_liner"]
+    },
+    {
+      "ref": "level_sensor_calibration",
+      "title": "Parts Level Sensor Calibration",
+      "condition": "Scheduled calibration interval is due for the bowl level sensor or an operator has reported that the displayed level reading does not match the observed fill state.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button shutdown_button",
+        "walk_to bowl_level_sensor",
+        "read_sensor bowl_level_sensor",
+        "place calibration_weight_standard",
+        "read_sensor bowl_level_sensor",
+        "notify quality_engineer"
+      ],
+      "equipment": ["feeder_control_panel", "shutdown_button", "bowl_level_sensor", "calibration_weight_standard"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout For Feeder Maintenance",
+      "condition": "Maintenance work requiring hands-on physical access to feeder internals, drive components, or the bowl itself, necessitating complete electrical energy isolation before work begins.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button shutdown_button",
+        "walk_to electrical_panel",
+        "press_button main_disconnect_switch",
+        "walk_to lockout_tagout_station",
+        "pick lockout_kit",
+        "place electrical_panel_lockout_point"
+      ],
+      "equipment": ["feeder_control_panel", "shutdown_button", "electrical_panel", "main_disconnect_switch", "lockout_tagout_station", "lockout_kit", "electrical_panel_lockout_point"]
+    },
+    {
+      "ref": "parts_spill_response",
+      "title": "Small Parts Floor Spill Response",
+      "condition": "Small parts have spilled onto the floor in the feeder work area, creating a slip and trip hazard for personnel.",
+      "steps": [
+        "walk_to safety_equipment_station",
+        "pick spill_containment_kit",
+        "place spill_area",
+        "notify line_supervisor",
+        "walk_to parts_collection_bin",
+        "pick spill_sweep_tool",
+        "place spill_area"
+      ],
+      "equipment": ["safety_equipment_station", "spill_containment_kit", "spill_area", "parts_collection_bin", "spill_sweep_tool"]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Emergency Stop Activation And Reset",
+      "condition": "The feeder emergency stop has been activated either automatically by the control system or manually by an operator, halting all feeder motion.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor feeder_status_sensor",
+        "notify maintenance_supervisor",
+        "walk_to bowl_track_access_door",
+        "read_sensor bowl_track_obstruction_sensor",
+        "walk_to feeder_control_panel",
+        "press_button estop_reset_button"
+      ],
+      "equipment": ["feeder_control_panel", "feeder_status_sensor", "bowl_track_access_door", "bowl_track_obstruction_sensor", "estop_reset_button"]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Feeder Normal Startup Sequence",
+      "condition": "Beginning-of-shift or post-maintenance startup with the feeder in a full shutdown state and all safety checks signed off.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "read_sensor feeder_status_sensor",
+        "read_sensor bowl_level_sensor",
+        "press_button power_on_button",
+        "wait 10",
+        "read_sensor feed_rate_sensor",
+        "notify line_supervisor"
+      ],
+      "equipment": ["feeder_control_panel", "feeder_status_sensor", "bowl_level_sensor", "power_on_button", "feed_rate_sensor"]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "Feeder Normal End-Of-Shift Shutdown",
+      "condition": "End-of-shift or planned shutdown with the feeder operating normally and production for the period complete.",
+      "steps": [
+        "walk_to feeder_control_panel",
+        "press_button amplitude_decrease_button",
+        "wait 15",
+        "read_sensor feed_rate_sensor",
+        "press_button shutdown_button",
+        "walk_to electrical_panel",
+        "read_sensor main_supply_voltage_sensor"
+      ],
+      "equipment": ["feeder_control_panel", "amplitude_decrease_button", "feed_rate_sensor", "shutdown_button", "electrical_panel", "main_supply_voltage_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "bowl_jammed",
+      "text": "Line 3 feeder stopped dead this morning about 20 minutes into first shift. Nothing coming through the exit chute. Got a look through the side window and there was a bracket wedged sideways across the spiral track about a third of the way up — totally blocking everything behind it."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "bowl_jammed",
+      "text": "Machine over by the pressing station went silent mid-run. Part must have flipped on its side and lodged in the narrow section — nothing was moving. Could see the pile-up of parts behind it waiting to move."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "bowl_jammed",
+      "text": "Second shift found the feeder at station 6 completely quiet. Couple of small clips had stacked on top of each other crosswise in the slot and created a dead wall. Everything backed up behind the blockage."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "parts_bridging",
+      "text": "Feeder on line 4 keeps going in and out all shift — runs fine for maybe ten seconds, goes quiet for five, then kicks back up. Hopper looks half full, so it's not running out. Like it's choking on and off."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "parts_bridging",
+      "text": "The unit at press 7 is acting real inconsistent today. Parts coming in these sudden bursts then nothing for a few seconds. Watched the funnel area at the top and it looks like stuff is clumping together at that entry point — sticking and releasing."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "parts_bridging",
+      "text": "Intermittent stoppages on the feeder at cell 2. Bowl sounds like it's running the whole time but the chute output is choppy. No fault light, no empty alarm. Think the parts are blocking each other at the top and then breaking loose in batches."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "feed_rate_low",
+      "text": "Rate counter at station 5 has been sitting in the red zone for a couple minutes but the machine is still humming. Parts are trickling through the chute — maybe a third of what we normally see. Has been like this since the last break."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "feed_rate_low",
+      "text": "Downstream accumulator on line 2 is draining faster than the feeder can refill it. Bowl is definitely running, you can feel it, but the count display says 58 PPM when we need well over 100. It's not stopped, just slow — and it's been slow for a while."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "feed_rate_zero",
+      "text": "Bowl at line 2 is humming but absolutely nothing coming down the chute. Zero. One second it was running normal, next second the output just died — no parts at all. Thing is still vibrating, lights are on, but the exit channel is bone dry."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "feed_rate_zero",
+      "text": "Output display on the line 6 feeder just shows nothing. Like it flipped off in an instant — not a gradual slowdown. Machine sounds totally alive but the PPM readout is at zero and the downstream robot is waiting on parts."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "feed_rate_high",
+      "text": "Parts flooding out the exit on line 6 too fast. The rotary table downstream is getting buried and parts are piling up past the stops. Count display is way above our upper spec — never seen it that high."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "feed_rate_high",
+      "text": "The slide under the feeder near the robot arm at bay 3 is overflowing. Parts spilling off the end of the track. Throughput is way beyond normal — thing is running way hotter than setpoint."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "drive_coil_overcurrent",
+      "text": "Red fault light on the control box by the line 3 feeder came on and the whole machine went dark — just cut out. Panel display is showing a fault code, not a normal stop. There's a faint warm smell near the bottom of the enclosure."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "drive_coil_overcurrent",
+      "text": "Heard a loud click at station 8 and the feeder just killed itself. Side panel indicator on the electrical box is tripped. Can't bring it back up from the run button — something in the protection circuit cut it."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "drive_coil_undervoltage",
+      "text": "Feeder on the right side of bay 2 sounds anemic — bowl is barely moving, like it's running at maybe 20 percent. Parts are barely creeping up the spiral. Ran totally fine yesterday afternoon so something changed overnight."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "drive_coil_undervoltage",
+      "text": "Third shift reported the feeder seemed sluggish when they started up, kept running anyway. Morning crew came in and the bowl is just barely oscillating — you can see it moving but it's weak. No trip, no fault code, just underpowered."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "drive_coil_undervoltage",
+      "text": "Feeder at press 12 is moving parts but at about half the usual amplitude. Bowl barely shakes. No alarms tripped, but the vibration is clearly weaker than it should be — like the drive isn't getting what it needs."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "level_sensor_alarm",
+      "text": "Yellow caution light came on at the feeder panel by dock 3. Bowl is still running fine and parts are still coming through — no slowdown yet. Light's been on for a few minutes now. Probably needs a reload soon."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "level_sensor_alarm",
+      "text": "Operator flagged me over to look at the amber indicator on the feeder at line 7 — it's flashing but the machine is still moving parts normally. No slowdown, no stop, just that warning lamp on the panel."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "level_sensor_alarm",
+      "text": "Panel light at the feeder near press 4 went amber about ten minutes into second shift. Production is still going, output still looks normal. Just a heads-up that supply is getting low — not urgent yet but needs attention."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "parts_hopper_empty",
+      "text": "Nothing coming out of the line 5 feeder at all — completely stopped. Looked inside the top and there is nothing left. Bottom of the bowl is fully visible, bone dry. Line went idle waiting on parts."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "parts_hopper_empty",
+      "text": "Robot at the loading station is reaching into empty air — no parts coming from the feeder. Peeked in the hopper and literally nothing left in there. Not a jam, not a fault — completely out of parts."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "parts_hopper_empty",
+      "text": "Feeder at bay 4 sounds like it's running but it's just spinning air. Checked the bowl — totally dry. This isn't a slowdown or a weak signal, it's fully stopped because there's nothing to feed. Line is down waiting."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "orientation_fault",
+      "text": "Reject chute at feeder 2 is getting hammered — parts keep looping back in bulk into the bowl. Way more rejects than normal, maybe one in five or six. The vision system indicator keeps flashing. Something is definitely wrong with how parts are being oriented."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "orientation_fault",
+      "text": "Downstream assembly flagged a bunch of bad parts and traced it back to the feeder. The return track near dock B is almost continuously dumping parts back into the bowl. Practically nothing is making it through the selector in the right position."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "noise_vibration_alarm",
+      "text": "Feeder by the stamping press is rattling more than usual — not terrible, but definitely louder and coarser than the normal tone. It's been going like this for the last 20 minutes of the shift. Machine is still running and putting out parts, just noisier."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "noise_vibration_alarm",
+      "text": "Something sounds different about the feeder on line 1 — has this extra buzz or low rattle underneath the normal hum. Been there all shift. Parts are still flowing fine, no fault lights showing, just sounds off compared to yesterday."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "noise_vibration_emergency",
+      "text": "Loud bang from the feeder at station 4 — thing started shaking so hard the whole stand was moving back and forth. We backed away from it immediately. Never heard it that violent before. Took it down right away."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "noise_vibration_emergency",
+      "text": "Feeder near the loading dock started vibrating violently and you could see the bowl bouncing on its mount. The noise was metallic and harsh, like something loose thrashing inside. Everyone cleared the area and someone hit the stop."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "track_cleaning",
+      "text": "Parts on the bowl track at press 9 are not sliding cleanly — there's an oily film or fine dust build-up on the spiral surface. Parts are dragging instead of gliding. PM sticker on the side says this one is overdue for a wipe-down."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "track_cleaning",
+      "text": "Maintenance log shows the bowl feeder at line 11 is at 220 hours since the last surface clean — 20 hours over the scheduled interval. Doing a walk-down before the next shift and putting in the cleaning work order."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "drive_coil_lubrication",
+      "text": "PM calendar shows the spring contact lube is due on the feeder at cell 3. Last service entry in the log was about six weeks back. No symptoms, just scheduled."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "drive_coil_lubrication",
+      "text": "Maintenance order came through for the feeder by line 2 — spring mounting surfaces are at their lubrication interval per the PM schedule. Flagging this for the next planned downtime window."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "spring_leaf_inspection",
+      "text": "Did a maintenance walk-down and one of those flat metal strips at the base of the bowl feeder on line 6 looks slightly bent. Hard to say if it's damage or just dirty, but it needs a proper look before we assume it's fine."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "spring_leaf_inspection",
+      "text": "PM interval hit on the feeder at station 11 and we noticed the vibration pattern has been slightly off for about a week — not enough to alarm, but different. Time to pull the cover and check those flat springs before something actually breaks."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "bowl_liner_replacement",
+      "text": "Coating inside the bowl at feeder 7 is flaking near the outer edge. Found a small piece of liner material sitting in the output tray when we checked the quality pull. That's a contamination issue — have to address it now."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "bowl_liner_replacement",
+      "text": "Quality walk flagged the bowl on line 3 feeder — there is a crack in the interior surface coating about four inches long. Parts passing over it could be picking up debris. Can't let it keep running like that."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "level_sensor_calibration",
+      "text": "Operator says the gauge on feeder 4 is reading half-full but he put in two completely full bins this morning. It should be showing near-full. Reading and reality are way off."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "level_sensor_calibration",
+      "text": "Quarterly calibration check is due on the bowl level sensor at line 8. Also had a complaint last week that the low-level warning came on way too early — bowl was still plenty full when the alarm triggered."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "lockout_tagout",
+      "text": "Need to get inside the feeder housing at station 2 to reposition the track guide. Nobody touches the inside of that machine until we do the full isolation — too much moving hardware in there."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance crew is swapping the bowl liner on line 5 feeder. Before anyone starts unbolting anything, power has to be fully cut and locked. Checking the work order — it says full energy isolation required before entry."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "lockout_tagout",
+      "text": "Electrician needs hands-on access to the coil assembly on the feeder at press 7. Going to be inside the unit, not just panel work. Full energy isolation has to happen before he goes in."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "parts_spill_response",
+      "text": "Someone knocked a parts bin near feeder 3 and small brackets scattered everywhere — whole aisle section is covered. Real slip hazard for anyone walking through that area."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "parts_spill_response",
+      "text": "Overflow from the feeder chute on line 4 dumped parts onto the floor behind the robot cell during the run. Roughly a square meter of small hardware sitting on concrete. Nobody hurt but it needs to be dealt with before the next pass."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "estop_activation",
+      "text": "Somebody hit the red button near feeder 6 and everything is locked out. Panel shows E-stop active. Don't know yet if it was automatic or a person, but it needs to be checked and cleared before we can restart."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "estop_activation",
+      "text": "E-stop on the line 1 feeder went active — machine is completely dead. Could be a manual hit, could be the system did it on its own. Either way we have to figure out what caused it and get through the reset process before the line can come back up."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "startup_procedure",
+      "text": "Coming in for first shift and the feeder at station 3 is sitting cold and dark — needs to be brought up before the line starts. Display shows no faults from yesterday. Just needs to go through the normal startup."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "startup_procedure",
+      "text": "Tech just signed off on the work order for feeder at bay 4 — maintenance window is done and everything is reassembled. Need to get it running again through the checklist before production resumes."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "shutdown_procedure",
+      "text": "Shift is wrapping up and the feeder at line 2 needs to be brought down clean before we leave for the night. Production quota is done, machine has been running solid all day."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of day on line 7 feeder — need to power it down properly before the weekend maintenance window kicks off tonight. No issues all shift, just a routine end-of-production shutdown."
+    }
+  ]
+}

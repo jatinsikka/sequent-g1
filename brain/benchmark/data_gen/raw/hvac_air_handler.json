@@ -1,0 +1,556 @@
+{
+  "family": "HVAC Air Handler",
+  "sops": [
+    {
+      "ref": "low_supply_airflow",
+      "title": "Low Supply Airflow — Gradual Decline",
+      "condition": "Supply air volumetric flow sensor reads below 70% of setpoint for more than 5 consecutive minutes, with a gradual declining trend over the preceding hour.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "read_sensor supply_airflow_sensor",
+        "read_sensor filter_dp_sensor",
+        "read_sensor fan_speed_sensor",
+        "notify hvac_technician",
+        "wait 300"
+      ],
+      "equipment": ["ahu_control_panel", "supply_airflow_sensor", "filter_dp_sensor", "fan_speed_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "airflow_sudden_collapse",
+      "title": "Sudden Total Supply Airflow Loss",
+      "condition": "Supply air volumetric flow sensor drops to below 5% of setpoint within a 30-second window with no preceding decline trend, indicating belt failure, fan seizure, or major mechanical obstruction.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "read_sensor supply_airflow_sensor",
+        "read_sensor fan_speed_sensor",
+        "press_button ahu_emergency_stop_button",
+        "notify maintenance_supervisor",
+        "wait 60"
+      ],
+      "equipment": ["ahu_control_panel", "supply_airflow_sensor", "fan_speed_sensor", "ahu_emergency_stop_button", "maintenance_supervisor"]
+    },
+    {
+      "ref": "supply_temp_high_warn",
+      "title": "Supply Air Temperature High Warning",
+      "condition": "Supply air temperature sensor reads between 58°F and 64°F for more than 3 continuous minutes, placing it in the elevated warning band above the 55°F setpoint without breaching the critical alarm threshold.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "read_sensor supply_air_temp_sensor",
+        "read_sensor outside_air_temp_sensor",
+        "read_sensor supply_airflow_sensor",
+        "notify hvac_technician",
+        "wait 180"
+      ],
+      "equipment": ["ahu_control_panel", "supply_air_temp_sensor", "outside_air_temp_sensor", "supply_airflow_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "supply_temp_high_alarm",
+      "title": "Supply Air Temperature Critical Alarm — Above Ceiling",
+      "condition": "Supply air temperature sensor reads above 64°F, breaching the hard emergency ceiling threshold and requiring immediate unit shutdown to prevent process heat exceedance.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "read_sensor supply_air_temp_sensor",
+        "press_button ahu_stop_button",
+        "notify plant_engineer",
+        "notify shift_supervisor",
+        "wait 120"
+      ],
+      "equipment": ["ahu_control_panel", "supply_air_temp_sensor", "ahu_stop_button", "plant_engineer", "shift_supervisor"]
+    },
+    {
+      "ref": "return_air_temp_low",
+      "title": "Return Air Temperature Below Setpoint",
+      "condition": "Return air temperature sensor reads below 65°F for more than 5 continuous minutes, indicating possible overcooling, zone bypass, or sensor drift requiring investigation.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "read_sensor return_air_temp_sensor",
+        "read_sensor supply_air_temp_sensor",
+        "read_sensor damper_position_sensor",
+        "notify hvac_technician",
+        "wait 300"
+      ],
+      "equipment": ["ahu_control_panel", "return_air_temp_sensor", "supply_air_temp_sensor", "damper_position_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "filter_dp_high",
+      "title": "Filter Differential Pressure High Alarm",
+      "condition": "Filter differential pressure sensor reads above 1.0 in. WG, indicating excessive filter loading that is measurably restricting airflow through the unit.",
+      "steps": [
+        "walk_to ahu_filter_section",
+        "read_sensor filter_dp_sensor",
+        "read_sensor supply_airflow_sensor",
+        "notify hvac_technician",
+        "wait 120"
+      ],
+      "equipment": ["ahu_filter_section", "filter_dp_sensor", "supply_airflow_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "coil_leak_minor",
+      "title": "Minor Cooling Coil Leak — Intermittent Drip",
+      "condition": "Condensate pan moisture sensor detects intermittent dripping with no floor pooling and no condensate pan overflow sensor activation, suggesting a minor coil or fitting weep.",
+      "steps": [
+        "walk_to ahu_coil_section",
+        "read_sensor condensate_pan_sensor",
+        "read_sensor floor_moisture_sensor",
+        "notify hvac_technician",
+        "wait 600"
+      ],
+      "equipment": ["ahu_coil_section", "condensate_pan_sensor", "floor_moisture_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "coil_leak_major",
+      "title": "Major Coil Rupture — Floor Flooding",
+      "condition": "Condensate pan overflow sensor AND floor moisture sensor both activate simultaneously, indicating substantial water release from coil rupture or chilled water line failure requiring emergency shutdown.",
+      "steps": [
+        "walk_to ahu_coil_section",
+        "read_sensor condensate_pan_sensor",
+        "read_sensor floor_moisture_sensor",
+        "press_button ahu_emergency_stop_button",
+        "notify maintenance_supervisor",
+        "notify plant_engineer",
+        "wait 60"
+      ],
+      "equipment": ["ahu_coil_section", "condensate_pan_sensor", "floor_moisture_sensor", "ahu_emergency_stop_button", "maintenance_supervisor", "plant_engineer"]
+    },
+    {
+      "ref": "fan_motor_overtemp",
+      "title": "Fan Motor Over-Temperature Alarm",
+      "condition": "Fan motor bearing temperature sensor reads above 185°F or motor winding temperature sensor exceeds the nameplate rated limit, triggering a thermal protection alarm.",
+      "steps": [
+        "walk_to ahu_fan_compartment",
+        "read_sensor fan_motor_temp_sensor",
+        "read_sensor motor_current_sensor",
+        "press_button ahu_stop_button",
+        "notify hvac_technician",
+        "wait 1800"
+      ],
+      "equipment": ["ahu_fan_compartment", "fan_motor_temp_sensor", "motor_current_sensor", "ahu_stop_button", "hvac_technician"]
+    },
+    {
+      "ref": "fan_below_speed",
+      "title": "Fan Running Below Target Speed",
+      "condition": "Fan tachometer reads 15–40% below the commanded speed setpoint while the motor contactor is closed and the shaft is still rotating, indicating belt slip, sheave wear, or VFD output degradation.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "read_sensor fan_speed_sensor",
+        "read_sensor motor_current_sensor",
+        "read_sensor vfd_status_sensor",
+        "notify hvac_technician",
+        "wait 300"
+      ],
+      "equipment": ["ahu_control_panel", "fan_speed_sensor", "motor_current_sensor", "vfd_status_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "fan_stopped",
+      "title": "Fan Completely Stopped While Motor Energized",
+      "condition": "Fan tachometer reads zero RPM while the motor contactor is confirmed closed and current draw is present, indicating shaft seizure, coupling failure, or catastrophic mechanical jam.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "read_sensor fan_speed_sensor",
+        "read_sensor motor_current_sensor",
+        "press_button ahu_emergency_stop_button",
+        "notify maintenance_supervisor",
+        "wait 60"
+      ],
+      "equipment": ["ahu_control_panel", "fan_speed_sensor", "motor_current_sensor", "ahu_emergency_stop_button", "maintenance_supervisor"]
+    },
+    {
+      "ref": "damper_stuck_closed",
+      "title": "Outside Air Damper Stuck Closed",
+      "condition": "Outside air damper position sensor reads 0% open despite the actuator receiving a command signal greater than 20% open, completely blocking fresh air intake to the unit.",
+      "steps": [
+        "walk_to ahu_damper_section",
+        "read_sensor damper_position_sensor",
+        "read_sensor outside_air_temp_sensor",
+        "notify hvac_technician",
+        "wait 120"
+      ],
+      "equipment": ["ahu_damper_section", "damper_position_sensor", "outside_air_temp_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "damper_stuck_open",
+      "title": "Return Air Damper Stuck Full Open",
+      "condition": "Return air damper position sensor reads 100% open despite the actuator receiving a command to partially or fully close, causing uncontrolled recirculation and loss of fresh air balance.",
+      "steps": [
+        "walk_to ahu_damper_section",
+        "read_sensor damper_position_sensor",
+        "read_sensor return_air_temp_sensor",
+        "read_sensor supply_airflow_sensor",
+        "notify hvac_technician",
+        "wait 180"
+      ],
+      "equipment": ["ahu_damper_section", "damper_position_sensor", "return_air_temp_sensor", "supply_airflow_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "vfd_fault",
+      "title": "Variable Frequency Drive Fault Alarm",
+      "condition": "Variable frequency drive fault indicator illuminates and the drive trips itself offline with an error code displayed, stopping fan speed modulation and defaulting the motor to zero output.",
+      "steps": [
+        "walk_to vfd_panel",
+        "read_sensor vfd_status_sensor",
+        "read_sensor motor_current_sensor",
+        "press_button vfd_reset_button",
+        "wait 30",
+        "read_sensor vfd_status_sensor",
+        "notify hvac_technician"
+      ],
+      "equipment": ["vfd_panel", "vfd_status_sensor", "motor_current_sensor", "vfd_reset_button", "hvac_technician"]
+    },
+    {
+      "ref": "breaker_trip",
+      "title": "Fan Motor Circuit Breaker Tripped",
+      "condition": "Fan motor circuit breaker in the motor control center panel has tripped to the OFF position, fully de-energizing the fan motor without an accompanying VFD fault code.",
+      "steps": [
+        "walk_to mcc_panel",
+        "read_sensor motor_current_sensor",
+        "read_sensor fan_speed_sensor",
+        "notify maintenance_supervisor",
+        "wait 300"
+      ],
+      "equipment": ["mcc_panel", "motor_current_sensor", "fan_speed_sensor", "maintenance_supervisor"]
+    },
+    {
+      "ref": "filter_replacement",
+      "title": "Scheduled Filter Replacement",
+      "condition": "Preventive maintenance schedule has reached the 90-day interval or filter differential pressure sensor reads above 0.8 in. WG, requiring filter media replacement.",
+      "steps": [
+        "walk_to ahu_filter_section",
+        "read_sensor filter_dp_sensor",
+        "pick replacement_filter",
+        "place replacement_filter",
+        "read_sensor filter_dp_sensor",
+        "notify hvac_technician"
+      ],
+      "equipment": ["ahu_filter_section", "filter_dp_sensor", "replacement_filter", "hvac_technician"]
+    },
+    {
+      "ref": "belt_inspection_tension",
+      "title": "V-Belt Tension Inspection and Adjustment",
+      "condition": "Scheduled 30-day inspection requires verification of fan drive V-belt tension, alignment, and surface condition without removing or replacing the belt.",
+      "steps": [
+        "walk_to ahu_fan_compartment",
+        "pick belt_tension_gauge",
+        "read_sensor fan_speed_sensor",
+        "place belt_tension_gauge",
+        "notify hvac_technician"
+      ],
+      "equipment": ["ahu_fan_compartment", "belt_tension_gauge", "fan_speed_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "belt_replacement",
+      "title": "Fan Drive Belt Replacement",
+      "condition": "V-belt inspection reveals cracking, fraying, glazing, or hardening, or belt tension cannot be restored to specification by adjustment alone, requiring full belt removal and replacement.",
+      "steps": [
+        "walk_to ahu_fan_compartment",
+        "pick replacement_belt",
+        "place replacement_belt",
+        "read_sensor fan_speed_sensor",
+        "notify hvac_technician"
+      ],
+      "equipment": ["ahu_fan_compartment", "replacement_belt", "fan_speed_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "coil_cleaning",
+      "title": "Cooling Coil Scheduled Cleaning",
+      "condition": "Quarterly preventive maintenance schedule or coil section differential pressure above 0.3 in. WG requires fin-and-tube coil face cleaning to restore heat transfer efficiency.",
+      "steps": [
+        "walk_to ahu_coil_section",
+        "read_sensor filter_dp_sensor",
+        "pick coil_cleaning_brush",
+        "place coil_cleaning_brush",
+        "read_sensor supply_air_temp_sensor",
+        "notify hvac_technician"
+      ],
+      "equipment": ["ahu_coil_section", "filter_dp_sensor", "coil_cleaning_brush", "supply_air_temp_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "damper_lubrication",
+      "title": "Damper Linkage and Actuator Lubrication",
+      "condition": "Semi-annual preventive maintenance schedule requires lubrication of all damper blade pivot points, linkage rod ends, and actuator drive shaft to prevent binding and wear.",
+      "steps": [
+        "walk_to ahu_damper_section",
+        "pick lubricant_tube",
+        "place lubricant_tube",
+        "read_sensor damper_position_sensor",
+        "notify hvac_technician"
+      ],
+      "equipment": ["ahu_damper_section", "lubricant_tube", "damper_position_sensor", "hvac_technician"]
+    },
+    {
+      "ref": "hvac_loto",
+      "title": "HVAC Unit Lockout/Tagout",
+      "condition": "Any maintenance task requiring physical access to rotating components, electrical panels, or pressurized refrigerant or water lines requires lockout/tagout of the AHU before work begins.",
+      "steps": [
+        "walk_to electrical_disconnect",
+        "press_button ahu_stop_button",
+        "wait 30",
+        "pick loto_lock",
+        "place loto_lock",
+        "pick loto_tag",
+        "place loto_tag"
+      ],
+      "equipment": ["electrical_disconnect", "ahu_stop_button", "loto_lock", "loto_tag"]
+    },
+    {
+      "ref": "hvac_emergency_stop",
+      "title": "Emergency Stop and Immediate Shutdown",
+      "condition": "Fire alarm activation, smoke detector trip within the AHU cabinet, operator personal safety emergency, or direct order from the safety officer requires immediate AHU shutdown.",
+      "steps": [
+        "walk_to ahu_control_panel",
+        "press_button ahu_emergency_stop_button",
+        "notify safety_officer",
+        "notify shift_supervisor",
+        "wait 120",
+        "read_sensor supply_airflow_sensor"
+      ],
+      "equipment": ["ahu_control_panel", "ahu_emergency_stop_button", "safety_officer", "shift_supervisor", "supply_airflow_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "low_supply_airflow",
+      "text": "Third shift, guys on line 3 over by the press stations kept saying it felt stuffy in there all night. Went over to the unit by bay 7 and you could barely feel air coming out the diffusers — not zero, just real weak. Motor's running, nothing's tripped. Feels like it's been slowly losing ground for a couple hours."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "low_supply_airflow",
+      "text": "East wing AHU, second shift. Wasn't a sudden thing, just kept getting warmer near the component inspection bench. Walked to the unit and it's putting out a trickle compared to normal. Checked the panel, no fault lights. Everything's running but the volume just isn't there. Been creeping down all afternoon."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "airflow_sudden_collapse",
+      "text": "About 2:15 on first shift, the ventilation over the welding stations just quit dead. One minute it was fine, next minute zero air movement at all. Heard a loud thud from inside the unit cabinet right before it happened, then total silence from the airside. No warning beforehand."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "airflow_sudden_collapse",
+      "text": "Night shift, alarm panel lit up around 11:30 and we lost all air in the stamping area near bay 12 in maybe 20 seconds flat. It wasn't slowly losing ground — it was running completely normal and then just died. Nothing coming out the ceiling diffusers at all."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "supply_temp_high_warn",
+      "text": "Air over by the paint prep area felt noticeably warm during first shift but nobody was panicking yet. Checked the discharge readout on the panel and it was running a few degrees higher than it should be — yellow caution light only, nothing red. Still blowing volume fine, just warm."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "supply_temp_high_warn",
+      "text": "Line 6 operators complained it was getting muggy around 10am. Went to the AHU panel near the east wall and the discharge temperature was elevated — not to the point where we had to do anything drastic, just the caution indicator on. No hard alarm, just warmer than it should be coming out the supply registers."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "supply_temp_high_alarm",
+      "text": "Full red alarm on the panel during second shift and the air coming out was noticeably hot, not just warm. Guys over at quality inspection were sweating and the thermometer in the area was climbing fast. That thing was way beyond just being a little high — had to act on it right away."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "supply_temp_high_alarm",
+      "text": "Plant engineer got paged around 3pm. The AHU next to the trim line was blasting hot air and the discharge gauge was buried well past anything we'd consider okay. We cleared the area — wasn't the yellow caution, this was the full critical indicator screaming at us."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "return_air_temp_low",
+      "text": "Something's off with the unit near the loading dock — the air on the return side is reading real cold. Not an overheating problem, actually the opposite. The space isn't cold either, so it's not that the zone is freezing. The exhaust air going back into the unit is way below what we'd normally expect."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "return_air_temp_low",
+      "text": "Second shift noticed the stamping bay seemed like it was overcooled and the guys were putting on jackets. Traced it to the AHU and the return side temperature was reading way lower than it should — supply discharge looked okay, but whatever's coming back to the unit is too cold."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "filter_dp_high",
+      "text": "The AHU by dock 2 feels like it's breathing through a pillow. Airflow's definitely reduced and there's an obvious resistance somewhere. Pulled up the panel and the pressure gauge across the filter housing was way up in the red. Fan sounds fine, motor's fine, just restricted."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "filter_dp_high",
+      "text": "First shift, line 4 guys said the ventilation was weak the entire day. Went and looked at the unit and the gauges on the filter bank were pegged out. Opened the access door and you could see the filter pads were absolutely loaded — dark grey and packed solid."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "filter_dp_high",
+      "text": "Third shift maintenance walkthrough on the north AHU — the differential gauge on the filter housing was maxed out, way above normal. Airflow down across the whole zone served by that unit. Fan's spinning fine, motor looks good, all the restriction is right there at the filter bank."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "coil_leak_minor",
+      "text": "Doing my morning walkthrough and noticed a small water drip coming off the coil connections inside the unit by the east wall. Not a puddle anywhere, not even a wet floor — just a little weeping from somewhere on the coil. Condensate pan looked fine, just this slow drip."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "coil_leak_minor",
+      "text": "Tech on second shift noticed a faint water stain under the coil section in the north unit during PM rounds. Nothing pooling, floor is completely dry around the unit, just looks like something has been weeping slowly for a while. No alarms, just a visual on the staining."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "coil_leak_major",
+      "text": "Came in to start first shift and there was water all over the floor around the AHU near bay 5. Not a drip — an actual puddle spreading out from the unit. Coil section cabinet was dripping from the bottom seam. Something let go inside there overnight."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "coil_leak_major",
+      "text": "Night shift emergency — water started spreading across the floor by the main air handler near the assembly line. Came out of the coil access panel area fast and was heading toward the electrical panels on the south wall. Had to pull people back from that area immediately."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "coil_leak_major",
+      "text": "Second shift, one of the line operators flagged me down because the floor near the AHU on the south wall was wet and getting slippery. By the time I got there water was coming out from inside the unit housing and spreading toward the aisle. Real mess, not a minor weep."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "Fan on the AHU near line 2 sounded labored this morning — kind of a straining note to it. Put my hand near the motor casing and it was way too hot. Thermal gauge on the panel was elevated. Fan was still turning, but that motor was cooking."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "Second shift maintenance got a heat alarm from the unit over the parts staging area. Went to check and the motor casing was throwing off serious heat, current draw was high on the panel meter. Fan was still running at that point but the thermal indicator was deep in the alarm zone."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "fan_below_speed",
+      "text": "Fan on the unit by the loading dock is definitely running — you can hear it spinning — but the airflow just isn't there compared to normal. It's moving but sluggishly. Checked the tach readout and it's going, just nowhere near what the controller is asking for. Somewhere between half and three-quarter speed."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "fan_below_speed",
+      "text": "Third shift noticed the ventilation in the assembly area was weak even though the unit sounded like it was running. Went to check the speed readout and it's well below target — fan is definitely turning, not a full stop, just spinning too slow to move the air we need."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "fan_stopped",
+      "text": "Weirdest thing on first shift — motor is drawing current, contactor is closed, everything looks energized on the panel, but there's zero air coming from the supply registers. Opened the access panel and the blades are completely frozen in place. Motor humming but nothing turning."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "fan_stopped",
+      "text": "Line 5, loud clunk from the AHU cabinet around 9am and then dead silence on the air side. No air at all. Went to look — motor's energized, breaker's in, VFD looks fine, but the shaft is not turning at all. Totally seized up mechanically while the electrical side is still live."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "damper_stuck_closed",
+      "text": "Guys on line 3 said it felt stale and stuffy even though the fan was clearly running and moving air. Went to check the fresh air intake side of the AHU and the blade wasn't moving at all — just sitting shut tight even though the controller was commanding ventilation. No outside air getting in whatsoever."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "damper_stuck_closed",
+      "text": "CO2 readings in the area near the break room started climbing during second shift and people were getting headaches. Checked the AHU serving that zone — fan is on, air is moving — but the intake damper blade on the fresh air side is completely frozen shut. Actuator signal is there, blade doesn't budge."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "damper_stuck_open",
+      "text": "The unit near shipping is recirculating like crazy — you can smell it, air quality getting stale, no fresh mixing happening right. Went and checked the return air blade inside the unit — wide open and completely stuck. Controller is sending a close command, position reads 100% open, nothing moves."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "damper_stuck_open",
+      "text": "Second shift, the system was supposed to cut back on recirculation during the economizer cycle but the return air side wouldn't cooperate. Blade is jammed fully open and whatever signal the actuator gets, it stays pinned at max open. Fresh air balance is completely off."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "vfd_fault",
+      "text": "The speed controller box on the north bay AHU threw a fault and the drive went offline. Red fault indicator lit up on the enclosure and the fan dropped to nothing. Not a breaker issue — the MCC looks fine. Just the drive itself bailed out with an error code on its display."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "vfd_fault",
+      "text": "First shift, the display on the variable speed drive for the main supply fan was flashing an error code and the unit went to a full stop. No mechanical noise beforehand, nothing tripped in the MCC. Just the electronic speed controller faulted itself offline and stopped the fan."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "vfd_fault",
+      "text": "Third shift, the drive cabinet by the south AHU lit up with a fault indicator and the fan dropped to zero. No mechanical problem I could see, no tripped breakers anywhere. Just the drive itself tripped on its own and posted an error code. Called it in."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "breaker_trip",
+      "text": "Fan in the east wing just died with no warning at all — no fault codes, no alarms from the drive. Traced it back to the motor control cabinet and one of the breaker handles was kicked out to the trip position. VFD display was dark but looked otherwise normal. Just the breaker itself let go."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "breaker_trip",
+      "text": "Second shift, whole ventilation for sector 4 went down. Went to the MCC room and found a breaker handle tripped out. Drive cabinet and controls looked completely fine, no fault codes. Just the circuit breaker in the motor control panel had tripped on its own."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "filter_replacement",
+      "text": "PM ticket came up for the 90-day swap on the bay 3 AHU. Pulled the old filter pads — visibly grey and packed heavy. Nothing broken, nothing alarming, just came due on the schedule. Swapped them out."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "filter_replacement",
+      "text": "Second shift PM crew caught the north AHU filter change that was a few days overdue on the calendar. Pulled the old media out — it was loaded and heavy. Put fresh ones in. Everything was working, just scheduled upkeep that needed doing."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "belt_inspection_tension",
+      "text": "Monthly walk on the south unit fan drive belt. Belt looks intact — no cracks, no glazing, no fraying. Checked the deflection and it was a hair loose so adjusted the tension. Belt itself is in good shape, just needed the 30-day verification and a small tweak."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "belt_inspection_tension",
+      "text": "First shift PM, 30-day belt check on the unit by line 6. Belt surface looked fine — no wear marks or glazing. Confirmed the tension was within range and checked the sheave alignment. Belt's good, just the scheduled check, no replacement needed."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "belt_replacement",
+      "text": "During the monthly check on the unit near dock 1, the belt was cracked through on the inner surface and glazed over. No matter how we tried to adjust the tensioner, it wouldn't hold. Had to pull the old one off and put a new belt on — adjustment alone wasn't going to fix it."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "belt_replacement",
+      "text": "Third shift found the drive belt on the east AHU shredded and fraying along both edges. Tension was completely gone — belt was flopping around on the sheaves. Wasn't a matter of adjusting anything, that belt was done. Put in a new one."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "coil_cleaning",
+      "text": "Quarterly PM on the coil bank for the central AHU. Fins were caked up with dust and fibrous debris from the plant floor. Had to work the whole face of the coil to clear it out. Efficiency was obviously down before the cleaning — you could see the buildup blocking the fin spacing."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "coil_cleaning",
+      "text": "Second shift maintenance, the coil section on the line 2 unit was due for its quarterly cleaning. Could see the buildup on the fin face right through the access panel before we even got the tools out. Cleaned the whole coil face as part of the scheduled work."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "damper_lubrication",
+      "text": "Six-month PM on the damper assembly for the bay 4 AHU. Pivot points were getting noticeably stiff and one of the rod ends was completely dry. Applied lubricant to all the pivot joints and the actuator shaft. Part of the semi-annual checklist, no fault, just due."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "damper_lubrication",
+      "text": "First shift, maintenance doing the biannual lube service on the damper linkage in the north unit. Actuator shaft felt gritty when we manually cycled it and the blade pivots were binding a little. Greased everything up per the PM checklist — no alarm, just the scheduled interval."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "hvac_loto",
+      "text": "Tech needed to get into the fan compartment on the west AHU to check a bearing. Before he could open the access door we had to lock the unit out at the disconnect. Ran through the lockout at the panel, applied the lock, verified the unit was dead before he went in."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "hvac_loto",
+      "text": "Maintenance needed to get inside the coil section to fix a leaking fitting. Standard drill — shut it down, lock it out at the electrical panel, hang the tag, confirm zero energy. Nobody goes in until all that's done. Did it by the book."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "hvac_loto",
+      "text": "First shift, before the scheduled belt work on the north AHU, we ran the full isolation procedure at the electrical disconnect. Lock went on, tag went on, waited for the unit to fully coast down. Tech verified the shaft was stationary before opening the belt guard."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "hvac_emergency_stop",
+      "text": "Fire alarm went off in the northwest corner during second shift. Hit the big red button on the AHU panel right away to keep it from pushing smoke through the ductwork and called it in. Cleared everyone from the area around the unit."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "hvac_emergency_stop",
+      "text": "Smoke detector inside the air handler cabinet tripped around 11pm on third shift. Killed the unit immediately and got the safety coordinator on the line. Cleared personnel from the duct section and around the unit until we knew what was going on."
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "hvac_emergency_stop",
+      "text": "One of the operators near the main AHU cabinet smelled something burning and hit the emergency stop before anyone figured out what it was. Called the safety officer right after per protocol. Better to kill it fast and investigate than let it keep running."
+    }
+  ]
+}

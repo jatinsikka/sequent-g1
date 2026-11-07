@@ -29,13 +29,11 @@ Usage:
 """
 import sys, os, json, subprocess, textwrap, time
 
-PROJ = r"C:\Users\sikka\Documents\Academic\Grad_Research\HCR_Research\Sequent-robotics"
-BRAIN_DIR = r"C:\Users\sikka\Documents\Academic\Grad_Research\HCR_Research\sop_planner_baseline"
-BRAIN_PY = os.path.join(BRAIN_DIR, r".venv_brain\Scripts\python.exe")
-BRAIN_QUERY = os.path.join(BRAIN_DIR, "brain_query.py")
+from demo_paths import PROJ, BRAIN_DIR, BRAIN_PY, BRAIN_QUERY, require
 CKPT_PRESS = "checkpoints_button/curr_v2_latest.zip"
 CKPT_LEVER = "checkpoints_lever_curr.zip"
 sys.path.insert(0, PROJ); os.chdir(PROJ)
+require(CKPT_PRESS, CKPT_LEVER, "g1_amo_gripper_pick.mjb")
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -138,7 +136,7 @@ if not LEVER_ONLY:
     print("FINAL TICKET DEMO — TICKET -> BRAIN -> PLAN -> ONE-TAKE EXECUTION")
     print("=" * 78)
     print(f"[TICKET] {ticket}\n")
-    print("[BRAIN] querying sop_planner_baseline retriever (.venv_brain subprocess)...")
+    print("[BRAIN] querying sop_planner_baseline retriever (brain subprocess)...")
     t0 = time.time()
     r = subprocess.run([BRAIN_PY, BRAIN_QUERY, ticket, "5"], capture_output=True, text=True,
                        encoding="utf-8", cwd=BRAIN_DIR, timeout=600)

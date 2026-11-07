@@ -298,6 +298,12 @@ def _classify_step(step: str) -> tuple:
     a step with no action evidence falls back to `notify` (a safe operational step). Running
     this PER STEP is what makes the plan a faithful 1:1 translation of the SOP."""
     sl = step.lower()
+    # Steps already written in skill syntax ("press_button estop_button", as in the 1,012-SOP
+    # corpus) name their skill directly. The keyword scan below can't see them: "_" is a word
+    # character, so r"\bpress\b" never matches "press_button" and the step fell back to notify.
+    lead = sl.split()[0] if sl.split() else ""
+    if lead in SKILL_KEYWORDS:
+        return lead, _extract_args_for_skill(lead, step)
     # WORD-BOUNDARY match so "press" doesn't fire on "pressure", "read" not on "ready", etc.
     scores = {sk: max([len(kw) for kw in kws if re.search(r"\b" + re.escape(kw) + r"\b", sl)] or [0])
               for sk, kws in SKILL_KEYWORDS.items()}

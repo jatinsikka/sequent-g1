@@ -3,7 +3,7 @@ Static viewer for the G1 + Robotiq 2F-85 gripper (g1_robotiq.mjb).
 Shows the robot standing with the right arm reaching forward so you can inspect the gripper
 mount/orientation. Pose held static (no stepping) so you can orbit freely.
 
-Run:  & "C:/Users/sikka/miniconda3/envs/amo/python.exe" Sequent-robotics/view_grasp.py
+Run:  python view_grasp.py
 Mouse: drag to orbit, scroll to zoom, right-drag to pan.
 """
 import os

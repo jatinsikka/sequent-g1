@@ -1,0 +1,684 @@
+{
+  "family": "Process Water Pump Station",
+  "sops": [
+    {
+      "ref": "low_pressure_alarm",
+      "title": "Low Discharge Pressure Alarm Response",
+      "condition": "Pump discharge pressure sensor reads below the 45 PSI minimum setpoint for more than 30 seconds during normal operation, with a gradual or steady drift.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "read_sensor discharge_pressure_sensor",
+        "walk_to pump_unit_1",
+        "read_sensor pump_inlet_valve_position_sensor",
+        "press_button acknowledge_alarm_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "discharge_pressure_sensor",
+        "pump_unit_1",
+        "pump_inlet_valve_position_sensor",
+        "acknowledge_alarm_button"
+      ]
+    },
+    {
+      "ref": "pressure_collapse",
+      "title": "Sudden Pressure Collapse Emergency Response",
+      "condition": "Pump discharge pressure drops from normal operating range to below 20 PSI within 5 seconds, indicating a catastrophic line break or valve failure rather than a gradual drift.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "press_button pump_estop_button",
+        "walk_to main_isolation_valve",
+        "press_button main_isolation_valve_actuator",
+        "read_sensor discharge_pressure_sensor",
+        "notify shift_supervisor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "pump_estop_button",
+        "main_isolation_valve",
+        "main_isolation_valve_actuator",
+        "discharge_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "high_pressure_alarm",
+      "title": "High Discharge Pressure Alarm Response",
+      "condition": "Pump discharge pressure sensor reads above the 85 PSI maximum ceiling during normal operation.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "read_sensor discharge_pressure_sensor",
+        "press_button pump_speed_reduce_button",
+        "wait 10",
+        "read_sensor discharge_pressure_sensor",
+        "press_button acknowledge_alarm_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "discharge_pressure_sensor",
+        "pump_speed_reduce_button",
+        "acknowledge_alarm_button"
+      ]
+    },
+    {
+      "ref": "flow_rate_low",
+      "title": "Low Process Water Flow Rate Alarm Response",
+      "condition": "Process water flow rate sensor reads below the 12 GPM minimum threshold while pump motor status confirms the motor is running.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "read_sensor flow_rate_sensor",
+        "walk_to pump_unit_1",
+        "read_sensor pump_inlet_strainer_dp_sensor",
+        "press_button acknowledge_alarm_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "flow_rate_sensor",
+        "pump_unit_1",
+        "pump_inlet_strainer_dp_sensor",
+        "acknowledge_alarm_button"
+      ]
+    },
+    {
+      "ref": "flow_rate_zero",
+      "title": "Complete Loss of Process Water Flow Response",
+      "condition": "Process water flow rate sensor reads zero while pump motor status confirms the motor is energized and running, indicating total blockage or impeller failure.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "read_sensor flow_rate_sensor",
+        "read_sensor pump_motor_status_indicator",
+        "press_button pump_estop_button",
+        "notify shift_supervisor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "flow_rate_sensor",
+        "pump_motor_status_indicator",
+        "pump_estop_button"
+      ]
+    },
+    {
+      "ref": "pressure_tank_low",
+      "title": "Pressure Tank Pre-Charge Below Setpoint",
+      "condition": "Pressure tank pre-charge gauge reads below the 30 PSI nitrogen pre-charge setpoint during a scheduled or walk-around inspection.",
+      "steps": [
+        "walk_to pressure_tank_station",
+        "read_sensor pressure_tank_precharge_gauge",
+        "read_sensor pressure_tank_system_pressure_sensor",
+        "press_button pressure_tank_isolation_valve_actuator",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pressure_tank_station",
+        "pressure_tank_precharge_gauge",
+        "pressure_tank_system_pressure_sensor",
+        "pressure_tank_isolation_valve_actuator"
+      ]
+    },
+    {
+      "ref": "motor_overtemp",
+      "title": "Pump Motor Over-Temperature Alarm Response",
+      "condition": "Pump motor winding temperature sensor exceeds the 155 degree Celsius alarm threshold.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "read_sensor motor_winding_temp_sensor",
+        "press_button pump_estop_button",
+        "wait 30",
+        "read_sensor motor_winding_temp_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "motor_winding_temp_sensor",
+        "pump_estop_button"
+      ]
+    },
+    {
+      "ref": "motor_electrical_fault",
+      "title": "Pump Motor Electrical Fault Response",
+      "condition": "Motor control center indicates an overcurrent trip or phase loss fault on the pump motor circuit, preventing normal pump operation.",
+      "steps": [
+        "walk_to motor_control_center",
+        "read_sensor mcc_fault_indicator",
+        "press_button mcc_fault_reset_button",
+        "wait 5",
+        "read_sensor mcc_fault_indicator",
+        "notify electrical_technician",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "motor_control_center",
+        "mcc_fault_indicator",
+        "mcc_fault_reset_button"
+      ]
+    },
+    {
+      "ref": "minor_seal_leak",
+      "title": "Minor Pump Mechanical Seal Drip Response",
+      "condition": "Pump mechanical seal area shows a slow drip leak at a rate below one drop per second, identified during visual inspection or by leak detector.",
+      "steps": [
+        "walk_to pump_unit_1",
+        "read_sensor pump_seal_leak_detector",
+        "walk_to pump_station_control_panel",
+        "press_button acknowledge_alarm_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_unit_1",
+        "pump_seal_leak_detector",
+        "pump_station_control_panel",
+        "acknowledge_alarm_button"
+      ]
+    },
+    {
+      "ref": "major_pipe_rupture",
+      "title": "Major Pipe Rupture Emergency Isolation",
+      "condition": "Process water is actively spraying or gushing from a pipe, fitting, or joint at high velocity, creating an uncontrolled water release.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "press_button pump_estop_button",
+        "walk_to main_isolation_valve",
+        "press_button main_isolation_valve_actuator",
+        "walk_to pump_station_control_panel",
+        "notify shift_supervisor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "pump_estop_button",
+        "main_isolation_valve",
+        "main_isolation_valve_actuator"
+      ]
+    },
+    {
+      "ref": "seal_inspection",
+      "title": "Routine Pump Mechanical Seal Inspection",
+      "condition": "The scheduled 500-hour inspection interval for the pump mechanical seal assembly has elapsed.",
+      "steps": [
+        "walk_to pump_unit_1",
+        "read_sensor pump_seal_leak_detector",
+        "pick inspection_mirror",
+        "place inspection_mirror",
+        "read_sensor pump_vibration_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_unit_1",
+        "pump_seal_leak_detector",
+        "inspection_mirror",
+        "pump_vibration_sensor"
+      ]
+    },
+    {
+      "ref": "filter_element_change",
+      "title": "Pump Inlet Filter Element Replacement",
+      "condition": "Pump inlet strainer differential pressure sensor reads above 5 PSI, indicating the filter element is loaded and requires replacement.",
+      "steps": [
+        "walk_to pump_inlet_strainer_housing",
+        "read_sensor pump_inlet_strainer_dp_sensor",
+        "pick replacement_filter_element",
+        "place replacement_filter_element",
+        "wait 5",
+        "read_sensor pump_inlet_strainer_dp_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_inlet_strainer_housing",
+        "pump_inlet_strainer_dp_sensor",
+        "replacement_filter_element"
+      ]
+    },
+    {
+      "ref": "pump_lubrication",
+      "title": "Pump Bearing Lubrication Service",
+      "condition": "The scheduled 250-hour lubrication interval for pump bearing assemblies on both pump units has elapsed.",
+      "steps": [
+        "walk_to pump_unit_1",
+        "pick grease_gun",
+        "place grease_gun",
+        "walk_to pump_unit_2",
+        "pick grease_gun",
+        "place grease_gun",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_unit_1",
+        "pump_unit_2",
+        "grease_gun"
+      ]
+    },
+    {
+      "ref": "relief_valve_test",
+      "title": "Pressure Relief Valve Functional Test",
+      "condition": "The quarterly functional test interval is due for the pump station pressure relief valve.",
+      "steps": [
+        "walk_to pressure_relief_valve_station",
+        "read_sensor discharge_pressure_sensor",
+        "press_button relief_valve_test_actuator",
+        "wait 5",
+        "read_sensor relief_valve_position_sensor",
+        "press_button relief_valve_test_actuator",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pressure_relief_valve_station",
+        "discharge_pressure_sensor",
+        "relief_valve_test_actuator",
+        "relief_valve_position_sensor"
+      ]
+    },
+    {
+      "ref": "pressure_tank_recharge",
+      "title": "Pressure Tank Bladder Nitrogen Recharge",
+      "condition": "Pressure tank nitrogen pre-charge has been confirmed below setpoint and the tank bladder requires nitrogen recharge to restore the 30 PSI pre-charge.",
+      "steps": [
+        "walk_to pressure_tank_station",
+        "press_button pressure_tank_isolation_valve_actuator",
+        "pick nitrogen_charge_hose",
+        "place nitrogen_charge_hose",
+        "wait 30",
+        "read_sensor pressure_tank_precharge_gauge",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pressure_tank_station",
+        "pressure_tank_isolation_valve_actuator",
+        "nitrogen_charge_hose",
+        "pressure_tank_precharge_gauge"
+      ]
+    },
+    {
+      "ref": "vibration_check",
+      "title": "Routine Pump Bearing Vibration Measurement",
+      "condition": "The scheduled weekly vibration measurement is due on all bearing measurement points on pump units 1 and 2.",
+      "steps": [
+        "walk_to pump_unit_1",
+        "read_sensor pump_vibration_sensor",
+        "walk_to pump_unit_2",
+        "read_sensor pump_vibration_sensor",
+        "walk_to pump_station_control_panel",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "pump_unit_1",
+        "pump_unit_2",
+        "pump_vibration_sensor",
+        "pump_station_control_panel"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Pump Station Lockout Tagout Procedure",
+      "condition": "Pump station requires full isolation of electrical and hydraulic energy sources prior to maintenance or repair work on pump internals or connected piping.",
+      "steps": [
+        "walk_to motor_control_center",
+        "press_button mcc_main_disconnect_switch",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "walk_to main_isolation_valve",
+        "press_button main_isolation_valve_actuator",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "motor_control_center",
+        "mcc_main_disconnect_switch",
+        "lockout_hasp",
+        "main_isolation_valve",
+        "main_isolation_valve_actuator"
+      ]
+    },
+    {
+      "ref": "spill_response",
+      "title": "Process Water Floor Spill Response",
+      "condition": "Standing water or pooling is observed on the pump station floor and is not associated with an active spray, pipe rupture, or seal failure.",
+      "steps": [
+        "walk_to pump_station_floor_drain",
+        "read_sensor floor_water_level_sensor",
+        "pick absorbent_pad",
+        "place absorbent_pad",
+        "walk_to pump_station_control_panel",
+        "press_button acknowledge_alarm_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "pump_station_floor_drain",
+        "floor_water_level_sensor",
+        "absorbent_pad",
+        "pump_station_control_panel",
+        "acknowledge_alarm_button"
+      ]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Pump Station Emergency Stop Activation",
+      "condition": "An imminent safety hazard at the pump station requires immediate halt of all pump station equipment with no time for normal shutdown sequencing.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "press_button pump_estop_button",
+        "wait 5",
+        "read_sensor pump_motor_status_indicator",
+        "notify shift_supervisor",
+        "notify safety_officer"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "pump_estop_button",
+        "pump_motor_status_indicator"
+      ]
+    },
+    {
+      "ref": "station_startup",
+      "title": "Pump Station Normal Startup",
+      "condition": "Pump station is in a safe de-energized state and is ready to be brought online for production at the start of a shift or after a maintenance window.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "read_sensor discharge_pressure_sensor",
+        "press_button pump_start_button",
+        "wait 15",
+        "read_sensor flow_rate_sensor",
+        "read_sensor discharge_pressure_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "discharge_pressure_sensor",
+        "pump_start_button",
+        "flow_rate_sensor"
+      ]
+    },
+    {
+      "ref": "station_shutdown",
+      "title": "Pump Station Normal Shutdown",
+      "condition": "Production has ended and the pump station requires a planned, controlled shutdown at end of shift or prior to a scheduled maintenance window.",
+      "steps": [
+        "walk_to pump_station_control_panel",
+        "press_button pump_stop_button",
+        "wait 30",
+        "read_sensor discharge_pressure_sensor",
+        "press_button main_isolation_valve_actuator",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "pump_station_control_panel",
+        "pump_stop_button",
+        "discharge_pressure_sensor",
+        "main_isolation_valve_actuator"
+      ]
+    },
+    {
+      "ref": "water_quality_check",
+      "title": "Process Water Quality and Turbidity Inspection",
+      "condition": "Scheduled daily quality inspection of process water turbidity and contamination level is due at the process water sample port.",
+      "steps": [
+        "walk_to process_water_sample_port",
+        "pick water_sample_bottle",
+        "place water_sample_bottle",
+        "read_sensor turbidity_sensor",
+        "walk_to pump_station_control_panel",
+        "notify quality_technician"
+      ],
+      "equipment": [
+        "process_water_sample_port",
+        "water_sample_bottle",
+        "turbidity_sensor",
+        "pump_station_control_panel"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "low_pressure_alarm",
+      "text": "Line 3 coolant supply was running sluggish this morning around 6am. The gauge at the pump skid near the south wall was hanging around 38 PSI the whole time — nowhere near where it should be. Pump was still spinning, just not pushing enough. Called it in at start of first shift."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "low_pressure_alarm",
+      "text": "Second shift noticed the water pressure at the parts wash station had been creeping down all evening. By the time I checked the panel by the loading dock, the readout was sitting at 41 PSI. Not an emergency, just drifting low over a couple hours. No banging, no alarms going off yet."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "low_pressure_alarm",
+      "text": "Came in for night shift handoff and the day guys said the unit up by the stamping cells had been weak all afternoon. Checked the digital readout — 43 PSI and holding there steady. Motor running fine, nothing tripped. Just not enough push in the system, gradual the whole time."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "pressure_collapse",
+      "text": "All hell broke loose on line 2 around 2pm. One second we had normal pressure, next second the needle dropped to the floor — like 8 PSI in less than 5 seconds. Water started backing up at the machining cells. I've never seen it go that fast. This wasn't a slow thing at all."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "pressure_collapse",
+      "text": "Third shift, the pump by the west dock just cratered. No warning, just a huge instantaneous drop on the display. Went from about 62 PSI down to basically nothing before I even got to the panel. Heard something give way somewhere in the line right after the pump tripped."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "pressure_collapse",
+      "text": "Middle of morning startup, the system pressure wiped out in under 5 seconds — I was watching the screen and it just fell off a cliff. Night crew said everything was fine at handoff an hour earlier. Totally different from the times we've seen it drift low over a shift."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "high_pressure_alarm",
+      "text": "The panel near the assembly cells was showing 91 PSI this morning — way past where we run. The relief valve didn't pop. I wasn't sure if something was stuck or if the setpoint got bumped. Pressure just kept climbing above the ceiling before I caught it."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "high_pressure_alarm",
+      "text": "After we brought the pump back online after lunch, discharge was reading over 88 PSI. I could hear the pipes creaking a bit. Nothing burst, but the numbers were clearly above the max the supervisor posted on the board. First shift, unit near shipping."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Second shift operator flagged this — the drive speed on the main pump might have gotten bumped during the cleaning crew's pass because we were pegging 93 PSI on the outlet side. Completely the opposite of the usual complaint about not enough push."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "flow_rate_low",
+      "text": "The parts washer on the east end wasn't getting enough water throughput during first shift. Pump sounded like it was working, but flow at the tool was way down — slower than I've ever seen it running. The pump wasn't dead, just starved. Pressure gauge looked roughly okay."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "flow_rate_low",
+      "text": "Maintenance log from last night: line 4 water supply was trickling during the second half of third shift. Motor humming away, no faults on the board, but the flow meter at the control station was reading about 9 GPM. About half of normal throughput, pump still running."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "flow_rate_zero",
+      "text": "Pump on the main skid was screaming — running full tilt, sounded angry — but absolutely zero water moving anywhere on line 1. The machining cells went dry completely. Motor pulling amps, nothing coming out the other end. Something is totally blocked or the impeller let go."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "flow_rate_zero",
+      "text": "End of first shift, line 2 coolant stopped moving entirely but nobody had pressed the stop button. You could hear the motor still running. Flow indicator at the panel by the east wall showing a big fat zero. Not a pressure problem — dead stop on the water with the motor still going."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "pressure_tank_low",
+      "text": "Did the weekly walkaround and the bladder tank near the pump room door was reading about 22 PSI on the pre-charge port. System pressure looked okay on the main gauge, but that accumulator isn't holding enough charge. It's been short-cycling more than normal too."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "pressure_tank_low",
+      "text": "Noticed during the morning rounds that the expansion tank by the boiler room side keeps making the pump kick on and off too often — cycling maybe every 20 seconds. Checked the air charge gauge on the tank body itself — only showing 25 PSI. Whole thing feels waterlogged."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "motor_overtemp",
+      "text": "Motor housing on pump unit 1 near the loading dock was too hot to even get close to — could feel the heat from two feet away. The thermal alarm light on the panel was flashing red. We'd been running it hard all day on a rush order and it just cooked itself."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "motor_overtemp",
+      "text": "Second shift complained about a burning smell near the pump skid on the south end. Checked the winding temp readout on the panel — showing 162 degrees Celsius. Fan blade on the motor might be broken or the vent slots are clogged with debris. It was definitely too hot."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "motor_electrical_fault",
+      "text": "MCC cabinet on the east wall threw a fault right at startup this morning. The indicator was solid red. The pump just wouldn't come on. Electrician on call said it looked like an overcurrent trip. Couldn't get anywhere with the normal start sequence from the operator panel."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "motor_electrical_fault",
+      "text": "During third shift the main pump tripped hard — nothing mechanical was wrong that I could see, but the drive cabinet next to the pump room door was showing a fault light. Couldn't restart from the operator panel at all. Had to call the E-tech out at 3am to sort it."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "motor_electrical_fault",
+      "text": "Phase loss fault at the motor control box near the compressor room — happened twice on second shift. First reset it came back, second time it stayed tripped. Fuses looked okay visually but something is flaky in the circuit. Not a mechanical issue, all electrical."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "minor_seal_leak",
+      "text": "Walkaround this morning and there's a slow drip coming from around the shaft area on unit 1 near the east dock. Like one drop every few seconds, leaving a small wet spot on the floor plate. Pump running fine otherwise, good pressure and flow — not gushing, just weeping at the back."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "minor_seal_leak",
+      "text": "First shift operator noted a damp ring forming under the pump by the filter housing. You can see where it's been seeping for a while — there's a mineral stain building on the base plate. Still very minor, no spray, no puddle forming — just a slow seep right at the shaft packing area."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "minor_seal_leak",
+      "text": "Maintenance noticed a small weep around the rotating part of the pump on line 3's unit. Wasn't there last week during inspection. Rate is slow — maybe a drop or two per minute tops. Unit is still making normal pressure and flow, just oozing a little at the rear of the pump casing."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "major_pipe_rupture",
+      "text": "Water was spraying like a sprinkler head from a fitting near the ceiling on the pump station north wall. Hit the ceiling tiles, soaked two operators who were nearby. The whole area was getting drenched within seconds. Nobody had stopped anything yet when I got there — pumps still running."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "major_pipe_rupture",
+      "text": "Line 1 pump room — a two-inch line let go at a union joint and water was absolutely gushing onto the floor. We're talking a full-on river within a minute. I could hear the pressure drop across the whole building. This was way beyond a drip — it was a flood situation."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "major_pipe_rupture",
+      "text": "Third shift emergency — an elbow at the discharge header blew out and was throwing water hard against the far wall. The pumps were still running and just pumping everything onto the floor. Floor drains couldn't keep up with the volume. Total chaos in the pump room."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "seal_inspection",
+      "text": "500-hour PM came due on the main pump this week. Maintenance coordinator wanted the seal check done before second shift started. Pump had been running smooth so nobody expected surprises, but still needed to do the shaft inspection and sign off the condition in the logbook."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "seal_inspection",
+      "text": "Planned inspection on the pump unit near the assembly area — just the regular look at the shaft seals as part of the PM schedule. Nothing obviously wrong but we were due at 500 hours, so the tech went through the inspection routine to document current condition and check for early wear."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "filter_element_change",
+      "text": "Differential pressure across the inlet strainer on the main unit was riding at 6 PSI all morning — been creeping up for a couple days. That basket is definitely plugged up. Water wasn't getting through clean enough. Needed a swap before the restriction got bad enough to starve the pump."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "filter_element_change",
+      "text": "The screen basket on the suction side was caked with debris when maintenance pulled it — iron filings and some rubber bits from upstream machining. The delta-P gauge on that strainer section was pegged above the change-out number. Definitely time to drop in a fresh element."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "pump_lubrication",
+      "text": "250-hour grease interval came up on both pump units this morning per the PM board. One of the techs mentioned the bearing housings felt slightly rough underfoot when walking the floor last week. No failure, just time for the scheduled greasing on both units before it becomes a problem."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "pump_lubrication",
+      "text": "Both pumps on the north end were due for bearing service. The PM tag on unit 2 was actually overdue by about 30 hours — someone missed it last cycle. Housings felt warm during rounds but no abnormal noise yet. Just needed the grease service completed to get back on schedule."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "relief_valve_test",
+      "text": "Quarterly PRV test was on the schedule for this week. Last time it was checked was three months back by day shift and it passed fine then. No complaints about it lately, just doing the required functional check to confirm it will still open at the right point if we ever need it."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "relief_valve_test",
+      "text": "Engineering asked for the safety valve on the discharge header to be tested after the system ran at elevated pressure last week. Needed to verify it would open at the correct setpoint and reseat cleanly afterward. Strictly a verify-and-document exercise, not a repair or adjustment job."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "pressure_tank_recharge",
+      "text": "After the inspection confirmed the accumulator was undercharged, maintenance brought out the nitrogen bottle to top it off. Tank was confirmed isolated from the system first. Pre-charge was brought back up to spec and the short-cycling stopped right after the fill was done."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "pressure_tank_recharge",
+      "text": "The expansion tank by the east pump room needed the air charge restored — it had bled down since last quarter. The tech connected the nitrogen rig to the Schrader valve on the tank while it was off the line. After the fill, checked the gauge and the system stopped hunting immediately."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "vibration_check",
+      "text": "Weekly vibe readings were due on the pump skids this Monday. One tech mentioned unit 2 felt a tiny bit rougher underfoot when walking by it last Thursday. Nothing alarming, just doing the scheduled measurement to see if the numbers confirm anything before it gets worse."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "vibration_check",
+      "text": "Vibration survey day — both units needed to be logged per the weekly PM. First unit read clean. Second unit by the south wall had a reading the tech wanted to flag to the reliability engineer. Still within acceptable limits but trending up compared to the last two weeks of data."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance was going in to replace the mechanical seal on unit 1 and needed the whole pump station made safe first. Electrician and plumber both had to be involved. All stored energy had to be killed and physically locked before anyone was allowed to open that pump casing."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "lockout_tagout",
+      "text": "A plumber needed access to the main discharge header to install a new tap for a branch line. Before he could cut into the live pipe, the pump had to be de-energized and the water isolated completely. Standard isolation before anyone puts a torch or a saw to that piping."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "spill_response",
+      "text": "Found a puddle on the pump room floor this morning — maybe 3 square feet of standing water. Couldn't see any active drip anywhere obvious on the pipes or fittings. No spraying, no gushing, no seal weeping visible. Just water on the floor with no obvious live source still running."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "spill_response",
+      "text": "Second shift walked into the pump station smelling damp and found the floor wet near the main drain. Looked like maybe a connection had sweated or a small amount sloshed over during the earlier filter change. No pipe failure, no spray event — just pooled water sitting on the concrete."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "estop_activation",
+      "text": "A contractor working near the pump skid slipped and went down hard. Supervisor called for an immediate halt to all equipment in the area before anyone else moved in to help. Everything needed to stop right now — no time to go through any kind of normal sequence."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "estop_activation",
+      "text": "Saw sparks coming from the junction box mounted next to the pump motor during third shift. Didn't know if it was a real electrical fault or a fluke, but the area had to be cleared and the equipment killed instantly. No time for a normal wind-down — just needed it stopped."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "station_startup",
+      "text": "First shift bring-up after the weekend idle — nothing wrong, just the standard sequence to get the water system running before the machining lines started at 6am. Needed to verify flow and pressure were both good before telling the production supervisor the lines were ready."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "station_startup",
+      "text": "Coming back online after last night's scheduled PM window — maintenance had the pump isolated for the seal job. Once they signed off the clearance and released the equipment, we ran through the normal startup sequence to restore water service to the plant floor before first shift arrived."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "station_shutdown",
+      "text": "End of day Friday, production done for the week. Supervisor called for water service to be wound down before the plant went into weekend mode. Nothing broken, nothing alarming — just the routine close-out on the pump station at the end of a normal production week."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "station_shutdown",
+      "text": "A maintenance window was scheduled for Saturday morning, so the pump system had to be brought down in a controlled way during Friday night third shift. No faults, no alarms going into it — just getting everything parked properly before the crew came in to do their repair work."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "water_quality_check",
+      "text": "Quality came around during first shift for the daily water sampling — someone upstream had changed a coolant concentrate mix and they wanted to make sure nothing cloudy was getting into the process water circuit. Standard daily sample collection at the tap near the pump room door."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "water_quality_check",
+      "text": "The inline turbidity monitor on the main supply line was showing a slightly elevated reading after startup this morning — looked a bit murky on the display. Quality tech wanted a grab sample and a sensor confirmation before releasing the line to production. Daily check but with a bit more urgency than usual."
+    }
+  ]
+}

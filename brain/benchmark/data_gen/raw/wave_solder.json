@@ -1,0 +1,699 @@
+{
+  "family": "Wave Soldering Machine",
+  "sops": [
+    {
+      "ref": "solder_temp_low",
+      "title": "Solder Pot Temperature Below Minimum Setpoint",
+      "condition": "Solder pot temperature sensor reads below 245 degrees C, the minimum operating threshold, while the machine is in normal production mode with no rate-of-change alarm active.",
+      "steps": [
+        "walk_to solder_pot_control_panel",
+        "read_sensor solder_pot_temp_sensor",
+        "notify process_engineer",
+        "press_button solder_temp_increase_button",
+        "wait 120 seconds",
+        "read_sensor solder_pot_temp_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "solder_pot_control_panel",
+        "solder_pot_temp_sensor",
+        "solder_temp_increase_button"
+      ]
+    },
+    {
+      "ref": "solder_temp_sudden_collapse",
+      "title": "Solder Pot Temperature Rapid Drop",
+      "condition": "Solder pot temperature drops more than 15 degrees C within two minutes while the machine is running, indicating a heater element failure or thermal runaway condition requiring immediate intervention.",
+      "steps": [
+        "walk_to solder_pot_control_panel",
+        "read_sensor solder_pot_temp_sensor",
+        "press_button machine_estop_button",
+        "notify maintenance_technician",
+        "walk_to solder_pot_heater_panel",
+        "read_sensor heater_fault_indicator",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "solder_pot_control_panel",
+        "solder_pot_temp_sensor",
+        "machine_estop_button",
+        "solder_pot_heater_panel",
+        "heater_fault_indicator"
+      ]
+    },
+    {
+      "ref": "solder_temp_overtemp",
+      "title": "Solder Pot Temperature Above Maximum Ceiling",
+      "condition": "Solder pot temperature sensor reads above 280 degrees C, triggering the overtemperature alarm and risking accelerated solder oxidation, dross formation, and alloy composition drift.",
+      "steps": [
+        "walk_to solder_pot_control_panel",
+        "read_sensor solder_pot_temp_sensor",
+        "press_button solder_temp_decrease_button",
+        "notify process_engineer",
+        "wait 180 seconds",
+        "read_sensor solder_pot_temp_sensor"
+      ],
+      "equipment": [
+        "solder_pot_control_panel",
+        "solder_pot_temp_sensor",
+        "solder_temp_decrease_button"
+      ]
+    },
+    {
+      "ref": "flux_level_low",
+      "title": "Flux Reservoir Level Low Warning",
+      "condition": "Flux reservoir level sensor falls below the 20 percent threshold, triggering the low-level warning indicator on the flux control panel while the pump remains operational.",
+      "steps": [
+        "walk_to flux_control_panel",
+        "read_sensor flux_level_sensor",
+        "notify material_handler",
+        "walk_to flux_storage_area",
+        "pick flux_drum",
+        "walk_to flux_fill_port",
+        "place flux_drum"
+      ],
+      "equipment": [
+        "flux_control_panel",
+        "flux_level_sensor",
+        "flux_storage_area",
+        "flux_drum",
+        "flux_fill_port"
+      ]
+    },
+    {
+      "ref": "flux_overpressure",
+      "title": "Flux System Pressure Exceeds Rated Limit",
+      "condition": "Flux pump pressure sensor reads above 4.5 bar, exceeding the system rated maximum and posing risk of line rupture, spray nozzle damage, or uncontrolled flux discharge.",
+      "steps": [
+        "walk_to flux_control_panel",
+        "read_sensor flux_pressure_sensor",
+        "press_button flux_pump_stop_button",
+        "notify maintenance_technician",
+        "wait 30 seconds",
+        "read_sensor flux_pressure_sensor"
+      ],
+      "equipment": [
+        "flux_control_panel",
+        "flux_pressure_sensor",
+        "flux_pump_stop_button"
+      ]
+    },
+    {
+      "ref": "conveyor_slowdown",
+      "title": "Conveyor Speed Below Setpoint",
+      "condition": "Conveyor tachometer reads more than 15 percent below the programmed speed setpoint while boards are present and the drive motor remains energized without a fault code.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor conveyor_speed_sensor",
+        "press_button conveyor_speed_increase_button",
+        "wait 30 seconds",
+        "read_sensor conveyor_speed_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "conveyor_control_panel",
+        "conveyor_speed_sensor",
+        "conveyor_speed_increase_button"
+      ]
+    },
+    {
+      "ref": "conveyor_stopped",
+      "title": "Conveyor Fully Stopped Mid-Cycle Hard Jam",
+      "condition": "Conveyor motion sensor reads zero velocity while the drive motor is energized and boards are loaded in the machine, indicating a hard mechanical jam rather than a programmed stop.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "press_button machine_estop_button",
+        "notify maintenance_technician",
+        "walk_to conveyor_jam_access_panel",
+        "read_sensor conveyor_motion_sensor",
+        "pick jammed_pcb",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "conveyor_control_panel",
+        "machine_estop_button",
+        "conveyor_jam_access_panel",
+        "conveyor_motion_sensor",
+        "jammed_pcb"
+      ]
+    },
+    {
+      "ref": "wave_height_low",
+      "title": "Solder Wave Height Below Specification",
+      "condition": "Wave height sensor reads below the 8 mm minimum specification, indicating insufficient pump speed or nozzle restriction causing incomplete solder contact with PCB pads.",
+      "steps": [
+        "walk_to wave_pump_control_panel",
+        "read_sensor wave_height_sensor",
+        "press_button wave_pump_speed_increase_button",
+        "wait 60 seconds",
+        "read_sensor wave_height_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "wave_pump_control_panel",
+        "wave_height_sensor",
+        "wave_pump_speed_increase_button"
+      ]
+    },
+    {
+      "ref": "wave_height_high",
+      "title": "Solder Wave Height Above Specification",
+      "condition": "Wave height sensor reads above the 12 mm maximum specification, causing solder flooding, bridging across adjacent pads, or solder splashing onto component bodies.",
+      "steps": [
+        "walk_to wave_pump_control_panel",
+        "read_sensor wave_height_sensor",
+        "press_button wave_pump_speed_decrease_button",
+        "wait 60 seconds",
+        "read_sensor wave_height_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "wave_pump_control_panel",
+        "wave_height_sensor",
+        "wave_pump_speed_decrease_button"
+      ]
+    },
+    {
+      "ref": "preheat_low",
+      "title": "Preheat Zone Temperature Below Lower Process Limit",
+      "condition": "Preheat zone thermocouple reads below 90 degrees C, the lower process limit, causing insufficient flux carrier evaporation and potential cold solder joint formation with no active alarm horn.",
+      "steps": [
+        "walk_to preheat_control_panel",
+        "read_sensor preheat_temp_sensor",
+        "press_button preheat_setpoint_increase_button",
+        "wait 90 seconds",
+        "read_sensor preheat_temp_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "preheat_control_panel",
+        "preheat_temp_sensor",
+        "preheat_setpoint_increase_button"
+      ]
+    },
+    {
+      "ref": "preheat_overtemp",
+      "title": "Preheat Zone Critical Overtemperature Alarm",
+      "condition": "Preheat zone thermocouple exceeds 160 degrees C, triggering the critical overtemperature alarm horn and red indicator, posing immediate risk of board delamination, component damage, or flux ignition.",
+      "steps": [
+        "walk_to preheat_control_panel",
+        "read_sensor preheat_temp_sensor",
+        "press_button machine_estop_button",
+        "notify process_engineer",
+        "walk_to preheat_heater_breaker_panel",
+        "press_button preheat_heater_breaker_off_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "preheat_control_panel",
+        "preheat_temp_sensor",
+        "machine_estop_button",
+        "preheat_heater_breaker_panel",
+        "preheat_heater_breaker_off_button"
+      ]
+    },
+    {
+      "ref": "drive_motor_overcurrent",
+      "title": "Conveyor Drive Motor Overcurrent Fault",
+      "condition": "Conveyor drive motor current sensor exceeds the 12-amp overcurrent trip threshold and the VFD displays a fault code, indicating mechanical overload or motor winding degradation rather than a chain jam.",
+      "steps": [
+        "walk_to conveyor_drive_panel",
+        "read_sensor motor_current_sensor",
+        "press_button machine_estop_button",
+        "notify maintenance_technician",
+        "wait 60 seconds",
+        "read_sensor motor_current_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "conveyor_drive_panel",
+        "motor_current_sensor",
+        "machine_estop_button"
+      ]
+    },
+    {
+      "ref": "minor_solder_leak",
+      "title": "Minor Solder Seepage from Pot Joint or Nozzle Fitting",
+      "condition": "A small drip or seepage of molten solder is observed at a pot gasket joint or nozzle fitting with no floor pooling, machine remaining in controlled operation and solder contained to the machine base area.",
+      "steps": [
+        "walk_to solder_pot_area",
+        "read_sensor solder_level_sensor",
+        "notify maintenance_technician",
+        "walk_to safety_station",
+        "pick spill_containment_tray",
+        "walk_to solder_pot_area",
+        "place spill_containment_tray"
+      ],
+      "equipment": [
+        "solder_pot_area",
+        "solder_level_sensor",
+        "safety_station",
+        "spill_containment_tray"
+      ]
+    },
+    {
+      "ref": "major_solder_spill",
+      "title": "Major Solder Spill or Pot Rupture",
+      "condition": "A large volume of molten solder is pooling on the floor or machine base, or the solder pot has ruptured, creating an immediate burn and fire hazard requiring full machine shutdown and area evacuation.",
+      "steps": [
+        "press_button machine_estop_button",
+        "notify shift_supervisor",
+        "walk_to safety_station",
+        "pick fire_extinguisher",
+        "notify maintenance_technician",
+        "walk_to main_electrical_panel",
+        "press_button main_power_off_breaker"
+      ],
+      "equipment": [
+        "machine_estop_button",
+        "safety_station",
+        "fire_extinguisher",
+        "main_electrical_panel",
+        "main_power_off_breaker"
+      ]
+    },
+    {
+      "ref": "dross_removal",
+      "title": "Solder Pot Dross Removal and Skimming",
+      "condition": "Scheduled dross removal interval is reached, or dross accumulation on the solder pot surface visually exceeds 30 percent coverage and risks being drawn into the wave pump.",
+      "steps": [
+        "walk_to solder_pot_control_panel",
+        "read_sensor solder_pot_temp_sensor",
+        "walk_to dross_tool_storage",
+        "pick dross_skimmer",
+        "walk_to solder_pot_area",
+        "place dross_skimmer",
+        "pick dross_collection_bin"
+      ],
+      "equipment": [
+        "solder_pot_control_panel",
+        "solder_pot_temp_sensor",
+        "dross_tool_storage",
+        "dross_skimmer",
+        "solder_pot_area",
+        "dross_collection_bin"
+      ]
+    },
+    {
+      "ref": "flux_filter_replace",
+      "title": "Flux System Filter Replacement",
+      "condition": "Flux filter service interval has elapsed, or pressure drop across the flux filter housing exceeds 0.8 bar indicating a clogged element that restricts pump flow.",
+      "steps": [
+        "walk_to flux_control_panel",
+        "press_button flux_pump_stop_button",
+        "walk_to flux_filter_housing",
+        "pick used_flux_filter",
+        "walk_to parts_storage",
+        "pick replacement_flux_filter",
+        "place replacement_flux_filter"
+      ],
+      "equipment": [
+        "flux_control_panel",
+        "flux_pump_stop_button",
+        "flux_filter_housing",
+        "used_flux_filter",
+        "parts_storage",
+        "replacement_flux_filter"
+      ]
+    },
+    {
+      "ref": "conveyor_finger_clean",
+      "title": "Conveyor Finger and Chain Cleaning",
+      "condition": "Scheduled conveyor cleaning interval is reached, or flux residue and solder buildup on conveyor fingers is observed during inspection and poses risk of board slippage or contamination transfer.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to cleaning_station",
+        "pick flux_residue_brush",
+        "walk_to conveyor_finger_zone",
+        "place flux_residue_brush",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "conveyor_control_panel",
+        "conveyor_stop_button",
+        "cleaning_station",
+        "flux_residue_brush",
+        "conveyor_finger_zone"
+      ]
+    },
+    {
+      "ref": "wave_nozzle_clean",
+      "title": "Wave Nozzle Cleaning and Wave Height Calibration",
+      "condition": "Scheduled nozzle maintenance interval is reached, or wave profile irregularities such as asymmetric cresting or partial restriction are observed during inspection window checks.",
+      "steps": [
+        "walk_to wave_pump_control_panel",
+        "press_button wave_pump_stop_button",
+        "walk_to tooling_cabinet",
+        "pick nozzle_cleaning_tool",
+        "walk_to solder_wave_nozzle",
+        "place nozzle_cleaning_tool",
+        "read_sensor wave_height_sensor"
+      ],
+      "equipment": [
+        "wave_pump_control_panel",
+        "wave_pump_stop_button",
+        "tooling_cabinet",
+        "nozzle_cleaning_tool",
+        "solder_wave_nozzle",
+        "wave_height_sensor"
+      ]
+    },
+    {
+      "ref": "flux_nozzle_calibrate",
+      "title": "Flux Spray Nozzle Flow Rate Calibration",
+      "condition": "Scheduled flux nozzle calibration interval is reached, or flux coverage uniformity fails visual inspection with dry patches observed on boards exiting the flux station.",
+      "steps": [
+        "walk_to flux_control_panel",
+        "read_sensor flux_flow_rate_sensor",
+        "press_button flux_nozzle_test_button",
+        "walk_to flux_spray_inspection_window",
+        "read_sensor flux_coverage_sensor",
+        "wait 30 seconds",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "flux_control_panel",
+        "flux_flow_rate_sensor",
+        "flux_nozzle_test_button",
+        "flux_spray_inspection_window",
+        "flux_coverage_sensor"
+      ]
+    },
+    {
+      "ref": "solder_replenish",
+      "title": "Solder Level Low Ingot Addition to Pot",
+      "condition": "Solder level sensor trips the low-level indicator while wave pump remains operational, requiring addition of solder ingots before the level drops further and wave formation degrades.",
+      "steps": [
+        "walk_to solder_pot_control_panel",
+        "read_sensor solder_level_sensor",
+        "walk_to ingot_storage_rack",
+        "pick solder_ingot",
+        "walk_to solder_pot_loading_port",
+        "place solder_ingot",
+        "wait 300 seconds"
+      ],
+      "equipment": [
+        "solder_pot_control_panel",
+        "solder_level_sensor",
+        "ingot_storage_rack",
+        "solder_ingot",
+        "solder_pot_loading_port"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout-Tagout for Scheduled Maintenance",
+      "condition": "A maintenance work order is issued requiring physical isolation of all energy sources on the wave soldering machine before personnel enter the machine guarded zone.",
+      "steps": [
+        "notify shift_supervisor",
+        "walk_to main_electrical_panel",
+        "press_button main_power_off_breaker",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "walk_to nitrogen_supply_valve",
+        "press_button nitrogen_shutoff_valve"
+      ],
+      "equipment": [
+        "main_electrical_panel",
+        "main_power_off_breaker",
+        "lockout_hasp",
+        "nitrogen_supply_valve",
+        "nitrogen_shutoff_valve"
+      ]
+    },
+    {
+      "ref": "fire_estop",
+      "title": "Fire Detection or Emergency Stop Activation",
+      "condition": "Smoke detector or flame sensor activates above the machine, or an operator manually triggers the emergency stop due to visible fire, severe flux ignition, or imminent injury hazard.",
+      "steps": [
+        "press_button machine_estop_button",
+        "notify shift_supervisor",
+        "walk_to safety_station",
+        "pick fire_extinguisher",
+        "notify maintenance_technician",
+        "walk_to main_electrical_panel",
+        "press_button main_power_off_breaker"
+      ],
+      "equipment": [
+        "machine_estop_button",
+        "safety_station",
+        "fire_extinguisher",
+        "main_electrical_panel",
+        "main_power_off_breaker"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "I001",
+      "sop_ref": "solder_temp_low",
+      "text": "Line 3 second shift, the wave machine HMI started showing amber on the pot temp readout around 2 AM. Wasn't dramatically low, just hovering around 242 when it should be sitting at 250. Boards were still running fine but I flagged it before we got any cold joint complaints. Temp had been drifting down slowly for maybe 30 minutes."
+    },
+    {
+      "id": "I002",
+      "sop_ref": "solder_temp_low",
+      "text": "Machine by the east loading dock crept about six degrees cold this morning. Noticed the temp display just dipping under the green band but nothing alarming — no alarm horn, just the indicator light going yellow. First shift lead called me over. Pot was still running, just gradually losing heat."
+    },
+    {
+      "id": "I003",
+      "sop_ref": "solder_temp_low",
+      "text": "Tech on line 7. Pot temp reading 241 at start of the second run cycle. Heat wasn't keeping up — gradual drift, definitely not a sudden thing. Sent a board to QC as a precaution and kept an eye on the trend. No panic, just a slow walk down."
+    },
+    {
+      "id": "I004",
+      "sop_ref": "solder_temp_sudden_collapse",
+      "text": "Middle of third shift on the south wave unit, pot temp dropped like a rock — went from 260 down to 232 in under three minutes. Never seen it fall that fast. Something failed in the heating system. Hit the stop immediately and called it in."
+    },
+    {
+      "id": "I005",
+      "sop_ref": "solder_temp_sudden_collapse",
+      "text": "Something went wrong with the heater on line 2. Temp was fine at the 6 AM check then an alarm screamed and the readout was plummeting. Must have lost a heating element — this wasn't a drift, it was in freefall. Called maintenance right away."
+    },
+    {
+      "id": "I006",
+      "sop_ref": "solder_temp_sudden_collapse",
+      "text": "Second shift, unit 4 by the loading dock. Operator reported the pot temp nosedived — said it lost almost 20 degrees before anyone reacted. Not a slow creep, a genuine collapse. Machine was shut down on the spot. Heater fault suspected."
+    },
+    {
+      "id": "I007",
+      "sop_ref": "solder_temp_overtemp",
+      "text": "Line 5 threw an overtemp alarm mid-morning — display was showing 284, well above where we run. Red light on the panel, alarm beeping steady. Pulled the board batch and held production. Trim must have walked up on its own."
+    },
+    {
+      "id": "I008",
+      "sop_ref": "solder_temp_overtemp",
+      "text": "Got called over to the north wave unit during first shift — HMI showing 287 on the pot. Setpoint controller must have drifted or someone bumped the trim. Temp was still climbing when I got there. Red alarm active."
+    },
+    {
+      "id": "I009",
+      "sop_ref": "flux_level_low",
+      "text": "Flux tank indicator on line 3 dropped into the red band around noon. Wasn't empty but the low-level light came on and production would have been at risk by end of shift if nobody refilled it."
+    },
+    {
+      "id": "I010",
+      "sop_ref": "flux_level_low",
+      "text": "Flux reservoir on the unit near dock 4 ran lower than we like to see it — around the 15 percent mark on the sight glass. Machine was still running but we were close to losing prime on the pump. Called for a refill."
+    },
+    {
+      "id": "I011",
+      "sop_ref": "flux_overpressure",
+      "text": "Maintenance call on line 6. Flux pressure gauge spiked past the rated mark on the dial. Pump was making a different noise than normal and the needle was buried in the red. Shut the pump down before anything could blow."
+    },
+    {
+      "id": "I012",
+      "sop_ref": "flux_overpressure",
+      "text": "Night shift on the south wing wave unit — flux line pressure went to high alarm. Not a gradual rise, jumped up pretty quick. Worried about the spray nozzle taking damage. Stopped the pump and called maintenance."
+    },
+    {
+      "id": "I013",
+      "sop_ref": "conveyor_slowdown",
+      "text": "Line 3 conveyor was dragging this morning — boards moving noticeably slower than normal through the machine. Board transit timer was coming in long on every cycle. No jam, no fault light, just sluggish movement."
+    },
+    {
+      "id": "I014",
+      "sop_ref": "conveyor_slowdown",
+      "text": "First shift noticed boards on line 7 taking longer to transit the machine than the recipe calls for. Speed display on the panel was reading below the setpoint. No stoppage, drive was still turning, just slower than programmed."
+    },
+    {
+      "id": "I015",
+      "sop_ref": "conveyor_stopped",
+      "text": "Complete halt on the conveyor during second shift on line 4. Board stuck dead in the middle of the machine. Drive motor was humming and energized but absolutely nothing was moving. Had to call maintenance to get in there."
+    },
+    {
+      "id": "I016",
+      "sop_ref": "conveyor_stopped",
+      "text": "Line 2 north unit, board went in and never came out the other side. Waited a full minute, nothing. Conveyor was frozen solid with product inside. Not slow — totally stopped. Chain was locked up."
+    },
+    {
+      "id": "I017",
+      "sop_ref": "conveyor_stopped",
+      "text": "Third shift, unit by dock 2. PCB got wedged somehow and brought the whole conveyor to a complete standstill. Motor was still energized but the chain wasn't moving at all. Different from when it just slows down — this was a full stop with product inside."
+    },
+    {
+      "id": "I018",
+      "sop_ref": "wave_height_low",
+      "text": "QC flagged a batch from line 3 — pads on the back side of the board barely wetted. Went and looked through the inspection window and the wave looked really flat. Wasn't reaching the boards properly."
+    },
+    {
+      "id": "I019",
+      "sop_ref": "wave_height_low",
+      "text": "Pulled a board off line 5 east unit after solder — all the through-hole leads on the connector side had what looked like missed wets. Wave must not have been high enough to make proper contact with the pads."
+    },
+    {
+      "id": "I020",
+      "sop_ref": "wave_height_low",
+      "text": "Line 7 second shift. Operator said the solder window looked thin — wave wasn't cresting like normal. A few reference boards came out with insufficient fillets on the heavier component leads. Wave running low."
+    },
+    {
+      "id": "I021",
+      "sop_ref": "wave_height_high",
+      "text": "Got solder bridges all over the connector on boards coming off line 3. Looked in the wave window and the wave was surging way up, practically splashing around the nozzle lip. Batch pulled for rework."
+    },
+    {
+      "id": "I022",
+      "sop_ref": "wave_height_high",
+      "text": "Batch reject on line 6 — boards coming out with shorts bridging adjacent pads on multiple locations. Wave looked flooded in the inspection glass. Way too much solder contacting the board face."
+    },
+    {
+      "id": "I023",
+      "sop_ref": "wave_height_high",
+      "text": "Second shift, line 2. Solder was visibly overflowing the nozzle area during every board pass. Boards had solder balls and bridging everywhere when they came out the exit side. Wave clearly running way higher than spec."
+    },
+    {
+      "id": "I024",
+      "sop_ref": "preheat_low",
+      "text": "Line 4 preheat zone showed a cold reading this morning — well under what it should be for our current board spec. Flux wasn't fully activating; you could still smell the carrier solvent at the solder zone entrance. No alarm horn going off though."
+    },
+    {
+      "id": "I025",
+      "sop_ref": "preheat_low",
+      "text": "Tech on line 3 first shift. Preheat temp display reading around 80 degrees — boards coming in noticeably cooler than normal to the touch. QC was seeing some graininess in the joints which is usually a cold preheat symptom. No active alarms."
+    },
+    {
+      "id": "I026",
+      "sop_ref": "preheat_overtemp",
+      "text": "Critical alarm on line 5 — preheat blasted past 160 and was still climbing when I got there. Red alarm light on, horn going steady. Boards in the preheat zone were visibly discolored. Stopped everything immediately."
+    },
+    {
+      "id": "I027",
+      "sop_ref": "preheat_overtemp",
+      "text": "Middle of second shift on the east wing wave unit. Preheat thermocouple reading 168 degrees with the critical alarm horn screaming. Way outside spec — thin PCB substrate was starting to show warping at the preheat exit zone."
+    },
+    {
+      "id": "I028",
+      "sop_ref": "drive_motor_overcurrent",
+      "text": "Motor fault on line 7 — the conveyor drive tripped out and a fault light came on the panel. Conveyor stopped but this was different from a jam — the VFD display was showing an overcurrent error code. No obvious mechanical blockage when I looked."
+    },
+    {
+      "id": "I029",
+      "sop_ref": "drive_motor_overcurrent",
+      "text": "Line 3 second shift. Conveyor drive made a buzzing sound then the fault relay tripped and the drive locked out. Controller display showed an overcurrent fault. No jam found, nothing wedged in the chain. Electrical issue with the motor."
+    },
+    {
+      "id": "I030",
+      "sop_ref": "minor_solder_leak",
+      "text": "Noticed a small drip forming on the side of the pot near the front nozzle fitting on line 4. Tiny — just beading up and dripping slow. Machine was still running, nothing on the floor yet, completely contained to the fitting area."
+    },
+    {
+      "id": "I031",
+      "sop_ref": "minor_solder_leak",
+      "text": "Line 6 during maintenance check. Found a slow seep at one of the pot body gasket joints. Silver bead forming and dripping maybe once every few seconds. Not flowing freely, contained to the machine base. Someone needs to look at that gasket seal."
+    },
+    {
+      "id": "I032",
+      "sop_ref": "minor_solder_leak",
+      "text": "First shift line 2 — operator spotted a small silvery drip coming from behind the wave nozzle assembly. Not a flood at all, just a steady slow drip. Put a catch tray down right away. Machine kept running but maintenance was called."
+    },
+    {
+      "id": "I033",
+      "sop_ref": "major_solder_spill",
+      "text": "Emergency on line 5 — solder came out everywhere. Large pool forming on the machine base and starting to run onto the floor. Smoking and burning smell immediately. Hit the red button and got everyone back from the area."
+    },
+    {
+      "id": "I034",
+      "sop_ref": "major_solder_spill",
+      "text": "Night shift, south wave unit. Catastrophic failure — solder was pouring out of the pot, heard a loud bang first. Floor around the machine was covered in a wide area. Nobody got hurt but it was bad. Full shutdown called."
+    },
+    {
+      "id": "I035",
+      "sop_ref": "dross_removal",
+      "text": "Line 3 pot surface had a thick grey skin on it — way more than usual for this point in the shift. Dark crusty layer covering most of the surface. Needed skimming before it started getting pulled down into the wave pump."
+    },
+    {
+      "id": "I036",
+      "sop_ref": "dross_removal",
+      "text": "Maintenance note on line 7: hit the four-hour interval and the pot surface looks rough. Grey layer covering a good chunk of the top. Scheduled dross skim is overdue by half a shift."
+    },
+    {
+      "id": "I037",
+      "sop_ref": "flux_filter_replace",
+      "text": "Flux pump on line 4 started sounding like it was working harder than usual. Checked the pressure gauges and the drop across the filter housing was reading high. Filter's clogged, needs swapping out."
+    },
+    {
+      "id": "I038",
+      "sop_ref": "flux_filter_replace",
+      "text": "Hit the eight-week service interval on the line 2 flux system. Pressure differential across the filter also looking elevated even before we're at flow. Time to change it out per the PM schedule."
+    },
+    {
+      "id": "I039",
+      "sop_ref": "conveyor_finger_clean",
+      "text": "Conveyor fingers on line 6 have got a real flux buildup — dark brown residue coating all the finger tips. Boards coming out with flux smear transfer on the edges. Due for a cleaning."
+    },
+    {
+      "id": "I040",
+      "sop_ref": "conveyor_finger_clean",
+      "text": "Line 3 second shift — visible solder balls and flux char accumulating on the chain fingers. Contamination bad enough to potentially cause board slippage mid-transit. Flagged for immediate cleaning."
+    },
+    {
+      "id": "I041",
+      "sop_ref": "wave_nozzle_clean",
+      "text": "Wave profile on line 5 looking uneven through the inspection glass — one side of the nozzle seems partially blocked. Left side cresting higher than the right. Nozzle clean was overdue by two days."
+    },
+    {
+      "id": "I042",
+      "sop_ref": "wave_nozzle_clean",
+      "text": "Line 7 first shift. Wave was clearly asymmetric — higher on the left side of the nozzle exit than the right. Nozzle slot must have partial dross buildup causing a restriction. Needs cleaning and wave height check after."
+    },
+    {
+      "id": "I043",
+      "sop_ref": "flux_nozzle_calibrate",
+      "text": "Board coverage coming off the line 3 flux station was uneven — dry patches right in the center of every board. Spray nozzle hasn't been calibrated in a while. Flow rate might be off or oscillation pattern drifted."
+    },
+    {
+      "id": "I044",
+      "sop_ref": "flux_nozzle_calibrate",
+      "text": "Line 6 QC inspection flagged boards with partial flux coverage across a whole batch. Spray pattern looked wrong when I watched the nozzle — coverage was mostly on the edges but missing the middle. Due for calibration."
+    },
+    {
+      "id": "I045",
+      "sop_ref": "solder_replenish",
+      "text": "Wave on line 4 started looking shallow at the edges and the low-level indicator light came on. Not an emergency yet but pot definitely needs ingots added before next shift or we'll lose wave formation."
+    },
+    {
+      "id": "I046",
+      "sop_ref": "solder_replenish",
+      "text": "Line 2 second shift. Solder level sensor tripped the low indicator on the control panel. Wave was starting to look thin at the sides during board pass. Needs topping up before we go further."
+    },
+    {
+      "id": "I047",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance work order issued for replacing the conveyor chain on line 5. Crew needs to go inside the guarded area. Machine has to be fully locked out before anyone touches it. LOTO procedure requested."
+    },
+    {
+      "id": "I048",
+      "sop_ref": "lockout_tagout",
+      "text": "Line 3 scheduled PM this weekend — both an electrician and a mechanical tech need inside the machine at the same time. All energy sources need isolated and documented before work starts."
+    },
+    {
+      "id": "I049",
+      "sop_ref": "fire_estop",
+      "text": "Smoke alarm went off above line 6 wave unit during second shift. Didn't see open flames but there was smoke coming from the preheat area. Hit the e-stop and got everyone back from the machine immediately."
+    },
+    {
+      "id": "I050",
+      "sop_ref": "fire_estop",
+      "text": "Third shift, line 2. Operator smelled burning and saw a small flash near the solder pot — looked like flux ignition. Triggered the emergency stop right away. Called for the fire extinguisher from the safety station."
+    }
+  ]
+}

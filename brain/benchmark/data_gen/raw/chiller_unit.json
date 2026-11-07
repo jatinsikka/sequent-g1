@@ -1,0 +1,589 @@
+{
+  "family": "Process Chiller",
+  "sops": [
+    {
+      "ref": "low_pressure_alarm",
+      "title": "Refrigerant Low Pressure Sustained Alarm Response",
+      "condition": "The suction pressure sensor reads below the 45 PSI minimum setpoint continuously for more than 5 minutes, generating a yellow alarm on the chiller HMI while the compressor remains running.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor suction_pressure_sensor",
+        "read_sensor refrigerant_sight_glass_indicator",
+        "press_button alarm_acknowledge_button",
+        "notify maintenance_technician",
+        "wait 300"
+      ],
+      "equipment": ["chiller_control_panel", "suction_pressure_sensor", "refrigerant_sight_glass_indicator", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "pressure_collapse",
+      "title": "Sudden Refrigerant Pressure Collapse Emergency Response",
+      "condition": "The suction pressure sensor records a drop exceeding 20 PSI within 60 seconds, indicating rapid system depressurization rather than a slow drift.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button compressor_stop_button",
+        "read_sensor suction_pressure_sensor",
+        "read_sensor discharge_pressure_sensor",
+        "notify plant_engineer",
+        "walk_to chiller_unit",
+        "notify refrigerant_recovery_team"
+      ],
+      "equipment": ["chiller_control_panel", "compressor_stop_button", "suction_pressure_sensor", "discharge_pressure_sensor"]
+    },
+    {
+      "ref": "high_pressure_alarm",
+      "title": "Discharge Refrigerant Pressure Over-Limit Response",
+      "condition": "The discharge pressure sensor reads above the 400 PSI ceiling and triggers a red high-pressure alarm, with the system still running but at risk of safety relief valve actuation.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor discharge_pressure_sensor",
+        "press_button compressor_stop_button",
+        "walk_to condenser_section",
+        "read_sensor condenser_fan_status_indicator",
+        "notify maintenance_technician",
+        "wait 120"
+      ],
+      "equipment": ["chiller_control_panel", "discharge_pressure_sensor", "compressor_stop_button", "condenser_section", "condenser_fan_status_indicator"]
+    },
+    {
+      "ref": "coolant_temp_high_warn",
+      "title": "Coolant Outlet Temperature High Warning Response",
+      "condition": "The coolant outlet temperature sensor reads above the 16 degrees C upper setpoint but below the 20 degrees C critical ceiling, generating a sustained yellow warning on the HMI while the chiller continues to run.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor coolant_outlet_temp_sensor",
+        "read_sensor coolant_flow_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify production_supervisor",
+        "wait 600"
+      ],
+      "equipment": ["chiller_control_panel", "coolant_outlet_temp_sensor", "coolant_flow_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "coolant_temp_critical",
+      "title": "Coolant Outlet Temperature Critical Interlock Response",
+      "condition": "The coolant outlet temperature sensor reads above the 20 degrees C critical ceiling, triggering a red emergency alarm and an automatic process interlock that halts downstream production equipment.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button red_estop_button",
+        "read_sensor coolant_outlet_temp_sensor",
+        "notify plant_engineer",
+        "notify production_supervisor",
+        "walk_to chiller_unit",
+        "read_sensor coolant_level_sensor"
+      ],
+      "equipment": ["chiller_control_panel", "red_estop_button", "coolant_outlet_temp_sensor", "chiller_unit", "coolant_level_sensor"]
+    },
+    {
+      "ref": "coolant_temp_low",
+      "title": "Coolant Outlet Temperature Below Setpoint Response",
+      "condition": "The coolant outlet temperature sensor reads below the 6 degrees C lower setpoint, indicating over-cooling or a failed-open expansion valve causing excessive refrigeration.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor coolant_outlet_temp_sensor",
+        "read_sensor expansion_valve_position_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify maintenance_technician",
+        "wait 300"
+      ],
+      "equipment": ["chiller_control_panel", "coolant_outlet_temp_sensor", "expansion_valve_position_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "pump_flow_reduced",
+      "title": "Coolant Pump Flow Rate Low Warning Response",
+      "condition": "The coolant flow sensor reads below 80 percent of the 120 GPM setpoint but above zero GPM for more than 2 minutes, generating a sustained low-flow warning on the HMI while the pump motor remains energized.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor coolant_flow_sensor",
+        "read_sensor pump_inlet_pressure_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to pump_station",
+        "read_sensor strainer_differential_pressure_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["chiller_control_panel", "coolant_flow_sensor", "pump_inlet_pressure_sensor", "alarm_acknowledge_button", "pump_station", "strainer_differential_pressure_sensor"]
+    },
+    {
+      "ref": "pump_flow_stopped",
+      "title": "Coolant Pump Complete No-Flow Emergency Response",
+      "condition": "The coolant flow sensor reads zero GPM continuously for more than 10 seconds, indicating the circulating pump has stopped entirely and compressor cooling is lost.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button compressor_stop_button",
+        "read_sensor coolant_flow_sensor",
+        "walk_to pump_station",
+        "read_sensor pump_motor_overload_indicator",
+        "press_button pump_reset_button",
+        "notify plant_engineer"
+      ],
+      "equipment": ["chiller_control_panel", "compressor_stop_button", "coolant_flow_sensor", "pump_station", "pump_motor_overload_indicator", "pump_reset_button"]
+    },
+    {
+      "ref": "condenser_fan_fault",
+      "title": "Condenser Fan Motor Electrical Fault Response",
+      "condition": "The condenser fan motor overload relay has tripped and the fan status indicator on the panel shows a fault code, halting condenser heat rejection while the compressor continues to run.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor condenser_fan_status_indicator",
+        "press_button compressor_stop_button",
+        "walk_to condenser_electrical_panel",
+        "read_sensor fan_motor_overload_relay",
+        "press_button fan_overload_reset_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["chiller_control_panel", "condenser_fan_status_indicator", "compressor_stop_button", "condenser_electrical_panel", "fan_motor_overload_relay", "fan_overload_reset_button"]
+    },
+    {
+      "ref": "compressor_overload",
+      "title": "Compressor Motor Overload Fault Response",
+      "condition": "The compressor motor overload relay has tripped and the chiller has auto-shut on a compressor fault alarm, with the pump and condenser fans still able to run.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor compressor_overload_indicator",
+        "read_sensor discharge_pressure_sensor",
+        "walk_to compressor_electrical_panel",
+        "read_sensor compressor_motor_overload_relay",
+        "notify plant_engineer",
+        "wait 1800"
+      ],
+      "equipment": ["chiller_control_panel", "compressor_overload_indicator", "discharge_pressure_sensor", "compressor_electrical_panel", "compressor_motor_overload_relay"]
+    },
+    {
+      "ref": "filter_change",
+      "title": "Coolant Filter Scheduled Replacement",
+      "condition": "The filter differential pressure sensor reads above 15 PSI or the 500-hour scheduled change interval has elapsed, indicating the filter element is loaded and must be replaced.",
+      "steps": [
+        "walk_to parts_storage",
+        "pick replacement_coolant_filter",
+        "walk_to filter_housing",
+        "pick spent_coolant_filter",
+        "place spent_coolant_filter waste_bin",
+        "place replacement_coolant_filter filter_housing",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["parts_storage", "replacement_coolant_filter", "filter_housing", "spent_coolant_filter", "waste_bin"]
+    },
+    {
+      "ref": "condenser_coil_cleaning",
+      "title": "Condenser Coil Scheduled Cleaning",
+      "condition": "The condenser approach temperature difference exceeds 5 degrees C above the established baseline, indicating fouled fin surfaces that reduce heat rejection capacity.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button compressor_stop_button",
+        "walk_to parts_storage",
+        "pick coil_cleaning_brush",
+        "walk_to condenser_section",
+        "place coil_cleaning_brush condenser_coil_surface",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["chiller_control_panel", "compressor_stop_button", "parts_storage", "coil_cleaning_brush", "condenser_section", "condenser_coil_surface"]
+    },
+    {
+      "ref": "pump_bearing_lubrication",
+      "title": "Coolant Pump Bearing Scheduled Lubrication",
+      "condition": "The 1000-hour pump bearing lubrication interval has elapsed or the pump bearing temperature sensor reads above 75 degrees C during operation.",
+      "steps": [
+        "walk_to parts_storage",
+        "pick grease_cartridge",
+        "walk_to pump_station",
+        "read_sensor pump_bearing_temp_sensor",
+        "place grease_cartridge pump_bearing_grease_fitting",
+        "read_sensor pump_bearing_temp_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["parts_storage", "grease_cartridge", "pump_station", "pump_bearing_temp_sensor", "pump_bearing_grease_fitting"]
+    },
+    {
+      "ref": "refrigerant_inspection",
+      "title": "Refrigerant Level and Leak Weekly Inspection",
+      "condition": "The scheduled weekly refrigerant inspection interval is due, or the chiller room refrigerant gas detector has triggered a low-level advisory alert.",
+      "steps": [
+        "walk_to chiller_unit",
+        "read_sensor refrigerant_sight_glass_indicator",
+        "read_sensor refrigerant_leak_detector_sensor",
+        "walk_to chiller_control_panel",
+        "read_sensor suction_pressure_sensor",
+        "notify maintenance_technician",
+        "wait 60"
+      ],
+      "equipment": ["chiller_unit", "refrigerant_sight_glass_indicator", "refrigerant_leak_detector_sensor", "chiller_control_panel", "suction_pressure_sensor"]
+    },
+    {
+      "ref": "temp_sensor_calibration",
+      "title": "Chiller Temperature Sensor Quarterly Calibration",
+      "condition": "The quarterly calibration interval has elapsed or a spot check reveals any chiller temperature sensor reading more than 1 degree C from a certified reference thermometer.",
+      "steps": [
+        "walk_to parts_storage",
+        "pick calibration_reference_thermometer",
+        "walk_to chiller_unit",
+        "read_sensor coolant_outlet_temp_sensor",
+        "place calibration_reference_thermometer coolant_outlet_port",
+        "read_sensor coolant_outlet_temp_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["parts_storage", "calibration_reference_thermometer", "chiller_unit", "coolant_outlet_temp_sensor", "coolant_outlet_port"]
+    },
+    {
+      "ref": "belt_replacement",
+      "title": "Pump Drive Belt Scheduled Replacement",
+      "condition": "A visual inspection reveals cracking, glazing, or more than 5 mm of deflection on the pump drive belt, or the 2000-hour replacement interval has elapsed.",
+      "steps": [
+        "walk_to parts_storage",
+        "pick replacement_drive_belt",
+        "walk_to pump_station",
+        "pick worn_drive_belt",
+        "place worn_drive_belt waste_bin",
+        "place replacement_drive_belt belt_drive_pulleys",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["parts_storage", "replacement_drive_belt", "pump_station", "worn_drive_belt", "waste_bin", "belt_drive_pulleys"]
+    },
+    {
+      "ref": "strainer_cleaning",
+      "title": "Coolant Y-Strainer Basket Cleaning",
+      "condition": "The strainer differential pressure sensor reads above 8 PSI, indicating the Y-strainer basket is fouled and restricting pump suction flow.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button pump_stop_button",
+        "walk_to pump_station",
+        "pick strainer_basket",
+        "place strainer_basket cleaning_sink",
+        "place strainer_basket strainer_housing",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["chiller_control_panel", "pump_stop_button", "pump_station", "strainer_basket", "cleaning_sink", "strainer_housing"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Chiller Lockout Tagout for Maintenance Access",
+      "condition": "Any scheduled or corrective maintenance task requires physical access to the chiller unit interior, creating an obligation to isolate all electrical and mechanical energy sources before work begins.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button compressor_stop_button",
+        "press_button pump_stop_button",
+        "walk_to chiller_electrical_disconnect",
+        "pick lockout_hasp",
+        "place lockout_hasp chiller_electrical_disconnect",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["chiller_control_panel", "compressor_stop_button", "pump_stop_button", "chiller_electrical_disconnect", "lockout_hasp"]
+    },
+    {
+      "ref": "refrigerant_spill",
+      "title": "Refrigerant Release and Spill Emergency Response",
+      "condition": "The chiller room refrigerant gas detector triggers a high-concentration alarm or visible frost and ice accumulation is observed at a fitting, joint, or hose connection on the refrigerant loop.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button red_estop_button",
+        "notify plant_engineer",
+        "notify safety_officer",
+        "walk_to emergency_ventilation_panel",
+        "press_button ventilation_boost_button",
+        "wait 120"
+      ],
+      "equipment": ["chiller_control_panel", "red_estop_button", "refrigerant_leak_detector_sensor", "emergency_ventilation_panel", "ventilation_boost_button"]
+    },
+    {
+      "ref": "emergency_stop",
+      "title": "Chiller Emergency Stop for Immediate Safety Threat",
+      "condition": "An immediate safety threat such as smoke, burning electrical odor, loud mechanical impact noise, or an operator distress call requires instant manual shutdown of the chiller independent of any fault alarm.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button red_estop_button",
+        "notify plant_engineer",
+        "notify production_supervisor",
+        "walk_to chiller_unit",
+        "read_sensor coolant_outlet_temp_sensor",
+        "wait 60"
+      ],
+      "equipment": ["chiller_control_panel", "red_estop_button", "chiller_unit", "coolant_outlet_temp_sensor"]
+    },
+    {
+      "ref": "chiller_startup",
+      "title": "Chiller Startup After De-Energization",
+      "condition": "The chiller has been fully de-energized for maintenance or an extended shutdown and must be returned to normal cooling service following clearance from maintenance personnel.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "read_sensor coolant_level_sensor",
+        "press_button pump_start_button",
+        "wait 30",
+        "read_sensor coolant_flow_sensor",
+        "press_button compressor_start_button",
+        "read_sensor coolant_outlet_temp_sensor"
+      ],
+      "equipment": ["chiller_control_panel", "coolant_level_sensor", "pump_start_button", "coolant_flow_sensor", "compressor_start_button", "coolant_outlet_temp_sensor"]
+    },
+    {
+      "ref": "chiller_shutdown",
+      "title": "Chiller Planned Controlled Shutdown Procedure",
+      "condition": "A planned maintenance window or end-of-production period requires the chiller to be taken offline in the correct controlled sequence to prevent thermal shock and compressor damage.",
+      "steps": [
+        "walk_to chiller_control_panel",
+        "press_button compressor_stop_button",
+        "wait 120",
+        "press_button pump_stop_button",
+        "read_sensor coolant_outlet_temp_sensor",
+        "read_sensor suction_pressure_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["chiller_control_panel", "compressor_stop_button", "pump_stop_button", "coolant_outlet_temp_sensor", "suction_pressure_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "low_pressure_alarm",
+      "text": "Been watching the readout on the unit over by bay 4 all morning and the number on the suction gauge has been slowly creeping down since first shift started around 6. It's sitting around 38 now and hasn't bounced back. Yellow light came on about an hour ago but the compressor is still humming along, nothing dramatic, just drifting."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "low_pressure_alarm",
+      "text": "The panel on the chiller near the loading dock has had that yellow indicator lit since halfway through second shift. Asked Jimmy to check it and he says the gauge on the low side has been losing ground all afternoon — nothing sudden, just slowly going in the wrong direction. Unit is still running but the number won't come back up on its own."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "pressure_collapse",
+      "text": "I was standing right next to the unit by bay 4 and watched the suction pressure reading drop from about 62 PSI to basically single digits in under a minute. Nothing gradual about it — it just crashed. Heard a short hiss and then both gauges just tanked at the same time. Never seen it move that fast in ten years on this line."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "pressure_collapse",
+      "text": "Second shift on the press line — one second everything looked normal on the chiller panel, next second both pressure gauges fell through the floor. The whole event was maybe 45 seconds from normal to zero. Production already shut itself down through the interlock. Sounds like something let go somewhere in the loop."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Big red fault on the chiller panel over by line 3. The discharge gauge is reading way up in the 400s and the compressor sounds like it's straining hard. Noticed before this happened that one of the condenser fans out back didn't look like it was spinning at normal speed. Could be related."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "high_pressure_alarm",
+      "text": "High pressure fault showing red on the unit near the stamping area. Discharge side is reading way above where it normally sits during a regular run. Compressor ended up tripping itself out. It's been running warm in that section today so ambient might be a factor on top of whatever else is going on."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Chiller panel by dock door 2 is lit red. Went over and looked at the high side gauge and it's pegged up in territory I've never seen it in before. Thing shut off on its own shortly after. We've got a big delivery in today so that whole area has been warm with the doors open — not sure if that caused it or made it worse."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "coolant_temp_high_warn",
+      "text": "The chiller HMI on line 2 has a yellow warning showing. Process coolant coming out of the unit is reading a few degrees warmer than it should be, but parts are still making spec — just barely. Nobody hit any e-stops and the unit is still running. It's been sitting yellow for close to an hour now without clearing itself."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "coolant_temp_high_warn",
+      "text": "First shift noticed the coolant headers going to the machine tools on line 2 felt noticeably warmer than usual compared to a typical morning start. Pulled up the HMI and there's a yellow indicator up on the temp display. Chiller is still running fine, no hard stops, but it's been sitting warm for a while and nobody wants to ignore it."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "coolant_temp_critical",
+      "text": "Hard shutdown hit all the tooling on line 1 mid-cycle. Traced it back to the chiller — full red alarm on the panel and the interlock killed the line. Went to feel the outlet pipe and it's running warm enough to be uncomfortable to touch, which is way off from normal. Every red indicator on the panel is lit."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "coolant_temp_critical",
+      "text": "Chiller feeding the CNC cell tripped out during third shift and took the whole cell with it. Fault display on the unit says temperature, not flow, not pressure — temperature. The outlet reading on the screen is up at a number we've never seen in normal operation. This is not like that yellow warning we had a couple weeks ago, everything stopped."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "coolant_temp_critical",
+      "text": "Everything on line 1 went down at once mid-cycle during second shift. The chiller panel is showing all red and the interlock relay tripped the downstream equipment off. Outlet temperature on the display is way above anything we'd call acceptable even on a bad day. No warning led up to this, it just went straight to a full stop."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "coolant_temp_low",
+      "text": "Something strange going on with the chiller for line 3 — coolant is coming out way too cold. One of the aluminum tooling manifolds actually had condensation freezing on the outside surface during second shift, which never happens. Think the control valve might be stuck wide open."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "coolant_temp_low",
+      "text": "Process temp on the line 3 chiller is sitting well below where we normally run. Thing usually sits around 10 degrees and today it's reading sub-6. Parts aren't getting damaged yet but the mold surfaces are sweating condensation pretty heavily and that's going to cause surface finish issues if we don't sort it out."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "pump_flow_reduced",
+      "text": "Flow feels sluggish on the unit serving the assembly area coolant loop. The readout is showing something but it's well below where it normally runs — maybe 70 percent of what it should be. Everything is still circulating, not stopped, but the inlet pressure at the pump looked low when I checked it manually. Unit hasn't alarmed yet."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "pump_flow_reduced",
+      "text": "Line 4 chiller pump seems like it's struggling today. The flow numbers on the panel have been running about 25 percent below normal since the start of second shift but it hasn't gone to zero. Wondering if the strainer basket is starting to plug up again — it was due for a cleanout a few weeks ago."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "pump_flow_stopped",
+      "text": "Coolant pump on the chiller unit near bay 2 just stopped dead. The flow sensor went to zero and it's been sitting there. Not reduced, not low — nothing is moving. Compressor is probably not happy running with no flow. Motor might have overloaded. Need someone to check the motor cabinet before we try to do anything."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "pump_flow_stopped",
+      "text": "Went from reduced flow to zero on the line 2 chiller in the last ten minutes of second shift. Completely stopped, not just low. Compressor is going to need to come down immediately. Overload indicator in the pump electrical panel is probably tripped based on what we've seen before when this happens."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "pump_flow_stopped",
+      "text": "Zero flow alarm on the chiller feeding the grinding cell — not a low flow situation, it's reading nothing at all. Pump quit completely sometime in the last few minutes. The compressor is still trying to do its thing but it can't run without circulation. Need to get to the pump motor cabinet and see what tripped."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "condenser_fan_fault",
+      "text": "One of the condenser fans on the chiller out back near the east exit is completely dead. Walked past during a break and the blade was sitting still while the other fan next to it was spinning normally. That's probably why the panel is showing a fault. Motor must have overloaded in that fan cabinet."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "condenser_fan_fault",
+      "text": "Electrical fault code on the chiller panel for the condenser section, not the compressor, not the pump — specifically the condenser. Went outside to the unit and confirmed the fan is not moving at all. Overload relay in the electrical box for that fan circuit is almost certainly what kicked out."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "compressor_overload",
+      "text": "Chiller shut itself down on a fault during the afternoon shift and it's the compressor that's the problem, not the pump or the fans — those are fine. Went to check and the overload indicator on the compressor contactor is showing tripped. Discharge was running high before it went. Going to need a tech to review before we reset anything."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "compressor_overload",
+      "text": "Chiller by the heat treat line tripped out overnight during third shift. Fault on the panel is pointing to the compressor motor specifically. The electrical cabinet has the compressor motor overload in a faulted state. Fan is running, pump is still able to run, it's just the compressor that went down."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "compressor_overload",
+      "text": "Whole chiller shut down, compressor faulted. Checked the fan — fine. Checked the pump — fine. The compressor motor overload relay is what tripped and it's sitting in a faulted state in the electrical cabinet. We want to know why it happened before anyone just resets it and restarts the machine."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "filter_change",
+      "text": "Maintenance log shows we're past the 500-hour mark on the coolant filter on the bay 3 chiller. Going to swap it out during the next window. Filter housing is in good shape, just the element itself is due based on hours."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "filter_change",
+      "text": "The differential pressure reading across the filter housing on the chiller serving line 5 is getting up there — it's ticking above where we normally change them out. We've got replacement elements in the parts room on the shelf. Scheduling the swap for this weekend's maintenance window."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "condenser_coil_cleaning",
+      "text": "Condenser coils on the chiller out behind the east wall look like they haven't been touched in months. The aluminum fins are visibly packed with dust, cottonwood, and some kind of debris from the parking lot. The approach temperature spread has been creeping up and this is almost certainly why."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "condenser_coil_cleaning",
+      "text": "Chiller efficiency has been dropping on the unit by the shipping dock and when I physically looked at the condenser coil section, the fins are dirty enough that you can barely see through them. Temperature split between ambient and leaving condenser is way off from our baseline. Coil cleaning is overdue."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "pump_bearing_lubrication",
+      "text": "Pump on the line 4 chiller has been making a faint high-pitched sound during first shift for the past couple days. Held my hand near the bearing housing and it felt noticeably warm. Hasn't gotten louder yet but it's early. Probably needs the grease fitting attended to."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "pump_bearing_lubrication",
+      "text": "PM schedule shows the bearing lubrication on the coolant pump for unit 2 is overdue by about two weeks — got pushed back when we had the weekend downtime canceled. Going to get in there with the grease gun during the next available break window before it becomes a problem."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "refrigerant_inspection",
+      "text": "Did the weekly walkaround on the chiller bank and the sight glass on unit 2 near the north wall is showing bubbles, which isn't how it normally looks. Might be low on charge or there's something in the loop. The room gas detector hasn't gone into alarm, just a low advisory, but the sight glass alone is worth looking into."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "refrigerant_inspection",
+      "text": "Faint chemical smell in the chiller room near the unit by bay 5 during the routine weekly walkthrough. Nothing strong, more like a background odor. Sight glass looked a little different — bubblier — compared to what it normally shows. Want someone to confirm there's no minor leak before we sign off on the week."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "refrigerant_inspection",
+      "text": "Weekly inspection on the chiller bank — the unit on the north wall has a sight glass that went from clear last week to showing some bubbling this week. Suction pressure also looks a little on the low end compared to normal for this time of year. Going to have maintenance check the charge and do a proper leak scan on that unit."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "temp_sensor_calibration",
+      "text": "Did a spot check with a handheld thermometer during the morning walkdown on the line 2 chiller and the panel temperature display is off by almost two degrees from what the reference is showing. That's outside the tolerance we accept. Sensor probably needs to be recalibrated or replaced."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "temp_sensor_calibration",
+      "text": "Quarterly calibration check is due on all the chiller temperature sensors. Last cycle one of them was reading high by about 1.5 degrees and had to be adjusted. Going through all of them during the weekend window so we have clean baselines for the next quarter."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "belt_replacement",
+      "text": "Drive belt on the pump for the unit over by bay 6 has some visible cracking along the inner surface — you can see the cracking if you flex it by hand. It also squeaks a little when you're standing close to the pump during startup. Probably a week or two from snapping on its own. Getting it scheduled."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "belt_replacement",
+      "text": "Belt inspection on the line 3 chiller pump — there's about 6mm of slack when I push on the middle of the belt, which is past what we allow. Inner surface is also showing glazing. This one isn't cracked yet but it's not far off. Going to swap it out at the next planned window rather than wait for it to fail."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "strainer_cleaning",
+      "text": "Flow started dropping on the chiller for line 1 this morning and when I put my gauge across the Y-strainer it's reading 10 PSI differential, which is well above the 8 PSI trigger. That basket is definitely plugged. Didn't change the filter recently so the restriction is at the strainer, not upstream of it."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "strainer_cleaning",
+      "text": "Second shift reported intermittent flow dips on the line 1 chiller that would clear up for a bit then come back. Classic plugged strainer behavior. Checked the dP across the basket and it's reading high. Changed the coolant filter last month so that's not the culprit — it's the strainer basket that needs to come out and get cleaned."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "lockout_tagout",
+      "text": "We're going in to replace the pump mechanical seal on the chiller by dock 3 this weekend. Crew is staged and ready but need the full isolation done first — electrical disconnect, compressor, pump, the works — before anybody puts hands on it."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "lockout_tagout",
+      "text": "Scheduled condenser coil cleaning on the east wall chiller unit during Saturday's plant shutdown. Maintenance crew has the brushes and chemicals ready to go but we need to complete the energy isolation procedure before anyone gets up on that unit. No work starts until the hasp is on."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "refrigerant_spill",
+      "text": "There's frost forming on one of the fittings at the back of the chiller unit near bay 2. Not a little bit of condensation — actual ice buildup on the outside of the joint. There's also a strong chemical smell in that corner of the room and the wall-mounted gas detector lit up the high alarm about ten minutes ago. We need to clear the area."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "refrigerant_spill",
+      "text": "Third shift reported a sharp smell in the chiller room near the north unit. Came in to check and there's ice forming around a joint on the refrigerant line — you can see the frost spreading from the fitting. The room concentration sensor is reading elevated and it's been trending up, not down. Something is actively leaking."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "refrigerant_spill",
+      "text": "Active refrigerant release at the chiller near the loading dock. Ice is growing on the outside of a pipe fitting on the high side line. The room detector went to high alarm about 10 minutes ago and the smell is strong enough to clear people out of that bay. Not a small seep — this is a real leak that needs the emergency response."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "emergency_stop",
+      "text": "Three loud banging impacts came from the chiller next to press line 2 during second shift — three heavy knocks spaced about a second apart then the pitch changed. Operator called it in right away. No smoke yet and no smell but that mechanical noise was absolutely not normal and we're not going to wait around."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "emergency_stop",
+      "text": "Small amount of smoke coming from the upper panel section of the chiller unit near line 4. Barely visible but definitely smoke, not steam. Electrical smell in the area. Nobody is waiting to see if it gets worse — unit needs to come down right now."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "chiller_startup",
+      "text": "Maintenance just wrapped up replacing the pump seal on the unit by bay 3 and they've signed off the work order. Ready to bring it back into service. Pump and compressor have both been sitting cold with the power off for about 18 hours so we need to go through the startup sequence properly before we hand it back to production."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "chiller_startup",
+      "text": "Weekend shutdown is over and the chiller feeding the grinding cell needs to come back up before the first shift Monday at 6 AM. It's been fully de-energized since Friday evening. Maintenance gave us the green light to restart. Going through the correct sequence so we don't run the compressor dry."
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "chiller_shutdown",
+      "text": "Production is going down for the long holiday weekend and the chiller bank on the south side needs to come offline tonight. Need to make sure the compressor goes first and we give it enough time before killing the pump — don't want to do it wrong and come back to a compressor problem Monday."
+    },
+    {
+      "id": "inc_050",
+      "sop_ref": "chiller_shutdown",
+      "text": "Planned maintenance window starts at midnight and the facility HVAC crew needs all chillers on the south side off before they begin their work. Going to walk through the shutdown sequence on each unit to make sure everything is taken down in the right order and nothing gets left in a bad state overnight."
+    },
+    {
+      "id": "inc_051",
+      "sop_ref": "chiller_shutdown",
+      "text": "End of week Friday, last shift is done and we're powering down the line 2 chiller for a weekend cleaning and inspection. Need to follow the book on the sequence — compressor off first, pump stays on to let it equalize, then pump off — so we're ready to restart clean on Monday morning without any surprises."
+    }
+  ]
+}

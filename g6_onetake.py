@@ -13,7 +13,7 @@ env, the pick machinery and the RL policy all live in the SAME sim.
 Output: _g6_onetake.mp4 + _g6_f0..f3.png (pick / carry / place / press) + printed metrics.
 """
 import sys, os
-PROJ = r"C:\Users\sikka\Documents\Academic\Grad_Research\HCR_Research\Sequent-robotics"
+from demo_paths import PROJ, require
 sys.path.insert(0, PROJ); os.chdir(PROJ)
 import numpy as np, torch, mujoco, imageio
 from collections import deque
@@ -32,6 +32,7 @@ UnifiedHumanoidEnv._load_robot_config = _lrc_pick
 from env_wrapper_button import ButtonPressEnv, GRIP_CLOSED
 
 ckpt = sys.argv[1] if len(sys.argv) > 1 else "checkpoints_button/curr_v2_latest.zip"
+require(ckpt, "g1_amo_gripper_pick.mjb")
 rl_model = PPO.load(ckpt, device="cpu")
 env = ButtonPressEnv(button_name="button_yellow", unified=True, reset_in_contact=False,
                      curriculum=True, headless=True)

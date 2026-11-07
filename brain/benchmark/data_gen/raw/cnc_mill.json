@@ -1,0 +1,780 @@
+{
+  "family": "CNC Milling Machine",
+  "sops": [
+    {
+      "ref": "spindle_overspeed",
+      "title": "Spindle Overspeed Alarm Response",
+      "condition": "CNC controller alarm panel indicates spindle RPM has exceeded the programmed maximum allowed ceiling.",
+      "steps": [
+        "Press spindle_stop_button to halt spindle rotation immediately.",
+        "Walk to HMI_panel and read_sensor spindle_rpm_display to confirm the overspeed reading.",
+        "Press feed_hold_button to suspend all axis motion.",
+        "Read_sensor spindle_drive_alarm_code to capture the fault code.",
+        "Notify maintenance_technician of spindle overspeed alarm with current RPM value and fault code.",
+        "Wait 30 seconds for spindle to decelerate fully.",
+        "Pick fault_log_clipboard and place at supervisor_station for review."
+      ],
+      "equipment": [
+        "spindle_stop_button",
+        "HMI_panel",
+        "spindle_rpm_display",
+        "feed_hold_button",
+        "spindle_drive_alarm_code",
+        "maintenance_technician",
+        "fault_log_clipboard",
+        "supervisor_station"
+      ]
+    },
+    {
+      "ref": "spindle_underspeed",
+      "title": "Spindle Underspeed During Active Cut",
+      "condition": "Spindle RPM drifts gradually below the programmed setpoint while an active cutting pass is in progress.",
+      "steps": [
+        "Read_sensor spindle_rpm_sensor to confirm RPM is below the programmed setpoint.",
+        "Press feed_hold_button to pause axis feed without terminating the program.",
+        "Notify CNC_operator of gradual underspeed condition and current RPM value.",
+        "Read_sensor spindle_load_meter to check for belt slip or drive overload signature.",
+        "Wait 15 seconds for spindle drive to stabilize.",
+        "Read_sensor spindle_rpm_sensor again to determine if RPM self-recovers to setpoint.",
+        "If RPM remains below setpoint, press spindle_stop_button and notify maintenance_technician."
+      ],
+      "equipment": [
+        "spindle_rpm_sensor",
+        "feed_hold_button",
+        "CNC_operator",
+        "spindle_load_meter",
+        "spindle_stop_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "spindle_stall",
+      "title": "Sudden Spindle Stall Mid-Cut",
+      "condition": "Spindle comes to a sudden and complete stop with no gradual deceleration while a cutting tool is engaged in the workpiece.",
+      "steps": [
+        "Press estop_button immediately to halt all machine motion and power to drives.",
+        "Read_sensor spindle_drive_fault_display to capture the stall fault code.",
+        "Notify maintenance_technician of sudden spindle stall event with fault code and tool-in-cut status.",
+        "Press coolant_off_button to stop coolant flow and prevent flooding the engaged workpiece.",
+        "Read_sensor spindle_motor_temp_sensor to check for thermal overload condition.",
+        "Wait 60 seconds before any restart attempt to allow drive capacitors to discharge.",
+        "Pick fault_log_clipboard and place at maintenance_station for technician review."
+      ],
+      "equipment": [
+        "estop_button",
+        "spindle_drive_fault_display",
+        "maintenance_technician",
+        "coolant_off_button",
+        "spindle_motor_temp_sensor",
+        "fault_log_clipboard",
+        "maintenance_station"
+      ]
+    },
+    {
+      "ref": "coolant_pressure_low",
+      "title": "Coolant Pressure Below Minimum Setpoint",
+      "condition": "Coolant pressure sensor reads below the minimum threshold setpoint for more than five continuous seconds during machining.",
+      "steps": [
+        "Read_sensor coolant_pressure_gauge to confirm the reading is below the minimum setpoint.",
+        "Press feed_hold_button to suspend axis motion while coolant delivery is insufficient.",
+        "Walk to coolant_pump_panel and read_sensor coolant_pump_status_light to verify pump state.",
+        "Read_sensor coolant_level_sensor to determine if low tank level is the root cause.",
+        "Notify maintenance_technician of low coolant pressure alarm with current gauge reading.",
+        "Wait 20 seconds for system pressure to stabilize after axis feed is held.",
+        "Press coolant_pump_reset_button if pump has tripped, then read_sensor coolant_pressure_gauge to confirm recovery."
+      ],
+      "equipment": [
+        "coolant_pressure_gauge",
+        "feed_hold_button",
+        "coolant_pump_panel",
+        "coolant_pump_status_light",
+        "coolant_level_sensor",
+        "maintenance_technician",
+        "coolant_pump_reset_button"
+      ]
+    },
+    {
+      "ref": "coolant_pressure_high",
+      "title": "Coolant Pressure Exceeds Upper Alarm Limit",
+      "condition": "Coolant pressure gauge reading rises above the upper alarm limit, indicating a restriction or relief valve failure in the coolant circuit.",
+      "steps": [
+        "Press coolant_off_button immediately to de-energize the coolant pump.",
+        "Read_sensor coolant_pressure_gauge to log the peak pressure value reached.",
+        "Walk to coolant_filter_housing and read_sensor filter_bypass_indicator to check for filter blockage causing back-pressure.",
+        "Notify maintenance_technician of high coolant pressure alarm with peak reading.",
+        "Wait 30 seconds for residual system pressure to bleed down.",
+        "Read_sensor coolant_pressure_gauge to confirm pressure has returned to normal range.",
+        "If filter_bypass_indicator is active, pick coolant_filter_element and place at inspection_bench for replacement."
+      ],
+      "equipment": [
+        "coolant_off_button",
+        "coolant_pressure_gauge",
+        "coolant_filter_housing",
+        "filter_bypass_indicator",
+        "maintenance_technician",
+        "coolant_filter_element",
+        "inspection_bench"
+      ]
+    },
+    {
+      "ref": "coolant_no_flow",
+      "title": "Zero Coolant Flow While Pump Is Running",
+      "condition": "Coolant flow sensor reads zero flow rate while the spindle is running and the coolant pump is commanded on.",
+      "steps": [
+        "Read_sensor coolant_flow_sensor to confirm a zero flow rate reading.",
+        "Press spindle_stop_button immediately to halt cutting with no coolant present.",
+        "Notify CNC_operator that coolant delivery has completely failed and production is halted.",
+        "Walk to coolant_pump_panel and read_sensor coolant_pump_status_light to check pump state.",
+        "Read_sensor coolant_level_sensor to verify the tank has not run dry.",
+        "Notify maintenance_technician of total coolant flow failure for pump and line inspection.",
+        "Pick lockout_tag and place at coolant_pump_panel before any pump maintenance begins."
+      ],
+      "equipment": [
+        "coolant_flow_sensor",
+        "spindle_stop_button",
+        "CNC_operator",
+        "coolant_pump_panel",
+        "coolant_pump_status_light",
+        "coolant_level_sensor",
+        "maintenance_technician",
+        "lockout_tag"
+      ]
+    },
+    {
+      "ref": "axis_servo_overload",
+      "title": "Axis Servo Drive Fault Response",
+      "condition": "CNC controller reports an axis servo drive overcurrent or position-error fault, halting all coordinated axis motion.",
+      "steps": [
+        "Read_sensor servo_fault_display to capture the fault code and the affected axis identifier.",
+        "Press feed_hold_button to prevent any automatic restart command from the controller.",
+        "Walk to servo_cabinet and read_sensor servo_drive_status_led to confirm drive fault state.",
+        "Notify maintenance_technician of servo fault with the axis identifier and fault code.",
+        "Wait 30 seconds for drive bus capacitors to discharge before touching the cabinet.",
+        "Press servo_reset_button on the affected axis drive card.",
+        "Read_sensor servo_fault_display to confirm the fault has cleared before releasing feed hold."
+      ],
+      "equipment": [
+        "servo_fault_display",
+        "feed_hold_button",
+        "servo_cabinet",
+        "servo_drive_status_led",
+        "maintenance_technician",
+        "servo_reset_button"
+      ]
+    },
+    {
+      "ref": "axis_overtravel",
+      "title": "Axis Hard Limit Overtravel Response",
+      "condition": "A machine axis has triggered the hard limit switch by traveling beyond the programmed soft limit or physical end-of-travel boundary.",
+      "steps": [
+        "Read_sensor overtravel_alarm_display to identify which axis and direction triggered the hard limit.",
+        "Press feed_hold_button immediately to prevent further commanded motion.",
+        "Notify CNC_operator of overtravel alarm specifying the faulted axis.",
+        "Walk to HMI_panel and press axis_override_enable_button to permit limited manual jog movement.",
+        "Press jog_axis_retract_button in the reverse direction to back the axis off the limit switch.",
+        "Read_sensor overtravel_alarm_display to confirm the overtravel alarm has cleared.",
+        "Notify maintenance_technician to investigate the root cause before resuming automatic operation."
+      ],
+      "equipment": [
+        "overtravel_alarm_display",
+        "feed_hold_button",
+        "CNC_operator",
+        "HMI_panel",
+        "axis_override_enable_button",
+        "jog_axis_retract_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "tool_changer_jam",
+      "title": "Automatic Tool Changer Carousel Jam",
+      "condition": "The automatic tool changer carousel fails to rotate to the commanded tool pocket position and halts mid-index.",
+      "steps": [
+        "Read_sensor atc_fault_display to capture the ATC error code and the commanded pocket number.",
+        "Press estop_button to prevent further motion commands from reaching the ATC mechanism.",
+        "Notify maintenance_technician of ATC jam with current carousel position and commanded pocket number.",
+        "Walk to atc_access_panel and read_sensor atc_home_sensor to confirm the carousel's actual position.",
+        "Wait 15 seconds for spindle to fully decelerate before approaching the ATC zone.",
+        "Pick atc_manual_crank_handle and place at atc_access_opening for technician use.",
+        "Notify CNC_operator once ATC is cleared to resume tool setup sequence."
+      ],
+      "equipment": [
+        "atc_fault_display",
+        "estop_button",
+        "maintenance_technician",
+        "atc_access_panel",
+        "atc_home_sensor",
+        "atc_manual_crank_handle",
+        "atc_access_opening",
+        "CNC_operator"
+      ]
+    },
+    {
+      "ref": "chip_conveyor_jam",
+      "title": "Chip Conveyor Overload and Jam Response",
+      "condition": "Chip conveyor motor overcurrent relay trips during a machining cycle, stopping chip removal from the machine enclosure.",
+      "steps": [
+        "Read_sensor chip_conveyor_overload_indicator to confirm the relay has tripped.",
+        "Press chip_conveyor_stop_button to fully de-energize the conveyor drive.",
+        "Notify CNC_operator to pause machining to prevent chip buildup in the enclosure.",
+        "Walk to chip_conveyor_access_door and pick chip_clearing_hook.",
+        "Place chip_clearing_hook at jam_location to break up and remove the compacted chip nest.",
+        "Press chip_conveyor_reset_button to reset the overload relay.",
+        "Press chip_conveyor_start_button and read_sensor chip_conveyor_overload_indicator to confirm normal current draw."
+      ],
+      "equipment": [
+        "chip_conveyor_overload_indicator",
+        "chip_conveyor_stop_button",
+        "CNC_operator",
+        "chip_conveyor_access_door",
+        "chip_clearing_hook",
+        "jam_location",
+        "chip_conveyor_reset_button",
+        "chip_conveyor_start_button"
+      ]
+    },
+    {
+      "ref": "spindle_lubrication",
+      "title": "Scheduled Spindle Bearing Lubrication",
+      "condition": "Weekly spindle bearing oil lubrication service is due per the preventive maintenance schedule.",
+      "steps": [
+        "Walk to maintenance_supply_cabinet and pick spindle_oil_cartridge.",
+        "Walk to spindle_lubrication_port.",
+        "Place spindle_oil_cartridge at spindle_lubrication_port.",
+        "Press lubrication_pump_button to inject the metered oil dose into the spindle bearings.",
+        "Wait 10 seconds for oil to distribute through the bearing races.",
+        "Read_sensor spindle_oil_level_sight_glass to confirm oil level is within the normal operating band.",
+        "Place empty spindle_oil_cartridge at used_consumable_bin and notify maintenance_technician that service is complete."
+      ],
+      "equipment": [
+        "maintenance_supply_cabinet",
+        "spindle_oil_cartridge",
+        "spindle_lubrication_port",
+        "lubrication_pump_button",
+        "spindle_oil_level_sight_glass",
+        "used_consumable_bin",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "way_lubrication",
+      "title": "Linear Guideway Lubrication Replenishment",
+      "condition": "Bi-weekly linear guideway oil replenishment is due per maintenance schedule, or automatic lube unit low-level indicator is active.",
+      "steps": [
+        "Walk to maintenance_supply_cabinet and pick way_oil_reservoir.",
+        "Walk to automatic_lube_unit.",
+        "Read_sensor lube_unit_level_gauge to verify the reservoir level before adding oil.",
+        "Place way_oil_reservoir at lube_unit_fill_port.",
+        "Press lube_unit_fill_button to transfer oil into the automatic lube unit reservoir.",
+        "Wait 5 seconds for the transfer to complete.",
+        "Read_sensor lube_unit_level_gauge to confirm reservoir is at the full mark, then notify maintenance_technician."
+      ],
+      "equipment": [
+        "maintenance_supply_cabinet",
+        "way_oil_reservoir",
+        "automatic_lube_unit",
+        "lube_unit_level_gauge",
+        "lube_unit_fill_port",
+        "lube_unit_fill_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "coolant_filter_change",
+      "title": "Coolant Sump Filter Element Replacement",
+      "condition": "Monthly coolant filter replacement interval is due, or the filter bypass indicator lamp is illuminated on the coolant system panel.",
+      "steps": [
+        "Press coolant_pump_off_button to de-energize the coolant system.",
+        "Wait 15 seconds for residual coolant flow to stop.",
+        "Walk to coolant_filter_housing and pick used_coolant_filter.",
+        "Place used_coolant_filter in coolant_waste_container.",
+        "Pick replacement_coolant_filter and place at coolant_filter_housing to install the new element.",
+        "Press coolant_pump_on_button and read_sensor coolant_pressure_gauge to verify pressure is within normal range.",
+        "Notify maintenance_technician that filter replacement is complete and log the service date."
+      ],
+      "equipment": [
+        "coolant_pump_off_button",
+        "coolant_filter_housing",
+        "used_coolant_filter",
+        "coolant_waste_container",
+        "replacement_coolant_filter",
+        "coolant_pump_on_button",
+        "coolant_pressure_gauge",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "spindle_belt_change",
+      "title": "Spindle Drive Belt Replacement",
+      "condition": "Quarterly spindle drive belt inspection reveals cracking, glazing, or stretch beyond the wear limit indicator.",
+      "steps": [
+        "Walk to machine_lockout_station and pick lockout_hasp.",
+        "Place lockout_hasp at main_power_disconnect and press disconnect_off_button to lock out main power.",
+        "Walk to spindle_belt_access_cover and pick belt_cover_bolts.",
+        "Place belt_cover_bolts at parts_tray then pick worn_spindle_belt from the spindle pulley.",
+        "Place worn_spindle_belt at inspection_bench for condition documentation.",
+        "Pick replacement_spindle_belt and place at spindle_pulley to route and tension the new belt.",
+        "Notify maintenance_technician that belt installation is complete and machine is ready for lockout removal."
+      ],
+      "equipment": [
+        "machine_lockout_station",
+        "lockout_hasp",
+        "main_power_disconnect",
+        "disconnect_off_button",
+        "spindle_belt_access_cover",
+        "belt_cover_bolts",
+        "parts_tray",
+        "worn_spindle_belt",
+        "inspection_bench",
+        "replacement_spindle_belt",
+        "spindle_pulley",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "coolant_tank_cleaning",
+      "title": "Coolant Tank Semi-Annual Drain and Refill",
+      "condition": "Semi-annual coolant tank drain, flush, and fluid replacement is scheduled on the preventive maintenance calendar.",
+      "steps": [
+        "Press coolant_pump_off_button and wait 30 seconds for fluid to drain back to the sump.",
+        "Walk to coolant_drain_valve and press coolant_drain_open_button to begin emptying the tank.",
+        "Wait 120 seconds for the tank to fully drain.",
+        "Pick coolant_tank_scrub_brush and place at coolant_tank_interior to scrub sludge and tramp oil deposits.",
+        "Press coolant_rinse_valve_button to flush the tank interior with clean water.",
+        "Pick fresh_coolant_concentrate and place at coolant_fill_port to begin refilling at the correct mix ratio.",
+        "Notify maintenance_technician when the tank is refilled and ready to return to service."
+      ],
+      "equipment": [
+        "coolant_pump_off_button",
+        "coolant_drain_valve",
+        "coolant_drain_open_button",
+        "coolant_tank_scrub_brush",
+        "coolant_tank_interior",
+        "coolant_rinse_valve_button",
+        "fresh_coolant_concentrate",
+        "coolant_fill_port",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "tool_changer_lubrication",
+      "title": "ATC Cam and Gripper Scheduled Lubrication",
+      "condition": "Monthly automatic tool changer cam and gripper jaw lubrication is due per the preventive maintenance schedule.",
+      "steps": [
+        "Press atc_index_disable_button to lock the carousel against rotation during the service.",
+        "Walk to maintenance_supply_cabinet and pick atc_grease_cartridge.",
+        "Walk to atc_cam_grease_fitting.",
+        "Place atc_grease_cartridge at atc_cam_grease_fitting.",
+        "Press grease_inject_button to deliver the metered grease dose to the cam mechanism.",
+        "Walk to atc_gripper_lubrication_point and place atc_grease_cartridge at atc_gripper_lubrication_point to grease the gripper jaws.",
+        "Notify maintenance_technician that ATC lubrication is complete and log the service date."
+      ],
+      "equipment": [
+        "atc_index_disable_button",
+        "maintenance_supply_cabinet",
+        "atc_grease_cartridge",
+        "atc_cam_grease_fitting",
+        "grease_inject_button",
+        "atc_gripper_lubrication_point",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Machine Lockout-Tagout Before Maintenance",
+      "condition": "Planned maintenance activity requires the machine to be fully de-energized and locked out before any personnel enter the work envelope.",
+      "steps": [
+        "Notify CNC_operator to complete the current program cycle and bring the machine to the safe home position.",
+        "Press spindle_stop_button then press coolant_pump_off_button to stop all active systems.",
+        "Walk to main_power_disconnect and press disconnect_off_button to cut all main power.",
+        "Pick lockout_hasp and place at main_power_disconnect.",
+        "Pick lockout_padlock and place at lockout_hasp to secure the disconnect in the off position.",
+        "Pick warning_tagout_tag and place at main_power_disconnect.",
+        "Notify maintenance_technician that LOTO is fully applied and the machine is safe for maintenance entry."
+      ],
+      "equipment": [
+        "CNC_operator",
+        "spindle_stop_button",
+        "coolant_pump_off_button",
+        "main_power_disconnect",
+        "disconnect_off_button",
+        "lockout_hasp",
+        "lockout_padlock",
+        "warning_tagout_tag",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "estop_response",
+      "title": "Unplanned Emergency Stop Activation Response",
+      "condition": "An emergency stop button has been activated unexpectedly, halting all machine motion without prior coordination.",
+      "steps": [
+        "Read_sensor estop_indicator_light to confirm E-stop circuit is active.",
+        "Notify CNC_operator to clear all personnel from the machine work zone perimeter.",
+        "Walk to the machine perimeter and read_sensor axis_position_display to document the axis positions at time of stop.",
+        "Read_sensor spindle_rpm_sensor to confirm spindle has reached zero before approaching the enclosure.",
+        "Notify maintenance_technician of the unplanned E-stop event with machine state details.",
+        "Wait 30 seconds after spindle reads zero RPM before approaching the machine enclosure door.",
+        "Press estop_reset_button only after maintenance_technician has investigated and authorized restart."
+      ],
+      "equipment": [
+        "estop_indicator_light",
+        "CNC_operator",
+        "axis_position_display",
+        "spindle_rpm_sensor",
+        "maintenance_technician",
+        "estop_reset_button"
+      ]
+    },
+    {
+      "ref": "coolant_spill_minor",
+      "title": "Minor Coolant Spill Containment",
+      "condition": "A coolant spill of less than 2 liters is present on the floor around the machine, creating a localized slip hazard.",
+      "steps": [
+        "Notify CNC_operator to pause machine operations.",
+        "Walk to spill_kit_cabinet and pick absorbent_mat_roll.",
+        "Place absorbent_mat_roll at spill_area to contain and absorb the coolant.",
+        "Wait 60 seconds for the absorbent material to fully soak up the fluid.",
+        "Pick saturated_absorbent_mat and place at coolant_waste_container for disposal.",
+        "Read_sensor coolant_level_sensor to check for an ongoing drip or weeping fitting as the source.",
+        "Notify maintenance_technician to inspect fittings and drip tray for the leak origin."
+      ],
+      "equipment": [
+        "CNC_operator",
+        "spill_kit_cabinet",
+        "absorbent_mat_roll",
+        "spill_area",
+        "saturated_absorbent_mat",
+        "coolant_waste_container",
+        "coolant_level_sensor",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "coolant_spill_major",
+      "title": "Major Coolant Spill Emergency Response",
+      "condition": "A large coolant release of more than 10 liters has occurred from a ruptured hose, failed fitting, or tank breach.",
+      "steps": [
+        "Press estop_button immediately to stop all machine motion and the coolant pump.",
+        "Notify shift_supervisor and safety_officer of a major coolant release requiring evacuation of the immediate area.",
+        "Press coolant_pump_emergency_off_button to cut coolant supply at the source.",
+        "Walk to spill_kit_cabinet and pick large_spill_berm_kit.",
+        "Place large_spill_berm_kit at drain_location to block floor drains and prevent fluid from entering the drainage system.",
+        "Wait for safety_officer to arrive and authorize personnel to re-enter the spill zone.",
+        "Notify maintenance_technician to isolate and repair the ruptured coolant line or fitting."
+      ],
+      "equipment": [
+        "estop_button",
+        "shift_supervisor",
+        "safety_officer",
+        "coolant_pump_emergency_off_button",
+        "spill_kit_cabinet",
+        "large_spill_berm_kit",
+        "drain_location",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Daily Machine Startup Sequence",
+      "condition": "Machine is at a cold start state before the first shift and requires full initialization before production.",
+      "steps": [
+        "Walk to main_power_disconnect and press disconnect_on_button to restore main electrical power.",
+        "Press control_power_on_button on HMI_panel to initiate CNC controller boot sequence.",
+        "Wait 45 seconds for the controller to complete its boot and self-check routine.",
+        "Read_sensor controller_status_display to confirm the controller has reached the ready state.",
+        "Press coolant_pump_on_button and read_sensor coolant_pressure_gauge to verify coolant system is within normal range.",
+        "Press automatic_lube_cycle_button to execute the initial way lubrication cycle before first axis motion.",
+        "Notify CNC_operator that the machine has completed startup and is ready for production."
+      ],
+      "equipment": [
+        "main_power_disconnect",
+        "disconnect_on_button",
+        "control_power_on_button",
+        "HMI_panel",
+        "controller_status_display",
+        "coolant_pump_on_button",
+        "coolant_pressure_gauge",
+        "automatic_lube_cycle_button",
+        "CNC_operator"
+      ]
+    },
+    {
+      "ref": "daily_shutdown",
+      "title": "End-of-Shift Machine Shutdown Sequence",
+      "condition": "The last production part of the shift has been completed and the machine must be shut down for end-of-shift.",
+      "steps": [
+        "Notify CNC_operator to confirm all programs have completed and no part is in cycle.",
+        "Press spindle_stop_button to ensure the spindle is fully de-energized.",
+        "Press coolant_pump_off_button to stop coolant circulation.",
+        "Walk to chip_conveyor_panel and press chip_conveyor_off_button to stop the chip conveyor.",
+        "Press control_power_off_button on HMI_panel to initiate CNC controller shutdown.",
+        "Wait 30 seconds for the controller to complete its shutdown sequence.",
+        "Walk to main_power_disconnect and press disconnect_off_button to cut main electrical power."
+      ],
+      "equipment": [
+        "CNC_operator",
+        "spindle_stop_button",
+        "coolant_pump_off_button",
+        "chip_conveyor_panel",
+        "chip_conveyor_off_button",
+        "control_power_off_button",
+        "HMI_panel",
+        "main_power_disconnect",
+        "disconnect_off_button"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "spindle_overspeed",
+      "text": "Running aluminum door brackets on machine 4 and started hearing a high-pitched whine from the head - the display was flashing red and the tach was way past where we had it dialed in. Had to kill it right away."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "spindle_overspeed",
+      "text": "Second shift on the VMC by the east wall - the 10000 RPM program started climbing and got up to about 12k with the alarm screaming. Never seen the tach go that high on this unit. Program was still running when we caught it."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "spindle_underspeed",
+      "text": "Was roughing a steel billet on line 3 - about 20 minutes into the cycle the head started bogging. RPMs were dropping off real slow, the feed sounded labored, like it was fighting the cut. Not a shutdown, just losing revs gradually."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "spindle_underspeed",
+      "text": "Morning run on the Haas near the loading dock - cutting speed kept drifting low during the pocketing pass. It was not a full stop at all, just slowly losing revs over the course of the whole cycle. Took us a while to even notice."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "spindle_stall",
+      "text": "Mid-cycle on a titanium flange, the head just died. No slowdown, no warning, zero in half a second. Left the cutter buried in the bore. Machine sat quiet for a few seconds before anything lit up."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "spindle_stall",
+      "text": "Third shift on line 2 - cutting 316 stainless and the head locked up instantly. Tool was fully engaged in the pocket. Not a gradual bog, just there and then gone. Machine sat in limbo for a bit before the alarms came on."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "spindle_stall",
+      "text": "Had a brand new four-flute endmill in it and the head seized with zero warning. Cutter snapped clean off in the part. No decel at all - running full speed one instant and completely frozen the next."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "coolant_pressure_low",
+      "text": "We were running a long facing cycle on the VMC and the coolant started looking weak - more of a slow trickle instead of the usual flood at the nozzle. Pressure was on the low side and kept creeping down slowly over about ten minutes."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "coolant_pressure_low",
+      "text": "First shift on line 1 - coolant was barely dribbling at the through-spindle nozzle. The gauge was hovering near the low alarm but hadn't fully tripped yet. Took a good ten minutes before it finally fell below the threshold."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "coolant_pressure_high",
+      "text": "Changed the filter two days ago but today the coolant lines were hammering. Pressure gauge pegged out past the red line - you could hear it surging in the hose near station 7."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "coolant_pressure_high",
+      "text": "Lines were vibrating like crazy on the machine by the south wall. Looked at the gauge and it was way over the normal band - chips must have backed up somewhere in the circuit and blocked it."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "coolant_pressure_high",
+      "text": "Day shift on machine 8 - noticed the coolant return hose was bulging near the pump head. Gauge confirmed it was way above spec. Relief valve must not have cracked open in time."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "coolant_no_flow",
+      "text": "The nozzle was bone dry - nothing coming out even though the pump indicator light was on and green. Spindle was still turning but zero fluid at the tip the whole time."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "coolant_no_flow",
+      "text": "Was running aluminum and suddenly all this smoke from the cut zone - no fluid at all. Could see the hot chips steaming. Flow meter on the controller screen was sitting at zero."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "coolant_no_flow",
+      "text": "Tech on line 4 said the indicator showed pump on but they looked at the cut and it was running completely dry. Pump was humming but nothing making it to the nozzle at all."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "axis_servo_overload",
+      "text": "Y-axis threw a fault in the middle of the toolpath - display popped up with some error code and the table just froze in position. Tried to jog it off manually and it wouldn't budge."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "axis_servo_overload",
+      "text": "Line 3 machine, the Z-axis drive tripped out during a deep plunge on the second op. Error screen had a code we hadn't seen before on that unit. Whole machine went into fault state and locked us out."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "axis_overtravel",
+      "text": "Operator had the wrong fixture offset loaded in G54 - table ran all the way into the far end stop hard, set off an alarm about the travel limit. Program had to be fully cancelled before we could do anything."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "axis_overtravel",
+      "text": "New guy on days tried a manual jog and ran the X-axis all the way to the end of travel. Machine banged against the stop and threw a hard limit alarm. Had to figure out how to get it back off the switch before anything else."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "tool_changer_jam",
+      "text": "ATC tried to swap to tool 12 and just stopped halfway. Carousel was stuck between pockets and would not move an inch. Got a changer fault code on screen and the whole program was stuck waiting."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "tool_changer_jam",
+      "text": "During a long program on the big VMC, the swap call came up and the arm just froze with the old tool still hanging. Could not do anything with it locked up like that - program was dead in the water."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "tool_changer_jam",
+      "text": "Ran the T6 to T7 change about 50 times today with no issues at all, then on the T8 call it locked up. Just sat there trying to rotate and then faulted out without getting to the pocket."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "chip_conveyor_jam",
+      "text": "Floor near machine 5 was filling up with chips fast - the belt was not moving at all. Overload light was lit up solid on the conveyor panel next to the enclosure."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "chip_conveyor_jam",
+      "text": "Line 2, running cast iron all afternoon. The chip removal belt seized up on us. When I got over there and opened the access panel, there was a huge ball of stringy steel chips wrapped around the take-up end."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "spindle_lubrication",
+      "text": "Maintenance log showed the head hadn't been serviced in three weeks on machine 6. Spindle was making a faint high-frequency whir at startup that wasn't there before. Weekly was definitely overdue."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "spindle_lubrication",
+      "text": "Scheduled head service on the vertical center by the west wall. Previous shift hadn't marked the logbook so nobody knew if it got done - did it again to be safe since the interval was right at the edge."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "way_lubrication",
+      "text": "Lube unit was blinking the empty warning on the machine next to the parts washer - reservoir was bone dry. Axis had apparently been running with no oil on the ways for some unknown amount of time."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "way_lubrication",
+      "text": "Biweekly check on line 3 showed the automatic oiler was sitting at minimum level. Hadn't been topped off since before the holiday shutdown - about three weeks of running with almost nothing in it."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "way_lubrication",
+      "text": "X-axis on the machine near dock 2 felt a bit notchy during the first setup of the week. Checked the lube unit and it was well below the min mark. Level indicator had been ignored for a while based on the dust on it."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "coolant_filter_change",
+      "text": "Coolant was coming out brown and smelled off on machine 2. Popped the housing and the filter looked like it was from last year - completely plugged with gray sludge and fine particles."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "coolant_filter_change",
+      "text": "The bypass lamp came on in the coolant cabinet on the VMC by the inspection area. Monthly service was four days overdue and the element was so clogged it had already gone into bypass mode."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "spindle_belt_change",
+      "text": "During the quarterly PM on line 1, the tech found a crack running the full width of the belt inside the spindle housing. Had to get it swapped out before it snapped during a production run."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "spindle_belt_change",
+      "text": "Machine was making a chirping noise up in the head, especially right at startup. Belt inspection after opening the access cover showed glazing and the stretch mark was way past the wear line."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "coolant_tank_cleaning",
+      "text": "Semi-annual PM on machine 6 - tank bottom had a thick gray sludge layer from months of tramp oil and settled fines. Took two people most of a shift to get it properly cleaned out."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "coolant_tank_cleaning",
+      "text": "Coolant on line 4 VMC started foaming really bad and had a rotten smell to it. Turned out the scheduled tank service was six months overdue and bacteria had taken over the sump."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "tool_changer_lubrication",
+      "text": "Monthly ATC service on the machine by the inspection table - gripper jaws were squeaking on every tool pull. When I got in there, the cam and gripper were visibly dry."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "tool_changer_lubrication",
+      "text": "During the routine PM check on line 3, the carousel was indexing noticeably slower than normal - hesitating at each pocket before locking in. The cam grease fitting hadn't been touched in over two months."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needed to get inside the enclosure to swap out a prox sensor on the Z-axis. Did the full de-energization and had the panel locked out before anyone went anywhere near the work area. Textbook pre-maintenance."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "lockout_tagout",
+      "text": "Shift supervisor called for a planned belt and coolant element change before second shift came on. Machine had to go completely offline with locks on before the tech would even open a panel."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "estop_response",
+      "text": "Someone hit the mushroom button on the machine at station 4 - nobody said anything was coming. Whole machine seized up mid-program. It wasn't planned, wasn't a scheduled stop, caught everyone off guard."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "estop_response",
+      "text": "The material cart bumped into the red button on line 2 on its way past. Program was live and part was mid-cut. Everything just stopped with no warning. Had to figure out what happened before anyone touched anything."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "estop_response",
+      "text": "Operator on nights yanked the button because they thought there was a crash coming. Machine was actually fine but nobody had planned or scheduled the stop. No locks, no coordinated shutdown - just a surprise halt."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "coolant_spill_minor",
+      "text": "Drip tray under machine 3 overflowed - maybe a quart of fluid on the floor right by the operator footboard. Slip hazard but nothing serious, just a small wet patch that needed a mat laid down."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "coolant_spill_minor",
+      "text": "After the noon changeover on line 1, found a small puddle of greenish fluid near the back of the enclosure. Maybe a cup, cup and a half of liquid. Looked like a fitting was just weeping slowly."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "coolant_spill_major",
+      "text": "The main coolant supply hose on the VMC near dock 3 let go completely - fluid all over the floor heading straight for the drain. Probably 15 or 20 liters out in under a minute. Had to get people away fast."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "coolant_spill_major",
+      "text": "Tank seam on line 5 cracked at an old weld - coolant flooded the whole bay around that machine. Had to shut down two adjacent stations just to contain it. Way more than a bucket's worth."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "daily_startup",
+      "text": "First shift startup on machine 4 - power came on fine but the controller just sat on the boot screen without ever getting to the ready state. Took a few tries to figure out the initialization order was off."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "daily_startup",
+      "text": "Monday morning on line 2 - operator skipped the initial lube cycle step entirely and jumped straight into the first program. Axis felt notchy during the first few moves. Caught it before any real damage happened."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "daily_shutdown",
+      "text": "Came in for first shift and the coolant was still circulating - someone on nights had shut the controller off but never killed the coolant pump. Found it running at 5am when I got in."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "daily_shutdown",
+      "text": "Night shift left without going through the full end-of-shift steps - chip conveyor was still on when days came in. Found a pile of chips backed up at the discharge end from running all night with nobody watching."
+    }
+  ]
+}

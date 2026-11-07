@@ -1,0 +1,742 @@
+{
+  "family": "Heat Treatment Furnace",
+  "sops": [
+    {
+      "ref": "temp_below_setpoint",
+      "title": "Temperature Below Setpoint Recovery",
+      "condition": "Zone thermocouple reads more than 15°C below target setpoint for five or more consecutive minutes during an active processing cycle.",
+      "steps": [
+        "Walk to zone1_control_panel",
+        "Read zone1_temp_sensor to determine deviation magnitude",
+        "Notify shift_supervisor of below-setpoint condition",
+        "Press heating_enable_button at zone1_control_panel to boost heat output",
+        "Wait 300 seconds for zone temperature to recover",
+        "Read zone1_temp_sensor to verify return to setpoint",
+        "Notify shift_supervisor of recovery status"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "zone1_temp_sensor",
+        "heating_enable_button"
+      ]
+    },
+    {
+      "ref": "temp_sudden_collapse",
+      "title": "Furnace Temperature Sudden Collapse Response",
+      "condition": "Any zone temperature drops more than 50°C within a single 60-second scan interval, indicating catastrophic heating element failure or a hard power interruption.",
+      "steps": [
+        "Press red_estop_button at zone1_control_panel to halt all operations immediately",
+        "Notify shift_supervisor and maintenance_tech of sudden temperature collapse",
+        "Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button",
+        "Wait 60 seconds for equipment to stabilize",
+        "Read heating_element_current_sensor to check for open-circuit fault",
+        "Notify maintenance_tech with heating_element_current_sensor reading"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "red_estop_button",
+        "atmosphere_control_panel",
+        "atmosphere_shutoff_valve_button",
+        "heating_element_current_sensor"
+      ]
+    },
+    {
+      "ref": "temp_above_ceiling",
+      "title": "Furnace Overtemperature Alarm Response",
+      "condition": "Any zone temperature exceeds the programmed upper safety ceiling by more than 5°C, triggering the high-temperature limit alarm.",
+      "steps": [
+        "Walk to zone1_control_panel and press heating_disable_button immediately",
+        "Read zone1_temp_sensor and zone2_temp_sensor to confirm overtemperature reading",
+        "Press conveyor_stop_button at zone1_control_panel to halt part movement",
+        "Notify shift_supervisor of overtemperature condition",
+        "Wait 120 seconds and re-read zone1_temp_sensor to track temperature descent",
+        "Notify quality_inspector to quarantine all parts processed during the overtemperature event"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "heating_disable_button",
+        "zone1_temp_sensor",
+        "zone2_temp_sensor",
+        "conveyor_stop_button"
+      ]
+    },
+    {
+      "ref": "atmosphere_low_flow",
+      "title": "Protective Atmosphere Low Flow Warning Response",
+      "condition": "Atmosphere gas flow rate drops below the minimum warning threshold but remains above the emergency shutoff level, triggering a yellow advisory alarm.",
+      "steps": [
+        "Walk to atmosphere_control_panel and read atm_flow_sensor",
+        "Read atm_pressure_sensor to check upstream supply pressure",
+        "Walk to filter_housing and visually assess for restriction",
+        "Notify maintenance_tech of low-flow warning condition",
+        "Wait 120 seconds and re-read atm_flow_sensor to confirm trend",
+        "Notify shift_supervisor with updated atm_flow_sensor reading"
+      ],
+      "equipment": [
+        "atmosphere_control_panel",
+        "atm_flow_sensor",
+        "atm_pressure_sensor",
+        "filter_housing"
+      ]
+    },
+    {
+      "ref": "atmosphere_loss",
+      "title": "Total Protective Atmosphere Loss Emergency",
+      "condition": "Atmosphere gas flow drops to zero or below the emergency threshold, causing immediate oxidation risk to parts in process and requiring emergency shutdown.",
+      "steps": [
+        "Press red_estop_button at zone1_control_panel immediately",
+        "Press conveyor_stop_button at zone1_control_panel to freeze part positions",
+        "Walk to gas_shutoff_station and press atmosphere_shutoff_valve_button",
+        "Notify shift_supervisor and safety_officer of total atmosphere loss emergency",
+        "Wait 30 seconds then read co_gas_sensor to assess residual combustible atmosphere",
+        "Notify maintenance_tech with co_gas_sensor reading and current status"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "red_estop_button",
+        "conveyor_stop_button",
+        "gas_shutoff_station",
+        "atmosphere_shutoff_valve_button",
+        "co_gas_sensor"
+      ]
+    },
+    {
+      "ref": "quench_oil_low_level",
+      "title": "Quench Tank Oil Level Low Response",
+      "condition": "Quench oil level sensor reads below the minimum operating level, indicating normal consumption or an undetected leak requiring immediate replenishment.",
+      "steps": [
+        "Walk to quench_tank and read quench_level_sensor",
+        "Notify shift_supervisor of low quench oil level",
+        "Walk to oil_storage_area and pick quench_oil_drum",
+        "Walk to quench_tank and place quench_oil_drum at fill_port",
+        "Press quench_pump_stop_button at quench_control_panel",
+        "Wait 60 seconds then read quench_level_sensor to verify level restored",
+        "Press quench_pump_start_button at quench_control_panel to resume quench circulation"
+      ],
+      "equipment": [
+        "quench_tank",
+        "quench_level_sensor",
+        "oil_storage_area",
+        "quench_oil_drum",
+        "quench_control_panel",
+        "quench_pump_stop_button",
+        "quench_pump_start_button"
+      ]
+    },
+    {
+      "ref": "quench_oil_high_temp",
+      "title": "Quench Oil Overtemperature Response",
+      "condition": "Quench oil temperature sensor exceeds the maximum allowable quench temperature, reducing quench severity and posing flash-point risk.",
+      "steps": [
+        "Walk to quench_control_panel and read quench_temp_sensor",
+        "Press quench_pump_stop_button at quench_control_panel",
+        "Notify shift_supervisor of quench oil overtemperature condition",
+        "Press cooling_fan_start_button at quench_control_panel to accelerate cooling",
+        "Wait 180 seconds and re-read quench_temp_sensor",
+        "Notify shift_supervisor with updated quench_temp_sensor reading",
+        "Press quench_pump_start_button once temperature returns to operating range"
+      ],
+      "equipment": [
+        "quench_control_panel",
+        "quench_temp_sensor",
+        "quench_pump_stop_button",
+        "cooling_fan_start_button",
+        "quench_pump_start_button"
+      ]
+    },
+    {
+      "ref": "heating_element_fault",
+      "title": "Heating Element Electrical Fault Response",
+      "condition": "Heating element current sensor detects an open-circuit or short-circuit condition on one or more element banks during an active heat cycle.",
+      "steps": [
+        "Walk to zone1_control_panel and read heating_element_current_sensor",
+        "Press heating_disable_button at zone1_control_panel",
+        "Notify maintenance_tech and shift_supervisor of heating element fault",
+        "Press conveyor_stop_button to hold parts in current zone positions",
+        "Wait 300 seconds for element assemblies to cool",
+        "Notify maintenance_tech with heating_element_current_sensor readings for repair dispatch"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "heating_element_current_sensor",
+        "heating_disable_button",
+        "conveyor_stop_button"
+      ]
+    },
+    {
+      "ref": "atmosphere_filter_change",
+      "title": "Protective Atmosphere Filter Replacement",
+      "condition": "Scheduled maintenance interval is reached or a low-flow warning is confirmed as caused by a filter restriction rather than a supply pressure issue.",
+      "steps": [
+        "Walk to loto_panel and press loto_panel_button to initiate lockout sequence",
+        "Walk to filter_housing and pick replacement_atmosphere_filter",
+        "Place replacement_atmosphere_filter at filter_housing",
+        "Walk to atmosphere_control_panel and press atmosphere_enable_button",
+        "Wait 60 seconds and read atm_flow_sensor to confirm restored flow",
+        "Notify maintenance_tech of completed filter change and current atm_flow_sensor reading"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "filter_housing",
+        "replacement_atmosphere_filter",
+        "atmosphere_control_panel",
+        "atmosphere_enable_button",
+        "atm_flow_sensor"
+      ]
+    },
+    {
+      "ref": "quench_oil_change",
+      "title": "Full Quench Oil Drain and Replacement",
+      "condition": "Scheduled quench oil change interval is reached or oil analysis results indicate fluid breakdown requiring full drain and replacement.",
+      "steps": [
+        "Walk to loto_panel and press loto_panel_button to initiate lockout",
+        "Walk to quench_tank and pick oil_drain_plug",
+        "Place drain_pan at quench_tank drain outlet",
+        "Wait 600 seconds for full oil drain",
+        "Pick quench_oil_drum from oil_storage_area",
+        "Place quench_oil_drum at quench_tank fill_port",
+        "Read quench_level_sensor to confirm proper fill level"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "quench_tank",
+        "oil_drain_plug",
+        "drain_pan",
+        "quench_oil_drum",
+        "oil_storage_area",
+        "quench_level_sensor"
+      ]
+    },
+    {
+      "ref": "door_seal_inspection",
+      "title": "Furnace Door Seal Inspection and Replacement",
+      "condition": "Scheduled maintenance interval is reached or a visible atmosphere leak is detected at the furnace door perimeter during a routine inspection walk.",
+      "steps": [
+        "Walk to loto_panel and press loto_panel_button to initiate lockout",
+        "Walk to door_seal_station and read door_seal_sensor",
+        "Pick replacement_door_seal from maintenance_cabinet",
+        "Place replacement_door_seal at door_seal_station",
+        "Walk to atmosphere_control_panel and read atm_pressure_sensor to verify seal integrity",
+        "Notify maintenance_tech of seal replacement completion and atm_pressure_sensor reading"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "door_seal_station",
+        "door_seal_sensor",
+        "replacement_door_seal",
+        "maintenance_cabinet",
+        "atmosphere_control_panel",
+        "atm_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "thermocouple_calibration",
+      "title": "Zone Thermocouple Calibration Procedure",
+      "condition": "Scheduled calibration interval is reached or thermocouple accuracy drift is detected during a quality verification check.",
+      "steps": [
+        "Walk to loto_panel and press loto_panel_button to initiate lockout",
+        "Walk to thermocouple_junction_box and pick thermocouple_calibrator",
+        "Place thermocouple_calibrator at zone1_control_panel connection point",
+        "Read zone1_temp_sensor and compare to thermocouple_calibrator reference",
+        "Walk to zone2_control_panel and read zone2_temp_sensor against thermocouple_calibrator",
+        "Notify maintenance_tech of calibration readings and any out-of-tolerance values"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "thermocouple_junction_box",
+        "thermocouple_calibrator",
+        "zone1_control_panel",
+        "zone1_temp_sensor",
+        "zone2_control_panel",
+        "zone2_temp_sensor"
+      ]
+    },
+    {
+      "ref": "heating_element_inspection",
+      "title": "Heating Element Visual Inspection",
+      "condition": "Scheduled preventive maintenance inspection is due or a prior heating element fault event requires follow-up physical examination of element condition.",
+      "steps": [
+        "Walk to loto_panel and press loto_panel_button to initiate lockout",
+        "Wait 600 seconds for heating elements to cool to safe inspection temperature",
+        "Walk to zone1_control_panel and read heating_element_current_sensor for pre-inspection baseline",
+        "Walk to zone2_control_panel and read zone2_temp_sensor as reference",
+        "Notify maintenance_tech of inspection access readiness and sensor baseline readings",
+        "Press heating_enable_button at zone1_control_panel only after maintenance_tech clearance and lockout removal"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "zone1_control_panel",
+        "heating_element_current_sensor",
+        "zone2_control_panel",
+        "zone2_temp_sensor",
+        "heating_enable_button"
+      ]
+    },
+    {
+      "ref": "quench_agitator_lubrication",
+      "title": "Quench Tank Agitator Bearing Lubrication",
+      "condition": "Scheduled lubrication interval for quench tank agitator bearings is reached per the preventive maintenance calendar.",
+      "steps": [
+        "Walk to loto_panel and press loto_panel_button to initiate lockout",
+        "Press quench_pump_stop_button at quench_control_panel",
+        "Walk to lubrication_station and pick grease_cartridge",
+        "Walk to quench_tank and place grease_cartridge at agitator_bearing_port",
+        "Wait 30 seconds for grease to distribute through bearing",
+        "Notify maintenance_tech of lubrication completion"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "quench_control_panel",
+        "quench_pump_stop_button",
+        "lubrication_station",
+        "grease_cartridge",
+        "quench_tank"
+      ]
+    },
+    {
+      "ref": "conveyor_chain_lubrication",
+      "title": "Furnace Conveyor Chain Lubrication",
+      "condition": "Scheduled lubrication interval for the furnace conveyor chain is reached or squealing noise is reported from the chain drive.",
+      "steps": [
+        "Walk to loto_panel and press loto_panel_button to initiate lockout",
+        "Press conveyor_stop_button at zone1_control_panel",
+        "Walk to lubrication_station and pick grease_cartridge",
+        "Walk to conveyor_access_panel and place grease_cartridge at chain_lubrication_port",
+        "Wait 20 seconds for grease to distribute across chain links",
+        "Press conveyor_start_button at zone1_control_panel after lockout removal"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "zone1_control_panel",
+        "conveyor_stop_button",
+        "lubrication_station",
+        "grease_cartridge",
+        "conveyor_access_panel",
+        "conveyor_start_button"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Furnace Full Lockout Tagout Procedure",
+      "condition": "Any planned maintenance or repair activity requires complete isolation of all furnace energy sources before personnel access.",
+      "steps": [
+        "Walk to zone1_control_panel and press stop_button",
+        "Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button",
+        "Press quench_pump_stop_button at quench_control_panel",
+        "Walk to loto_panel and press loto_panel_button",
+        "Pick loto_lock_set from maintenance_cabinet",
+        "Place loto_lock_set at loto_panel",
+        "Notify maintenance_tech that lockout is complete and all energy sources are at zero"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "stop_button",
+        "atmosphere_control_panel",
+        "atmosphere_shutoff_valve_button",
+        "quench_control_panel",
+        "quench_pump_stop_button",
+        "loto_panel",
+        "loto_panel_button",
+        "loto_lock_set",
+        "maintenance_cabinet"
+      ]
+    },
+    {
+      "ref": "atmosphere_gas_leak",
+      "title": "Protective Atmosphere Gas Leak Emergency Response",
+      "condition": "Co gas sensor reading rises above ambient background or physical detection of protective atmosphere gas leaking outside furnace containment boundaries.",
+      "steps": [
+        "Press red_estop_button at zone1_control_panel immediately",
+        "Walk to gas_shutoff_station and press atmosphere_shutoff_valve_button",
+        "Read co_gas_sensor to quantify leak concentration in the area",
+        "Notify safety_officer and shift_supervisor immediately with co_gas_sensor reading",
+        "Walk to fire_extinguisher_station and pick fire_extinguisher",
+        "Place fire_extinguisher at safe_standby_position near furnace perimeter",
+        "Notify maintenance_tech with co_gas_sensor reading for hazmat assessment"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "red_estop_button",
+        "gas_shutoff_station",
+        "atmosphere_shutoff_valve_button",
+        "co_gas_sensor",
+        "fire_extinguisher_station",
+        "fire_extinguisher"
+      ]
+    },
+    {
+      "ref": "furnace_fire",
+      "title": "Furnace Area Fire Emergency Response",
+      "condition": "Visible flames, fire alarm activation, or smoke is detected in or immediately around the furnace equipment.",
+      "steps": [
+        "Press red_estop_button at zone1_control_panel immediately",
+        "Notify safety_officer and shift_supervisor of fire emergency",
+        "Walk to fire_extinguisher_station and pick fire_extinguisher",
+        "Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button",
+        "Press quench_pump_stop_button at quench_control_panel",
+        "Place fire_extinguisher at discharge_position adjacent to fire source"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "red_estop_button",
+        "fire_extinguisher_station",
+        "fire_extinguisher",
+        "atmosphere_control_panel",
+        "atmosphere_shutoff_valve_button",
+        "quench_control_panel",
+        "quench_pump_stop_button"
+      ]
+    },
+    {
+      "ref": "quench_oil_spill",
+      "title": "Quench Oil Spill Containment and Cleanup",
+      "condition": "Quench oil is observed pooling on the floor around the quench tank or along the transfer path, indicating a fitting leak or overflow event.",
+      "steps": [
+        "Notify shift_supervisor and safety_officer of spill location immediately",
+        "Walk to maintenance_cabinet and pick oil_absorbent_pads",
+        "Walk to quench_tank spill area and place oil_absorbent_pads over spill",
+        "Pick oil_spill_kit from maintenance_cabinet",
+        "Place oil_spill_kit at spill boundary to contain further spread",
+        "Read quench_level_sensor to assess volume of oil lost",
+        "Notify maintenance_tech with quench_level_sensor reading and estimated spill extent"
+      ],
+      "equipment": [
+        "maintenance_cabinet",
+        "oil_absorbent_pads",
+        "quench_tank",
+        "oil_spill_kit",
+        "quench_level_sensor"
+      ]
+    },
+    {
+      "ref": "furnace_startup",
+      "title": "Furnace Cold Start Procedure",
+      "condition": "Furnace is in a fully de-energized cold state and a scheduled production startup is required.",
+      "steps": [
+        "Walk to loto_panel and read loto_panel_button status to confirm all lockouts are cleared",
+        "Walk to atmosphere_control_panel and press atmosphere_enable_button",
+        "Wait 120 seconds and read atm_flow_sensor to confirm protective atmosphere is established",
+        "Walk to zone1_control_panel and press start_button",
+        "Press heating_enable_button at zone1_control_panel to begin heat ramp",
+        "Wait 1800 seconds for furnace zones to reach target setpoint",
+        "Read zone1_temp_sensor and notify shift_supervisor that furnace is production-ready"
+      ],
+      "equipment": [
+        "loto_panel",
+        "loto_panel_button",
+        "atmosphere_control_panel",
+        "atmosphere_enable_button",
+        "atm_flow_sensor",
+        "zone1_control_panel",
+        "start_button",
+        "heating_enable_button",
+        "zone1_temp_sensor"
+      ]
+    },
+    {
+      "ref": "furnace_shutdown",
+      "title": "Furnace Planned Shutdown Procedure",
+      "condition": "Planned end-of-shift or pre-maintenance shutdown is initiated with all parts cleared from the furnace chamber.",
+      "steps": [
+        "Walk to zone1_control_panel and press heating_disable_button",
+        "Press conveyor_stop_button at zone1_control_panel",
+        "Wait 300 seconds for initial thermal cooldown",
+        "Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button",
+        "Press quench_pump_stop_button at quench_control_panel",
+        "Read zone1_temp_sensor to confirm temperature is falling safely",
+        "Notify shift_supervisor that planned shutdown is complete"
+      ],
+      "equipment": [
+        "zone1_control_panel",
+        "heating_disable_button",
+        "conveyor_stop_button",
+        "atmosphere_control_panel",
+        "atmosphere_shutoff_valve_button",
+        "quench_control_panel",
+        "quench_pump_stop_button",
+        "zone1_temp_sensor"
+      ]
+    },
+    {
+      "ref": "load_inspection",
+      "title": "Pre-Load and Post-Process Part Inspection",
+      "condition": "A parts basket arrives at the load station or is discharged from the furnace, requiring dimensional and surface hardness verification before or after heat treatment.",
+      "steps": [
+        "Walk to parts_load_area and pick parts_basket",
+        "Place parts_basket at inspection_station",
+        "Pick inspection_gauge from maintenance_cabinet",
+        "Place inspection_gauge on sample parts in parts_basket to check dimensional conformance",
+        "Pick surface_hardness_tester from maintenance_cabinet",
+        "Place surface_hardness_tester on sample part to verify hardness target",
+        "Notify quality_inspector with hardness and dimensional measurement readings"
+      ],
+      "equipment": [
+        "parts_load_area",
+        "parts_basket",
+        "inspection_station",
+        "inspection_gauge",
+        "maintenance_cabinet",
+        "surface_hardness_tester"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "temp_below_setpoint",
+      "text": "Line 3 furnace was running about 18 degrees cold on zone 1 for the last half hour of first shift — HMI showed 822 and we're supposed to be sitting at 840. It wasn't a sudden drop or anything, just crept down slowly while we were loading parts. Didn't lose the zone completely, just couldn't hold temp."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "temp_below_setpoint",
+      "text": "Second shift here on the unit by the loading dock — the middle zone has been consistently running under where it should be all evening. Not talking about a crash, it's been maybe 15 to 20 degrees below for four or five consecutive readings. Nothing dramatic, just off and staying off."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "temp_below_setpoint",
+      "text": "Zone 2 on furnace A was drifting low all morning — been below target for at least six minutes solid. The other zones are holding fine, just this one zone gradually lost a few degrees and parked there. No alarms tripped, no loud bells, just quietly below spec."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "temp_sudden_collapse",
+      "text": "Zone 3 just cratered on second shift — went from 870 down to around 800 in less than a minute. That is not a slow drift where you bump the heaters and wait. Something died in there instantly. Hit the stop right away."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "temp_sudden_collapse",
+      "text": "Had a hard, fast drop on line 3 furnace last night — zone 1 fell about 65 degrees in under 30 seconds. Not the gradual kind of thing, something lost power or blew out completely. Went from sitting at temp to a disaster in one scan cycle. Alarm was blaring."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "temp_sudden_collapse",
+      "text": "The loading zone temp fell off a cliff on first shift — went from 845 to 780 in a single scan cycle, roughly a 65-degree drop in under a minute. That is catastrophic, not a setpoint drift issue. Full stop was the only call."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "temp_above_ceiling",
+      "text": "Zone 2 spiked way above the safety limit this afternoon — HMI was showing 12 degrees over the upper ceiling while parts were still in the chamber. Not a slow drift upward, it blew right past the boundary. Had to kill the heaters and hold the conveyor immediately."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "temp_above_ceiling",
+      "text": "Furnace over by press 4 ran legitimately hot today — zone 1 exceeded the upper safety cutoff by about 8 degrees and the limit alarm came on. Parts were in process the whole time. Quality needed to be notified to put that batch on hold."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "temp_above_ceiling",
+      "text": "Overtemp limit alarm on second shift — zone 3 climbed past the safety ceiling, not just the setpoint. Whatever was in the furnace at that point needs to be flagged for quality. This was a true over-limit event, heaters had to come off."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "atmosphere_low_flow",
+      "text": "Flow on the atmosphere supply is reading about 15 percent below the normal minimum but it is nowhere near zero — just sitting in the yellow advisory band. Supply pressure at the header looks fine, so it is probably a restriction somewhere downstream. Not an emergency, just watching it."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "atmosphere_low_flow",
+      "text": "Second shift on line 2, the atmosphere control panel has been showing a yellow flow advisory all morning. Gas is still coming through, just not at full rate. Pressure at the manifold is normal. My guess is the filter is starting to plug — maintenance is aware."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "atmosphere_low_flow",
+      "text": "Flow gauge on furnace 1 atmosphere supply dropped into the warning zone, not a shutoff alarm — there is definitely still gas moving through the system. Maintenance looked at the pressure differential and thinks it is a filter restriction. Flow is low, not absent."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "atmosphere_loss",
+      "text": "We completely lost atmosphere protection on line 2 furnace during second shift — flow meter went to zero and flatlined. Not a low warning, not a yellow light, it just stopped entirely. Parts were at oxidation risk. Hit the estop and killed the gas supply."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "atmosphere_loss",
+      "text": "Total atmosphere loss on the heat treat furnace by the east wall during first shift. Zero on the flow sensor, zero pressure downstream — the whole gas system went dead all at once. That is an emergency stop situation, nothing gradual about it."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "atmosphere_loss",
+      "text": "Endothermic atmosphere just died on furnace 3 — completely gone, nothing registering on the flow sensor. This was not a slow drop like a filter issue, it went from normal to zero in one reading. Stopped the conveyor and cleared the area."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "quench_oil_low_level",
+      "text": "Quench tank low level light came on during second shift on line 3. Level sensor was reading below minimum — looks like normal oil consumption over the week, nothing dramatic. Temperature on the oil is totally fine, we are just short on fluid. Needed to get a drum from the back storage area."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "quench_oil_low_level",
+      "text": "Oil level alarm tripped on the quench tank by press row B — level sensor confirmed we are below the minimum fill mark. Temperature of the quench oil is normal, no heat issue, just not enough volume in the tank. Robot fetched a drum from storage and topped it off."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "quench_oil_high_temp",
+      "text": "Quench oil was running way too hot on second shift — temp sensor was showing we were above the max allowable temperature. Level in the tank is fine, it is not low on fluid at all. Just overheated. Worried about flash point and definitely not getting proper hardness quenching at that temperature."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "quench_oil_high_temp",
+      "text": "The thermometer on the quench tank is pegged well above operating range — not a level issue, the tank is full of fluid. But we cannot quench at this temperature, parts will come out soft and there is a fire risk if it keeps climbing. Oil is hot, not missing."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "quench_oil_high_temp",
+      "text": "Second shift called it in on line 4 — quench temp was climbing past the upper limit. Tank level is okay, no spill, no leak anywhere. Just overheated oil from running too many consecutive cycles without enough cooldown time between them. Have to bring the temp down before running more parts."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "heating_element_fault",
+      "text": "Got a current fault alarm on zone 2 this morning — the element current sensor showed an open circuit on element bank A. Temperature was starting to drift as a downstream effect but the fault indication itself is electrical, not just a thermal deviation."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "heating_element_fault",
+      "text": "Zone 1 element bank B current dropped to near zero per the ammeter readout on second shift — looks like a burned-out element. No temperature limit alarm has tripped yet but the current sensor is showing a clear open-circuit fault. Maintenance needs to pull that element."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "atmosphere_filter_change",
+      "text": "PM work order came up for the atmosphere filter swap on furnace 1 today. Flow sensor confirmed there was a restriction before the swap — filter was clearly clogged based on the pressure differential. Maintenance had the robot handle the change during the lockout window."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "atmosphere_filter_change",
+      "text": "Low flow advisory on line 3 atmosphere supply was traced to a clogged filter after maintenance verified that supply pressure at the header was normal. Scheduled the robot to swap the filter element during the next available maintenance slot per the work order."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "quench_oil_change",
+      "text": "Hit the 1000-hour mark on the quench oil and pulled a sample for analysis — it came back dark with visible breakdown products and depleted inhibitor. Scheduled a full drain and refill for the Sunday maintenance outage. Nothing failed in operation, purely interval-based."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "quench_oil_change",
+      "text": "Oil analysis from last week flagged the quench fluid on furnace 2 as degraded — viscosity was out of spec and the antioxidant package was shot. Full drain and refill work order cut for this weekend's shutdown window. Robot handled the drain and fresh fill."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "door_seal_inspection",
+      "text": "Could see a faint orange glow around the door edge on second shift — protective atmosphere was burning off at the door gap on furnace 2 where the seal was not seating properly. Not a fire inside the chamber, just the gas leaking through the gap and igniting at the edge."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "door_seal_inspection",
+      "text": "PM work order for the door gasket check came due on furnace 1 this week. Robot inspected the seal condition and found compression loss along the bottom section — gap was big enough to allow atmosphere to bleed out at the perimeter. Scheduled replacement during the maintenance window."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "thermocouple_calibration",
+      "text": "Quality flagged that hardness numbers on the line 3 batch were consistently low this week — traced it back to the zone 2 thermocouple reading artificially high, so the furnace controller thought it was at setpoint when it was actually below. Calibration was overdue by two weeks."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "thermocouple_calibration",
+      "text": "Doing a pyrometer survey as part of the AMS 2750 audit prep and zone 1 thermocouple was off by 11 degrees against the reference instrument. Scheduled the robot to run through the calibration procedure on all zones before the audit date."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "heating_element_inspection",
+      "text": "After the element fault we had last week on zone 2, maintenance scheduled a visual walk-through of all heating elements during the next planned outage to check for damage on adjacent elements that might have been stressed during the event."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "heating_element_inspection",
+      "text": "Six-month PM inspection was due on furnace 3 heating elements. One element in zone 1 looked discolored and swollen on inspection even though it had not faulted yet — tech flagged it for replacement before it becomes an unplanned failure."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "quench_agitator_lubrication",
+      "text": "Agitator on the quench tank was making a grinding noise on first shift — maintenance log showed the bearing lube interval was overdue by about two weeks. Robot handled the grease job during the lunch lockout window."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "quench_agitator_lubrication",
+      "text": "PM calendar on line 2 showed the quench agitator bearing lubrication was coming due this week. No noise yet but past the scheduled interval. Maintenance scheduled the robot to do it during the Sunday window rather than wait for a symptom."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "conveyor_chain_lubrication",
+      "text": "Furnace conveyor was squealing bad on first shift on line 3 — chain clearly needed grease. You could hear it across the floor. Maintenance scheduled the lube job for the next production break between shifts."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "conveyor_chain_lubrication",
+      "text": "PM work order for conveyor chain lubrication on furnace 2 came due — chain had not been serviced in three weeks per the maintenance log. No noise yet but past interval. Robot handled the lube during the planned stop between first and second shift."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needed to get inside furnace 1 to swap a failed thermocouple — robot applied full lockout on all energy sources before the tech went in. All locks placed at the panel, energy verified at zero, then maintenance crew entered."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "lockout_tagout",
+      "text": "Planned outage on furnace 3 for element bank replacement — the whole crew was going in to work on the heating zone. Full LOTO applied to every energy point on the furnace before anyone set foot inside. Robot secured it all per the procedure."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "atmosphere_gas_leak",
+      "text": "Could smell something strong near line 4 furnace on first shift and the CO detector in that area started reading elevated levels. Not talking about low flow inside the furnace — the gas was physically escaping into the plant around the inlet piping fittings. Hit the estop and shut the supply valve."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "atmosphere_gas_leak",
+      "text": "Hissing sound near the gas manifold on furnace 2 and the area CO monitor went to warning level. Atmosphere gas was leaking out through a fitting outside the furnace shell, not a loss-of-flow condition inside the chamber. Completely different situation — the gas was going into the plant air."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "furnace_fire",
+      "text": "Quench oil drip ignited near the furnace door on second shift — small but visible flames and a lot of smoke. Not a temperature problem inside the furnace, actual fire outside on the floor. Hit the estop and grabbed the extinguisher from the station."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "furnace_fire",
+      "text": "Fire alarm went off in the heat treat area on line 2 and we could see flames at the base of the furnace near the transfer zone. Smoke was heavy. Emergency stop immediately — no waiting to assess, visible fire in the area."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "quench_oil_spill",
+      "text": "Found quench oil pooling on the floor near the transfer conveyor during the morning walkdown — drain fitting on the quench tank had come loose. About 3 gallons on the concrete, big slipping hazard. Nothing on fire, no overheating, just needed containment fast."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "quench_oil_spill",
+      "text": "Second shift reported oil on the floor under the quench tank by press row C — level sensor confirmed we had lost some fluid. Oil was cold, no heat issue, no fire risk at this point. Just a spill that needed the absorbent pads down immediately before someone walked through it."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "furnace_startup",
+      "text": "Monday morning after the long maintenance weekend and furnace 1 was stone cold, fully locked out. Needed to bring it up from zero — establish atmosphere first, then heat ramp, then verify zones at setpoint before releasing to production. Took about 30 minutes total."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "furnace_startup",
+      "text": "Starting up furnace 2 after the planned outage for the element replacement job — cold start from fully de-energized state. Had to get atmosphere going, ramp the heat, wait for all three zones to confirm at setpoint before first shift could load parts."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "furnace_shutdown",
+      "text": "End of second shift Friday and the last basket was already out of the furnace with nothing else queued. Initiated the planned close-down — heaters off, conveyor stopped, atmosphere closed, quench pump off. Clean and orderly, no parts in there."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "furnace_shutdown",
+      "text": "Planned maintenance outage starting Monday morning, so we did the end-of-shift shutdown on Sunday evening with the furnace completely cleared out. No emergency, no parts in process — just normal close-down before the maintenance crew arrives for the scheduled work."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "load_inspection",
+      "text": "Parts basket came off furnace 3 after the heat cycle and the hardness readings were right at the top of the spec — robot ran the surface tester on three sample parts and logged everything for quality to review. Dimensional check on the gauge came back fine."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "load_inspection",
+      "text": "Pre-load inspection on a basket going into line 2 furnace — quality spotted some light surface scale on a couple of parts before they went in. Robot ran the gauge check and dimensional readings were within spec. Quality decided to proceed but put a flag on that basket for post-process review."
+    }
+  ]
+}

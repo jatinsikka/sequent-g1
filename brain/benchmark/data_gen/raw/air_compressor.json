@@ -1,0 +1,596 @@
+{
+  "family": "Plant Air Compressor",
+  "sops": [
+    {
+      "ref": "low_pressure_gradual",
+      "title": "Gradual System Pressure Drop Below Setpoint",
+      "condition": "System pressure sensor reads below the 90 PSI minimum setpoint for more than 60 consecutive seconds with no corresponding production load increase, indicating a slow ongoing loss event.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor system_pressure_sensor",
+        "read_sensor discharge_temp_sensor",
+        "press_button load_unload_button",
+        "wait 120",
+        "read_sensor system_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "system_pressure_sensor", "discharge_temp_sensor", "load_unload_button"]
+    },
+    {
+      "ref": "pressure_collapse_sudden",
+      "title": "Sudden Catastrophic Pressure Collapse",
+      "condition": "System pressure drops more than 20 PSI within 10 seconds, indicating a catastrophic loss event such as a burst distribution line, major valve failure, or large-area rupture.",
+      "steps": [
+        "walk_to emergency_stop_button",
+        "press_button emergency_stop_button",
+        "notify maintenance_supervisor",
+        "notify plant_manager",
+        "walk_to receiver_tank",
+        "read_sensor system_pressure_sensor",
+        "wait 300"
+      ],
+      "equipment": ["emergency_stop_button", "receiver_tank", "system_pressure_sensor"]
+    },
+    {
+      "ref": "high_pressure_ceiling",
+      "title": "System Pressure Exceeds Maximum Ceiling",
+      "condition": "System pressure sensor reads above the 125 PSI maximum ceiling setpoint, triggering the high-pressure alarm while the compressor remains loaded and running without automatic unloading.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor system_pressure_sensor",
+        "press_button load_unload_button",
+        "wait 30",
+        "read_sensor system_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "system_pressure_sensor", "load_unload_button"]
+    },
+    {
+      "ref": "high_temp_warning",
+      "title": "Discharge Temperature High Warning",
+      "condition": "Discharge temperature sensor reads between 195 F and 210 F, triggering the amber warning-level alarm without initiating automatic compressor shutdown.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor discharge_temp_sensor",
+        "read_sensor oil_level_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify maintenance_supervisor",
+        "wait 300",
+        "read_sensor discharge_temp_sensor"
+      ],
+      "equipment": ["control_panel", "discharge_temp_sensor", "oil_level_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "high_temp_emergency",
+      "title": "Discharge Temperature Emergency Shutdown",
+      "condition": "Discharge temperature sensor reads above 210 F, causing the compressor control system to execute an automatic protective shutdown on a high-temperature fault.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor discharge_temp_sensor",
+        "read_sensor oil_level_sensor",
+        "notify maintenance_supervisor",
+        "notify on_call_technician",
+        "wait 600",
+        "press_button reset_button"
+      ],
+      "equipment": ["control_panel", "discharge_temp_sensor", "oil_level_sensor", "reset_button"]
+    },
+    {
+      "ref": "receiver_leak_minor",
+      "title": "Minor Air Leak at Receiver Tank Fittings",
+      "condition": "Audible hiss or positive soap-bubble test at a receiver tank port or fitting, with system pressure loss less than 2 PSI per minute and no visible structural damage to the tank body.",
+      "steps": [
+        "walk_to receiver_tank",
+        "read_sensor system_pressure_sensor",
+        "notify maintenance_supervisor",
+        "walk_to control_panel",
+        "press_button load_unload_button",
+        "wait 60",
+        "read_sensor system_pressure_sensor"
+      ],
+      "equipment": ["receiver_tank", "system_pressure_sensor", "control_panel", "load_unload_button"]
+    },
+    {
+      "ref": "receiver_leak_major",
+      "title": "Major Receiver Tank Rupture or Blowout",
+      "condition": "Visible structural crack, loud percussive report, or catastrophic air release from the receiver tank body causes system pressure to drop to near-zero within 30 seconds.",
+      "steps": [
+        "walk_to emergency_stop_button",
+        "press_button emergency_stop_button",
+        "notify plant_manager",
+        "notify safety_officer",
+        "walk_to compressor_room_exit",
+        "wait 600",
+        "notify on_call_technician"
+      ],
+      "equipment": ["emergency_stop_button", "compressor_room_exit", "system_pressure_sensor"]
+    },
+    {
+      "ref": "oil_level_low",
+      "title": "Compressor Oil Level Low Alarm",
+      "condition": "Oil level sensor reads below the minimum mark on the sight glass, triggering the low-oil alarm while the compressor remains operational and no temperature fault is present.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor oil_level_sensor",
+        "walk_to oil_fill_port",
+        "pick oil_fill_container",
+        "place oil_fill_container",
+        "wait 30",
+        "read_sensor oil_level_sensor"
+      ],
+      "equipment": ["control_panel", "oil_level_sensor", "oil_fill_port", "oil_fill_container"]
+    },
+    {
+      "ref": "oil_change",
+      "title": "Scheduled Compressor Oil Change",
+      "condition": "Compressor has accumulated 2000 operating hours or oil analysis results indicate viscosity degradation or elevated metallic contamination requiring a full drain-and-fill.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_button",
+        "walk_to loto_station",
+        "pick loto_lock",
+        "place loto_lock",
+        "walk_to oil_drain_valve",
+        "press_button drain_button"
+      ],
+      "equipment": ["control_panel", "stop_button", "loto_station", "loto_lock", "oil_drain_valve", "drain_button", "drain_pan"]
+    },
+    {
+      "ref": "air_filter_change",
+      "title": "Intake Air Filter Element Replacement",
+      "condition": "Differential pressure sensor across the intake filter exceeds 4 inches W.C., or 500 operating hours have elapsed since the last filter element replacement.",
+      "steps": [
+        "walk_to filter_housing",
+        "read_sensor differential_pressure_sensor",
+        "pick replacement_air_filter",
+        "place replacement_air_filter",
+        "walk_to control_panel",
+        "press_button reset_button",
+        "read_sensor differential_pressure_sensor"
+      ],
+      "equipment": ["filter_housing", "differential_pressure_sensor", "replacement_air_filter", "control_panel", "reset_button"]
+    },
+    {
+      "ref": "separator_element_change",
+      "title": "Oil-Air Separator Element Replacement",
+      "condition": "Separator differential pressure sensor reads above 10 PSI, indicating a clogged separator element that must be replaced to prevent oil carry-over into the distribution system.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor separator_dp_sensor",
+        "press_button stop_button",
+        "walk_to separator_housing",
+        "pick replacement_separator_element",
+        "place replacement_separator_element",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "separator_dp_sensor", "stop_button", "separator_housing", "replacement_separator_element"]
+    },
+    {
+      "ref": "belt_inspection_replacement",
+      "title": "Drive Belt Inspection and Replacement",
+      "condition": "Scheduled 1000-hour belt inspection interval is reached, or audible squealing or visible cracking and glazing is observed on the compressor drive belt during rounds.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_button",
+        "walk_to belt_cover",
+        "pick replacement_drive_belt",
+        "place replacement_drive_belt",
+        "walk_to control_panel",
+        "press_button start_button"
+      ],
+      "equipment": ["control_panel", "stop_button", "belt_cover", "replacement_drive_belt", "start_button"]
+    },
+    {
+      "ref": "dryer_filter_change",
+      "title": "Refrigerant Dryer Coalescing Filter Replacement",
+      "condition": "Dryer coalescing filter differential pressure indicator reads above 15 PSI, or 1000 operating hours have elapsed since the last dryer filter element replacement.",
+      "steps": [
+        "walk_to dryer_unit",
+        "read_sensor dryer_dewpoint_sensor",
+        "pick replacement_dryer_filter",
+        "place replacement_dryer_filter",
+        "walk_to control_panel",
+        "press_button reset_button",
+        "read_sensor dryer_dewpoint_sensor"
+      ],
+      "equipment": ["dryer_unit", "dryer_dewpoint_sensor", "replacement_dryer_filter", "control_panel", "reset_button"]
+    },
+    {
+      "ref": "lubrication_fittings",
+      "title": "Motor and Fan Bearing Lubrication",
+      "condition": "Lubrication interval of 2000 operating hours has been reached for the compressor motor and cooling fan bearing grease fittings per the preventive maintenance schedule.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_button",
+        "walk_to motor_bearing_zerk",
+        "pick grease_gun",
+        "place grease_gun",
+        "walk_to fan_bearing_zerk",
+        "place grease_gun"
+      ],
+      "equipment": ["control_panel", "stop_button", "motor_bearing_zerk", "fan_bearing_zerk", "grease_gun"]
+    },
+    {
+      "ref": "pressure_relief_valve_test",
+      "title": "Pressure Relief Valve Annual Functional Test",
+      "condition": "Annual scheduled functional test of the receiver tank pressure relief valve is due, requiring verification that the valve lifts and reseats at its rated set pressure.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor system_pressure_sensor",
+        "notify maintenance_supervisor",
+        "walk_to receiver_tank",
+        "press_button pressure_relief_valve_test_lever",
+        "wait 5",
+        "read_sensor system_pressure_sensor"
+      ],
+      "equipment": ["control_panel", "system_pressure_sensor", "receiver_tank", "pressure_relief_valve_test_lever"]
+    },
+    {
+      "ref": "pressure_switch_calibration",
+      "title": "Pressure Switch Setpoint Calibration",
+      "condition": "Scheduled 6-month calibration of the compressor cut-in and cut-out pressure switch setpoints is due, or observed cycling points deviate from engineering specifications by more than 2 PSI.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor system_pressure_sensor",
+        "press_button stop_button",
+        "walk_to pressure_switch_panel",
+        "pick calibration_tool",
+        "place calibration_tool",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "system_pressure_sensor", "stop_button", "pressure_switch_panel", "calibration_tool"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Compressor Lockout Tagout for Maintenance",
+      "condition": "Any maintenance activity requiring physical access to compressor internals, electrical panels, or pressurized components mandates full energy isolation per plant LOTO procedure before work begins.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_button",
+        "walk_to loto_station",
+        "pick loto_lock",
+        "place loto_lock",
+        "pick loto_tag",
+        "place loto_tag"
+      ],
+      "equipment": ["control_panel", "stop_button", "loto_station", "loto_lock", "loto_tag", "compressor_disconnect"]
+    },
+    {
+      "ref": "oil_spill_response",
+      "title": "Compressor Oil Spill Response",
+      "condition": "Oil is visible on the floor beneath the compressor unit or a drain pan overflow is detected, creating a slip hazard that requires immediate containment and cleanup.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button stop_button",
+        "notify safety_officer",
+        "walk_to spill_kit_cabinet",
+        "pick spill_absorbent_pad",
+        "place spill_absorbent_pad",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "stop_button", "spill_kit_cabinet", "spill_absorbent_pad"]
+    },
+    {
+      "ref": "emergency_stop_fire",
+      "title": "Emergency Stop for Fire or Smoke Near Compressor",
+      "condition": "Smoke, visible flame, or strong burning odor is detected in or immediately adjacent to the compressor room, requiring immediate energy isolation and fire response.",
+      "steps": [
+        "walk_to emergency_stop_button",
+        "press_button emergency_stop_button",
+        "walk_to fire_extinguisher_cabinet",
+        "pick fire_extinguisher",
+        "notify safety_officer",
+        "notify plant_manager",
+        "wait 30"
+      ],
+      "equipment": ["emergency_stop_button", "fire_extinguisher_cabinet", "fire_extinguisher"]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Standard Compressor Daily Startup Procedure",
+      "condition": "Daily startup at the beginning of the production shift, or restart following a planned shutdown or completed maintenance window after all LOTO devices have been removed.",
+      "steps": [
+        "walk_to compressor_room",
+        "read_sensor oil_level_sensor",
+        "read_sensor system_pressure_sensor",
+        "walk_to control_panel",
+        "press_button start_button",
+        "wait 30",
+        "read_sensor system_pressure_sensor"
+      ],
+      "equipment": ["compressor_room", "oil_level_sensor", "system_pressure_sensor", "control_panel", "start_button"]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "Standard Planned Compressor Shutdown",
+      "condition": "End-of-shift or scheduled planned shutdown is required with no maintenance access needed, calling for a controlled unload-and-stop sequence that leaves the unit in a safe idle state.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button load_unload_button",
+        "wait 60",
+        "press_button stop_button",
+        "read_sensor system_pressure_sensor",
+        "notify shift_lead",
+        "walk_to compressor_room"
+      ],
+      "equipment": ["control_panel", "load_unload_button", "stop_button", "system_pressure_sensor"]
+    },
+    {
+      "ref": "weekly_inspection",
+      "title": "Weekly Walk-Around Inspection and Logging",
+      "condition": "Weekly scheduled inspection interval has been reached, requiring visual verification and sensor logging of all major compressor and dryer subsystems before the maintenance log is signed off.",
+      "steps": [
+        "walk_to compressor_room",
+        "read_sensor oil_level_sensor",
+        "read_sensor system_pressure_sensor",
+        "read_sensor discharge_temp_sensor",
+        "read_sensor separator_dp_sensor",
+        "pick inspection_checklist",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["compressor_room", "oil_level_sensor", "system_pressure_sensor", "discharge_temp_sensor", "separator_dp_sensor", "inspection_checklist"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "AC-001",
+      "sop_ref": "low_pressure_gradual",
+      "text": "Been watching the main panel gauge on line 3 all morning and the needle has been creeping south since about 6 AM. Was sitting at 92 when I clocked on, now it is down to 86 and the air tools are starting to feel sluggish. No alarm tripped, no banging, machine is still humming - just a slow bleed over the last couple hours."
+    },
+    {
+      "id": "AC-002",
+      "sop_ref": "low_pressure_gradual",
+      "text": "Second shift here by the loading dock compressor - our air guns started feeling weak maybe an hour into the shift. Checked the big gauge on the panel and it is reading 84. Nothing has alarmed, the unit is still cycling, but we have been slowly losing ground since around 2 PM. No sudden anything, just a gradual drift downward."
+    },
+    {
+      "id": "AC-003",
+      "sop_ref": "low_pressure_gradual",
+      "text": "Line 5 assembly called us because their torque wrenches keep timing out early - not enough oomph. Came up to the compressor room and the panel shows 87 PSI. Nothing has faulted, she is loaded and running, just not keeping up. Has been walking down steadily for what looks like half a shift based on the trend screen."
+    },
+    {
+      "id": "AC-004",
+      "sop_ref": "pressure_collapse_sudden",
+      "text": "Big pop from the compressor room - I was on the floor maybe 30 feet away and felt it in my chest. Ran over and the system gauge went from 105 to near zero in about 10 seconds flat. Compressor is still spinning but there is absolutely no air anywhere on the lines. Happened in an instant."
+    },
+    {
+      "id": "AC-005",
+      "sop_ref": "pressure_collapse_sudden",
+      "text": "Every robot on line 2 faulted simultaneously - all the air grippers dropped parts at the same time. Ran to the compressor panel and we are reading 3 PSI. Was over 100 not 10 minutes ago. There was no slow drop, no warning - it just went away all at once."
+    },
+    {
+      "id": "AC-006",
+      "sop_ref": "pressure_collapse_sudden",
+      "text": "Heard what sounded like a gunshot from the utility corridor on third shift. The plant overhead PA auto-announced a total air loss. By the time I got to the compressor area the needle was pegged at zero. One of the guys said it dropped off the scale in under 15 seconds. Never seen anything go that fast."
+    },
+    {
+      "id": "AC-007",
+      "sop_ref": "high_pressure_ceiling",
+      "text": "High-pressure alarm lit up on the HMI screen and the red beacon on the compressor cabinet is flashing. The panel gauge shows 128 PSI. The machine is fully loaded and just keeps pushing - the unload cycle never kicked in on its own. No shutdown, just the alarm light and a climbing gauge."
+    },
+    {
+      "id": "AC-008",
+      "sop_ref": "high_pressure_ceiling",
+      "text": "Line 4 fitter called saying his impact guns are hitting too hard - blowing fasteners past spec. Went to check and the receiver gauge reads 130 PSI when it should top out at 125. Compressor is still running full bore. No trip, no fault, it is just building past where it should stop."
+    },
+    {
+      "id": "AC-009",
+      "sop_ref": "high_pressure_ceiling",
+      "text": "Doing my morning rounds and noticed the pressure gauge on the receiver tank is pegged higher than I have ever seen it - 132 PSI. The unit is running but the unload cycle has not fired once since I started watching. It is just sitting there overpressure with no automatic relief from the controls."
+    },
+    {
+      "id": "AC-010",
+      "sop_ref": "high_temp_warning",
+      "text": "The amber light on the compressor cabinet came on but the machine did not shut down. Walked over and the digital readout on the panel shows 203 degrees. Felt the discharge pipe and it is noticeably hotter than usual. She is still running fine otherwise - no fault, just the yellow beacon going."
+    },
+    {
+      "id": "AC-011",
+      "sop_ref": "high_temp_warning",
+      "text": "Was cutting through the compressor room on my way to the break room and noticed the amber warning light cycling on and off. Checked the panel temp display - sitting at 198. Machine is loaded, air is flowing, no shutdown. That yellow beacon has been flashing for at least 10 minutes based on when I walked by last time."
+    },
+    {
+      "id": "AC-012",
+      "sop_ref": "high_temp_warning",
+      "text": "Got a temp-high alert on the SCADA screen at the supervisor station but it looked like a nuisance alarm because the unit is still running. Went to verify in person - the outlet line by the check valve is hot enough that I pulled my hand back fast. Panel temp display says 207. Running fine, just elevated and that amber light is on."
+    },
+    {
+      "id": "AC-013",
+      "sop_ref": "high_temp_emergency",
+      "text": "Compressor just shut itself completely off - went silent mid-shift. Red fault light is solid on the cabinet. Went to the panel and the temp readout shows 215. The machine tripped itself out automatically - no air, no running, nothing. Tried the start button once and it would not come back on."
+    },
+    {
+      "id": "AC-014",
+      "sop_ref": "high_temp_emergency",
+      "text": "Plant air disappeared on line 6 during first shift and the compressor room has the red fault beacon going solid. Went inside to check and the unit is completely dead - off, silent. Panel shows a high-temp trip and the readout is at 218. Machine shut itself down hard about 20 minutes ago and will not restart."
+    },
+    {
+      "id": "AC-015",
+      "sop_ref": "high_temp_emergency",
+      "text": "Night maintenance called me in because we lost all air. The big unit on the east wall is stone cold dead - just sitting there with the red lamp on. Temp display on the front panel reads 213 and it shows an automatic shutdown event from about an hour ago. Pushed reset and nothing happened."
+    },
+    {
+      "id": "AC-016",
+      "sop_ref": "receiver_leak_minor",
+      "text": "Can hear a little hiss coming from the back of the storage tank near the drain valve fitting. Checked the gauge and we are losing maybe a PSI or so every minute - compressor is cycling more often to keep up but nothing has alarmed yet. The leak is small, more of a whistle than a roar."
+    },
+    {
+      "id": "AC-017",
+      "sop_ref": "receiver_leak_minor",
+      "text": "Maintenance tech on second shift - I soaped up all the fittings around the tank and found one of the port flanges is bubbling steadily. Not spraying, just a slow bubble-up. Gauge is still in range but it is ticking down slowly. The compressor is loading more often than it did at the start of shift."
+    },
+    {
+      "id": "AC-018",
+      "sop_ref": "receiver_leak_minor",
+      "text": "Noticed the compressor is running short cycles way more than normal - on and off every couple minutes. Walked around the receiver and felt a faint cold spot near one of the top ports. There is definitely air seeping out somewhere on the tank, slow enough that nothing alarmed but fast enough that the unit is working harder than it should."
+    },
+    {
+      "id": "AC-019",
+      "sop_ref": "receiver_leak_major",
+      "text": "Loud bang like a rifle shot from the compressor room - ran in and there is a crack running along the side of the tank. Air is screaming out of it, gauge dropped to zero in maybe 20 seconds. Room sounds like a jet engine. Everybody out of there."
+    },
+    {
+      "id": "AC-020",
+      "sop_ref": "receiver_leak_major",
+      "text": "The storage vessel just let go - saw the safety panel on the side of the receiver blow completely off. Massive rush of air, the whole compressor room filled with mist instantly. Lost all plant air in about two seconds. Was over 100 PSI one moment and zero the next."
+    },
+    {
+      "id": "AC-021",
+      "sop_ref": "receiver_leak_major",
+      "text": "Was maybe 10 feet away when it happened. The bottom seam on the big tank separated - made a sound like a concussion grenade. Air blasting everywhere, tools dead plant-wide. Can see the gap in the tank seam from outside the room and the gauge has been at zero since it blew."
+    },
+    {
+      "id": "AC-022",
+      "sop_ref": "oil_level_low",
+      "text": "Oil low lamp came on the compressor panel about 20 minutes ago during my walk. Looked through the sight glass on the front of the unit and the level is well below the bottom mark. Machine is still running - pressure is fine, temp is fine - just that amber oil light is on."
+    },
+    {
+      "id": "AC-023",
+      "sop_ref": "oil_level_low",
+      "text": "Second shift startup and the amber oil indicator was already lit when I came in to turn things on. Checked the sight glass before I touched the start button - barely any oil showing. Temp looked okay, everything else was normal, but whoever ran last shift either did not check or ignored it."
+    },
+    {
+      "id": "AC-024",
+      "sop_ref": "oil_level_low",
+      "text": "Night maintenance flagged this one on the handoff sheet. The oil status light on the control cabinet has been on since about 10 PM. Sight glass is down near the very bottom of the visible range. Unit has been running all night with that indicator lit."
+    },
+    {
+      "id": "AC-025",
+      "sop_ref": "oil_change",
+      "text": "Hour meter on the compressor rolled past 2000 sometime last week. Service label on the cabinet says it is past due. Oil in the sight glass looks darker than it should and has a slightly burnt smell when I pulled the dipstick cap."
+    },
+    {
+      "id": "AC-026",
+      "sop_ref": "oil_change",
+      "text": "Lab results came back on the quarterly oil sample I pulled last week. Viscosity is out of spec and the iron particle count is higher than the allowed limit. Need to get it drained and refilled before the next production run."
+    },
+    {
+      "id": "AC-027",
+      "sop_ref": "air_filter_change",
+      "text": "The intake restriction indicator jumped past the red line on the filter gauge this morning. Unit is working noticeably harder to breathe - you can hear the difference in the inlet sound compared to normal."
+    },
+    {
+      "id": "AC-028",
+      "sop_ref": "air_filter_change",
+      "text": "500-hour service mark hit on the maintenance log this week. Pulled the intake housing open to take a look and the element is black with gunk - barely any airflow would get through that thing. Long past time to swap it."
+    },
+    {
+      "id": "AC-029",
+      "sop_ref": "separator_element_change",
+      "text": "Oily mist showing up in the air line at one of the downstream drops on line 2. Checked the separator gauge on the panel and it reads 12 PSI across the element. That is way past the change point."
+    },
+    {
+      "id": "AC-030",
+      "sop_ref": "separator_element_change",
+      "text": "Robotics station on line 4 is getting oil residue in the actuators - maintenance has been cleaning fittings all week. Went to the compressor room and the separator delta-P gauge is showing over 10. Element must be completely saturated."
+    },
+    {
+      "id": "AC-031",
+      "sop_ref": "belt_inspection_replacement",
+      "text": "Squealing from inside the compressor cabinet every time it loads up. Opened the belt cover to take a look and there is a crack running about 2 inches along the outer edge of the drive belt. Ready to go any time."
+    },
+    {
+      "id": "AC-032",
+      "sop_ref": "belt_inspection_replacement",
+      "text": "Maintenance calendar flagged the 1000-hour belt inspection this week. Pulled the guard and the belt is significantly glazed on the pulley-contact side - no squealing yet but the glazing means it has lost its grip. Would not make it to the next interval."
+    },
+    {
+      "id": "AC-033",
+      "sop_ref": "dryer_filter_change",
+      "text": "Dew point alarm went off on the dryer unit this morning. We are getting moisture in the air lines - had two air-actuated valves seize up on line 1 already. Checked the filter differential indicator inside the dryer cabinet and it is pinned in the red zone."
+    },
+    {
+      "id": "AC-034",
+      "sop_ref": "dryer_filter_change",
+      "text": "Hit the 1000-hour mark on the dryer service log and pulled the coalescing element for inspection. It is completely waterlogged and the indicator was maxed out. Should have been changed before this but it got pushed back twice."
+    },
+    {
+      "id": "AC-035",
+      "sop_ref": "lubrication_fittings",
+      "text": "Maintenance PM sheet shows we hit the 2000-hour grease interval on the motor and fan bearings last Tuesday. Have not had a chance to get to it yet. The motor side has been quieter than usual which actually worries me - probably running dry."
+    },
+    {
+      "id": "AC-036",
+      "sop_ref": "lubrication_fittings",
+      "text": "Noticed a slight hum from the fan end of the compressor during my afternoon rounds. Touched the bearing housing on the fan side and it is noticeably warmer than the motor end. Greasing interval is overdue by about 50 hours on the log."
+    },
+    {
+      "id": "AC-037",
+      "sop_ref": "pressure_relief_valve_test",
+      "text": "Annual safety walkthrough is coming up next week and the PRV on the receiver has not been pull-tested yet this year. Tag on the valve says last test was 13 months ago - we are already overdue."
+    },
+    {
+      "id": "AC-038",
+      "sop_ref": "pressure_relief_valve_test",
+      "text": "Insurance inspector flagged during the plant audit last month that the safety pop-off valve on the air receiver has gone over 12 months without a verification test. Need to get that done and documented before the follow-up visit."
+    },
+    {
+      "id": "AC-039",
+      "sop_ref": "pressure_switch_calibration",
+      "text": "Compressor is kicking on at 82 PSI instead of the 88 it should cut in at, and it is cutting out at 122 instead of 110. The cycling is all wrong. Six-month calibration interval is due anyway so this is probably drift in the switch."
+    },
+    {
+      "id": "AC-040",
+      "sop_ref": "pressure_switch_calibration",
+      "text": "Plant engineer noticed the on/off cycling points are off when she pulled the trend data from last week. The machine is kicking on and off at the wrong points compared to the spec sheet. Nobody has touched the cut-in and cut-out settings since before the summer shutdown."
+    },
+    {
+      "id": "AC-041",
+      "sop_ref": "lockout_tagout",
+      "text": "Need to get inside the compressor enclosure to replace the minimum pressure check valve - the seat is shot and it is leaking back. Tech cannot open that cabinet until the machine is fully de-energized and locked out. Nobody goes near the internals without the lock on the disconnect first."
+    },
+    {
+      "id": "AC-042",
+      "sop_ref": "lockout_tagout",
+      "text": "Scheduled to swap the inlet unloader valve this afternoon. Work order says the tech needs to reach inside the pressurized enclosure. All energy has to be isolated and tagged before anybody touches it - this is not a quick outside-the-cabinet job."
+    },
+    {
+      "id": "AC-043",
+      "sop_ref": "oil_spill_response",
+      "text": "Oil puddled on the floor under the compressor when I came in this morning - the drip pan overflowed overnight. Looks like at least a quart on the concrete near the east wall. Definite slip hazard and it is spreading toward the aisle."
+    },
+    {
+      "id": "AC-044",
+      "sop_ref": "oil_spill_response",
+      "text": "Drip pan under the unit is overflowing and oil is running across the floor toward the storm drain. Happened at some point during second shift - floor is slick all the way to the equipment rack. Someone is going to go down if we do not get this contained."
+    },
+    {
+      "id": "AC-045",
+      "sop_ref": "emergency_stop_fire",
+      "text": "Saw smoke coming out from the top vent slots of the compressor cabinet during third shift rounds. Strong smell like burning plastic or insulation. Nobody was in the room when it started - I noticed it from outside through the window."
+    },
+    {
+      "id": "AC-046",
+      "sop_ref": "emergency_stop_fire",
+      "text": "Small flame visible at the back of the motor control panel inside the compressor room right after first shift startup. Wiring smell immediately. Looks like it started at one of the contactor terminals."
+    },
+    {
+      "id": "AC-047",
+      "sop_ref": "startup_procedure",
+      "text": "First shift is starting and we need to get the compressor online before assembly begins at 6. Shutdown last night was clean - no faults showing on the panel, no red lights, no LOTO in place. Just a normal morning bring-up."
+    },
+    {
+      "id": "AC-048",
+      "sop_ref": "startup_procedure",
+      "text": "Maintenance finished replacing the drive belt overnight and cleared the lockout at 5:30 AM. Need to bring the unit back online and verify everything is stable before the 6 AM production call. All locks and tags are off and accounted for."
+    },
+    {
+      "id": "AC-049",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of third shift and production is done for the week. Management wants the compressor shut down for the weekend - no maintenance work orders active, just a clean stop and walk-away. Nobody needs access to the machine, just get it parked safely."
+    },
+    {
+      "id": "AC-050",
+      "sop_ref": "shutdown_procedure",
+      "text": "Line changeover finished and the plant is going to energy-saving mode between shifts. Need to shut the compressor down in a controlled way - no work being done on it, just an operational close-out before the next crew comes in."
+    },
+    {
+      "id": "AC-051",
+      "sop_ref": "weekly_inspection",
+      "text": "Monday morning and the maintenance coordinator wants the compressor inspection sheet filled out before the 9 AM production meeting. Last week flagged a couple of amber items to keep an eye on so need to walk through everything and log the current state."
+    },
+    {
+      "id": "AC-052",
+      "sop_ref": "weekly_inspection",
+      "text": "Plant manager is asking for this week's compressor health log before the noon review. Need to go through all the checkpoints on the form, pull the readings off the panel, and get it signed off. Has not been done yet this week and it is already Wednesday."
+    }
+  ]
+}

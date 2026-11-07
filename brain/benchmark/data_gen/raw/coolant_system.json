@@ -1,0 +1,581 @@
+{
+  "family": "Machine Coolant System",
+  "sops": [
+    {
+      "ref": "low_coolant_pressure",
+      "title": "Low Coolant Pressure Warning Response",
+      "condition": "The coolant pressure sensor reads below the 15 PSI minimum warning threshold during steady-state pump operation with no abrupt change in the reading trend.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "read_sensor coolant_pressure_sensor",
+        "read_sensor pump_outlet_pressure_gauge",
+        "notify maintenance_supervisor",
+        "wait 300",
+        "read_sensor coolant_pressure_sensor"
+      ],
+      "equipment": ["coolant_control_panel", "coolant_pressure_sensor", "pump_outlet_pressure_gauge"]
+    },
+    {
+      "ref": "sudden_pressure_collapse",
+      "title": "Sudden Coolant Pressure Collapse Emergency",
+      "condition": "The coolant pressure sensor registers a rapid drop from normal operating range to below 5 PSI within 10 seconds, indicating a catastrophic loss event rather than a gradual decline.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "press_button pump_stop_button",
+        "read_sensor coolant_pressure_sensor",
+        "notify maintenance_supervisor",
+        "walk_to main_distribution_manifold",
+        "read_sensor line_pressure_gauge"
+      ],
+      "equipment": ["coolant_control_panel", "pump_stop_button", "coolant_pressure_sensor", "main_distribution_manifold", "line_pressure_gauge"]
+    },
+    {
+      "ref": "high_coolant_pressure",
+      "title": "High Coolant Pressure Overpressure Response",
+      "condition": "The coolant pressure sensor reads above the 80 PSI maximum ceiling during normal operation, indicating an overpressure condition requiring immediate relief.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "read_sensor coolant_pressure_sensor",
+        "press_button bypass_valve_button",
+        "wait 30",
+        "read_sensor coolant_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["coolant_control_panel", "coolant_pressure_sensor", "bypass_valve_button"]
+    },
+    {
+      "ref": "low_coolant_level",
+      "title": "Low Coolant Tank Level Refill Warning",
+      "condition": "The coolant level sensor reads below the 25 percent refill warning mark in the main coolant tank during normal production, with the pump still running and no interlock tripped.",
+      "steps": [
+        "walk_to coolant_tank",
+        "read_sensor coolant_level_sensor",
+        "notify maintenance_supervisor",
+        "walk_to coolant_control_panel",
+        "press_button alarm_acknowledge_button",
+        "wait 60"
+      ],
+      "equipment": ["coolant_tank", "coolant_level_sensor", "coolant_control_panel", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "coolant_level_critical",
+      "title": "Critical Coolant Level Emergency Shutdown",
+      "condition": "The coolant level sensor reads at or below the 5 percent emergency cutoff mark, triggering the automatic pump interlock and halting production.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "read_sensor coolant_level_sensor",
+        "press_button pump_stop_button",
+        "notify maintenance_supervisor",
+        "walk_to coolant_tank",
+        "read_sensor coolant_level_sensor"
+      ],
+      "equipment": ["coolant_control_panel", "coolant_level_sensor", "pump_stop_button", "coolant_tank"]
+    },
+    {
+      "ref": "high_temp_warning",
+      "title": "High Coolant Temperature Warning Response",
+      "condition": "The coolant temperature sensor reads above the 55 degrees C advisory setpoint but below the 75 degrees C emergency threshold, with the pump still operating normally.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "read_sensor coolant_temperature_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify maintenance_supervisor",
+        "wait 120",
+        "read_sensor coolant_temperature_sensor"
+      ],
+      "equipment": ["coolant_control_panel", "coolant_temperature_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "high_temp_emergency",
+      "title": "Coolant Temperature Emergency Shutdown",
+      "condition": "The coolant temperature sensor reads above the 75 degrees C emergency threshold, requiring immediate pump shutdown to prevent system damage and thermal runaway.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "read_sensor coolant_temperature_sensor",
+        "press_button pump_stop_button",
+        "notify maintenance_supervisor",
+        "walk_to pump_station",
+        "read_sensor pump_motor_temp_sensor"
+      ],
+      "equipment": ["coolant_control_panel", "coolant_temperature_sensor", "pump_stop_button", "pump_station", "pump_motor_temp_sensor"]
+    },
+    {
+      "ref": "pump_motor_fault",
+      "title": "Coolant Pump Motor Electrical Fault Response",
+      "condition": "The pump motor current sensor triggers an overcurrent or ground fault alarm, illuminating the motor fault indicator on the control panel, unrelated to thermal or mechanical jam conditions.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "read_sensor pump_motor_current_sensor",
+        "press_button pump_stop_button",
+        "notify maintenance_electrician",
+        "walk_to pump_station",
+        "read_sensor pump_motor_current_sensor"
+      ],
+      "equipment": ["coolant_control_panel", "pump_motor_current_sensor", "pump_stop_button", "pump_station"]
+    },
+    {
+      "ref": "minor_coolant_leak",
+      "title": "Minor Coolant Leak at Fitting or Hose",
+      "condition": "A small seep or drip of coolant is detected at a hose fitting or compression joint, producing a slow accumulation of less than one liter per hour with no pressure loss on the system gauge.",
+      "steps": [
+        "walk_to main_distribution_manifold",
+        "read_sensor coolant_pressure_sensor",
+        "notify maintenance_supervisor",
+        "walk_to spill_kit_cabinet",
+        "pick warning_cone",
+        "place warning_cone",
+        "notify maintenance_plumber"
+      ],
+      "equipment": ["main_distribution_manifold", "coolant_pressure_sensor", "spill_kit_cabinet", "warning_cone"]
+    },
+    {
+      "ref": "major_coolant_rupture",
+      "title": "Major Coolant Line Rupture Emergency Response",
+      "condition": "A large-volume coolant release is observed from a failed hose or ruptured fitting, producing a continuous high-flow spill exceeding 10 liters per minute and requiring immediate system shutdown.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "press_button pump_stop_button",
+        "press_button red_estop_button",
+        "notify maintenance_supervisor",
+        "walk_to spill_kit_cabinet",
+        "pick spill_kit",
+        "place spill_kit"
+      ],
+      "equipment": ["coolant_control_panel", "pump_stop_button", "red_estop_button", "spill_kit_cabinet", "spill_kit"]
+    },
+    {
+      "ref": "filter_dp_high",
+      "title": "Coolant Filter High Differential Pressure Warning",
+      "condition": "The filter differential pressure sensor reads above the 25 PSI clogging warning limit, indicating the filter element is partially blocked and will require replacement within the next scheduled maintenance window.",
+      "steps": [
+        "walk_to filter_housing",
+        "read_sensor filter_differential_pressure_sensor",
+        "notify maintenance_supervisor",
+        "walk_to coolant_control_panel",
+        "press_button alarm_acknowledge_button",
+        "wait 3600",
+        "read_sensor filter_differential_pressure_sensor"
+      ],
+      "equipment": ["filter_housing", "filter_differential_pressure_sensor", "coolant_control_panel", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "concentration_low",
+      "title": "Coolant Concentration Below Minimum Specification",
+      "condition": "The coolant concentration sensor reads below the 5 percent minimum Brix specification, indicating the mixture is too dilute and presents elevated corrosion or microbial risk.",
+      "steps": [
+        "walk_to coolant_tank",
+        "read_sensor coolant_concentration_sensor",
+        "pick concentration_refractometer",
+        "read_sensor concentration_refractometer",
+        "notify process_engineer",
+        "place concentration_refractometer"
+      ],
+      "equipment": ["coolant_tank", "coolant_concentration_sensor", "concentration_refractometer"]
+    },
+    {
+      "ref": "concentration_high",
+      "title": "Coolant Concentration Above Maximum Specification",
+      "condition": "The coolant concentration sensor reads above the 10 percent maximum Brix specification, indicating an overly rich mixture likely to cause foaming or residue buildup on machined parts.",
+      "steps": [
+        "walk_to coolant_tank",
+        "read_sensor coolant_concentration_sensor",
+        "pick concentration_refractometer",
+        "read_sensor concentration_refractometer",
+        "notify process_engineer",
+        "place concentration_refractometer"
+      ],
+      "equipment": ["coolant_tank", "coolant_concentration_sensor", "concentration_refractometer"]
+    },
+    {
+      "ref": "filter_replacement",
+      "title": "Scheduled Coolant Filter Element Replacement",
+      "condition": "The filter element has reached its 500-hour scheduled replacement interval, or a differential pressure warning has been planned into the next maintenance window.",
+      "steps": [
+        "walk_to loto_lockout_station",
+        "pick loto_lock",
+        "walk_to coolant_control_panel",
+        "press_button pump_stop_button",
+        "walk_to filter_housing",
+        "pick replacement_filter_element",
+        "place replacement_filter_element"
+      ],
+      "equipment": ["loto_lockout_station", "loto_lock", "coolant_control_panel", "pump_stop_button", "filter_housing", "replacement_filter_element"]
+    },
+    {
+      "ref": "coolant_refill",
+      "title": "Scheduled Coolant Tank Top-Off",
+      "condition": "The coolant level sensor reads between 25 and 40 percent of tank capacity during a planned maintenance window, requiring a top-off to restore the operating level without emergency conditions present.",
+      "steps": [
+        "walk_to coolant_tank",
+        "read_sensor coolant_level_sensor",
+        "walk_to loading_dock_area",
+        "pick refill_hose",
+        "place refill_hose",
+        "wait 600",
+        "read_sensor coolant_level_sensor"
+      ],
+      "equipment": ["coolant_tank", "coolant_level_sensor", "loading_dock_area", "refill_hose"]
+    },
+    {
+      "ref": "pump_bearing_lube",
+      "title": "Scheduled Coolant Pump Bearing Lubrication",
+      "condition": "The pump bearing lubrication interval of 1000 operating hours has elapsed per the preventive maintenance schedule, with no bearing noise or elevated temperature currently observed.",
+      "steps": [
+        "walk_to loto_lockout_station",
+        "pick loto_lock",
+        "walk_to coolant_control_panel",
+        "press_button pump_stop_button",
+        "walk_to pump_station",
+        "pick lube_gun",
+        "place lube_gun"
+      ],
+      "equipment": ["loto_lockout_station", "loto_lock", "coolant_control_panel", "pump_stop_button", "pump_station", "lube_gun"]
+    },
+    {
+      "ref": "concentration_adjustment",
+      "title": "Periodic Coolant Concentration Mixing Adjustment",
+      "condition": "The coolant concentration sensor reads within one Brix unit of a specification boundary during a routine weekly check, requiring a corrective mixing cycle before the reading goes out of spec.",
+      "steps": [
+        "walk_to coolant_tank",
+        "read_sensor coolant_concentration_sensor",
+        "pick concentration_refractometer",
+        "read_sensor concentration_refractometer",
+        "press_button mixing_valve_button",
+        "wait 180",
+        "read_sensor coolant_concentration_sensor"
+      ],
+      "equipment": ["coolant_tank", "coolant_concentration_sensor", "concentration_refractometer", "mixing_valve_button"]
+    },
+    {
+      "ref": "system_flush",
+      "title": "Scheduled Coolant System Flush and Clean",
+      "condition": "The coolant system has reached its quarterly flush interval, or visible biological growth, dark discoloration, or abnormal odor has been detected in the coolant tank.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "press_button pump_stop_button",
+        "press_button drain_valve_button",
+        "wait 1200",
+        "walk_to coolant_tank",
+        "read_sensor coolant_level_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["coolant_control_panel", "pump_stop_button", "drain_valve_button", "coolant_tank", "coolant_level_sensor"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Coolant System Lockout-Tagout Procedure",
+      "condition": "Maintenance work requiring physical intervention on the coolant system components is scheduled, necessitating full energy isolation and tagging before any technician begins work.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "press_button pump_stop_button",
+        "walk_to loto_lockout_station",
+        "pick loto_lock",
+        "pick loto_tag",
+        "place loto_lock",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["coolant_control_panel", "pump_stop_button", "loto_lockout_station", "loto_lock", "loto_tag"]
+    },
+    {
+      "ref": "coolant_spill_response",
+      "title": "Coolant Spill Floor Cleanup Response",
+      "condition": "Coolant fluid is found pooled on the floor surface in the machining area creating a slip hazard, with no active high-volume source currently releasing fluid.",
+      "steps": [
+        "walk_to spill_kit_cabinet",
+        "pick warning_cone",
+        "place warning_cone",
+        "pick spill_kit",
+        "place spill_kit",
+        "notify maintenance_supervisor",
+        "wait 300"
+      ],
+      "equipment": ["spill_kit_cabinet", "warning_cone", "spill_kit"]
+    },
+    {
+      "ref": "emergency_estop",
+      "title": "Coolant System Emergency Stop Activation",
+      "condition": "A fire alarm, personnel injury, or uncontrollable equipment failure in the machining area requires immediate and complete stop of all coolant system operation.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "press_button red_estop_button",
+        "notify maintenance_supervisor",
+        "notify safety_officer",
+        "walk_to pump_station",
+        "read_sensor pump_motor_current_sensor"
+      ],
+      "equipment": ["coolant_control_panel", "red_estop_button", "pump_station", "pump_motor_current_sensor"]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Coolant System Daily Production Startup",
+      "condition": "The start of a production shift requires the coolant system to be brought from idle to full operating status before machining equipment is released to run.",
+      "steps": [
+        "walk_to coolant_control_panel",
+        "read_sensor coolant_level_sensor",
+        "read_sensor coolant_concentration_sensor",
+        "press_button pump_start_button",
+        "wait 30",
+        "read_sensor coolant_pressure_sensor",
+        "notify production_supervisor"
+      ],
+      "equipment": ["coolant_control_panel", "coolant_level_sensor", "coolant_concentration_sensor", "pump_start_button", "coolant_pressure_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "CS-001",
+      "sop_ref": "low_coolant_pressure",
+      "text": "Line 3 has been flagging something on the coolant panel for about 20 minutes now. Gauges look a little off — not crashing, just reading lower than we normally run. Nothing dramatic, same number showing up repeatedly. Day shift noticed it first thing this morning. System's still running but it keeps nagging at us."
+    },
+    {
+      "id": "CS-002",
+      "sop_ref": "low_coolant_pressure",
+      "text": "Over by the central station near bay 4, one of the HMI readouts has been sitting a few ticks below where it normally is all morning. Machine hasn't tripped or anything, just nudging down slowly. Been watching it for about half an hour and no sudden moves, just quietly below normal."
+    },
+    {
+      "id": "CS-003",
+      "sop_ref": "sudden_pressure_collapse",
+      "text": "We were at full production on second shift and the whole coolant supply just tanked in about five seconds. Whatever was reading normal went to basically zero in no time flat. Heard a gurgling noise from the lines near the north wall right before it happened. Something went seriously wrong fast and the pump didn't stop on its own."
+    },
+    {
+      "id": "CS-004",
+      "sop_ref": "sudden_pressure_collapse",
+      "text": "Third shift here — everything was fine and then out of nowhere the delivery system cratered. The numbers slammed to nothing before anyone could react. Panel lit up like a Christmas tree all at once. This was not a slow bleed, it was instant."
+    },
+    {
+      "id": "CS-005",
+      "sop_ref": "sudden_pressure_collapse",
+      "text": "The unit by the loading dock had a full system flatline on the supply side — instant loss, not a gradual thing at all. Operator said it sounded like air getting into the lines. One second normal, next second nothing. We're talking seconds, not minutes."
+    },
+    {
+      "id": "CS-006",
+      "sop_ref": "high_coolant_pressure",
+      "text": "Panel alarm on line 2 this morning, something's pushing too hard in the supply loop. Numbers are way above what we ever see at steady state — past the top of the normal band by a good margin. Bypass never kicked in automatically. Second shift had been adjusting the flow valves before changeover."
+    },
+    {
+      "id": "CS-007",
+      "sop_ref": "high_coolant_pressure",
+      "text": "The gauge up at the central manifold is pegged at the high end, been sitting there since the line restarted after the lunch break. No leaks visible, no noise from the hoses, just reading way too high. Nothing's relieving on its own."
+    },
+    {
+      "id": "CS-008",
+      "sop_ref": "low_coolant_level",
+      "text": "Tank looks like it's getting kind of low — been bleeding down through the shift but nothing tripped. Just the usual advisory light on. This happens on this unit when Friday production runs long without anyone topping it off. Machine's still running fine."
+    },
+    {
+      "id": "CS-009",
+      "sop_ref": "low_coolant_level",
+      "text": "Routine walkthrough on line 4 this morning, coolant tank gauge is showing less than a quarter full. Nothing stopped running, system's operating normally, but we're going to need someone to bring the level back up before end of shift."
+    },
+    {
+      "id": "CS-010",
+      "sop_ref": "coolant_level_critical",
+      "text": "Pump just stopped by itself on line 1 mid-cycle. Machine threw a hard interlock stop and when I checked the tank sight glass it was nearly empty. Someone's been running this line hard without checking levels. Third shift found it like this at handover."
+    },
+    {
+      "id": "CS-011",
+      "sop_ref": "coolant_level_critical",
+      "text": "Central unit near the press area killed itself — pump locked out and when we went to check, there was basically no fluid left in the reservoir. Not even close to the minimum. Production is down and we need coolant out here now."
+    },
+    {
+      "id": "CS-012",
+      "sop_ref": "coolant_level_critical",
+      "text": "Line 5 cut out on first shift, operator thought it was an electrical trip at first but the tank just ran completely dry. Sight glass shows basically fumes. The auto interlock did what it was supposed to do but now we're dead in the water."
+    },
+    {
+      "id": "CS-013",
+      "sop_ref": "high_temp_warning",
+      "text": "Second shift noticed the fluid coming back through the return line felt noticeably warm to the touch near the junction on line 3. Checked the panel and it's showing elevated but not into the danger zone yet. Machine is still running, just the advisory indicator is lit."
+    },
+    {
+      "id": "CS-014",
+      "sop_ref": "high_temp_warning",
+      "text": "Got a caution on line 3 — fluid heat climbing, sitting above the yellow mark on the panel readout. Not a full alarm, just the advisory light. This tends to happen when we run continuous heavy cuts for a long stretch without a break. Everything still going but it's flagging."
+    },
+    {
+      "id": "CS-015",
+      "sop_ref": "high_temp_emergency",
+      "text": "The system over by bay 7 went into full thermal protection lockout on the overnight run. Fluid was almost too hot to handle when maintenance arrived — could actually see wisps coming off the return lines. Pump stopped itself. This was a full-on crisis, not just a caution light."
+    },
+    {
+      "id": "CS-016",
+      "sop_ref": "high_temp_emergency",
+      "text": "Line 2 tripped hard due to heat on the overnight shift. Operators said the panel went fully red and the pump stopped on its own. When maintenance confirmed, the fluid temps were way past anything we see on a hot day run — past the point where you can touch the lines."
+    },
+    {
+      "id": "CS-017",
+      "sop_ref": "pump_motor_fault",
+      "text": "Motor on the main coolant pump tripped the drive fault on second shift. Panel is showing an electrical fault indicator, not a thermal or jam condition. We've seen similar before when the winding gets weak. This needs an electrician, not a wrench."
+    },
+    {
+      "id": "CS-018",
+      "sop_ref": "pump_motor_fault",
+      "text": "The supply pump on the south side loop popped a fault light this morning. The variable frequency drive display is showing overcurrent on start. This is a drive or winding issue — mechanically the pump turns freely by hand, so it's definitely electrical."
+    },
+    {
+      "id": "CS-019",
+      "sop_ref": "minor_coolant_leak",
+      "text": "Found a slow weep at one of the compression fittings near the distribution header on line 4. Barely dripping — about a coffee cup's worth over the whole morning. System's still at normal delivery, just a little seep at the joint. Put a rag under it for now."
+    },
+    {
+      "id": "CS-020",
+      "sop_ref": "minor_coolant_leak",
+      "text": "Housekeeping noticed a small puddle forming under the hose rack in bay 2. Traced it back to a fitting junction that's got a hairline seep on it. Not spraying, just oozing slowly. Dropped a cone nearby and reported it. Nothing dramatic, just a drip."
+    },
+    {
+      "id": "CS-021",
+      "sop_ref": "minor_coolant_leak",
+      "text": "One of the hose connections at the junction box by the parts washer is weeping a little — been like that since yesterday afternoon. Small amount accumulating, no urgency, but it needs attention before it works its way into a bigger problem. System readings all look normal otherwise."
+    },
+    {
+      "id": "CS-022",
+      "sop_ref": "major_coolant_rupture",
+      "text": "Hose blew on line 6 right at the start of first shift. Coolant was everywhere within a minute — floor was covered and it was still coming hard. Nobody got hurt but there was a massive volume of fluid and the drain couldn't keep up. We cut power to the whole area."
+    },
+    {
+      "id": "CS-023",
+      "sop_ref": "major_coolant_rupture",
+      "text": "Something let go near the main feed line to the machining cells on the afternoon run. Full-volume spray, soaked the lower section of two machines and overwhelmed the floor drain. This was a real emergency — volume we've never seen from a fitting failure before."
+    },
+    {
+      "id": "CS-024",
+      "sop_ref": "filter_dp_high",
+      "text": "The differential across the filter housing on line 3 is creeping up — the alarm flagged it this morning but the system is still flowing fine. Not a crisis, we knew this filter was getting near its limit. Logging it for the next scheduled maintenance window."
+    },
+    {
+      "id": "CS-025",
+      "sop_ref": "filter_dp_high",
+      "text": "Flow restriction noticed in bay 5 — machines were reporting reduced delivery but nothing hard-tripped. Went to the filter station and the pressure drop readout is higher than normal. Element is loaded up and needs to go on the work order for next downtime."
+    },
+    {
+      "id": "CS-026",
+      "sop_ref": "concentration_low",
+      "text": "Weekly check on line 3 came back thin — the refractometer was reading below where we need to run. Something's been watering down the mix, maybe condensate getting in or someone topped off from the wrong drum. Parts coming off that line might be at corrosion risk."
+    },
+    {
+      "id": "CS-027",
+      "sop_ref": "concentration_low",
+      "text": "Process check on second shift flagged the mixture as way too weak on line 1. Tested it manually and confirmed. This has happened before when someone refills from a water-only drum by mistake. The automatic sensor was already showing it but nobody caught it until the check."
+    },
+    {
+      "id": "CS-028",
+      "sop_ref": "concentration_low",
+      "text": "QC flagged some unusual surface spotting on parts coming off line 2, and when maintenance went to check the bath, the mix was essentially water. No biological smell — just genuinely too dilute. Whatever protective qualities it's supposed to have, it doesn't right now."
+    },
+    {
+      "id": "CS-029",
+      "sop_ref": "concentration_high",
+      "text": "Noticed a lot of foam building up in the coolant tray on line 2 this morning — more than we'd ever see normally. Pulled a refractometer sample and we're running way too rich on concentrate. Somebody added a dose without checking what was already in there."
+    },
+    {
+      "id": "CS-030",
+      "sop_ref": "concentration_high",
+      "text": "Residue buildup on the machine guards and around the spindle area on line 4 — oily crust forming way faster than normal. Maintenance ran a mix check and it came back overloaded. Too much concentrate relative to water in that tank right now."
+    },
+    {
+      "id": "CS-031",
+      "sop_ref": "filter_replacement",
+      "text": "500-hour service came due on the line 3 filter today per the CMMS schedule. No fault conditions, just the clock hitting the interval — maintenance team put it on the board last week. Element is already in the parts room waiting."
+    },
+    {
+      "id": "CS-032",
+      "sop_ref": "filter_replacement",
+      "text": "The differential pressure warning that was acknowledged during last week's planning meeting is today's task during the line 1 maintenance window. Element was ordered and received. Just need the downtime slot to open up and do the swap."
+    },
+    {
+      "id": "CS-033",
+      "sop_ref": "coolant_refill",
+      "text": "Tank on line 2 is around 30 percent on the sight glass — not a crisis, just the weekly top-off that got put on the schedule for today's downtime window. Drum is already staged near the loading dock. Everything's running, just time to bring it back up."
+    },
+    {
+      "id": "CS-034",
+      "sop_ref": "coolant_refill",
+      "text": "Planned downtime on Friday afternoon — the level on line 4 has been running a little below mid-tank for a few days now, nothing alarming, just time to bring it back to full before the weekend production push."
+    },
+    {
+      "id": "CS-035",
+      "sop_ref": "pump_bearing_lube",
+      "text": "PM clock on the main supply pump hit 1000 hours per the CMMS ticket this morning. Scheduled grease service before first shift startup. No noise or heat from the bearings — no symptoms at all, just hitting the interval as planned."
+    },
+    {
+      "id": "CS-036",
+      "sop_ref": "pump_bearing_lube",
+      "text": "Line 5 pump lubrication is overdue by about 50 hours per the maintenance board. No issues yet — runs quiet and cool — but the interval is past and we need to service the bearings today during the lunch break window before it becomes a problem."
+    },
+    {
+      "id": "CS-037",
+      "sop_ref": "concentration_adjustment",
+      "text": "Weekly refractometer check on line 4 shows we're right at the edge — not technically out of range but close enough to the upper boundary that the process engineer flagged it for a small mixing correction before next shift starts."
+    },
+    {
+      "id": "CS-038",
+      "sop_ref": "concentration_adjustment",
+      "text": "Routine Friday check on the coolant blend for line 2 came in just inside the lower spec limit, trending downward. Not out of spec yet but if we leave it over the weekend it'll be below by Monday morning. Process wants a small corrective mix done now."
+    },
+    {
+      "id": "CS-039",
+      "sop_ref": "system_flush",
+      "text": "Strong sour smell coming from the coolant on line 6 and the tank has that grey-green slime starting to form along the walls. Last full cleanout was over three months ago. Time to drain and flush the whole loop — this has gone long enough."
+    },
+    {
+      "id": "CS-040",
+      "sop_ref": "system_flush",
+      "text": "Maintenance found dark brown discoloration in the tank on line 1 during the quarterly walkthrough. Fluid is clearly overdue for a full turnover — opacity is off, there's a smell, and it doesn't look anything like fresh coolant anymore. Needs a full drain and reload."
+    },
+    {
+      "id": "CS-041",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance team needs to get into the filter housing on line 3 to replace a cracked housing body. Before they can open it up, the coolant circuit needs full energy isolation — safety won't let them touch it until LOTO is confirmed and documented."
+    },
+    {
+      "id": "CS-042",
+      "sop_ref": "lockout_tagout",
+      "text": "Tech is scheduled to swap out a valve actuator on the supply manifold today. Can't start turning bolts until the system is fully de-energized and the tag is on the panel. Safety team needs to see the lock applied before the job starts."
+    },
+    {
+      "id": "CS-043",
+      "sop_ref": "coolant_spill_response",
+      "text": "Came in this morning and found a pool near the machine on line 3 — looks like something dripped overnight and accumulated. The source looks like it stopped on its own, just the mess remaining. It's right next to the main walkway and is a slip risk."
+    },
+    {
+      "id": "CS-044",
+      "sop_ref": "coolant_spill_response",
+      "text": "Second shift found coolant smeared across the aisle between bays 3 and 4. Looks like it tracked out from a machine at some point — no active drip visible right now, just the fluid spread across the floor that needs cleaning up before first shift comes in."
+    },
+    {
+      "id": "CS-045",
+      "sop_ref": "coolant_spill_response",
+      "text": "Operator near the loading dock area stepped around a puddle that nobody had put a cone on yet. Fluid had been sitting under the machine for a while — no active flow, just the accumulated pool. No injury but the area needs to be cleaned up immediately."
+    },
+    {
+      "id": "CS-046",
+      "sop_ref": "emergency_estop",
+      "text": "Fire alarm went off in the machining area on second shift. We needed everything stopped right then — coolant supply loops, everything. Hit the big red button on the panel and cleared the area. This was not a planned or normal stop in any sense."
+    },
+    {
+      "id": "CS-047",
+      "sop_ref": "emergency_estop",
+      "text": "Operator got their hand caught in a machine on line 2 during afternoon shift. Everyone cleared the cell, and the coolant system got hit along with everything else in the area — the whole cell went down immediately. Safety and medical were called."
+    },
+    {
+      "id": "CS-048",
+      "sop_ref": "daily_startup",
+      "text": "Start of first shift and the coolant system needs to come back up after sitting idle since Friday night. Standard morning check before we release the machines — levels, mix, make sure the supply is actually flowing before anyone tries to run a part."
+    },
+    {
+      "id": "CS-049",
+      "sop_ref": "daily_startup",
+      "text": "Second shift taking over from days at the changeover — coolant was idled down during the lunch window for a minor adjustment and now we need to bring it back to full flow before releasing the cells to production. Need confirmation everything is good to go."
+    },
+    {
+      "id": "CS-050",
+      "sop_ref": "daily_startup",
+      "text": "Monday morning first shift, system's been sitting all weekend. Before we cut any parts we need to verify the tank didn't lose anything over the weekend and the mix is still in spec. Nothing's been running since Saturday noon so it all needs a check before startup."
+    },
+    {
+      "id": "CS-051",
+      "sop_ref": "high_temp_warning",
+      "text": "Operator on line 1 noticed the coolant coming out of the spindle felt warmer than usual during a long facing cut. Checked the control panel and saw the advisory indicator was on — not the red alarm, just the yellow advisory. Still running but warrants watching."
+    }
+  ]
+}

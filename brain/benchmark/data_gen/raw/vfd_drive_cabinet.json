@@ -1,0 +1,591 @@
+{
+  "family": "VFD Drive Cabinet",
+  "sops": [
+    {
+      "ref": "overcurrent_fault",
+      "title": "VFD Overcurrent Fault Response",
+      "condition": "The drive display shows an overcurrent fault code and the motor circuit has tripped offline due to measured phase current exceeding the drive's protection threshold.",
+      "steps": [
+        "walk_to drive_display_panel",
+        "read_sensor output_current_sensor",
+        "notify maintenance_supervisor",
+        "press_button vfd_reset_button",
+        "wait 30",
+        "read_sensor output_current_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["drive_display_panel", "output_current_sensor", "vfd_reset_button"]
+    },
+    {
+      "ref": "dc_bus_overvoltage",
+      "title": "DC Bus Overvoltage Fault Response",
+      "condition": "The DC bus voltage sensor reading has risen above the drive's upper fault threshold, causing the drive to trip on an overvoltage condition.",
+      "steps": [
+        "walk_to drive_display_panel",
+        "read_sensor dc_bus_voltage_sensor",
+        "notify electrician",
+        "press_button stop_button",
+        "wait 60",
+        "read_sensor dc_bus_voltage_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["drive_display_panel", "dc_bus_voltage_sensor", "stop_button"]
+    },
+    {
+      "ref": "dc_bus_undervoltage",
+      "title": "DC Bus Undervoltage Alarm Response",
+      "condition": "The DC bus voltage sensor reading has drifted gradually below the minimum operating setpoint during normal running conditions while the drive remains online.",
+      "steps": [
+        "walk_to drive_display_panel",
+        "read_sensor dc_bus_voltage_sensor",
+        "notify electrician",
+        "walk_to main_disconnect_panel",
+        "read_sensor supply_voltage_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["drive_display_panel", "dc_bus_voltage_sensor", "main_disconnect_panel", "supply_voltage_sensor"]
+    },
+    {
+      "ref": "dc_bus_voltage_collapse",
+      "title": "DC Bus Sudden Voltage Collapse Response",
+      "condition": "The DC bus voltage drops instantaneously to near-zero within a single control scan cycle, indicating catastrophic input power loss or an internal hard fault rather than a gradual undervoltage drift.",
+      "steps": [
+        "walk_to drive_display_panel",
+        "read_sensor dc_bus_voltage_sensor",
+        "press_button estop_button",
+        "notify electrician",
+        "notify safety_officer",
+        "wait 10",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["drive_display_panel", "dc_bus_voltage_sensor", "estop_button"]
+    },
+    {
+      "ref": "drive_overtemp_warning",
+      "title": "Drive Heatsink Overtemperature Warning",
+      "condition": "The heatsink temperature sensor has triggered a warning-level alarm but the drive remains running and has not yet reached the automatic shutdown threshold.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "read_sensor heatsink_temp_sensor",
+        "read_sensor cooling_fan_rpm_sensor",
+        "read_sensor inlet_filter_dp_sensor",
+        "notify maintenance_supervisor",
+        "wait 300"
+      ],
+      "equipment": ["vfd_cabinet_panel", "heatsink_temp_sensor", "cooling_fan_rpm_sensor", "inlet_filter_dp_sensor"]
+    },
+    {
+      "ref": "drive_overtemp_shutdown",
+      "title": "Drive Overtemperature Emergency Shutdown",
+      "condition": "The heatsink temperature has exceeded the drive's emergency shutdown threshold and the drive has already tripped itself offline to prevent thermal damage.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "read_sensor heatsink_temp_sensor",
+        "press_button stop_button",
+        "notify electrician",
+        "notify shift_supervisor",
+        "wait 600",
+        "read_sensor heatsink_temp_sensor"
+      ],
+      "equipment": ["vfd_cabinet_panel", "heatsink_temp_sensor", "stop_button"]
+    },
+    {
+      "ref": "ground_fault",
+      "title": "Ground Fault Detection Response",
+      "condition": "The ground fault relay has activated, indicating an insulation breakdown between a phase conductor and the cabinet ground path that requires immediate isolation.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "read_sensor ground_fault_relay",
+        "press_button estop_button",
+        "notify electrician",
+        "notify safety_officer",
+        "walk_to main_disconnect_panel",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["vfd_cabinet_panel", "ground_fault_relay", "estop_button", "main_disconnect_panel"]
+    },
+    {
+      "ref": "cooling_fan_warning",
+      "title": "Cooling Fan Degraded Speed Warning",
+      "condition": "The cooling fan RPM sensor reads below rated speed but the fan is still rotating, triggering a warning-level alarm while the drive continues to run.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "read_sensor cooling_fan_rpm_sensor",
+        "read_sensor heatsink_temp_sensor",
+        "notify maintenance_supervisor",
+        "wait 120",
+        "read_sensor cooling_fan_rpm_sensor"
+      ],
+      "equipment": ["vfd_cabinet_panel", "cooling_fan_rpm_sensor", "heatsink_temp_sensor"]
+    },
+    {
+      "ref": "cooling_fan_failure",
+      "title": "Cooling Fan Complete Failure Emergency",
+      "condition": "The cooling fan RPM sensor reads zero, confirming the fan has fully stopped with no rotation, and immediate drive shutdown is required to prevent thermal runaway.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "read_sensor cooling_fan_rpm_sensor",
+        "press_button stop_button",
+        "notify electrician",
+        "notify shift_supervisor",
+        "wait 30",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["vfd_cabinet_panel", "cooling_fan_rpm_sensor", "stop_button"]
+    },
+    {
+      "ref": "air_filter_replacement",
+      "title": "Scheduled Inlet Air Filter Replacement",
+      "condition": "The preventive maintenance calendar interval for the cabinet inlet air filter has elapsed and replacement is due regardless of differential pressure reading.",
+      "steps": [
+        "walk_to maintenance_station",
+        "pick replacement_air_filter",
+        "walk_to vfd_cabinet_panel",
+        "pick spent_air_filter",
+        "place spent_air_filter",
+        "place replacement_air_filter",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["maintenance_station", "replacement_air_filter", "vfd_cabinet_panel", "spent_air_filter"]
+    },
+    {
+      "ref": "air_filter_clogged",
+      "title": "Clogged Inlet Air Filter Unscheduled Replacement",
+      "condition": "The differential pressure sensor across the inlet air filter reads above the high-limit setpoint, indicating a blockage that is restricting airflow and causing elevated cabinet temperatures ahead of schedule.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "read_sensor inlet_filter_dp_sensor",
+        "notify maintenance_supervisor",
+        "walk_to maintenance_station",
+        "pick replacement_air_filter",
+        "walk_to vfd_cabinet_panel",
+        "place replacement_air_filter"
+      ],
+      "equipment": ["vfd_cabinet_panel", "inlet_filter_dp_sensor", "maintenance_station", "replacement_air_filter"]
+    },
+    {
+      "ref": "capacitor_inspection",
+      "title": "DC Bus Capacitor Scheduled Inspection",
+      "condition": "The scheduled inspection interval for DC bus electrolytic capacitors has elapsed and a visual and measurement check is required per the preventive maintenance calendar.",
+      "steps": [
+        "walk_to tool_crib",
+        "pick capacitor_inspection_checklist",
+        "pick voltage_meter",
+        "walk_to vfd_cabinet_panel",
+        "read_sensor dc_bus_voltage_sensor",
+        "place capacitor_inspection_checklist",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["tool_crib", "capacitor_inspection_checklist", "voltage_meter", "vfd_cabinet_panel", "dc_bus_voltage_sensor"]
+    },
+    {
+      "ref": "terminal_retorque",
+      "title": "Power and Control Terminal Re-Torque",
+      "condition": "The scheduled re-torque interval for all power and control terminal connections inside the cabinet has elapsed per the preventive maintenance plan.",
+      "steps": [
+        "walk_to tool_crib",
+        "pick torque_wrench",
+        "walk_to vfd_cabinet_panel",
+        "read_sensor output_current_sensor",
+        "place torque_wrench",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["tool_crib", "torque_wrench", "vfd_cabinet_panel", "output_current_sensor"]
+    },
+    {
+      "ref": "cabinet_interior_cleaning",
+      "title": "Cabinet Interior Dust and Debris Cleaning",
+      "condition": "Accumulated dust and debris on internal components has reached the cleaning threshold per the maintenance schedule.",
+      "steps": [
+        "walk_to tool_crib",
+        "pick compressed_air_nozzle",
+        "walk_to vfd_cabinet_panel",
+        "read_sensor cabinet_ambient_temp_sensor",
+        "place compressed_air_nozzle",
+        "pick compressed_air_nozzle",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["tool_crib", "compressed_air_nozzle", "vfd_cabinet_panel", "cabinet_ambient_temp_sensor"]
+    },
+    {
+      "ref": "heat_sink_cleaning",
+      "title": "Drive Heat Sink Fin Cleaning",
+      "condition": "Heat sink fins have been found to have debris deposits identified during a thermal inspection, requiring compressed-air cleaning to restore thermal performance.",
+      "steps": [
+        "walk_to tool_crib",
+        "pick thermal_camera",
+        "walk_to vfd_cabinet_panel",
+        "read_sensor heatsink_temp_sensor",
+        "place thermal_camera",
+        "walk_to compressed_air_station",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["tool_crib", "thermal_camera", "vfd_cabinet_panel", "heatsink_temp_sensor", "compressed_air_station"]
+    },
+    {
+      "ref": "output_frequency_calibration",
+      "title": "VFD Output Frequency Calibration Verification",
+      "condition": "The scheduled calibration check interval requires verifying that the VFD output frequency matches the commanded speed setpoint within the specified tolerance.",
+      "steps": [
+        "walk_to tool_crib",
+        "pick frequency_meter",
+        "walk_to vfd_cabinet_panel",
+        "read_sensor output_frequency_sensor",
+        "place frequency_meter",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["tool_crib", "frequency_meter", "vfd_cabinet_panel", "output_frequency_sensor"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "VFD Cabinet Lockout Tagout Procedure",
+      "condition": "A maintenance task requires opening the VFD cabinet door with personnel exposure to internal components, necessitating full energy isolation before any work begins.",
+      "steps": [
+        "walk_to main_disconnect_panel",
+        "press_button main_disconnect_switch",
+        "walk_to tool_crib",
+        "pick lockout_hasp",
+        "pick personal_lock",
+        "walk_to main_disconnect_panel",
+        "place lockout_hasp"
+      ],
+      "equipment": ["main_disconnect_panel", "main_disconnect_switch", "tool_crib", "lockout_hasp", "personal_lock", "danger_tagout_tag"]
+    },
+    {
+      "ref": "fire_estop_response",
+      "title": "Fire or Emergency Stop Response",
+      "condition": "A fire alarm has activated or visible smoke or flame is detected in or near the VFD cabinet, requiring immediate machine de-energization and evacuation.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "press_button estop_button",
+        "walk_to main_disconnect_panel",
+        "press_button main_disconnect_switch",
+        "notify safety_officer",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["vfd_cabinet_panel", "estop_button", "main_disconnect_panel", "main_disconnect_switch"]
+    },
+    {
+      "ref": "capacitor_discharge_verify",
+      "title": "DC Bus Capacitor Discharge Verification",
+      "condition": "After cabinet de-energization and lockout, the DC bus must be confirmed fully discharged before any personnel make physical contact with internal components.",
+      "steps": [
+        "walk_to tool_crib",
+        "pick voltage_meter",
+        "walk_to vfd_cabinet_panel",
+        "read_sensor dc_bus_voltage_sensor",
+        "wait 300",
+        "read_sensor dc_bus_voltage_sensor",
+        "notify electrician"
+      ],
+      "equipment": ["tool_crib", "voltage_meter", "vfd_cabinet_panel", "dc_bus_voltage_sensor"]
+    },
+    {
+      "ref": "normal_startup",
+      "title": "VFD Cabinet Normal Startup Sequence",
+      "condition": "The VFD cabinet is to be energized and brought online following a planned outage or at the start of a production shift with no active faults present.",
+      "steps": [
+        "walk_to main_disconnect_panel",
+        "press_button main_disconnect_switch",
+        "walk_to vfd_cabinet_panel",
+        "read_sensor dc_bus_voltage_sensor",
+        "press_button start_button",
+        "read_sensor output_frequency_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["main_disconnect_panel", "main_disconnect_switch", "vfd_cabinet_panel", "dc_bus_voltage_sensor", "start_button", "output_frequency_sensor"]
+    },
+    {
+      "ref": "normal_shutdown",
+      "title": "VFD Cabinet Normal Shutdown Sequence",
+      "condition": "A planned shutdown of the VFD cabinet is required at the end of a production shift or prior to a scheduled maintenance window.",
+      "steps": [
+        "walk_to vfd_cabinet_panel",
+        "press_button stop_button",
+        "wait 60",
+        "read_sensor output_frequency_sensor",
+        "walk_to main_disconnect_panel",
+        "press_button main_disconnect_switch",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["vfd_cabinet_panel", "stop_button", "output_frequency_sensor", "main_disconnect_panel", "main_disconnect_switch"]
+    },
+    {
+      "ref": "post_fault_restart",
+      "title": "Post-Fault Restart After Cleared Fault",
+      "condition": "A non-emergency VFD fault has been investigated and root cause resolved, and the drive is ready to be restarted following confirmed fault clearance and technician sign-off.",
+      "steps": [
+        "walk_to drive_display_panel",
+        "read_sensor output_current_sensor",
+        "press_button fault_reset_pushbutton",
+        "wait 10",
+        "press_button start_button",
+        "read_sensor output_frequency_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["drive_display_panel", "output_current_sensor", "fault_reset_pushbutton", "start_button", "output_frequency_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "overcurrent_fault",
+      "text": "Line 3 spindle drive went dark on us right around 6 AM. Motor just kicked out and the whole line stopped. I could see the current climbing on the display before it dropped—was pulling way too many amps and then the unit tripped itself."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "overcurrent_fault",
+      "text": "Second shift, the big drive unit over by press 4 knocked itself offline with no warning. We heard the contactors clack and everything went quiet. Guys on the floor said it had been struggling to pull load for a few minutes before that."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "overcurrent_fault",
+      "text": "The drive cabinet near the loading dock started pulling way more amps than normal right before it shut down. I watched the number on the HMI climb past the red line and then boom—motor stopped, line down. Current spike before the trip was obvious."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "dc_bus_overvoltage",
+      "text": "Drive on the conveyor line threw a fit when the motor was decelerating too fast coming off a high-speed run. Bus voltage climbed way past where it should sit and the unit shut itself down. Reading on the display showed it well over the ceiling."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "dc_bus_overvoltage",
+      "text": "Right after maintenance swapped the motor on cell 7, the drive faulted out on the very first startup attempt. Bus voltage reading was sitting way above the upper limit before the drive even got to speed. Looked like the regen braking config was wrong for the new motor."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "dc_bus_overvoltage",
+      "text": "Line 2 saw the drive drop out unexpectedly during a normal decel cycle. The bus voltage number climbed past safe limits and the unit tripped before anyone could react. Whole thing was over in a couple seconds."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "dc_bus_undervoltage",
+      "text": "The drive in bay 4 has been throwing a low-voltage warning on and off all morning but it is still running. The bus reading on the display is sitting lower than we normally see it—looks like it drifted down slowly since the last shift check, not a sudden drop."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "dc_bus_undervoltage",
+      "text": "Drive near the paint booth has been complaining about voltage for about an hour. Unit has not tripped, still spinning, but the number on the display is consistently below spec. The maintenance tech said it started around midnight and has just been sitting below the setpoint ever since."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "dc_bus_undervoltage",
+      "text": "Third shift noticed the bus reading on line 5's main drive creeping down through the night. Was not a sudden thing at all—just slowly fell below where it should be over two or three hours. Drive is still running but the value has not recovered on its own."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "dc_bus_voltage_collapse",
+      "text": "Everything went dead at once on bay 6—no ramp down, no warning, just an instant blackout on the drive. The bus reading dropped to basically nothing in a split second. Scared the hell out of us. Nothing gradual about it at all."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "dc_bus_voltage_collapse",
+      "text": "Second shift, the drive by compressor row just collapsed completely. One second it was running fine, next second zero volts on the bus. Did not even alarm before it dropped—just instant total loss. Nothing like the slow undervoltage issue we had on line 5 last week."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "dc_bus_voltage_collapse",
+      "text": "We had a sudden total loss on the drive unit next to the weld station. No gradual dimming, no warning beeps, no ramp down—literally zero in an eye blink. Something major went wrong inside because normal brownout faults look nothing like this."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "drive_overtemp_warning",
+      "text": "The amber light on the drive cabinet in cell 3 came on around 2 PM. Unit is still running and has not shut down, but the temperature reading is definitely higher than normal. Happened on a real hot afternoon—fan seems to be spinning okay, nothing tripped."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "drive_overtemp_warning",
+      "text": "Line 4's drive cabinet started flashing a caution indicator during first shift. I checked and it is warm in there but the motor is still moving product. Nothing tripped, drive is online, just the yellow warning light blinking."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "drive_overtemp_warning",
+      "text": "Operator on bay 8 called me over because the drive cabinet felt hotter than usual and had a blinking amber light. Still operational, fan appeared to be running, but the temperature display is sitting in the yellow zone. Has not shut itself down."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "drive_overtemp_shutdown",
+      "text": "Drive on line 1 cooked itself and shut down hard mid-production. By the time I got there the heat sink was way too hot to touch and everything was offline. Unit had tripped itself completely—motor not moving, drive totally dead."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "drive_overtemp_shutdown",
+      "text": "The big drive in the stamping area went down hard during second shift—thermal protection kicked in and killed it completely. When maintenance got there the temperature reading was past the red mark and the drive was stone cold stopped. Not a warning this time, a full shutdown."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "ground_fault",
+      "text": "The GFI tripped on the drive cabinet near dock 3. Electrician says it looks like an insulation problem somewhere in the wiring to the motor. Circuit is dead, fault light is lit solid, and we are keeping everyone away until the root cause is found."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "ground_fault",
+      "text": "Got called to cell 5 because the drive faulted out and the fault indicator was showing something different from the usual trip codes we see. Turns out the ground relay had activated—totally different situation from the overcurrent we had on cell 7 last month. Electrician is on his way."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "cooling_fan_warning",
+      "text": "The drive on line 6 is making an unusual low hum from the cooling section—sounds like the fan is laboring a bit. It is still spinning and the drive is still running, but the fan does not sound right and there is a yellow indicator lit on the panel. Heatsink is running warmer than normal."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "cooling_fan_warning",
+      "text": "Second shift noticed the cabinet on press 9 was running hotter than usual. Fan seems to be turning but it is noticeably slower than it should be—you can hear the difference just standing next to it. Drive has not shut down, still producing parts."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "cooling_fan_warning",
+      "text": "Maintenance flagged a warning light on the drive unit in bay 2 during their rounds. The fan is definitely still moving but it is sluggish—nothing like the full stop we had on cell 4—and the heatsink temp is creeping up. Line is still running for now."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "cooling_fan_failure",
+      "text": "Line 3 drive went into emergency shutdown around 10 AM. I checked the back of the cabinet and the cooling fan is completely dead—no movement, totally silent back there. Nothing like the sluggish fan issue on press 9; this one is not turning at all."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "cooling_fan_failure",
+      "text": "The cabinet by the paint line stopped producing any airflow—you could tell right away, no air coming from the vents whatsoever, fan completely stopped and the cabinet was getting hot fast. We had to pull the plug before the drive fried itself."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "cooling_fan_failure",
+      "text": "Second shift operator noticed the drive cabinet on cell 4 was dead quiet and getting really hot in a hurry. Fan had seized—nothing moving at all. We had to stop the line before the drive cooked. Was not slow like the warning we saw on bay 2, just instantly gone."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "air_filter_replacement",
+      "text": "PM schedule showed the filter on the bay 5 drive cabinet was due for swap last Thursday. We were running behind on preventive work but maintenance finally flagged it today. No faults, no alarms, the unit is running fine—just hit the calendar interval."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "air_filter_replacement",
+      "text": "Line 7 drive cabinet filter came up on the weekly PM checklist during the morning walkdown. Filter is not dirty enough to be causing any issues and the airflow looks okay, but the calendar says it is time so we are swapping it out on schedule."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "air_filter_clogged",
+      "text": "Drive cabinet on press line 2 started running warm and the pressure indicator behind the filter was reading high. Pulled the filter and it was packed solid with metal dust—nowhere near the normal swap schedule but it clearly needs changing now."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "air_filter_clogged",
+      "text": "The airflow out of the drive cabinet near welding station 4 dropped off noticeably during first shift. Maintenance tech checked the differential pressure gauge and the reading was way off the charts—filter was completely blocked with grinding debris from the nearby operation."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "capacitor_inspection",
+      "text": "The six-month capacitor check came due on the main drive cabinet in bay 3. No issues noted in the machine, nothing unusual on the floor—just the time to do the scheduled visual and measurement inspection per the PM calendar."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "capacitor_inspection",
+      "text": "Line 2 main drive is hitting its annual inspection window. Quality wants the bus capacitor condition documented before the year-end audit, so maintenance is doing the walkthrough today regardless of whether anything looks off."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "terminal_retorque",
+      "text": "Annual connection check came due on the line 5 drive cabinet this week. No symptoms, no faults, running fine—just the scheduled torque verification per the preventive maintenance plan. Maintenance has the wrench out."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "terminal_retorque",
+      "text": "During a thermal camera walkdown, maintenance found a slightly warm terminal lug on press 7's drive cabinet—hotter than the surrounding connections. Pulled out the torque wrench for a full re-torque on all the power and control connections in that cabinet."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "cabinet_interior_cleaning",
+      "text": "The interior of the drive cabinet in bay 6 looks like a dust bunny farm. Have not done a thorough clean-out since the last quarterly PM and it is getting thick in there. Need to blow it out before the buildup becomes a real problem."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "cabinet_interior_cleaning",
+      "text": "PM audit on line 4 flagged the drive cabinet interior as overdue for cleaning. A lot of fine metal dust from the nearby grinding operation has been working its way inside and coating everything. Maintenance wants it cleaned before the next quarterly review."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "heat_sink_cleaning",
+      "text": "Thermal camera pass on the drive in cell 8 showed certain sections of the heat sink running hotter than the rest. Fins look plugged up on one side with compacted debris—drive is okay for now but needs a compressed air treatment to get airflow back through the fins."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "heat_sink_cleaning",
+      "text": "During a routine walkdown on line 1, maintenance noticed the drive heat sink had a lot of fine powder packed into the fins. Drive is not alarming yet but airflow through the fins is clearly reduced. The interior looked clean but the fins themselves are the problem."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "output_frequency_calibration",
+      "text": "Line 2 motor has been running slightly slow for the past week—production noticed parts are taking a hair longer than they should through the cycle. We need to verify the drive output actually matches what we commanded before assuming it is a mechanical issue."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "output_frequency_calibration",
+      "text": "Quarterly calibration check is due on the bay 9 drive. No complaints from the floor, nothing alarming—the audit trail just requires us to verify the output against the speed setpoint on schedule before we can sign off the PM."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "lockout_tagout",
+      "text": "Electrician needs to swap a burned contactor inside the cabinet on press 6. Nothing is wrong with the drive itself—we just need power dead and tagged before he opens that door and starts touching things inside."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "lockout_tagout",
+      "text": "PM team is doing the annual terminal inspection on line 3's drive cabinet. Standard pre-work before anyone goes inside—disconnect and personal lock on before the cabinet door opens, same as always."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "lockout_tagout",
+      "text": "The mechanic on second shift needed to replace the cooling fan on bay 4's drive unit. Had to kill the power and get the lock on the panel first before he could touch anything inside the cabinet—safety would not let him crack that door otherwise."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "fire_estop_response",
+      "text": "There was a burning smell coming from the direction of the main VFD cabinet on line 1 and someone reported seeing a wisp of smoke curling out of the top vents. We hit the red mushroom button and called the supervisor without waiting."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "fire_estop_response",
+      "text": "Second shift heard the fire panel alarm go off near the electrical room during the 10 PM break. Nobody waited around to investigate—they killed the drive on press 3 immediately and cleared the area. Turned out to be a hotspot in the cable tray above the cabinet."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "capacitor_discharge_verify",
+      "text": "Electrician locked out the drive cabinet on bay 7 but wanted to confirm the bus was actually dead before reaching in to swap the IGBT module. Called me over to verify the voltage reading on the internal bus sensor before he touched anything near the capacitors."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "capacitor_discharge_verify",
+      "text": "After we shut down and locked out the line 5 drive for a contactor swap, the tech would not open the main bus covers until someone confirmed there was no stored charge on the bus. Standard safety check before the work started—those caps can hold a lot of juice even after shutdown."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "normal_startup",
+      "text": "First shift coming on and line 4 drive cabinet needs to come up from a cold weekend shutdown. Everything is off, no faults, just running through the normal checks before we start pulling product for the morning run."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "normal_startup",
+      "text": "Maintenance finished the overnight PM on the bay 2 drive and now production wants it back online for the 6 AM shift. Need to bring it up in the right sequence so it comes on clean rather than just slapping the start button."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "normal_shutdown",
+      "text": "End of second shift and we need to bring the line 6 drive down properly before the maintenance crew comes in for the overnight window. Nothing wrong with the unit—just taking it down clean at end of shift."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "normal_shutdown",
+      "text": "Production manager called it for an early shutdown on line 3 due to low orders on the afternoon of the 12th. Need to take the drive down in the correct order before the crew leaves for the day."
+    },
+    {
+      "id": "INC-051",
+      "sop_ref": "post_fault_restart",
+      "text": "Electrician found a loose lug that caused the overcurrent trip on press 5's drive earlier this morning. He fixed the connection, confirmed nothing else is damaged, and cleared the fault display. Now we need to bring the drive back up and confirm it runs right before we call the line good."
+    },
+    {
+      "id": "INC-052",
+      "sop_ref": "post_fault_restart",
+      "text": "The drive on line 8 tripped out earlier in the shift and the root cause turned out to be a brief grid blip—no hardware damage, no wiring issues. Fault code has been acknowledged by maintenance and everything checks out. Ready to put it back in service the right way."
+    }
+  ]
+}

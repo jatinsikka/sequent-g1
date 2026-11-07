@@ -1,0 +1,727 @@
+{
+  "family": "Die Casting Machine",
+  "sops": [
+    {
+      "ref": "shot_pressure_low",
+      "title": "Shot Pressure Below Injection Setpoint",
+      "condition": "Shot pressure sensor reads below 850 bar at the start of the injection phase, before the plunger has completed 10% of its stroke.",
+      "steps": [
+        "walk_to shot_pressure_gauge_panel",
+        "read_sensor shot_pressure_sensor",
+        "notify process_engineer",
+        "walk_to hydraulic_pump_control_panel",
+        "read_sensor hydraulic_supply_pressure_sensor",
+        "press_button injection_parameter_hold_button",
+        "wait 30"
+      ],
+      "equipment": [
+        "shot_pressure_gauge_panel",
+        "shot_pressure_sensor",
+        "hydraulic_pump_control_panel",
+        "hydraulic_supply_pressure_sensor",
+        "injection_parameter_hold_button"
+      ]
+    },
+    {
+      "ref": "shot_pressure_high",
+      "title": "Shot Pressure Exceeding Upper Ceiling",
+      "condition": "Shot pressure sensor reads above 1200 bar during the injection stroke, triggering the high-pressure alarm.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_interrupt_button",
+        "walk_to shot_pressure_gauge_panel",
+        "read_sensor shot_pressure_sensor",
+        "notify process_engineer",
+        "walk_to hydraulic_pump_control_panel",
+        "read_sensor hydraulic_supply_pressure_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_interrupt_button",
+        "shot_pressure_gauge_panel",
+        "shot_pressure_sensor",
+        "hydraulic_pump_control_panel",
+        "hydraulic_supply_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "shot_pressure_collapse",
+      "title": "Shot Pressure Sudden Mid-Stroke Collapse",
+      "condition": "Shot pressure sensor registers a drop of more than 200 bar within one second during an active plunger stroke that had already reached nominal pressure.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button estop_button",
+        "notify maintenance_tech",
+        "walk_to shot_sleeve_access_panel",
+        "read_sensor shot_pressure_sensor",
+        "read_sensor plunger_position_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "estop_button",
+        "shot_sleeve_access_panel",
+        "shot_pressure_sensor",
+        "plunger_position_sensor"
+      ]
+    },
+    {
+      "ref": "die_temp_low",
+      "title": "Die Temperature Below Preheat Minimum",
+      "condition": "Die surface temperature sensor reads below 150 degrees C minimum preheat threshold before the next shot cycle is permitted to begin.",
+      "steps": [
+        "walk_to die_temperature_display",
+        "read_sensor die_surface_temp_sensor",
+        "notify process_engineer",
+        "press_button cycle_hold_button",
+        "walk_to die_heater_control_panel",
+        "press_button die_heater_boost_button",
+        "wait 180"
+      ],
+      "equipment": [
+        "die_temperature_display",
+        "die_surface_temp_sensor",
+        "cycle_hold_button",
+        "die_heater_control_panel",
+        "die_heater_boost_button"
+      ]
+    },
+    {
+      "ref": "die_temp_overheat",
+      "title": "Die Temperature Exceeding Upper Limit",
+      "condition": "Die surface temperature sensor reads above 320 degrees C upper limit during or immediately after a casting cycle.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_interrupt_button",
+        "walk_to die_temperature_display",
+        "read_sensor die_surface_temp_sensor",
+        "notify process_engineer",
+        "walk_to coolant_control_panel",
+        "press_button coolant_boost_valve_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_interrupt_button",
+        "die_temperature_display",
+        "die_surface_temp_sensor",
+        "coolant_control_panel",
+        "coolant_boost_valve_button"
+      ]
+    },
+    {
+      "ref": "furnace_level_low",
+      "title": "Furnace Molten Aluminum Level Below Minimum",
+      "condition": "Furnace level sensor reads below 40% fill mark, indicating insufficient molten aluminum to complete a full shot.",
+      "steps": [
+        "walk_to furnace_control_panel",
+        "read_sensor furnace_level_sensor",
+        "press_button cycle_hold_button",
+        "notify furnace_operator",
+        "walk_to furnace_charging_station",
+        "wait 60",
+        "read_sensor furnace_level_sensor"
+      ],
+      "equipment": [
+        "furnace_control_panel",
+        "furnace_level_sensor",
+        "cycle_hold_button",
+        "furnace_charging_station"
+      ]
+    },
+    {
+      "ref": "coolant_leak_minor",
+      "title": "Minor Coolant Drip at Die Cooling Fitting",
+      "condition": "Coolant flow sensor shows a 5 to 10 percent flow reduction and visual dripping is observed at a die cooling line fitting, with no spray or pooling.",
+      "steps": [
+        "walk_to coolant_supply_manifold",
+        "read_sensor coolant_flow_sensor",
+        "notify maintenance_tech",
+        "press_button cycle_hold_button",
+        "walk_to die_cooling_line_fitting",
+        "read_sensor coolant_pressure_sensor",
+        "wait 30"
+      ],
+      "equipment": [
+        "coolant_supply_manifold",
+        "coolant_flow_sensor",
+        "cycle_hold_button",
+        "die_cooling_line_fitting",
+        "coolant_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "coolant_leak_major",
+      "title": "Coolant Line Burst at Die Cooling Manifold",
+      "condition": "Coolant pressure sensor drops suddenly by more than 30 percent and a spray or burst of coolant is detected at the die cooling manifold, presenting a steam explosion risk near molten metal.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button estop_button",
+        "walk_to coolant_isolation_valve_panel",
+        "press_button coolant_shutoff_valve_button",
+        "notify maintenance_supervisor",
+        "notify safety_officer",
+        "wait 300"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "estop_button",
+        "coolant_isolation_valve_panel",
+        "coolant_shutoff_valve_button"
+      ]
+    },
+    {
+      "ref": "shot_sleeve_jam",
+      "title": "Shot Sleeve Plunger Advance Jam",
+      "condition": "Plunger position sensor shows the plunger has not advanced past 25 percent of stroke within 2 seconds of injection command.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_interrupt_button",
+        "read_sensor plunger_position_sensor",
+        "notify maintenance_tech",
+        "walk_to shot_sleeve_access_panel",
+        "read_sensor shot_pressure_sensor",
+        "wait 60"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_interrupt_button",
+        "plunger_position_sensor",
+        "shot_sleeve_access_panel",
+        "shot_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "ejector_pin_stuck",
+      "title": "Ejector Pins Fail to Retract After Ejection",
+      "condition": "Ejector pin return sensor indicates pins have not reached the fully retracted home position within 3 seconds of the ejection stroke completing.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_hold_button",
+        "walk_to ejector_mechanism_panel",
+        "read_sensor ejector_pin_position_sensor",
+        "notify maintenance_tech",
+        "press_button ejector_manual_retract_button",
+        "wait 15"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_hold_button",
+        "ejector_mechanism_panel",
+        "ejector_pin_position_sensor",
+        "ejector_manual_retract_button"
+      ]
+    },
+    {
+      "ref": "hydraulic_pressure_low",
+      "title": "Hydraulic Supply Pressure Low Warning",
+      "condition": "Hydraulic system supply pressure sensor reads below 180 bar minimum while machine is in standby or between cycles, triggering a non-shutdown warning alarm.",
+      "steps": [
+        "walk_to hydraulic_pump_control_panel",
+        "read_sensor hydraulic_supply_pressure_sensor",
+        "press_button cycle_hold_button",
+        "notify maintenance_tech",
+        "read_sensor hydraulic_reservoir_level_sensor",
+        "wait 60",
+        "read_sensor hydraulic_supply_pressure_sensor"
+      ],
+      "equipment": [
+        "hydraulic_pump_control_panel",
+        "hydraulic_supply_pressure_sensor",
+        "cycle_hold_button",
+        "hydraulic_reservoir_level_sensor"
+      ]
+    },
+    {
+      "ref": "electrical_fault_heater",
+      "title": "Furnace Heater Band Circuit Fault",
+      "condition": "Furnace heater band overcurrent alarm activates on the electrical panel, indicating a heater circuit fault that may cause furnace temperature to drop.",
+      "steps": [
+        "walk_to furnace_electrical_panel",
+        "read_sensor heater_current_sensor",
+        "press_button heater_circuit_reset_button",
+        "wait 30",
+        "read_sensor heater_current_sensor",
+        "notify maintenance_electrician",
+        "press_button cycle_hold_button"
+      ],
+      "equipment": [
+        "furnace_electrical_panel",
+        "heater_current_sensor",
+        "heater_circuit_reset_button",
+        "cycle_hold_button"
+      ]
+    },
+    {
+      "ref": "lubrication_die_spray",
+      "title": "Between-Shot Die Release Agent Application",
+      "condition": "Die lubricant application timer signals that release agent must be sprayed onto the die cavity surfaces before the next shot cycle.",
+      "steps": [
+        "walk_to die_spray_system_panel",
+        "press_button die_open_confirm_button",
+        "walk_to die_spray_nozzle_station",
+        "pick die_spray_wand",
+        "place die_spray_wand at die_cavity_A_surface",
+        "press_button spray_activate_button",
+        "wait 8"
+      ],
+      "equipment": [
+        "die_spray_system_panel",
+        "die_open_confirm_button",
+        "die_spray_nozzle_station",
+        "die_spray_wand",
+        "die_cavity_A_surface",
+        "spray_activate_button"
+      ]
+    },
+    {
+      "ref": "filter_hydraulic_change",
+      "title": "Hydraulic Oil Filter Replacement",
+      "condition": "Hydraulic filter differential pressure indicator has reached the replacement threshold, or the scheduled maintenance interval has elapsed.",
+      "steps": [
+        "walk_to hydraulic_pump_control_panel",
+        "press_button hydraulic_pump_shutoff_button",
+        "walk_to hydraulic_filter_housing",
+        "pick used_hydraulic_filter",
+        "place used_hydraulic_filter at disposal_bin",
+        "pick replacement_hydraulic_filter",
+        "place replacement_hydraulic_filter at hydraulic_filter_housing"
+      ],
+      "equipment": [
+        "hydraulic_pump_control_panel",
+        "hydraulic_pump_shutoff_button",
+        "hydraulic_filter_housing",
+        "used_hydraulic_filter",
+        "disposal_bin",
+        "replacement_hydraulic_filter"
+      ]
+    },
+    {
+      "ref": "shot_sleeve_cleaning",
+      "title": "Shot Sleeve Bore Cleaning and Inspection",
+      "condition": "Shot sleeve bore inspection interval has elapsed or visual aluminum oxide buildup or carbon contamination is detected inside the sleeve.",
+      "steps": [
+        "walk_to shot_sleeve_access_panel",
+        "press_button sleeve_retract_button",
+        "pick cleaning_brush_tool",
+        "place cleaning_brush_tool at shot_sleeve_bore",
+        "wait 45",
+        "pick cleaning_rag",
+        "place cleaning_rag at shot_sleeve_bore"
+      ],
+      "equipment": [
+        "shot_sleeve_access_panel",
+        "sleeve_retract_button",
+        "cleaning_brush_tool",
+        "shot_sleeve_bore",
+        "cleaning_rag"
+      ]
+    },
+    {
+      "ref": "furnace_flux_skim",
+      "title": "Furnace Dross and Flux Skimming",
+      "condition": "Dross accumulation sensor or inspection timer indicates that oxide crust and flux must be removed from the furnace melt surface.",
+      "steps": [
+        "walk_to furnace_control_panel",
+        "read_sensor furnace_temp_sensor",
+        "notify furnace_operator",
+        "walk_to furnace_access_port",
+        "pick skimming_ladle",
+        "place skimming_ladle at furnace_melt_surface",
+        "place skimming_ladle at dross_collection_bin"
+      ],
+      "equipment": [
+        "furnace_control_panel",
+        "furnace_temp_sensor",
+        "furnace_access_port",
+        "skimming_ladle",
+        "furnace_melt_surface",
+        "dross_collection_bin"
+      ]
+    },
+    {
+      "ref": "die_calibration_check",
+      "title": "Die Clamping Force and Tonnage Calibration Check",
+      "condition": "Scheduled die clamping force calibration interval has been reached, or a cast part shows parting-line flash suggesting tonnage has drifted from specification.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_hold_button",
+        "walk_to die_clamp_force_display",
+        "read_sensor die_clamp_force_sensor",
+        "read_sensor die_close_position_sensor",
+        "notify process_engineer",
+        "wait 60"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_hold_button",
+        "die_clamp_force_display",
+        "die_clamp_force_sensor",
+        "die_close_position_sensor"
+      ]
+    },
+    {
+      "ref": "lockout_tagout_die",
+      "title": "Lockout Tagout for Die Change or Mechanical Maintenance",
+      "condition": "A die change or any mechanical maintenance requiring access to the die casting machine interior is scheduled, requiring full energy isolation before work begins.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button machine_off_button",
+        "walk_to lockout_tagout_station",
+        "pick lockout_hasp",
+        "place lockout_hasp at main_power_disconnect",
+        "pick lockout_tag",
+        "place lockout_tag at lockout_hasp"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "machine_off_button",
+        "lockout_tagout_station",
+        "lockout_hasp",
+        "main_power_disconnect",
+        "lockout_tag"
+      ]
+    },
+    {
+      "ref": "molten_metal_spill",
+      "title": "Molten Aluminum Spill on Machine or Floor",
+      "condition": "Molten aluminum is observed outside the shot sleeve or die cavity on the machine base, apron, or surrounding floor area.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button estop_button",
+        "notify safety_officer",
+        "notify maintenance_supervisor",
+        "walk_to spill_kit_station",
+        "pick dry_sand_bucket",
+        "place dry_sand_bucket at spill_location"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "estop_button",
+        "spill_kit_station",
+        "dry_sand_bucket",
+        "spill_location"
+      ]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Emergency Stop Activation and Recovery",
+      "condition": "An emergency stop button has been pressed by an operator or triggered by a safety device, halting all machine motion and interrupting the production cycle.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor estop_status_sensor",
+        "notify shift_supervisor",
+        "walk_to estop_panel",
+        "read_sensor machine_motion_sensor",
+        "wait 30",
+        "press_button estop_reset_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "estop_status_sensor",
+        "estop_panel",
+        "machine_motion_sensor",
+        "estop_reset_button"
+      ]
+    },
+    {
+      "ref": "machine_startup",
+      "title": "Full Cold-Start Machine Startup Procedure",
+      "condition": "Machine has been fully de-energized and a new production shift is beginning, requiring a complete cold-start warm-up sequence before casting.",
+      "steps": [
+        "walk_to main_power_panel",
+        "press_button main_power_on_button",
+        "walk_to furnace_control_panel",
+        "press_button furnace_preheat_button",
+        "wait 1800",
+        "read_sensor furnace_temp_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "main_power_panel",
+        "main_power_on_button",
+        "furnace_control_panel",
+        "furnace_preheat_button",
+        "furnace_temp_sensor"
+      ]
+    },
+    {
+      "ref": "machine_shutdown",
+      "title": "Planned End-of-Shift Machine Shutdown",
+      "condition": "End-of-shift signal is received and no further production orders remain, requiring an orderly shutdown of the die casting machine.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_complete_hold_button",
+        "walk_to furnace_control_panel",
+        "press_button furnace_temp_reduce_button",
+        "wait 300",
+        "read_sensor furnace_temp_sensor",
+        "press_button main_power_off_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_complete_hold_button",
+        "furnace_control_panel",
+        "furnace_temp_reduce_button",
+        "furnace_temp_sensor",
+        "main_power_off_button"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "shot_pressure_low",
+      "text": "Line 3, first shift - we kicked off the run and the injection gauge was looking weak from the very first pull. Never climbed above 800 bar. Parts came out underfilled on the B-surface, you could feel the short fill just by looking at them."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "shot_pressure_low",
+      "text": "Second shift here, unit by bay 7. About 40 shots in the gauge kept sitting low on every cycle, reading around 780. Had to pause the run and call it in."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "shot_pressure_low",
+      "text": "Noticed on the second cavity side the shot wasn't fully packing the detail. Gauge was maybe 830 bar the whole time, just under where it needs to be to fill out the ribs."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "shot_pressure_high",
+      "text": "The machine by the loading dock spiked hard on shot 14 - pressure alarm went red, reading was 1,280 bar. We saw flash all along the parting line on that part, pretty severe."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "shot_pressure_high",
+      "text": "Line 2, afternoon run. Pressure went way over on us, hit 1,320 bar. Could feel the machine bang when it peaked. Stopped the run right away."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "shot_pressure_high",
+      "text": "Bay 4, third shift. The injection went too hard on us - gauge pegged past the red mark, somewhere north of 1,200. Part had a thick fin all the way around it."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "shot_pressure_collapse",
+      "text": "We were mid-injection on cell 4 and the pressure just fell off a cliff - started strong around 950, then in less than a second it tanked down to maybe 380 bar. Never seen it do that, plunger hadn't even finished moving."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "shot_pressure_collapse",
+      "text": "Shot on line 2 started completely normal this morning, then somewhere halfway through the stroke the gauge just cratered fast. Like the plunger suddenly lost all its backing pressure mid-move. Came in alarmed."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "die_temp_low",
+      "text": "Before we could start the run on line 3 the die felt cold to the sensor - temp display was reading 130 degrees. Quality hold until it warms up, can't shoot into a die that cold."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "die_temp_low",
+      "text": "Second shift picked up right after changeover and the tooling hadn't come up to temperature yet. Display showed 145, just short of where it has to be before we pull a shot."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "die_temp_low",
+      "text": "Bay 6, came back from a 20-minute die swap and went to resume the run. Thermometer on the cavity face said 138 degrees. Couldn't shoot - would've gotten misruns for sure."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "die_temp_overheat",
+      "text": "After about 60 back-to-back pulls on bay 4 the tooling was getting really hot. Surface reading hit 340 degrees and we started seeing parts sticking in the cavity, pulling out of the B-half."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "die_temp_overheat",
+      "text": "Line 1, afternoon shift. The die got away from us heat-wise - temp sensor said 328 degrees and we were seeing soldering marks and surface blistering on the castings. Had to stop the cycle."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "furnace_level_low",
+      "text": "Went to pull a shot on line 5 and the machine hesitated at the pour - turns out the metal in the furnace was way down, around 35%. Couldn't get a full biscuit on that shot."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "furnace_level_low",
+      "text": "Third shift, furnace on unit 3 ran between charges without anyone noticing. Level alarm finally lit up. Was reading 38% and dropping. No way to run with that little metal in there."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "coolant_leak_minor",
+      "text": "Noticed a small drip under the die block on line 2 between shots. Looked like it was coming from the cooling line connection on the operator side - maybe one drop every few seconds, leaving a wet spot on the platen."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "coolant_leak_minor",
+      "text": "Morning walkthrough on bay 6. Found a wet spot under the die, not a puddle but definitely a steady seep from one of the fittings at the bottom of the die block. Caught it early on the pre-shift check."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "coolant_leak_major",
+      "text": "Cooling line blew on line 4 mid-shift - water sprayed hard across the whole die area. Had to hit the red button immediately. Main concern was water misting near the open melt."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "coolant_leak_major",
+      "text": "Full burst at the water block on cell 2, second shift. Coolant everywhere around the die, steam coming off the hot surfaces. Alarm hit and we killed it fast. Everyone back away from the machine."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "shot_sleeve_jam",
+      "text": "Plunger wouldn't move on line 3. Gave the inject command and it barely crept forward a few inches then stopped dead. No metal came out. Machine went into fault immediately."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "shot_sleeve_jam",
+      "text": "Bay 5, third shift - the plunger seized up about a quarter of the way through the stroke. Just stopped moving and the machine faulted out. No shot completed, metal still sitting in the sleeve."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "ejector_pin_stuck",
+      "text": "Part looked like it ejected on line 1 but then the machine faulted before it could close again. Checked the B-plate and two of the ejector pins were still sitting up proud, never came back home."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "ejector_pin_stuck",
+      "text": "Bay 3, the casting cleared the cavity fine but the pins didn't pull back all the way. Machine couldn't close up for the next cycle - it faulted out trying to close onto the pins."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "hydraulic_pressure_low",
+      "text": "Sitting in standby on bay 3 between shifts and the yellow hydraulic warning came on - nothing had moved yet, just an alarm. Pressure gauge showed about 170 bar, no production going on at the time."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "hydraulic_pressure_low",
+      "text": "Before the very first shot of the shift on line 4 the hydraulic warning beeped. Nothing was running yet, just powered up. Gauge showed 165 bar, machine was sitting there at idle."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "hydraulic_pressure_low",
+      "text": "Line 6 was between cycles - no active shot, just waiting for the die spray - and the low hydraulic alarm came on. Yellow light, not a shutdown, but we stopped anyway to check the reservoir."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "electrical_fault_heater",
+      "text": "Heater alarm went off on furnace 2 around 6 AM on second shift. The breaker panel showed the fault code. Furnace temperature had already started dropping by the time we caught it."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "electrical_fault_heater",
+      "text": "The heater band on the main furnace tripped sometime overnight. Came in Monday morning and found the melt temperature about 80 degrees low and a heater fault code sitting on the panel display."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "lubrication_die_spray",
+      "text": "Timer buzzed between shots on line 3 - release agent cycle was due. The die hadn't been sprayed since before the last break and we were coming up on the next pull."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "lubrication_die_spray",
+      "text": "Operator on cell 1 noticed parts were starting to drag a little on ejection, sticking slightly in the cavity. Realized the spray hadn't cycled when it was supposed to between pulls."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "filter_hydraulic_change",
+      "text": "The differential pressure indicator on the hydraulic filter housing on bay 4 was pegged in the red. Filter was overdue and the indicator had been climbing for a while."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "filter_hydraulic_change",
+      "text": "Maintenance flagged the hydraulic filter on line 2 during the PM walk. The indicator showed red and the pressure drop across the filter housing was past the spec limit on the work order."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "shot_sleeve_cleaning",
+      "text": "Shot sleeve on bay 3 had visible aluminum buildup and dark smearing near the pour hole. Interval was up anyway, so we called for a clean-out between runs before restarting."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "shot_sleeve_cleaning",
+      "text": "Found carbon residue and oxide flakes caked inside the sleeve bore on line 1 during a break inspection. Bore looked rough and discolored. Needed a clean before the next run."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "furnace_flux_skim",
+      "text": "The dross was really piling up on the melt surface in furnace 3 - thick gray crust floating on top. The skim timer had already expired and it was overdue."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "furnace_flux_skim",
+      "text": "Operator on line 2 flagged it at shift change - said the metal surface in the furnace looked thick and crusty, like oxide had been building up all shift. Called for a skim."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "die_calibration_check",
+      "text": "Parts on line 3 started showing a thin, consistent fin along the parting line - not random, same spot every time. Probably tonnage drift. Time to go verify the clamp force is still in spec."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "die_calibration_check",
+      "text": "During the PM on bay 5 the calibration interval came up on the work order. No obvious defect on the parts yet but the check was due and we weren't going to skip it."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "lockout_tagout_die",
+      "text": "Die change was scheduled for bay 2 at the shift change. Before anyone put a hand near the tooling, energy isolation had to go on. Sent for the locks before the crew showed up."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "lockout_tagout_die",
+      "text": "Maintenance crew was setting up to pull the A-half insert on line 4 to replace a cracked core pin. Full isolation required before anyone reached into the die space, no exceptions."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "molten_metal_spill",
+      "text": "Got a splash of liquid aluminum on the floor on the operator side of cell 3. Orange glowing puddle about the size of a dinner plate right on the deck. Stopped everything."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "molten_metal_spill",
+      "text": "Line 1, the parting line leaked on one shot and liquid metal ran down the face of the die and pooled on the machine base. Not a huge amount but definitely still molten."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "molten_metal_spill",
+      "text": "Third shift, bay 5 - pour went wrong and metal ran down the shot sleeve and collected on the machine apron in a puddle. Glowing orange. Everyone stepped back and we killed the machine."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "estop_activation",
+      "text": "Someone hit the red button on bay 6 during second shift - said they saw the robot arm move in a way that didn't look right. Machine stopped hard, full shutdown, everything locked out."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "estop_activation",
+      "text": "The safety mat on line 3 triggered the stop when a forklift came too close during an active cycle. Machine halted mid-sequence. Had to figure out what tripped it before resetting."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "machine_startup",
+      "text": "Coming in for first shift Monday, machine on bay 2 had been completely off all weekend. Full cold bring-up needed - furnace was stone cold and nothing was energized."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "machine_startup",
+      "text": "After the long weekend shutdown the furnace on line 4 was at room temperature. Had to run through the whole warm-up sequence before any production - couldn't rush it."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "machine_shutdown",
+      "text": "End of second shift Friday, last order on bay 4 finished up. Time to put the machine to bed for the weekend - nothing left in the queue."
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "machine_shutdown",
+      "text": "Line 2 finished the production order about 20 minutes before the shift ended. Went through the whole shutdown routine before clocking out - didn't want to leave it running hot with nobody around."
+    },
+    {
+      "id": "inc_050",
+      "sop_ref": "machine_shutdown",
+      "text": "Bay 3, third shift. Last part came off the machine at 2:40 AM and that was it for the week. Called it done and ran through the shutdown steps, furnace cool-down and all."
+    },
+    {
+      "id": "inc_051",
+      "sop_ref": "shot_sleeve_jam",
+      "text": "Line 6, afternoon. Gave the inject and the plunger just sat there. Pressure built up but the sleeve wasn't moving. Heard a grinding noise and then the fault alarm came on. No metal transferred."
+    }
+  ]
+}

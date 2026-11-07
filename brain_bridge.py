@@ -1,13 +1,14 @@
 """
-Bridge: incident text -> retrieved SOP -> typed Plan, using the brain's 100-SOP
-library and schema, with zero external dependencies (numpy only).
+Bridge: incident text -> retrieved SOP -> typed Plan (the no-API "B" path of run_task.py).
 
-This is the no-API "B" path. The retriever (numpy TF-IDF cosine) and the
-step->skill mapper (keyword rules) deliberately stand in for the brain's
-sklearn/BERT retriever and Flan-T5 planner — both get replaced by a frontier
-LLM in the "A" path. What's real here is the spine: a natural-language incident
-selects a real SOP from the library, and that SOP's steps become an executable,
-verifiable plan.
+SOP library and retriever, in order of preference:
+  1. brain/benchmark/: the 1,012-SOP corpus ranked by the fine-tuned MiniLM bi-encoder, when
+     brain/benchmark/artifacts/retriever_st exists (train it with
+     `cd brain/benchmark && python -m src.retrieval.train_eval_sentence_encoder`).
+  2. Otherwise the original 100-SOP library (brain/src/data/sop_examples.json) ranked by
+     off-the-shelf MiniLM, plus numpy TF-IDF as a no-dependency fallback.
+The semantic and lexical rankings are interleaved (semantic first, so the top-1 pick is the
+semantic one); the step->skill mapping is the keyword planner in brain/src/planner.
 
 Author: Jatin Sikka
 """
@@ -25,7 +26,13 @@ from typing import Dict, List, Tuple
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "brain"))
 from src.data.schemas import Plan, PlanStep, SKILLS  # noqa: E402
 
-_SOP_PATH = os.path.join(os.path.dirname(__file__), "brain", "src", "data", "sop_examples.json")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_BENCH = os.path.join(_HERE, "brain", "benchmark")
+_FT_DIR = os.path.join(_BENCH, "artifacts", "retriever_st")
+_USE_BENCH = os.path.isdir(_FT_DIR)
+_SOP_PATH = (os.path.join(_BENCH, "src", "data", "plant_sops.json") if _USE_BENCH
+             else os.path.join(_HERE, "brain", "src", "data", "sop_examples.json"))
+_FT_STATE: dict = {}
 _TOKEN = re.compile(r"[a-z0-9_]+")
 
 
@@ -54,6 +61,9 @@ def retrieve_sop(incident: str, sops: List[dict], k: int = 3) -> List[Tuple[dict
     ranker's best candidates are guaranteed a slot. Falls back to pure lexical if the
     semantic stack is unavailable."""
     lex = _retrieve_sop_tfidf(incident, sops, k=max(k, 3))
+    if _USE_BENCH:
+        sem = _retrieve_sop_finetuned(incident, sops, k=max(k, 3))
+        return _interleave(sem, lex, k)
     try:
         from src.retrieval.infer_retrieve import retrieve_topk
         by_id = {s["sop_id"]: s for s in sops}
@@ -61,11 +71,30 @@ def retrieve_sop(incident: str, sops: List[dict], k: int = 3) -> List[Tuple[dict
                if r["sop_id"] in by_id]
     except Exception:
         sem = []  # semantic stack missing/broken -> lexical only
+    return _interleave(sem, lex, k)
+
+
+def _interleave(sem, lex, k):
     merged, seen = [], set()
     for pair in [p for ab in zip(sem, lex) for p in ab] + sem + lex:   # interleave sem/lex, then leftovers
         if pair[0]["sop_id"] not in seen:
             seen.add(pair[0]["sop_id"]); merged.append(pair)
     return merged[:k] if merged else lex[:k]
+
+
+def _retrieve_sop_finetuned(incident: str, sops: List[dict], k: int = 3) -> List[Tuple[dict, float]]:
+    """Rank the 1,012-SOP corpus with the fine-tuned bi-encoder (cosine over normalized embeddings)."""
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+    if not _FT_STATE:
+        m = SentenceTransformer(_FT_DIR)
+        # same SOP text format the retriever was trained on (train_eval_sentence_encoder.synth)
+        synth = [f"{s['title']}. {s['condition']}. Steps: " + " ; ".join(s.get("steps", [])) for s in sops]
+        _FT_STATE.update(model=m, emb=m.encode(synth, normalize_embeddings=True,
+                                              show_progress_bar=False))
+    q = _FT_STATE["model"].encode([incident], normalize_embeddings=True, show_progress_bar=False)[0]
+    sc = _FT_STATE["emb"] @ q
+    return [(sops[i], float(sc[i])) for i in np.argsort(-sc)[:k]]
 
 
 def _retrieve_sop_tfidf(incident: str, sops: List[dict], k: int = 3) -> List[Tuple[dict, float]]:

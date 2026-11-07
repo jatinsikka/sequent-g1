@@ -1,13 +1,13 @@
 # Sequent: SOP-Driven, Physics-Verified Loco-Manipulation on a Simulated Humanoid, from Ticket to Task-Execution with Retrieval-Grounded Planning and Curriculum RL
 
 **Jatin Sikka**
-Sequent Robotics · sequentrobotics.ai
+Sequent Robotics · sequentrobotics.com
 
 ---
 
 ## Abstract
 
-We present Sequent, an end-to-end system that takes a plant-floor incident ticket written in an operator's own words, retrieves the correct Standard Operating Procedure (SOP) from a library of 1,012 procedures, converts it into a faithful step-by-step plan, and executes that plan on a simulated Unitree G1 humanoid (walking, picking, carrying, placing, pressing a button, and partially pulling a lever) in one continuous MuJoCo simulation, with every step verified against measured physics rather than the policy's own claim. The "brain" is a fine-tuned 22.7M-parameter sentence bi-encoder that reaches Recall@1 0.584 / Recall@5 0.851 / MRR 0.697 on a held-out test set where lexical TF-IDF scores 0.301 / 0.535 / 0.408; along the way, a from-scratch bert-base retriever lost to TF-IDF and an off-the-shelf cross-encoder reranker *hurt* a strong retriever (R@1 0.57 → 0.44); in our experiments the training recipe mattered more than model size. The "body" follows an explicit architecture thesis: classical controllers for kinematics (walking, IK-based picking), reinforcement learning for contact-rich interaction (button press, lever pull), and a physics verifier above both. This division was chosen based on the results in Section 4.2: RL grasping scored 0% verified success across ~10 reward configurations, the "lifts" recorded by the training metric were the box popping ballistically out of a crushing pinch, and grasping was replaced by an IK controller with a force-gated latch. The paper documents the RL manipulation work in detail: a curriculum plus behavior-cloning warm-starts (used twice, with measured limits), an action envelope physically too small to express the task, a catalog of reward hacks (parking, seat farming, pumping, air-swinging, penalty-hacked smoothness, metric-fooled lifts), each caught by human review of rendered rollouts rather than by metrics and each fixed at the root, and a description of the erratic behavior the final policies still exhibit. The final demonstration retrieves an authored SOP at rank 1 (score 0.897) and executes a five-action plan in one take, with the system reporting the lever step as failed and the ticket as "partially resolved." All numbers reported here were measured by us, and failed steps are reported as failed.
+We present Sequent, an end-to-end system that takes a plant-floor incident ticket written in an operator's own words, retrieves the correct Standard Operating Procedure (SOP) from a library of 1,012 procedures, converts it into a faithful step-by-step plan, and executes that plan on a simulated Unitree G1 humanoid (walking, picking, carrying, placing, pressing a button, and partially pulling a lever) in one continuous MuJoCo simulation, with every step verified against measured physics rather than the policy's own claim. The "brain" is a fine-tuned 22.7M-parameter sentence bi-encoder that reaches Recall@1 0.577 ± 0.006 / Recall@5 0.856 / MRR 0.695 (5 seeds) on a held-out test set where TF-IDF scores 0.301, BM25 0.357 and the same encoder without fine-tuning 0.409; the gain over the untuned encoder holds on held-out SOPs (0.656 vs. 0.468) and held-out equipment families (0.607 vs. 0.420), and an off-the-shelf cross-encoder reranker *lowers* R@1 (0.452). The "body" follows an explicit architecture thesis: classical controllers for kinematics (walking, IK-based picking), reinforcement learning for contact-rich interaction (button press, lever pull), and a physics verifier above both. This division was chosen based on the results in Section 4.2: RL grasping on the gripper-equipped humanoid scored 0% verified success across the reward configurations we tried, the "lifts" recorded by the training metric were the box popping ballistically out of a crushing pinch, and grasping was replaced by an IK controller with a force-gated latch. The paper documents the RL manipulation work in detail: a curriculum plus behavior-cloning warm-starts (used twice, with measured limits), an action envelope physically too small to express the task, a catalog of reward hacks (parking, seat farming, pumping, air-swinging, penalty-hacked smoothness, metric-fooled lifts), each caught by human review of rendered rollouts rather than by metrics and each fixed at the root, and a description of the erratic behavior the final policies still exhibit. The final demonstration (a pipeline demonstration: its ticket and SOP were authored together) retrieves the SOP at rank 1 (score 0.897) and executes a five-action plan in one take, with the system reporting the lever step as failed and the ticket as "partially resolved." All numbers reported here were measured by us, and failed steps are reported as failed.
 
 ---
 
@@ -24,7 +24,7 @@ The executed skills are: `walk_to` (controller), `pick`/`place` (controller: dam
 This paper makes three kinds of contribution:
 
 1. **A working system** connecting language-level intent (a messy human ticket) to physical task execution through retrieval-grounded planning, with verification as the connective tissue.
-2. **Measured retrieval results on a deliberately hard synthetic SOP benchmark**, including two negative results (a from-scratch bi-encoder that lost to keyword search; a generic reranker that degraded a strong retriever) and the replacement of a failed neural planner with a deterministic faithful one.
+2. **Measured retrieval results on a deliberately hard synthetic SOP benchmark**, reproduced over 5 seeds against lexical (TF-IDF, BM25) and untuned neural baselines, with held-out-SOP and held-out-family generalization tests, a breakdown by how clearly the operator writes, and one negative result (a generic reranker that degraded a strong retriever).
 3. **A detailed post-mortem of RL manipulation**, documenting why RL grasping failed outright and became a controller (§4.2), how behavior cloning bridged the exploration gap twice and where it capped out (§5.6), what residual erratic behavior the final policies still exhibit (§5.7), and a full catalog of reward hacks with their fixes (§5.8).
 
 A note on methodology: every number in this paper was measured by us on our own runs. Where a component is unreliable (the lever), we say so and quantify it. Where a demo element was authored for the demo (the finale's SOP), we disclose it.
@@ -33,7 +33,7 @@ A note on methodology: every number in this paper was measured by us on our own 
 
 ![The Sequent pipeline: ticket → bi-encoder retrieval over 1,012 SOPs → top-5 → faithful planner → verifier/executor → body skills (walk AMO, pick IK+latch, press RL, lever RL)](figures/fig_pipeline.png)
 
-*Figure 1: The Sequent pipeline. A plain-language ticket is embedded by the fine-tuned bi-encoder and matched against the 1,012-SOP index; the top-5 candidates feed the deterministic faithful planner (one skill per written SOP step). The executor runs every skill inside a pre/postcondition contract measured from `mjData`, and the body executes with controllers for kinematics and RL for contact.*
+*Figure 1: **Only the retriever and three of the skills are learned.** A plain-language ticket is matched against the 1,012-SOP index by the fine-tuned retriever; the planner maps the SOP's steps to skills by rule; the verifier runs every skill inside a pre/postcondition contract measured from simulator state (`mjData`) and reports a verdict. Blue: learned (retriever, frozen AMO walking policy, RL press and lever). Grey: rules and controllers.*
 
 Sequent spans two repositories: the *brain* (`sop_planner_baseline`: corpus generation, retriever training and evaluation, and the planner) and the *robot* (`sequent-g1`: the MuJoCo G1 model, skill controllers and RL environments, the verifier, and the demo harnesses). At runtime the brain is bridged into the robot process (`brain_bridge.py`), so a single script takes a ticket string and drives the simulated robot.
 
@@ -55,35 +55,36 @@ Every SOP is executable by the robot's 7-skill vocabulary (`walk_to, press_butto
 
 ### 3.2 The retriever: a fine-tuned MiniLM bi-encoder
 
-We fine-tuned `sentence-transformers/all-MiniLM-L6-v2` (a 22.7M-parameter, 6-layer, 384-dimensional bi-encoder) with MultipleNegativesRankingLoss for 3 epochs (batch 32) on the 1,859 training pairs, on CPU, in minutes. Evaluation is over the full 1,012-SOP index on the 269 held-out incidents. We reproduced the evaluation locally on the robot machine; the reproduced numbers are:
+We fine-tuned `sentence-transformers/all-MiniLM-L6-v2` (a 22.7M-parameter, 6-layer, 384-dimensional bi-encoder) with MultipleNegativesRankingLoss (each incident is pulled toward its gold SOP and pushed away from the other SOPs in its batch) for 3 epochs (batch 32) on the 1,859 training pairs, in about 2 minutes on a laptop. Evaluation ranks the full 1,012-SOP index for each of the 269 held-out incidents. Fine-tuned rows are mean ± std over 5 seeds; code, data and per-run CSVs are in `brain/benchmark/`.
 
 | Method | R@1 | R@5 | MRR |
 |---|---|---|---|
 | TF-IDF (lexical baseline) | 0.301 | 0.535 | 0.408 |
-| **Fine-tuned bi-encoder (ours)** | **0.584** | **0.851** | **0.697** |
+| BM25 | 0.357 | 0.569 | 0.461 |
+| MiniLM, untuned | 0.409 | 0.677 | 0.529 |
+| bge-small-en-v1.5, untuned | 0.465 | 0.717 | 0.578 |
+| **MiniLM, fine-tuned (ours)** | **0.577 ± 0.006** | **0.856 ± 0.006** | **0.695 ± 0.005** |
+| ours + off-the-shelf cross-encoder rerank | 0.452 ± 0.006 | 0.843 ± 0.003 | 0.611 ± 0.004 |
 
-(The original training-repo evaluation measured 0.572 / 0.866 / 0.692 on the same split; the small differences reflect environment/version drift, and both were measured live, not quoted.)
+Fine-tuning adds +0.17 R@1 over the same encoder untuned. Every test SOP also has training incidents, so we additionally hold out (i) 20% of SOPs entirely and (ii) five whole equipment families; on these splits the fine-tuned model reaches R@1 0.656 and 0.607 against 0.468 and 0.420 untuned (each split has its own test set, so only within-split comparisons are meaningful). The model learns how operators describe problems, not just the training SOPs.
 
 ![Grouped bar chart of R@1/R@5/MRR for TF-IDF, the fine-tuned bi-encoder, and the bi-encoder plus reranker](figures/fig_retrieval.png)
 
-*Figure 2: Held-out retrieval over the full 1,012-SOP index (269 test incidents). The fine-tuned bi-encoder roughly doubles TF-IDF at R@1; adding an off-the-shelf cross-encoder reranker **hurts** (R@1 0.584 → 0.442), so it is excluded from the system. All bars are our own measurements (TF-IDF and bi-encoder reproduced locally; reranker columns from the original training-repo evaluation).*
+*Figure 2: Held-out retrieval over the full 1,012-SOP index. The fine-tuned model leads every baseline on vague operator tickets; when tickets are written clearly, every method does well. Error bars: std over seeds.*
 
-Two negative results shaped the design more than the headline number:
+**How clearly the operator writes matters most.** On the same index we compare three kinds of ticket: the vague test incidents; the same incidents with the machine named up front; and 92 clear tickets written by an operator who knows the system (two per family, sampled with a fixed seed and written by the author from each SOP's title and condition, so they share some of its vocabulary). R@1 for BM25 / fine-tuned (3 seeds): 0.357 / 0.577 (vague), 0.398 / 0.632 (machine named), 0.837 / 0.920 (clear). Clear tickets are easy for every method; the fine-tuned model's advantage is on vague language.
 
-- **A from-scratch bert-base bi-encoder lost to keyword search** (R@1 0.312 vs. TF-IDF 0.396 on a 418-SOP validation corpus). A model an order of magnitude larger than MiniLM, trained without the sentence-encoder recipe (mean pooling, contrastive MNR loss), was worse than not using a neural network at all.
-- **An off-the-shelf cross-encoder reranker hurt the strong retriever**: bolting `ms-marco-MiniLM-L-6-v2` onto the fine-tuned bi-encoder's top-10 dropped R@1 from 0.57 to 0.44. A generic reranker reshuffles an already-good in-domain ranking; it helped only the weak from-scratch retriever. It is excluded from the system.
+**Where it fails.** About 70% of misses on the vague test pick an SOP for a different machine. Naming the machine raises the share of top-1 picks on the correct machine from 0.71 to 0.85 but R@1 only to 0.63, so the remaining errors are same-machine look-alikes, the hard negatives the corpus was built around. The model always returns its nearest SOP; it has no way to say "none of these" (§9).
 
-The conclusion we draw is that the training recipe mattered more than model size in this setting, and that adding components must be justified by measurement, not plausibility.
+**An off-the-shelf cross-encoder reranker hurts.** Reranking the fine-tuned model's top-10 with `ms-marco-MiniLM-L-6-v2` lowers R@1 from 0.577 to 0.452: a generic web-search reranker reshuffles an in-domain ranking it was not trained for. It is excluded from the system.
 
 ### 3.3 The planner: deterministic and faithful, by evidence
 
-We first trained a planner (Flan-T5-base with LoRA) that emitted the skill chain as JSON. It produced **0 valid plans out of 20 test incidents**, re-run twice on independent machines: it echoed prompt placeholders and emitted unparseable output. (An earlier writeup had reported strong planner metrics; on inspection those were hardcoded placeholders in an eval script, never measured. We discarded them and now publish only measured numbers.)
-
-The replacement is a **deterministic faithful planner**: one skill per written SOP step, order preserved, with implicit `walk_to` navigation inserted when a step's target equipment differs from the robot's current station. This is a design choice rather than a fallback: the skill space is fixed at 7 typed skills, and the SOPs' steps are already written at skill granularity, so there is no open-ended language-to-action gap for an LLM to close. A generative planner adds failure modes without adding capability here. The DL contribution of the brain is the retriever; the planner is faithful by construction.
+The planner is **deterministic**: one skill per written SOP step, order preserved, with implicit `walk_to` navigation inserted when the required location changes. This works because the corpus SOPs are written at skill granularity (`press_button estop_button`); step arguments are then mapped onto the simulator's object set (four colored buttons, a fixed tool set). The learned component of the brain is the retriever; the planner involves no learning. An earlier attempt at a learned planner (Flan-T5-base with LoRA, emitting JSON) is not reported as a result: its setup could not succeed, since T5's tokenizer has no `{` or `}` and it was trained on the earlier 100-SOP corpus with keyword-template targets. A correctly set-up learned planner, needed for SOPs written in ordinary prose, is future work (§9).
 
 ### 3.4 Runtime retrieval: a semantic-lexical hybrid
 
-Deploying the trained retriever exposed a complementarity we had not planned for. The semantic model wins on paraphrases ("there's smoke coming out" correctly retrieves the *Smoke Detection* SOP with no lexical overlap) but can bury exact-title matches: the query "pressure is low" ranked its obvious SOP at position 7 semantically, below several hard negatives, while TF-IDF ranked it first. The runtime therefore **interleaves the trained semantic ranking with lexical TF-IDF** into a merged candidate list; the top-5 candidates go to an optional LLM picker that selects the best fit (with the rank-1 merged candidate as the no-API fallback). The semantic ranking provides recall on paraphrases; the lexical ranking provides precision on exact titles.
+At runtime (`brain_bridge.py`) the semantic ranking from the fine-tuned model is interleaved with a lexical TF-IDF ranking into a candidate list, semantic first, so the top-1 pick is the semantic model's; lexical candidates fill later slots so exact-title matches stay in the candidate set. With an API key, `run_task.py --planner llm` passes the top-5 candidates to an LLM that picks one. Neither the interleaving nor the LLM picker is evaluated in this paper; the retrieval numbers above are for the fine-tuned model alone. The finale script queries the fine-tuned model directly.
 
 ## 4. The Body: Controllers for Kinematics, RL for Contact
 
@@ -113,7 +114,7 @@ This deserves its own subsection because it is the single most instructive negat
 
 ### 4.3 Walking: AMO plus a yaw servo
 
-Locomotion uses the frozen AMO whole-body controller with velocity commands from a simple navigation layer. AMO as wired has limitations, which we measured: it **cannot turn in place**, it carries a **~18° yaw bias while walking** (it crabs), and it **drifts under payload** (the carried box shifts the CoM it was not trained for). The navigation layer wraps it in a **closed-loop yaw servo** (continuously re-steering toward the target from measured base pose) plus arc-turn maneuvers for large heading changes. This works in practice: the finale's carry covers 2.8 m including a 180° turn with the box held.
+Locomotion uses the frozen AMO whole-body controller with velocity commands from a simple navigation layer. AMO as wired has limitations, which we measured: it **cannot turn in place**, it carries a **~18° yaw bias while walking** (it crabs), and it **drifts under payload** (the carried box shifts the CoM it was not trained for). The navigation layer wraps it in a **closed-loop yaw servo** (continuously re-steering toward the target from measured base pose) plus arc-turn maneuvers for large heading changes. This works in practice: the finale's carry to the panel station includes a 180° turn with the box held.
 
 ### 4.4 Picking: IK plus a force-gated latch
 
@@ -239,7 +240,7 @@ Reading down the fix column gives the design rules we now apply *before* trainin
 
 ### 5.9 PPO and infrastructure details
 
-All RL skills use Stable-Baselines3 PPO, MlpPolicy [128, 128], `n_steps` 1024, batch 1024, γ = 0.99, entropy coefficient staged 0.05 → 0.02 → 0.005 across training phases. Training runs on 24–56 parallel MuJoCo environments on a 64-core Azure F64als_v7. One infrastructure bug mattered enough to report: with default threading, 32 AMO workers each spawned a full complement of torch threads and thrashed the cores: 18 env steps/s. Capping `OMP_NUM_THREADS=1` per worker (with the learner's threads uncapped separately) took throughput to ~2,600 steps/s, a 144× recovery that turned overnight runs into 15-minute iterations.
+All RL skills use Stable-Baselines3 PPO, MlpPolicy [128, 128], `n_steps` 1024, batch 1024, γ = 0.99; entropy coefficient 0.02 for the press and 0.05 for the lever, followed for the lever by a final low-entropy phase. Training ran on 24–56 parallel MuJoCo environments on 32- and 64-core Azure VMs. One infrastructure bug mattered enough to report: with default threading, 32 AMO workers each spawned a full complement of torch threads and thrashed the cores: 18 env steps/s. Capping `OMP_NUM_THREADS=1` per worker (with the learner's threads uncapped separately) took throughput to ~2,600 steps/s, a 144× recovery that turned overnight runs into 15-minute iterations.
 
 ## 6. System Results
 
@@ -249,7 +250,7 @@ All RL skills use Stable-Baselines3 PPO, MlpPolicy [128, 128], `n_steps` 1024, b
 
 *Figure 4: Six frames from the G6 one-take video (a single unbroken simulation, not compiled from clips): walk, pick (IK + force-gated latch), carry with the box held, place at the panel station, RL press, return to rest.*
 
-The G6 gate is a single continuous simulation: walk to the table → pick the box → carry 2.8 m including a 180° turn → place at the panel station → RL press (34.5 mm, PUMPS=0) → return to rest. All verification criteria pass; the box is never dropped; the robot never falls. This run also surfaced and fixed a real bug (a stale external-force flag from the carry corrupting the place), which is why gates are run as *takes*, not compiled from clips.
+The G6 gate is a single continuous simulation: walk to the table → pick the box → carry to the panel station including a 180° turn → place at the panel station → RL press (34.5 mm, PUMPS=0) → return to rest. All verification criteria pass; the box is never dropped; the robot never falls. This run also surfaced and fixed a real bug (a stale external-force flag from the carry corrupting the place), which is why gates are run as *takes*, not compiled from clips.
 
 ### 6.2 The finale: ticket → brain → robot
 
@@ -257,7 +258,7 @@ The G6 gate is a single continuous simulation: walk to the table → pick the bo
 
 *Figure 5: Six frames from the Gate-7 ticket-to-robot video: the incident ticket card, the retrieval card (trained bi-encoder top-5 over the full index), the walk, the RL press, a captioned non-embodied step (`notify`, captioned on screen rather than mimed), and the final resolved-verdict card.*
 
-For the final demonstration we authored a new SOP (SOP-1013, disclosed as authored for the demo) describing the full workstation procedure, added it to the 1,012-SOP index, and issued a natural-language ticket. The trained retriever returned SOP-1013 at **rank 1 (score 0.897)** over the full corpus; the faithful planner emitted a five-action plan; the robot executed it in one take:
+For the final demonstration we authored a new SOP (SOP-1013, disclosed as authored for the demo) describing the full workstation procedure, added it to the 1,012-SOP index, and issued a natural-language ticket. The trained retriever returned SOP-1013 at **rank 1 (score 0.897)** over the full corpus. Because the ticket and SOP were written together, this demonstrates the pipeline, not retrieval accuracy: TF-IDF also ranks SOP-1013 first. The planner emitted a five-action plan and the robot executed it in one take:
 
 | Step | Skill | Measured outcome | Verdict |
 |---|---|---|---|
@@ -273,16 +274,9 @@ For the final demonstration we authored a new SOP (SOP-1013, disclosed as author
 
 The system's own verdict card reads **"PARTIALLY RESOLVED"**: the lever step failed, and the system reported it as failed. Reporting failed steps as failed is the purpose of the verification layer.
 
-### 6.3 Retrieval results (held-out, reproduced locally)
+### 6.3 Retrieval results
 
-| Method | R@1 | R@5 | MRR |
-|---|---|---|---|
-| TF-IDF (lexical) | 0.301 | 0.535 | 0.408 |
-| From-scratch bert-base bi-encoder† | 0.312 | 0.604 | 0.453 |
-| **Fine-tuned MiniLM bi-encoder (ours)** | **0.584** | **0.851** | **0.697** |
-| + off-the-shelf cross-encoder reranker | 0.442 | 0.833 | 0.604 |
-
-†bert-base row measured on the 418-SOP validation corpus (96 test incidents), where TF-IDF scores 0.396 R@1; all other rows are the full 1,012-SOP / 269-incident held-out test. Reranker row from the original training-repo evaluation (0.572 base → 0.442 reranked).
+See §3.2 for the full table (5 seeds, all baselines), the held-out-SOP and held-out-family splits, and the breakdown by ticket clarity. Reproduction scripts and per-run CSVs: `brain/benchmark/repro/`.
 
 ## 7. Methodology: Human Review of Rendered Rollouts
 
@@ -292,7 +286,7 @@ A single practice recurs through every result above:
 
 1. **Frame-check before claiming.** No run is logged as a success until its deterministic rollout has been watched.
 2. **Verify semantics, not scalars.** The verifier's postconditions encode what the task *means* (held, sustained, upright), not what is easy to measure (peak height, threshold crossing).
-3. **Only measured numbers.** Nothing appears on the website, in the logs, or in this paper that we did not measure ourselves. This rule led us to retract a previously reported planner result that turned out to be a hardcoded placeholder, and to retract an early grasp result trained on a broken simulation.
+3. **Only measured numbers.** Nothing appears on the website, in the logs, or in this paper that we did not measure ourselves. This rule led us to retract a previously reported planner result that turned out to be a hardcoded placeholder, an early grasp result trained on a broken simulation, and, on re-auditing the brain, a learned-planner negative result whose setup could not have worked.
 4. **Root-cause before retrain.** The action-envelope hunt (§5.2) cost a day but ended a class of failures; retraining on top of an unexpressible action space would have burned the same day with nothing to show.
 
 We believe this section generalizes beyond this project: reward hacking is usually presented as an alignment curiosity, but in practice it is a *routine engineering hazard* whose only reliable detector, at this scale, is human review of behavior.
@@ -303,7 +297,7 @@ The main limitations are as follows.
 
 - **Simulation only.** Everything runs in MuJoCo. No sim-to-real transfer is claimed or attempted; contact parameters were tuned for plausibility, not matched to hardware.
 - **Synthetic SOP corpus, same-generator test.** The retrieval test set is held out from training but produced by the same generator as the corpus. There is no out-of-distribution or real-plant evaluation; real-world retrieval numbers would differ.
-- **The lever is ~50% reliable and jerky.** The structural cause (unobserved per-episode reach bias) is identified and the fix designed, but not yet executed. We report it as a partial skill.
+- **The lever is about 50% reliable (1 of 2 deterministic episodes) and jerky.** The structural cause (unobserved per-episode reach bias) is identified and the fix designed, but not yet executed. We report it as a partial skill.
 - **Handoff seams re-initialize controller state.** Transitions between skills restore controller state at the seam (the base is pinned, nothing teleports, and scene objects persist), but a reset does exist at each handoff; the demo is continuous in physics, not in controller memory.
 - **Single operator-verifier.** The human-review methodology of §7 has n=1 reviewer; the same eyes that designed the rewards audited them.
 - **The finale SOP was authored for the demo.** SOP-1013 was written by us and inserted into the index; retrieval over the 1,012 pre-existing SOPs is trained and evaluated, but the finale's specific retrieval target is not an organic corpus member. Disclosed here and in the demo.
@@ -314,10 +308,14 @@ The main limitations are as follows.
 - **GPU-parallel simulation (Isaac Lab).** The curriculum results demonstrate CPU MuJoCo *can* train these skills; a port would buy iteration speed for the harder contact tasks, and should be judged on that basis alone. Earlier in the project we reached for more throughput when the actual blocker was contact fidelity (§4.2); any port should be justified by iteration speed, not by that misdiagnosis.
 - **Hardware.** The architecture (controllers + RL + verifier) was chosen with a real G1 in mind; the verifier's contracts translate naturally to estimated state. Sim-to-real for the RL contact skills is the open risk.
 - **Retrieval beyond the generator.** An out-of-distribution test set (ideally real maintenance tickets) is the necessary next measurement before any claim about deployed retrieval quality.
+- **Ask when unsure.** The retriever always acts on its nearest SOP. Using the top-1 score (low for out-of-scope tickets) and the top-1/top-2 margin (near zero for ambiguous ones such as "the machine is overheating") to refuse, escalate, or ask a clarifying question ("which machine?") is the most important safety addition.
+- **Use the machine ID.** Real tickets come from a known machine or location; filtering candidates to that equipment family targets the 70% of errors that pick the wrong machine.
+- **Hard-negative training.** Training against same-machine look-alike SOPs rather than random in-batch negatives targets the remaining errors.
+- **An LLM baseline and a learned planner.** Measure an LLM that picks among the retriever's candidates, and train a planner (with an output format its tokenizer can express) that converts SOPs written in ordinary prose into skills.
 
 ## 10. Conclusion
 
-Sequent connects a human's plain-language description of a problem, through retrieval of the governing procedure, to a humanoid physically executing that procedure, with a verifier above the whole stack that reports "partially resolved" when a step fails. The headline artifacts are a retriever that nearly doubles keyword search on a hard benchmark and a one-take loco-manipulation chain; the durable contributions, in our view, are the negative results and the methodology. In retrieval, the training recipe mattered more than model size. Controllers outperformed RL where the task was kinematic (parallel-jaw grasping most of all), and RL was the right tool where contact dominated. Control-level constraints outperformed reward penalties. In every case where a policy found a way to collect reward without doing the task, the exploit was caught by a human watching rendered rollouts, not by a metric.
+Sequent connects a human's plain-language description of a problem, through retrieval of the governing procedure, to a humanoid physically executing that procedure, with a verifier above the whole stack that reports "partially resolved" when a step fails. The headline artifacts are a fine-tuned retriever that improves on lexical and untuned neural baselines and generalizes to unseen procedures and machines, and a one-take loco-manipulation chain; the durable contributions, in our view, are the negative results and the methodology. Controllers outperformed RL where the task was kinematic (parallel-jaw grasping most of all), and RL was the right tool where contact dominated. Control-level constraints outperformed reward penalties. In every case where a policy found a way to collect reward without doing the task, the exploit was caught by a human watching rendered rollouts, not by a metric.
 
 ## Acknowledgments
 

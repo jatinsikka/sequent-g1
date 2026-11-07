@@ -1,0 +1,581 @@
+{
+  "family": "Vision Inspection Station",
+  "sops": [
+    {
+      "ref": "camera_signal_loss",
+      "title": "Camera Signal Loss Recovery",
+      "condition": "One or more inspection cameras shows no video feed on the vision controller display.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "read_sensor camera_signal_indicator",
+        "press_button camera_power_cycle_button",
+        "wait 15 seconds",
+        "read_sensor camera_signal_indicator",
+        "notify vision_technician"
+      ],
+      "equipment": ["vision_controller_panel", "camera_signal_indicator", "camera_power_cycle_button", "vision_technician"]
+    },
+    {
+      "ref": "lighting_intensity_low",
+      "title": "Lighting Intensity Gradual Drift Below Setpoint",
+      "condition": "The ambient light sensor records a slow, continuous decline to below the 350-lux minimum threshold over the course of a shift, triggering a low-light advisory alarm.",
+      "steps": [
+        "walk_to lighting_control_panel",
+        "read_sensor ambient_light_sensor",
+        "press_button lighting_intensity_increase_button",
+        "wait 10 seconds",
+        "read_sensor ambient_light_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["lighting_control_panel", "ambient_light_sensor", "lighting_intensity_increase_button", "process_engineer"]
+    },
+    {
+      "ref": "lighting_sudden_collapse",
+      "title": "Instantaneous Lighting Failure Response",
+      "condition": "The ambient light sensor drops to zero or near-zero instantaneously within a single scan cycle, indicating a bulb burnout or LED driver failure rather than a gradual drift.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "walk_to lighting_control_panel",
+        "read_sensor ambient_light_sensor",
+        "notify maintenance_supervisor",
+        "pick replacement_led_driver",
+        "place replacement_led_driver at lighting_fixture_bay"
+      ],
+      "equipment": ["vision_station_e_stop", "lighting_control_panel", "ambient_light_sensor", "maintenance_supervisor", "replacement_led_driver", "lighting_fixture_bay"]
+    },
+    {
+      "ref": "reject_gate_jam",
+      "title": "Reject Gate Physical Jam Clearance",
+      "condition": "The reject gate actuator is energized and commanded to the reject position but the gate does not move and the gate position sensor reads zero displacement after 3 seconds.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "walk_to reject_gate_panel",
+        "read_sensor gate_position_sensor",
+        "notify maintenance_technician",
+        "pick jam_clearance_tool",
+        "place jam_clearance_tool at reject_gate_mechanism"
+      ],
+      "equipment": ["vision_station_e_stop", "reject_gate_panel", "gate_position_sensor", "maintenance_technician", "jam_clearance_tool", "reject_gate_mechanism"]
+    },
+    {
+      "ref": "reject_gate_slow_response",
+      "title": "Reject Gate Delayed Actuation Response",
+      "condition": "The reject gate moves to the reject position but consistently takes more than 1.5 seconds after the trigger signal, causing parts to occasionally clear the gate before it closes fully.",
+      "steps": [
+        "walk_to reject_gate_panel",
+        "read_sensor gate_response_time_sensor",
+        "read_sensor pneumatic_pressure_gauge",
+        "press_button gate_manual_test_button",
+        "wait 5 seconds",
+        "notify process_engineer"
+      ],
+      "equipment": ["reject_gate_panel", "gate_response_time_sensor", "pneumatic_pressure_gauge", "gate_manual_test_button", "process_engineer"]
+    },
+    {
+      "ref": "false_reject_rate_high",
+      "title": "Excessive False Reject Rate Response",
+      "condition": "The vision system is flagging and diverting more than 5% of parts to the reject bin that quality sampling confirms are conforming to dimensional and surface specifications.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "read_sensor false_reject_counter",
+        "pick calibration_target_board",
+        "place calibration_target_board at inspection_zone",
+        "read_sensor calibration_score_display",
+        "notify quality_engineer"
+      ],
+      "equipment": ["vision_controller_panel", "false_reject_counter", "calibration_target_board", "inspection_zone", "calibration_score_display", "quality_engineer"]
+    },
+    {
+      "ref": "miss_rate_high",
+      "title": "High Defect Miss Rate Response",
+      "condition": "Post-process audit or customer feedback confirms that defective parts are passing through the vision station and receiving a PASS disposition, indicating the system is under-detecting flaws.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "read_sensor miss_rate_counter",
+        "pick golden_defect_sample_set",
+        "place golden_defect_sample_set at inspection_zone",
+        "read_sensor detection_rate_display",
+        "notify quality_engineer"
+      ],
+      "equipment": ["vision_controller_panel", "miss_rate_counter", "golden_defect_sample_set", "inspection_zone", "detection_rate_display", "quality_engineer"]
+    },
+    {
+      "ref": "camera_overheat_warning",
+      "title": "Camera Thermal Warning Response",
+      "condition": "A camera body temperature sensor triggers a WARNING-level amber alarm indicating temperature above 55 degrees C but below the 70 degree C emergency shutdown threshold, with the system still running.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "read_sensor camera_temperature_sensor",
+        "press_button cooling_fan_boost_button",
+        "wait 60 seconds",
+        "read_sensor camera_temperature_sensor",
+        "notify vision_technician"
+      ],
+      "equipment": ["vision_controller_panel", "camera_temperature_sensor", "cooling_fan_boost_button", "vision_technician"]
+    },
+    {
+      "ref": "lens_cleaning",
+      "title": "Scheduled Camera Lens Cleaning",
+      "condition": "The vision controller triggers an 8-hour interval lens contamination flag, or an operator observes smearing or hazing on live camera images consistent with oil mist or coolant overspray on the lens.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "pick lens_cleaning_kit",
+        "place lens_cleaning_kit at camera_mounting_bracket",
+        "wait 30 seconds",
+        "press_button vision_station_power_on_button",
+        "read_sensor image_clarity_sensor"
+      ],
+      "equipment": ["vision_station_e_stop", "lens_cleaning_kit", "camera_mounting_bracket", "vision_station_power_on_button", "image_clarity_sensor"]
+    },
+    {
+      "ref": "lighting_filter_replacement",
+      "title": "Lighting Diffusion Filter Replacement",
+      "condition": "Scheduled 500-hour PM interval is reached or the lighting uniformity sensor triggers a diffusion degradation alarm indicating non-uniform illumination across the inspection zone.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "pick replacement_diffusion_filter",
+        "place replacement_diffusion_filter at lighting_fixture_bay",
+        "press_button vision_station_power_on_button",
+        "read_sensor ambient_light_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["vision_station_e_stop", "replacement_diffusion_filter", "lighting_fixture_bay", "vision_station_power_on_button", "ambient_light_sensor", "process_engineer"]
+    },
+    {
+      "ref": "reject_gate_lubrication",
+      "title": "Reject Gate Actuator Lubrication",
+      "condition": "Scheduled weekly PM task for lubricating the reject gate pneumatic actuator rod and pivot bearings is due, or an operator reports audible squealing or grinding from the gate mechanism.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "pick grease_cartridge",
+        "place grease_cartridge at reject_gate_lubrication_port",
+        "press_button vision_station_power_on_button",
+        "press_button gate_manual_test_button",
+        "read_sensor gate_response_time_sensor"
+      ],
+      "equipment": ["vision_station_e_stop", "grease_cartridge", "reject_gate_lubrication_port", "vision_station_power_on_button", "gate_manual_test_button", "gate_response_time_sensor"]
+    },
+    {
+      "ref": "vision_calibration",
+      "title": "Vision System Full Calibration",
+      "condition": "Scheduled 30-day calibration PM interval is reached or a calibration-due alarm is displayed on the vision controller, requiring the full calibration sequence with the reference target board.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "pick calibration_target_board",
+        "place calibration_target_board at inspection_zone",
+        "press_button calibration_run_button",
+        "wait 120 seconds",
+        "read_sensor calibration_score_display",
+        "notify quality_engineer"
+      ],
+      "equipment": ["vision_controller_panel", "calibration_target_board", "inspection_zone", "calibration_run_button", "calibration_score_display", "quality_engineer"]
+    },
+    {
+      "ref": "camera_alignment_check",
+      "title": "Camera Field-of-View Alignment Verification",
+      "condition": "Scheduled bi-weekly alignment verification is due or the vision controller reports an alignment drift alarm indicating the active field of view has shifted from the nominal center position.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "pick alignment_reference_fixture",
+        "place alignment_reference_fixture at inspection_zone",
+        "read_sensor alignment_deviation_sensor",
+        "press_button alignment_correction_button",
+        "wait 20 seconds",
+        "read_sensor alignment_deviation_sensor"
+      ],
+      "equipment": ["vision_controller_panel", "alignment_reference_fixture", "inspection_zone", "alignment_deviation_sensor", "alignment_correction_button"]
+    },
+    {
+      "ref": "enclosure_air_filter_cleaning",
+      "title": "Vision Enclosure Air Filter Replacement",
+      "condition": "Scheduled monthly PM is due or the enclosure HVAC pressure differential sensor triggers a clog alarm indicating restricted airflow through the inlet filter.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "pick replacement_air_filter",
+        "place replacement_air_filter at enclosure_hvac_inlet",
+        "press_button vision_station_power_on_button",
+        "read_sensor enclosure_temperature_sensor"
+      ],
+      "equipment": ["vision_station_e_stop", "replacement_air_filter", "enclosure_hvac_inlet", "vision_station_power_on_button", "enclosure_temperature_sensor"]
+    },
+    {
+      "ref": "gate_actuator_seal_replacement",
+      "title": "Reject Gate Actuator Pneumatic Seal Replacement",
+      "condition": "Scheduled annual PM is due or a slow pneumatic leakdown is audible at the reject gate actuator body, indicating worn or failed internal seals.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "pick replacement_actuator_seal_kit",
+        "place replacement_actuator_seal_kit at reject_gate_actuator",
+        "press_button vision_station_power_on_button",
+        "read_sensor pneumatic_pressure_gauge",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["vision_station_e_stop", "replacement_actuator_seal_kit", "reject_gate_actuator", "vision_station_power_on_button", "pneumatic_pressure_gauge", "maintenance_technician"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Vision Station Lockout-Tagout Procedure",
+      "condition": "Any task requiring physical entry into the inspection enclosure or hands-on work involving electrical, pneumatic, or mechanical components of the vision station.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "walk_to main_disconnect_panel",
+        "press_button main_disconnect_switch",
+        "pick lockout_hasp_and_tag",
+        "place lockout_hasp_and_tag at main_disconnect_panel",
+        "notify area_supervisor"
+      ],
+      "equipment": ["vision_station_e_stop", "main_disconnect_panel", "main_disconnect_switch", "lockout_hasp_and_tag", "area_supervisor"]
+    },
+    {
+      "ref": "solvent_spill_response",
+      "title": "Lens Cleaner Solvent Spill Response",
+      "condition": "Lens cleaning solvent or isopropyl alcohol is spilled within or immediately adjacent to the vision station enclosure, creating a slip hazard or chemical exposure risk.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "pick spill_kit",
+        "place spill_kit at spill_location",
+        "notify area_supervisor",
+        "notify ehs_coordinator"
+      ],
+      "equipment": ["vision_station_e_stop", "spill_kit", "spill_location", "area_supervisor", "ehs_coordinator"]
+    },
+    {
+      "ref": "emergency_stop_activation",
+      "title": "Vision Station Emergency Stop Activation",
+      "condition": "Any unsafe condition, uncontrolled mechanical motion, personnel hazard, smoke, or imminent equipment damage is observed at the vision station requiring immediate cessation of all motion.",
+      "steps": [
+        "walk_to vision_station_e_stop",
+        "press_button vision_station_e_stop",
+        "read_sensor fault_status_display",
+        "notify area_supervisor",
+        "notify maintenance_technician",
+        "wait 30 seconds"
+      ],
+      "equipment": ["vision_station_e_stop", "fault_status_display", "area_supervisor", "maintenance_technician"]
+    },
+    {
+      "ref": "startup_sequence",
+      "title": "Vision Station Startup Sequence",
+      "condition": "Beginning of production shift or return from any planned downtime requiring the vision station to be brought from a fully de-energized state to production-ready operation.",
+      "steps": [
+        "walk_to main_disconnect_panel",
+        "press_button main_disconnect_switch",
+        "walk_to vision_controller_panel",
+        "press_button vision_station_power_on_button",
+        "wait 45 seconds",
+        "read_sensor camera_signal_indicator",
+        "read_sensor ambient_light_sensor"
+      ],
+      "equipment": ["main_disconnect_panel", "main_disconnect_switch", "vision_controller_panel", "vision_station_power_on_button", "camera_signal_indicator", "ambient_light_sensor"]
+    },
+    {
+      "ref": "shutdown_sequence",
+      "title": "Vision Station End-of-Shift Shutdown",
+      "condition": "End of the production shift or start of planned downtime requiring orderly shutdown of the vision station from production-running state to fully de-energized.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "press_button vision_station_shutdown_button",
+        "wait 30 seconds",
+        "walk_to main_disconnect_panel",
+        "press_button main_disconnect_switch",
+        "notify area_supervisor"
+      ],
+      "equipment": ["vision_controller_panel", "vision_station_shutdown_button", "main_disconnect_panel", "main_disconnect_switch", "area_supervisor"]
+    },
+    {
+      "ref": "first_article_setup",
+      "title": "First Article Inspection Program Setup",
+      "condition": "A new part number or tooling changeover requires selection of the correct vision inspection program and a golden-part verification pass before production is released to run.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "pick part_program_selection_key",
+        "place part_program_selection_key at vision_controller_panel",
+        "press_button program_load_button",
+        "pick golden_part_sample",
+        "place golden_part_sample at inspection_zone",
+        "read_sensor detection_rate_display"
+      ],
+      "equipment": ["vision_controller_panel", "part_program_selection_key", "program_load_button", "golden_part_sample", "inspection_zone", "detection_rate_display"]
+    },
+    {
+      "ref": "golden_part_verification",
+      "title": "Golden Part Start-of-Shift Verification Run",
+      "condition": "Scheduled start-of-shift or post-maintenance check requiring the certified golden-part sample set to be run through the active inspection program to confirm current detection accuracy before production begins.",
+      "steps": [
+        "walk_to vision_controller_panel",
+        "pick golden_defect_sample_set",
+        "place golden_defect_sample_set at inspection_zone",
+        "read_sensor detection_rate_display",
+        "read_sensor false_reject_counter",
+        "notify quality_engineer"
+      ],
+      "equipment": ["vision_controller_panel", "golden_defect_sample_set", "inspection_zone", "detection_rate_display", "false_reject_counter", "quality_engineer"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "camera_signal_loss",
+      "text": "Screen went blank on camera 3 right after startup, no picture at all. Line 3 was sitting dead for about 10 minutes before anyone noticed parts were running through unchecked. Had to call it out over the radio. — D. Kowalski, 2nd shift"
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "camera_signal_loss",
+      "text": "Operator at the south bay reported one of the monitors on the inspection unit just went dark mid-run. Parts were still moving on the belt but nothing was being checked upstream. Had to halt the line. — M. Torres, 1st shift"
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "camera_signal_loss",
+      "text": "After the lunch break the whole right-side display on the unit by the loading dock came back with nothing on it. Kept blinking, no image at all. Someone had to run product blind until the vision tech got there. — J. Park, 3rd shift"
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "lighting_intensity_low",
+      "text": "Lights inside the inspection zone looked washed out and kind of yellowish, noticeably dimmer than normal. It was fine at 6 AM but by noon you could barely see the part surface on the monitor. Crept up on us slow. — R. Singh, 1st shift"
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "lighting_intensity_low",
+      "text": "The system kept throwing up a yellow banner — not the red alarm, just a yellow advisory — and the ring lights were obviously less bright than last week. Took most of the morning to get bad enough to notice. Definitely not sudden. — C. Barba, 2nd shift"
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "lighting_sudden_collapse",
+      "text": "Lights just cut out. One second they were full brightness over the nest, the next second pitch black. No dimming beforehand, just gone. Had to shout to get everybody to stop the line immediately. — A. Duda, 2nd shift"
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "lighting_sudden_collapse",
+      "text": "Everything went dark on the camera side right in the middle of a production run. Absolutely no warning, no flicker. Total blackout over the inspection area in an instant. Nothing gradual about it. — T. Nguyen, 1st shift"
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "reject_gate_jam",
+      "text": "The arm that kicks the bad ones into the reject chute just wouldn't budge. You could hear it trying — thumping — but nothing moved. Parts were piling up past the gate and going into the good bin. — B. Koonce, 3rd shift"
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "reject_gate_jam",
+      "text": "Reject chute door was stuck completely solid. Heard one hard thump then nothing. Tried to push it by hand and there was something wedged in the mechanism — wouldn't shift at all. — L. Martinez, 1st shift"
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "reject_gate_jam",
+      "text": "The divert flap froze up in the middle of a cycle. The controller HMI showed it as active but you could see with your own eyes it wasn't going anywhere. Completely immobilized. — S. Patel, 2nd shift"
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "reject_gate_slow_response",
+      "text": "Gate's moving but it's lazy about it. Takes a beat too long after the reject signal and some of the flagged parts are already past it by the time the flap swings over. Nothing stuck, just slow. — M. Chen, 1st shift"
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "reject_gate_slow_response",
+      "text": "The kicker arm actuates fine — it does eventually swing — but there's this obvious lag between the alarm and the physical movement. Some rejects are ending up in the good bin because it doesn't get there in time. — P. Okafor, 2nd shift"
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "false_reject_rate_high",
+      "text": "Quality pulled 30 parts out of the red bin at the end of the shift and 28 of them checked out perfectly good. Vision system's being way too jumpy on the surface check. Good parts going in the scrap pile. — D. Stein, 1st shift"
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "false_reject_rate_high",
+      "text": "Scrap rate spiked to something insane this morning but when we mic'd the parts ourselves they were all in spec. The machine is flagging everything that comes through. Good product getting diverted. — C. Walsh, 2nd shift"
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "false_reject_rate_high",
+      "text": "Reject count was almost 1 in 5 today on line 2. Ran a bunch of them by hand inspection and they all pass visual and dimensional. The vision box is seeing things that aren't there. — T. Adeyemi, 3rd shift"
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "miss_rate_high",
+      "text": "Found a cracked housing in a finished shipping box that should have been pulled at the camera check. That part definitely went through — it had the PASS label on it. Something's not triggering on the bad ones. — K. Brown, QA"
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "miss_rate_high",
+      "text": "Customer called in a complaint. Scratched parts showed up in their incoming inspection, and our system had them stamped PASS and shipped. Defects are getting through the camera station without being flagged. — R. Cho, quality coordinator"
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "camera_overheat_warning",
+      "text": "A yellow alarm came up on the vision controller box — something about camera temperature. System was still fully running, nothing tripped or stopped. Just that amber warning sitting there. — F. DiMaggio, 2nd shift"
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "camera_overheat_warning",
+      "text": "Got a blinking amber on the panel at the inspection station on the north side. Nothing stopped, cameras were still live and producing images. Tech said it was running warm but hadn't hit the critical cutoff yet. — B. Otieno, 1st shift"
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "lens_cleaning",
+      "text": "System threw a focus error but the part design hasn't changed. Looking at the monitor you can see a smear over the center of the image — looks like oil mist or something on the glass in front of the lens. — A. Rossi, 1st shift"
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "lens_cleaning",
+      "text": "Camera 2 on the unit by the south wall has been showing a milky haze for a couple hours. Parts look blurry on-screen. Same thing happened last month after the press next door had a coolant overspray incident. — H. Kim, 2nd shift"
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "lighting_filter_replacement",
+      "text": "Light over inspection zone 2 looks uneven — super bright right in the center and noticeably dark around the edges. Been like that for a few shifts, not totally out, just a patchy spread. — O. Bell, 1st shift"
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "lighting_filter_replacement",
+      "text": "Every part that sits in the nest looks like it has a shadow on one side in the camera image. Ring light isn't spreading evenly anymore. Pretty sure the diffuser is worn out. — G. Cruz, 3rd shift"
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "reject_gate_lubrication",
+      "text": "Reject arm is making a grinding squeak on every single cycle. Moves fine, no hesitation, but the noise is getting louder each shift. Been building all week. — P. Hadley, 2nd shift"
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "reject_gate_lubrication",
+      "text": "Gate is squealing on every stroke out here on line 4. Maintenance walked by and said it's overdue for grease — nothing mechanically broken but it sounds like metal on metal. — N. Watts, 1st shift"
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "vision_calibration",
+      "text": "PM calendar says calibration was due last Tuesday. Nobody got to it during that shift and it's been sitting past the window ever since. Still running product through but we're overdue. — J. Ferris, process tech"
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "vision_calibration",
+      "text": "Controller had a banner on it when I powered up this morning that said something like CALIBRATION DUE. Been about a month since the last one, or maybe longer. Just sitting there on the screen at startup. — W. Osei, 1st shift"
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "vision_calibration",
+      "text": "Monthly PM checklist came back and it flagged the calibration as overdue by 6 days. Nothing crashed or alarmed hard but the tracking sheet shows we blew past the interval. — C. Lin, maintenance"
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "camera_alignment_check",
+      "text": "Parts are consistently poking out to the left side of the camera frame on camera 2. Looks like the view has drifted since sometime last week. Not throwing an alarm yet but something's visibly off-center. — T. Russo, 1st shift"
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "camera_alignment_check",
+      "text": "Inspection images look off to me — the feature we're supposed to be checking is halfway out of frame on one camera. My guess is the cleaning crew bumped the mount over the weekend. — S. Oluwafemi, 2nd shift"
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "enclosure_air_filter_cleaning",
+      "text": "Controller inside the enclosure on the east line tripped a high-temp advisory. Stuck my hand near the intake vent and airflow is barely there — feels completely restricted compared to normal. — B. Huang, maintenance"
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "enclosure_air_filter_cleaning",
+      "text": "Enclosure has been running noticeably hotter than usual all shift. The vent grille on the side is pulling almost nothing. Filter in there looks like it's never been touched. — D. McAllister, 1st shift"
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "gate_actuator_seal_replacement",
+      "text": "There's a hissing sound coming from right around the reject arm cylinder. Air is bleeding out somewhere on the actuator block. Gate still cycles but pressure feels low and it's definitely slower than it should be. — R. Petrov, 2nd shift"
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "gate_actuator_seal_replacement",
+      "text": "Slow air bleed on the actuator body on the reject gate — not a big rupture, just a steady hiss you can hear if you stand close. Gate's working for now but it's been getting worse over the past few days. — M. Jensen, maintenance"
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "lockout_tagout",
+      "text": "Need to go inside the enclosure to swap out a camera mount bracket. Walked up and the conveyor was still enabled and no lock was on the disconnect. Nobody had isolated it before starting. — P. Amara, maintenance"
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "lockout_tagout",
+      "text": "Tech had their hand right next to the camera bracket for a lens swap and the station hadn't been properly de-energized before they went in. Shift supervisor caught it and stopped them immediately. — Y. Tanaka, area supervisor"
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "solvent_spill_response",
+      "text": "Knocked over a small bottle of lens cleaner while prepping for the PM — it went right off the shelf and splashed onto the conveyor belt below the camera mount. Might have gotten into the belt drive area. — C. Santos, 1st shift"
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "solvent_spill_response",
+      "text": "IPA spilled on the floor right at the base of the vision stand during a lens cleaning. Not a huge amount but the floor is slippery and the spill is sitting close to the power strip and the cable tray. — A. Mehta, 2nd shift"
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "emergency_stop_activation",
+      "text": "Part went sideways on the belt and was about to get dragged up into the camera frame mount at high speed. Hit the red mushroom without thinking. Whole line stopped instantly. — L. Thomas, 1st shift"
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "emergency_stop_activation",
+      "text": "Robot arm on the upstream welding cell swung way too close to the camera enclosure on the traverse. Smacked the e-stop before it could make contact. Everything halted. — O. Rivera, 2nd shift"
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "emergency_stop_activation",
+      "text": "Saw what looked like smoke or haze coming out from behind the vision controller panel. Didn't wait around, just hit the mushroom on the front and stepped back. — B. Park, 3rd shift"
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "startup_sequence",
+      "text": "Came in at 6 AM for day shift and the station was completely dark — nobody from nights had powered it up before they left. Had to walk through the whole boot process before we could start running parts. — D. Kowalski, 1st shift"
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "startup_sequence",
+      "text": "Coming back after the long weekend, everything at the vision station was fully cold — power had been cut at the panel for the holiday shutdown. Took longer than a normal morning start to get it back online from scratch. — J. Ito, maintenance"
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "shutdown_sequence",
+      "text": "End of 2nd shift and the cameras were still live, system running, when 3rd shift showed up. Nobody had gone through the power-down steps before leaving. Third shift didn't know what state anything was in. — T. Cruz, 2nd shift"
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "shutdown_sequence",
+      "text": "Station was left fully on over the weekend. Came in Monday and the controller had been running with no product for two days straight. Trying to get better about the end-of-week power-off routine. — S. Williams, maintenance"
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "first_article_setup",
+      "text": "Switched over to the new bracket part number after the morning break but the vision box was still on the old housing recipe. First dozen-plus pieces ran through on the wrong inspection program before anyone caught it. — M. Baxter, 1st shift"
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "first_article_setup",
+      "text": "Tooling change-over right after lunch. Nobody loaded the new inspection recipe and the system sat there passing parts it wasn't even looking at correctly for those dimensions. Only figured it out when quality walked by. — C. Dube, process tech"
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "golden_part_verification",
+      "text": "Start-of-shift check this morning — ran the known-bad part with the surface scratch through and it came back with a green PASS. That's supposed to be an automatic reject. Something's wrong with how it's reading right now. — R. Andersen, 1st shift"
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "golden_part_verification",
+      "text": "Weekly verification run with the certified sample kit after maintenance was done on the station. One of the gold pieces — the one with the known edge chip — went through and didn't get flagged as a reject. Shift lead stopped the line right away. — O. Eze, quality tech"
+    },
+    {
+      "id": "inc_050",
+      "sop_ref": "golden_part_verification",
+      "text": "Post-PM check using the reference samples. The sample with the subsurface void that's supposed to always trigger a reject came through clean with no alarm. Couldn't release the line until we figured out what changed. — F. Nakamura, process engineer"
+    },
+    {
+      "id": "inc_051",
+      "sop_ref": "camera_alignment_check",
+      "text": "Images from the top camera look like they shifted overnight — the feature we measure for the edge distance is clipped on the right side of every frame. No alarm fired but inspection results were all over the place at startup. — B. Reyes, 1st shift"
+    }
+  ]
+}

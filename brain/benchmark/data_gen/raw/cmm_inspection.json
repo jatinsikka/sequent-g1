@@ -1,0 +1,586 @@
+{
+  "family": "Coordinate Measuring Machine",
+  "sops": [
+    {
+      "ref": "daily_startup",
+      "title": "Daily CMM Startup Sequence",
+      "condition": "The CMM has been fully powered off overnight and must be initialized for the incoming production shift.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "press_button green_power_button",
+        "wait 120",
+        "read_sensor air_pressure_sensor",
+        "read_sensor temperature_sensor",
+        "press_button axis_home_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["cmm_control_panel", "green_power_button", "air_pressure_sensor", "temperature_sensor", "axis_home_button", "shift_supervisor"]
+    },
+    {
+      "ref": "daily_shutdown",
+      "title": "End-of-Shift CMM Shutdown Sequence",
+      "condition": "The production shift has ended and the CMM must be safely parked, probe stowed, and controller powered down.",
+      "steps": [
+        "walk_to granite_table",
+        "pick stylus_tip",
+        "walk_to probe_change_rack",
+        "place stylus_tip",
+        "walk_to cmm_control_panel",
+        "wait 30",
+        "press_button controller_power_button"
+      ],
+      "equipment": ["granite_table", "stylus_tip", "probe_change_rack", "cmm_control_panel", "controller_power_button"]
+    },
+    {
+      "ref": "thermal_warmup",
+      "title": "Pre-Measurement Thermal Stabilization",
+      "condition": "The CMM has been powered on but ambient temperature in the measurement room has not yet stabilized to the required 20 degrees C before dimensional inspection may begin.",
+      "steps": [
+        "walk_to measurement_area",
+        "read_sensor temperature_sensor",
+        "wait 1800",
+        "read_sensor temperature_sensor",
+        "notify quality_engineer"
+      ],
+      "equipment": ["measurement_area", "temperature_sensor", "quality_engineer"]
+    },
+    {
+      "ref": "air_pressure_low",
+      "title": "Air Bearing Pressure Below Minimum Threshold",
+      "condition": "Air supply pressure to the CMM air bearings has drifted gradually below the 5.5 bar minimum setpoint, triggering a sustained low-pressure warning alarm.",
+      "steps": [
+        "walk_to air_supply_panel",
+        "read_sensor air_pressure_sensor",
+        "walk_to air_filter_housing",
+        "read_sensor filter_pressure_drop_sensor",
+        "notify maintenance_technician",
+        "wait 60",
+        "read_sensor air_pressure_sensor"
+      ],
+      "equipment": ["air_supply_panel", "air_pressure_sensor", "air_filter_housing", "filter_pressure_drop_sensor", "maintenance_technician"]
+    },
+    {
+      "ref": "air_pressure_sudden_drop",
+      "title": "Sudden Air Bearing Pressure Collapse",
+      "condition": "Air bearing supply pressure has collapsed more than 1.5 bar within ten seconds, indicating a supply line rupture or valve failure requiring immediate machine halt.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "press_button red_estop_button",
+        "walk_to air_supply_panel",
+        "press_button air_supply_shutoff_button",
+        "read_sensor air_pressure_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["cmm_control_panel", "red_estop_button", "air_supply_panel", "air_supply_shutoff_button", "air_pressure_sensor", "maintenance_technician"]
+    },
+    {
+      "ref": "air_pressure_high",
+      "title": "Air Bearing Pressure Exceeds Upper Limit",
+      "condition": "Air bearing supply pressure has climbed above the 6.5 bar ceiling, risking permanent damage to the precision air bearing surfaces.",
+      "steps": [
+        "walk_to air_supply_panel",
+        "read_sensor air_pressure_sensor",
+        "press_button air_supply_shutoff_button",
+        "notify maintenance_technician",
+        "wait 120",
+        "read_sensor air_pressure_sensor"
+      ],
+      "equipment": ["air_supply_panel", "air_pressure_sensor", "air_supply_shutoff_button", "maintenance_technician"]
+    },
+    {
+      "ref": "probe_force_warning",
+      "title": "Probe Contact Force Elevated Warning",
+      "condition": "Probe contact force sensor reads between 0.15 N and 0.25 N, above the nominal 0.10 N but below the fault threshold, indicating possible tip contamination or probe stiffness.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "read_sensor probe_force_sensor",
+        "press_button warning_acknowledge_button",
+        "walk_to spill_kit_cabinet",
+        "pick cleaning_cloth",
+        "walk_to granite_table",
+        "place cleaning_cloth"
+      ],
+      "equipment": ["cmm_control_panel", "probe_force_sensor", "warning_acknowledge_button", "spill_kit_cabinet", "cleaning_cloth", "granite_table"]
+    },
+    {
+      "ref": "probe_force_fault",
+      "title": "Probe Contact Force Critical Fault",
+      "condition": "Probe contact force sensor has exceeded the 0.25 N fault threshold, causing the CMM controller to freeze all axis motion and raise a hard fault alarm.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "read_sensor probe_force_sensor",
+        "press_button red_estop_button",
+        "walk_to probe_change_rack",
+        "pick replacement_stylus",
+        "place replacement_stylus",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["cmm_control_panel", "probe_force_sensor", "red_estop_button", "probe_change_rack", "replacement_stylus", "maintenance_technician"]
+    },
+    {
+      "ref": "temp_low_deviation",
+      "title": "Measurement Area Temperature Below Setpoint",
+      "condition": "Measurement room temperature has fallen below 19 degrees C, outside the plus-or-minus 1 degree C ISO tolerance band, causing the CMM to automatically suspend active measurements.",
+      "steps": [
+        "walk_to measurement_area",
+        "read_sensor temperature_sensor",
+        "walk_to cmm_control_panel",
+        "press_button measurement_suspend_button",
+        "notify quality_engineer",
+        "wait 3600",
+        "read_sensor temperature_sensor"
+      ],
+      "equipment": ["measurement_area", "temperature_sensor", "cmm_control_panel", "measurement_suspend_button", "quality_engineer"]
+    },
+    {
+      "ref": "temp_high_spike",
+      "title": "Measurement Area Temperature Rapid Rise Above Ceiling",
+      "condition": "Measurement room temperature has risen above 22 degrees C within a fifteen-minute window, indicating HVAC failure or external heat intrusion requiring immediate machine shutdown.",
+      "steps": [
+        "walk_to measurement_area",
+        "read_sensor temperature_sensor",
+        "walk_to cmm_control_panel",
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "notify quality_engineer"
+      ],
+      "equipment": ["measurement_area", "temperature_sensor", "cmm_control_panel", "red_estop_button", "shift_supervisor", "quality_engineer"]
+    },
+    {
+      "ref": "probe_tip_chipped",
+      "title": "Chipped Stylus Ball Detected on Visual Inspection",
+      "condition": "Visual inspection has identified a chip or surface crack on the ruby stylus ball, making dimensional readings unreliable while the probe motion mechanism remains functional.",
+      "steps": [
+        "walk_to probe_change_rack",
+        "pick replacement_stylus",
+        "walk_to granite_table",
+        "place replacement_stylus",
+        "walk_to reference_sphere_stand",
+        "read_sensor probe_force_sensor",
+        "notify quality_engineer"
+      ],
+      "equipment": ["probe_change_rack", "replacement_stylus", "granite_table", "reference_sphere_stand", "probe_force_sensor", "quality_engineer"]
+    },
+    {
+      "ref": "probe_tip_bent",
+      "title": "Bent Stylus Shaft Detected by Qualification Failure",
+      "condition": "The automated probe qualification routine against the reference sphere has exceeded the 2 micrometer tolerance, indicating the stylus shaft is physically deformed and no longer coaxial.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "read_sensor probe_force_sensor",
+        "press_button alarm_reset_button",
+        "walk_to probe_change_rack",
+        "pick replacement_stylus",
+        "place replacement_stylus",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["cmm_control_panel", "probe_force_sensor", "alarm_reset_button", "probe_change_rack", "replacement_stylus", "maintenance_technician"]
+    },
+    {
+      "ref": "loto_maintenance",
+      "title": "Lockout-Tagout for Scheduled CMM Maintenance",
+      "condition": "Scheduled preventive maintenance requires all electrical and pneumatic energy sources on the CMM to be fully isolated and locked before any panel or cover is opened.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "press_button controller_power_button",
+        "walk_to air_supply_panel",
+        "press_button air_supply_shutoff_button",
+        "walk_to loto_station",
+        "pick loto_padlock",
+        "place loto_padlock"
+      ],
+      "equipment": ["cmm_control_panel", "controller_power_button", "air_supply_panel", "air_supply_shutoff_button", "loto_station", "loto_padlock"]
+    },
+    {
+      "ref": "coolant_minor_drip",
+      "title": "Minor Coolant Drip Near Granite Table Base",
+      "condition": "A small coolant drip of less than 0.5 liters has been detected near the base of the granite table structure, with the table surface itself remaining uncontaminated.",
+      "steps": [
+        "walk_to spill_kit_cabinet",
+        "pick spill_absorbent_pad",
+        "walk_to granite_table",
+        "place spill_absorbent_pad",
+        "read_sensor coolant_level_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["spill_kit_cabinet", "spill_absorbent_pad", "granite_table", "coolant_level_sensor", "maintenance_technician"]
+    },
+    {
+      "ref": "coolant_major_spill",
+      "title": "Major Coolant Flood Contaminating Granite Table Surface",
+      "condition": "Greater than 2 liters of coolant has pooled on or across the granite table surface, contaminating the measurement datum and creating an immediate slip hazard on the surrounding floor.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "walk_to spill_kit_cabinet",
+        "pick spill_absorbent_pad",
+        "walk_to granite_table",
+        "place spill_absorbent_pad"
+      ],
+      "equipment": ["cmm_control_panel", "red_estop_button", "shift_supervisor", "spill_kit_cabinet", "spill_absorbent_pad", "granite_table"]
+    },
+    {
+      "ref": "estop_response",
+      "title": "Emergency Stop Activated During Active Measurement Cycle",
+      "condition": "The red E-stop button has been pressed while the CMM is executing a measurement cycle, leaving the probe axes halted mid-travel with a workpiece still fixtured on the granite table.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "read_sensor estop_status_sensor",
+        "read_sensor axis_position_sensor",
+        "notify shift_supervisor",
+        "wait 60",
+        "press_button alarm_reset_button",
+        "press_button axis_home_button"
+      ],
+      "equipment": ["cmm_control_panel", "estop_status_sensor", "axis_position_sensor", "shift_supervisor", "alarm_reset_button", "axis_home_button"]
+    },
+    {
+      "ref": "air_filter_replace",
+      "title": "Scheduled Air Supply Filter Replacement",
+      "condition": "The CMM air supply inline filter has reached its 500-hour replacement interval, or the filter differential pressure sensor reads above 0.3 bar.",
+      "steps": [
+        "walk_to air_supply_panel",
+        "press_button air_supply_shutoff_button",
+        "walk_to maintenance_supply_cart",
+        "pick replacement_air_filter",
+        "walk_to air_filter_housing",
+        "place replacement_air_filter",
+        "read_sensor filter_pressure_drop_sensor"
+      ],
+      "equipment": ["air_supply_panel", "air_supply_shutoff_button", "maintenance_supply_cart", "replacement_air_filter", "air_filter_housing", "filter_pressure_drop_sensor"]
+    },
+    {
+      "ref": "stylus_calibration",
+      "title": "Probe Stylus Calibration with Reference Sphere",
+      "condition": "A new stylus tip has been installed, or the four-hour calibration interval has elapsed, requiring re-qualification of the probe tip position against the precision reference sphere.",
+      "steps": [
+        "walk_to reference_sphere_stand",
+        "read_sensor probe_force_sensor",
+        "walk_to cmm_control_panel",
+        "press_button calibration_start_button",
+        "wait 180",
+        "read_sensor probe_force_sensor",
+        "notify quality_engineer"
+      ],
+      "equipment": ["reference_sphere_stand", "probe_force_sensor", "cmm_control_panel", "calibration_start_button", "quality_engineer"]
+    },
+    {
+      "ref": "granite_table_clean",
+      "title": "Routine Granite Table Surface Cleaning",
+      "condition": "End-of-shift or between-batch cleaning of the granite surface is required to remove metal chips, coolant residue, and dust that could affect part seating accuracy.",
+      "steps": [
+        "walk_to spill_kit_cabinet",
+        "pick cleaning_cloth",
+        "walk_to granite_table",
+        "place cleaning_cloth",
+        "pick cleaning_cloth",
+        "walk_to spill_kit_cabinet",
+        "place cleaning_cloth"
+      ],
+      "equipment": ["spill_kit_cabinet", "cleaning_cloth", "granite_table"]
+    },
+    {
+      "ref": "scale_encoder_clean",
+      "title": "Linear Scale Encoder Cleaning Procedure",
+      "condition": "Scheduled 1000-hour maintenance or an axis repeatability test has detected intermittent encoder read errors requiring cleaning of the linear glass scale and read head.",
+      "steps": [
+        "walk_to cmm_control_panel",
+        "press_button controller_power_button",
+        "walk_to spill_kit_cabinet",
+        "pick cleaning_cloth",
+        "walk_to encoder_panel",
+        "place cleaning_cloth",
+        "notify quality_engineer"
+      ],
+      "equipment": ["cmm_control_panel", "controller_power_button", "spill_kit_cabinet", "cleaning_cloth", "encoder_panel", "quality_engineer"]
+    },
+    {
+      "ref": "controller_cabinet_filter",
+      "title": "Controller Cabinet Cooling Filter Replacement",
+      "condition": "The controller cabinet cooling filter has reached its 250-hour replacement interval, or the cabinet internal temperature sensor reads above 45 degrees C.",
+      "steps": [
+        "walk_to controller_cabinet",
+        "read_sensor cabinet_temp_sensor",
+        "walk_to maintenance_supply_cart",
+        "pick replacement_controller_filter",
+        "walk_to controller_cabinet",
+        "place replacement_controller_filter",
+        "read_sensor cabinet_temp_sensor"
+      ],
+      "equipment": ["controller_cabinet", "cabinet_temp_sensor", "maintenance_supply_cart", "replacement_controller_filter"]
+    },
+    {
+      "ref": "measurement_artifact_check",
+      "title": "Reference Artifact Dimensional Verification",
+      "condition": "Daily pre-production verification of the calibration artifact is required on the granite table to confirm CMM volumetric accuracy is within specification before any production parts are inspected.",
+      "steps": [
+        "walk_to reference_sphere_stand",
+        "pick calibration_artifact",
+        "walk_to granite_table",
+        "place calibration_artifact",
+        "press_button measurement_start_button",
+        "wait 300",
+        "notify quality_engineer"
+      ],
+      "equipment": ["reference_sphere_stand", "calibration_artifact", "granite_table", "measurement_start_button", "quality_engineer"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "daily_startup",
+      "text": "Came in first thing on first shift and the CMM is completely dark — whole panel is dead. Tried moving the axes and got nothing. Realized nobody did the full boot-up before leaving last night."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "daily_startup",
+      "text": "Night crew confirmed they killed everything hard at end of shift. Machine is cold, controller is off, no air audible. Need to go through the whole wake-up routine before we can touch any parts."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "daily_shutdown",
+      "text": "End of second shift and the probe is still seated on the last part — nobody put it back in the holder before they walked off. Controller box is still live and humming."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "daily_shutdown",
+      "text": "Shift changeover and the previous operator just left the machine sitting there running — stylus hanging over the table, controller powered up. Need to park it properly and power down the box before third shift takes over."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "thermal_warmup",
+      "text": "Machine just came on but the thermometer on the wall shows 18 degrees in here. HVAC hasn't caught up yet after the weekend. Can't touch any inspection parts until the room gets to where it needs to be."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "thermal_warmup",
+      "text": "Got here first thing and the measurement room is at 17.5. Looks like the building heat was set back over the long weekend. We're going to be sitting here waiting a while before we're allowed to run any dimensions."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "air_pressure_low",
+      "text": "Over the last hour the air gage has been slowly creeping down — sitting around 5.0 bar now and the yellow light just came on. Nothing sudden, just a gradual slide downward."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "air_pressure_low",
+      "text": "Third shift called it in — the pressure has been drifting all night, now at 4.8 bar with the warning indicator on. No events, no bangs, just a slow bleed-off over about four hours."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "air_pressure_sudden_drop",
+      "text": "The whole machine just slammed off — pressure went from about 6 bar to under 2 bar in maybe five seconds and the axes dropped. Sounded like something burst in the line."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "air_pressure_sudden_drop",
+      "text": "Right in the middle of a run, the air just died instantly. The bearings settled onto the table — you could hear them contact. Not a drift, it was instantaneous. Hit stop as fast as I could."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "air_pressure_sudden_drop",
+      "text": "Line 4 CMM — the supply line just let go. One second it was running fine, next second the axes are grinding because the bearings have nothing under them. Had to kill it immediately."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "air_pressure_high",
+      "text": "The downstream gage is reading 7.1 bar and still climbing past the red mark. Never seen it go that high. Something's wrong with the regulator — it's not holding setpoint anymore."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "air_pressure_high",
+      "text": "Overpressure alarm came on — panel's showing 6.8 bar and it was trending upward. Way over where it should be. Worried about what that's doing to the bearing clearances."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "probe_force_warning",
+      "text": "The force readout on the screen is showing 0.18 or so — not critical but definitely up from normal. Yellow flag came on but the measurement is still running. Tip might be picking up some debris."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "probe_force_warning",
+      "text": "Controller is flagging elevated stylus contact — it's in the orange zone on the gauge. Hasn't tripped the fault yet but it's above the happy range. Need to check the tip surface."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "probe_force_fault",
+      "text": "Machine just stopped dead mid-cycle — the force value spiked to 0.3-something and everything locked out. Probe must have hit a fixture edge. I think the tip is damaged."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "probe_force_fault",
+      "text": "Got a hard red alarm and total axis freeze out of nowhere. Stylus must have caught on the clamp bolt — force went way over limit and the controller killed everything immediately."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "probe_force_fault",
+      "text": "CMM over by the incoming dock stopped with a hard fault. Someone ran it into a fixture during the last job — you can see the shaft is tweaked and the force number on the screen is completely off the chart."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "temp_low_deviation",
+      "text": "Night shift left the loading dock door cracked open and the measurement room got cold — thermometer is reading 18.3 right now. Machine suspended itself automatically and won't release for inspection."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "temp_low_deviation",
+      "text": "AC was cranked way too hard or the setpoint got bumped — it's 17 degrees in here by the CMM. System already flagged it and locked out inspection mode. We can't run parts until this recovers."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "temp_high_spike",
+      "text": "HVAC just crapped out and the room went from 20 to 24 degrees in about ten minutes — never seen it climb that fast. Machine is throwing alarms and we need to stop."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "temp_high_spike",
+      "text": "Someone opened the bay door right next to the measurement room and welding heat flooded in. Temp sensor jumped four degrees in a few minutes and tripped the system. Everything shut down."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "temp_high_spike",
+      "text": "The chiller for the measurement room quit and now it's a sauna in here. Went from fine to 25 degrees in under fifteen minutes. Everything is down and the quality engineer has been paged."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "probe_tip_chipped",
+      "text": "Noticed the ruby ball looks a little off while swapping parts — there's a small nick visible on the side when I held it under the magnifier. Probe still moves fine but I don't trust the data coming off it."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "probe_tip_chipped",
+      "text": "Quality flagged a bunch of readings that look suspicious on the last batch. Went and checked the stylus and you can see a chip on the ball surface. Probe mechanism is working but the contact point is compromised."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "probe_tip_bent",
+      "text": "Ran the sphere qualification this morning and it bombed — deviation is way over tolerance. Looked at the shaft and it's not straight anymore. There's a slight hook to it."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "probe_tip_bent",
+      "text": "Calibration routine failed at the start of second shift — error on the reference sphere check. Pulled the stylus out to look at it and the shaft has a visible kink. Must have collided with a fixture on last shift."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "probe_tip_bent",
+      "text": "CMM near line 2 failed its morning qual check by three sigma. Tech came over and confirmed the shaft is physically off-axis — it's bent, not just dirty or loose."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "loto_maintenance",
+      "text": "Scheduled PM today on the CMM — need all energy isolated before we start pulling panels. Right now the machine is still live and air is still on. Can't let the crew open anything up yet."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "loto_maintenance",
+      "text": "Maintenance crew is ready to start on the CMM bearing service but the machine hasn't been fully de-energized. Need the full isolation done and locks applied before anyone opens a cover."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "coolant_minor_drip",
+      "text": "There's a small puddle under the front base of the CMM — maybe a cup's worth. It's not up on the stone surface but it's definitely dripping from somewhere above. Floor's wet but the granite is clean."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "coolant_minor_drip",
+      "text": "Second shift noticed a slow drip on the floor near the front leg of the granite stand — just a trickle, barely anything. Table top is dry but it's worth catching before it gets bigger."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "coolant_major_spill",
+      "text": "Huge coolant dump near the CMM — it's all over the granite top and pooling on the floor around the base. Came out of nowhere, maybe a hose let go. It's a real mess and a slip hazard out here."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "coolant_major_spill",
+      "text": "The parts washer upstream backed up and coolant flooded across to the CMM area — the stone is wet, the floor is wet. Nothing is running until this whole area gets cleaned up properly."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "coolant_major_spill",
+      "text": "Came in and found the whole CMM area flooded from a failed fitting — liquid on the table surface, running down the side of the granite, and about an inch standing on the floor around the base."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "estop_response",
+      "text": "Operator on line 3 hit the mushroom button when a part started to tip — probe is frozen mid-air and there's still a component on the table. Everything is halted and we need to sort out the axis position before we clear it."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "estop_response",
+      "text": "The red button got bumped during a material move through the aisle — machine stopped right in the middle of a measurement run. Need to figure out where the axes are before we reset anything."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "air_filter_replace",
+      "text": "PM sheet says 500 hours is up on the inline filter — differential gauge is also reading 0.35 bar which is past the flag. Time to pull it and swap in a new one."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "air_filter_replace",
+      "text": "Maintenance log shows we're overdue on the CMM air filter by about 50 hours. The pressure drop gauge has been in the red for a week and we keep ignoring it. Can't put it off anymore."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "stylus_calibration",
+      "text": "Put a new tip in this morning and now the controller is prompting for calibration before it'll let me run any actual parts. Need to do the sphere-touch sequence first."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "stylus_calibration",
+      "text": "Four-hour interval popped up on the screen — machine is asking for another sphere run before it releases for production inspection. Nobody has done it since shift start."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "stylus_calibration",
+      "text": "Got a calibration-expired warning mid-batch — no new tip installed, just the time interval expired. Need to run through the sphere sequence before any of these measurements are considered valid."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "granite_table_clean",
+      "text": "End of shift and the stone top has aluminum shavings and coolant residue all over it from the batch run — needs a full wipe-down before the next job family goes on there."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "granite_table_clean",
+      "text": "Between-batch switchover and the table is dirty — chips from the bracket run are sitting on the surface and there's oily residue. Can't put the next part family down without cleaning the stone first."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "scale_encoder_clean",
+      "text": "Repeatability test on the X-axis is coming back with intermittent errors — deviations that come and go. Tech thinks it's a dirty glass scale. Need to clean it before we can trust those numbers."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "scale_encoder_clean",
+      "text": "Monthly PM is due and the encoder diagnostic is throwing occasional read blips on the Y-axis. Time to do the glass wipe on that axis before we run another batch."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "controller_cabinet_filter",
+      "text": "Controller box is running hot — the internal temp warning came on and it's showing 47 degrees inside the cabinet. The filter pad in the door vent looks completely clogged with lint and dust."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "controller_cabinet_filter",
+      "text": "The 250-hour sticker on the cabinet filter says it's past due. Fan is working a lot harder than usual and the temperature reading is sitting right on the edge. Time to swap the pad."
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "measurement_artifact_check",
+      "text": "Before we kick off the morning run, nobody has done the reference block check yet. Quality says we can't release any inspection data until that piece has been run through on the CMM."
+    },
+    {
+      "id": "inc_050",
+      "sop_ref": "measurement_artifact_check",
+      "text": "Start of third shift and the calibration block hasn't been touched — supervisor wants the standard reference piece checked on the stone before we sign off on any inspection results tonight."
+    },
+    {
+      "id": "inc_051",
+      "sop_ref": "measurement_artifact_check",
+      "text": "QE is holding up batch sign-off until she sees the artifact verification log. Robot needs to run the reference piece through its paces on the CMM and get those numbers back to her."
+    }
+  ]
+}

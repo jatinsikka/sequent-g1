@@ -1,0 +1,710 @@
+{
+  "family": "Fiber Laser Cutter",
+  "sops": [
+    {
+      "ref": "assist_gas_low_pressure",
+      "title": "Assist Gas Supply Pressure Below Setpoint",
+      "condition": "Assist gas supply pressure drifts below the 8 bar operating setpoint and the low-pressure alarm activates.",
+      "steps": [
+        "walk_to assist_gas_supply_panel",
+        "read_sensor assist_gas_pressure_sensor",
+        "walk_to assist_gas_cylinder_bank",
+        "read_sensor assist_gas_cylinder_pressure_gauge",
+        "press_button cutting_cycle_pause_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "assist_gas_supply_panel",
+        "assist_gas_pressure_sensor",
+        "assist_gas_cylinder_bank",
+        "assist_gas_cylinder_pressure_gauge",
+        "cutting_cycle_pause_button"
+      ]
+    },
+    {
+      "ref": "assist_gas_pressure_collapse",
+      "title": "Assist Gas Pressure Sudden Collapse",
+      "condition": "Assist gas pressure drops instantaneously to below 2 bar, indicating a line rupture or catastrophic regulator failure.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to assist_gas_supply_panel",
+        "press_button assist_gas_shutoff_valve_button",
+        "read_sensor assist_gas_pressure_sensor",
+        "notify maintenance_technician",
+        "notify safety_officer"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "assist_gas_supply_panel",
+        "assist_gas_shutoff_valve_button",
+        "assist_gas_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "assist_gas_overpressure",
+      "title": "Assist Gas Pressure Above Maximum Ceiling",
+      "condition": "Assist gas pressure exceeds the 16 bar maximum ceiling and the high-pressure alarm activates.",
+      "steps": [
+        "press_button cutting_cycle_pause_button",
+        "walk_to assist_gas_supply_panel",
+        "read_sensor assist_gas_pressure_sensor",
+        "press_button assist_gas_pressure_relief_button",
+        "wait 30",
+        "read_sensor assist_gas_pressure_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "cutting_cycle_pause_button",
+        "assist_gas_supply_panel",
+        "assist_gas_pressure_sensor",
+        "assist_gas_pressure_relief_button"
+      ]
+    },
+    {
+      "ref": "chiller_coolant_temp_high",
+      "title": "Chiller Coolant Temperature Elevated Warning",
+      "condition": "Chiller coolant outlet temperature rises above the 22 degrees C warning threshold during normal operation.",
+      "steps": [
+        "walk_to chiller_unit",
+        "read_sensor chiller_coolant_temp_sensor",
+        "read_sensor chiller_ambient_temp_sensor",
+        "press_button chiller_fan_boost_button",
+        "wait 120",
+        "read_sensor chiller_coolant_temp_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "chiller_unit",
+        "chiller_coolant_temp_sensor",
+        "chiller_ambient_temp_sensor",
+        "chiller_fan_boost_button"
+      ]
+    },
+    {
+      "ref": "chiller_coolant_temp_critical",
+      "title": "Chiller Coolant Temperature Critical Emergency Stop",
+      "condition": "Chiller coolant temperature exceeds the 28 degrees C emergency limit, creating imminent risk of laser module thermal damage.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to chiller_unit",
+        "read_sensor chiller_coolant_temp_sensor",
+        "press_button laser_emission_disable_button",
+        "notify maintenance_technician",
+        "notify production_supervisor",
+        "wait 600"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "chiller_unit",
+        "chiller_coolant_temp_sensor",
+        "laser_emission_disable_button"
+      ]
+    },
+    {
+      "ref": "chiller_coolant_low_level",
+      "title": "Chiller Coolant Reservoir Level Below Minimum",
+      "condition": "Chiller coolant reservoir level drops below the minimum mark and the low-level sensor activates while temperature remains within range.",
+      "steps": [
+        "walk_to chiller_unit",
+        "read_sensor chiller_coolant_level_sensor",
+        "walk_to coolant_storage_cabinet",
+        "pick coolant_refill_jug",
+        "walk_to chiller_unit",
+        "place coolant_refill_jug",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "chiller_unit",
+        "chiller_coolant_level_sensor",
+        "coolant_storage_cabinet",
+        "coolant_refill_jug"
+      ]
+    },
+    {
+      "ref": "cutting_head_collision",
+      "title": "Cutting Head Collision Sensor Fault Response",
+      "condition": "The cutting head collision sensor trips after the nozzle makes unintended contact with the workpiece, fixture, or clamp during a cutting cycle.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to laser_cutter_control_panel",
+        "press_button laser_emission_disable_button",
+        "read_sensor cutting_head_collision_sensor",
+        "notify maintenance_technician",
+        "notify production_supervisor"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "laser_cutter_control_panel",
+        "laser_emission_disable_button",
+        "cutting_head_collision_sensor"
+      ]
+    },
+    {
+      "ref": "laser_power_low",
+      "title": "Laser Output Power Below Programmed Setpoint",
+      "condition": "Measured laser output power falls below 90 percent of the programmed setpoint during an active cutting cycle with no module fault code present.",
+      "steps": [
+        "press_button cutting_cycle_pause_button",
+        "walk_to laser_cutter_control_panel",
+        "read_sensor laser_power_sensor",
+        "walk_to cutting_head_service_access",
+        "read_sensor focus_lens_contamination_sensor",
+        "notify maintenance_technician",
+        "wait 60"
+      ],
+      "equipment": [
+        "cutting_cycle_pause_button",
+        "laser_cutter_control_panel",
+        "laser_power_sensor",
+        "cutting_head_service_access",
+        "focus_lens_contamination_sensor"
+      ]
+    },
+    {
+      "ref": "laser_power_fault",
+      "title": "Laser Power Module Fault Complete Emission Failure",
+      "condition": "The laser power module generates a fault code and emission stops entirely with zero output detected and no cutting occurring.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to laser_source_cabinet",
+        "read_sensor laser_module_fault_indicator",
+        "press_button laser_module_reset_button",
+        "wait 30",
+        "read_sensor laser_module_fault_indicator",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "laser_source_cabinet",
+        "laser_module_fault_indicator",
+        "laser_module_reset_button"
+      ]
+    },
+    {
+      "ref": "exhaust_airflow_low",
+      "title": "Fume Exhaust System Airflow Below Minimum",
+      "condition": "Fume exhaust system airflow drops below the 800 CFM minimum threshold and the airflow sensor alarm activates.",
+      "steps": [
+        "press_button cutting_cycle_pause_button",
+        "walk_to exhaust_fan_panel",
+        "read_sensor exhaust_airflow_sensor",
+        "walk_to exhaust_filter_housing",
+        "read_sensor exhaust_filter_differential_pressure_sensor",
+        "notify maintenance_technician",
+        "wait 120"
+      ],
+      "equipment": [
+        "cutting_cycle_pause_button",
+        "exhaust_fan_panel",
+        "exhaust_airflow_sensor",
+        "exhaust_filter_housing",
+        "exhaust_filter_differential_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "focus_lens_replacement",
+      "title": "Focus Lens Scheduled Replacement",
+      "condition": "Focus lens replacement interval has been reached per the PM calendar, or lens damage is confirmed during optical inspection.",
+      "steps": [
+        "walk_to laser_cutter_control_panel",
+        "press_button laser_emission_disable_button",
+        "walk_to cutting_head_service_access",
+        "pick worn_focus_lens",
+        "place worn_focus_lens",
+        "pick replacement_focus_lens",
+        "place replacement_focus_lens"
+      ],
+      "equipment": [
+        "laser_cutter_control_panel",
+        "laser_emission_disable_button",
+        "cutting_head_service_access",
+        "worn_focus_lens",
+        "replacement_focus_lens"
+      ]
+    },
+    {
+      "ref": "nozzle_inspection_cleaning",
+      "title": "Cutting Nozzle Inspection and Cleaning",
+      "condition": "Scheduled nozzle inspection interval is reached or cut quality degradation is observed on finished parts.",
+      "steps": [
+        "walk_to laser_cutter_control_panel",
+        "press_button cutting_cycle_pause_button",
+        "walk_to cutting_head_service_access",
+        "pick cutting_nozzle",
+        "read_sensor nozzle_condition_sensor",
+        "place cutting_nozzle",
+        "notify quality_inspector"
+      ],
+      "equipment": [
+        "laser_cutter_control_panel",
+        "cutting_cycle_pause_button",
+        "cutting_head_service_access",
+        "cutting_nozzle",
+        "nozzle_condition_sensor"
+      ]
+    },
+    {
+      "ref": "cover_glass_replacement",
+      "title": "Cutting Head Protective Cover Glass Replacement",
+      "condition": "The protective cover glass inside the cutting head reaches its replacement interval or shows visible contamination on inspection.",
+      "steps": [
+        "press_button laser_emission_disable_button",
+        "walk_to cutting_head_service_access",
+        "pick contaminated_cover_glass",
+        "place contaminated_cover_glass",
+        "pick replacement_cover_glass",
+        "place replacement_cover_glass",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "laser_emission_disable_button",
+        "cutting_head_service_access",
+        "contaminated_cover_glass",
+        "replacement_cover_glass"
+      ]
+    },
+    {
+      "ref": "chiller_coolant_scheduled_refill",
+      "title": "Chiller Coolant Scheduled Monthly Refill",
+      "condition": "Monthly PM calendar triggers a scheduled coolant top-off with no active sensor alarm and coolant level still above the low threshold.",
+      "steps": [
+        "walk_to chiller_unit",
+        "read_sensor chiller_coolant_level_sensor",
+        "walk_to coolant_storage_cabinet",
+        "pick coolant_refill_jug",
+        "walk_to chiller_unit",
+        "place coolant_refill_jug",
+        "read_sensor chiller_coolant_level_sensor"
+      ],
+      "equipment": [
+        "chiller_unit",
+        "chiller_coolant_level_sensor",
+        "coolant_storage_cabinet",
+        "coolant_refill_jug"
+      ]
+    },
+    {
+      "ref": "exhaust_filter_replacement",
+      "title": "Fume Exhaust Filter Replacement",
+      "condition": "Exhaust filter differential pressure exceeds 1.5 in-WC or the PM interval is reached, indicating filter saturation.",
+      "steps": [
+        "press_button cutting_cycle_pause_button",
+        "walk_to exhaust_filter_housing",
+        "pick saturated_exhaust_filter",
+        "place saturated_exhaust_filter",
+        "pick replacement_exhaust_filter",
+        "place replacement_exhaust_filter",
+        "press_button exhaust_system_restart_button"
+      ],
+      "equipment": [
+        "cutting_cycle_pause_button",
+        "exhaust_filter_housing",
+        "saturated_exhaust_filter",
+        "replacement_exhaust_filter",
+        "exhaust_system_restart_button"
+      ]
+    },
+    {
+      "ref": "laser_power_calibration",
+      "title": "Laser Power and Focus Calibration",
+      "condition": "Scheduled calibration interval is due or post-maintenance verification is required after optic service.",
+      "steps": [
+        "walk_to laser_cutter_control_panel",
+        "press_button calibration_mode_button",
+        "walk_to laser_power_meter_station",
+        "place laser_power_meter_target",
+        "read_sensor laser_power_calibration_sensor",
+        "press_button calibration_confirm_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "laser_cutter_control_panel",
+        "calibration_mode_button",
+        "laser_power_meter_station",
+        "laser_power_meter_target",
+        "laser_power_calibration_sensor",
+        "calibration_confirm_button"
+      ]
+    },
+    {
+      "ref": "linear_guide_lubrication",
+      "title": "X and Y Axis Linear Guide Rail Lubrication",
+      "condition": "Scheduled lubrication interval for X and Y axis linear guide rails is reached per the PM calendar.",
+      "steps": [
+        "press_button laser_emission_disable_button",
+        "walk_to x_axis_guide_rail",
+        "pick grease_applicator",
+        "place grease_applicator",
+        "walk_to y_axis_guide_rail",
+        "place grease_applicator",
+        "press_button axis_home_button"
+      ],
+      "equipment": [
+        "laser_emission_disable_button",
+        "x_axis_guide_rail",
+        "grease_applicator",
+        "y_axis_guide_rail",
+        "axis_home_button"
+      ]
+    },
+    {
+      "ref": "lockout_tagout_laser",
+      "title": "Laser Cutter Lockout Tagout Energy Isolation",
+      "condition": "Maintenance or repair work requires full energy isolation of the laser cutter before personnel enter the enclosure or service internal components.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to laser_main_power_disconnect",
+        "press_button main_power_disconnect_switch",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "pick lockout_tag",
+        "place lockout_tag"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "laser_main_power_disconnect",
+        "main_power_disconnect_switch",
+        "lockout_hasp",
+        "lockout_tag"
+      ]
+    },
+    {
+      "ref": "coolant_spill_response",
+      "title": "Chiller Coolant Spill Cleanup Response",
+      "condition": "Chiller coolant is observed spilled on the floor around the laser cutter or chiller unit.",
+      "steps": [
+        "press_button cutting_cycle_pause_button",
+        "notify safety_officer",
+        "walk_to spill_kit_station",
+        "pick spill_absorbent_pad",
+        "walk_to chiller_unit",
+        "place spill_absorbent_pad",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "cutting_cycle_pause_button",
+        "spill_kit_station",
+        "spill_absorbent_pad",
+        "chiller_unit"
+      ]
+    },
+    {
+      "ref": "fire_estop_response",
+      "title": "Fire or Uncontrolled Combustion Emergency Stop",
+      "condition": "Fire, uncontrolled smoke, or sustained sparking is detected inside or immediately adjacent to the laser cutting enclosure.",
+      "steps": [
+        "press_button red_estop_button",
+        "press_button laser_emission_disable_button",
+        "walk_to assist_gas_supply_panel",
+        "press_button assist_gas_shutoff_valve_button",
+        "notify safety_officer",
+        "notify production_supervisor",
+        "walk_to fire_extinguisher_station"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "laser_emission_disable_button",
+        "assist_gas_supply_panel",
+        "assist_gas_shutoff_valve_button",
+        "fire_extinguisher_station"
+      ]
+    },
+    {
+      "ref": "startup_sequence",
+      "title": "Laser Cutter Shift Startup Sequence",
+      "condition": "Laser cutter is to be started at the beginning of a shift or following a planned shutdown.",
+      "steps": [
+        "walk_to laser_cutter_control_panel",
+        "press_button main_power_on_button",
+        "walk_to chiller_unit",
+        "read_sensor chiller_coolant_level_sensor",
+        "walk_to assist_gas_supply_panel",
+        "read_sensor assist_gas_pressure_sensor",
+        "press_button laser_emission_enable_button"
+      ],
+      "equipment": [
+        "laser_cutter_control_panel",
+        "main_power_on_button",
+        "chiller_unit",
+        "chiller_coolant_level_sensor",
+        "assist_gas_supply_panel",
+        "assist_gas_pressure_sensor",
+        "laser_emission_enable_button"
+      ]
+    },
+    {
+      "ref": "shutdown_sequence",
+      "title": "Laser Cutter End of Shift Shutdown Sequence",
+      "condition": "Laser cutter is to be shut down at the end of a shift or before a planned maintenance window.",
+      "steps": [
+        "walk_to laser_cutter_control_panel",
+        "press_button cutting_cycle_stop_button",
+        "press_button laser_emission_disable_button",
+        "walk_to assist_gas_supply_panel",
+        "press_button assist_gas_shutoff_valve_button",
+        "wait 300",
+        "press_button main_power_off_button"
+      ],
+      "equipment": [
+        "laser_cutter_control_panel",
+        "cutting_cycle_stop_button",
+        "laser_emission_disable_button",
+        "assist_gas_supply_panel",
+        "assist_gas_shutoff_valve_button",
+        "main_power_off_button"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "assist_gas_low_pressure",
+      "text": "Been running line 4 since 7am and about an hour in the machine started throwing that low-gas alarm. Checked the readout on the panel — it was sitting at like 6.5 bar, been slowly creeping down since we loaded the last set of brackets. Didn't drop off fast, just drifted. Called it in to maintenance."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "assist_gas_low_pressure",
+      "text": "Second shift, the unit near the east loading dock. The nitrogen was reading low on the display — not gone, just a bit under where it should be. Machine kept wanting to cut but the quality was off, so we paused it. Gauge said about 7 bar when it should be at least 8."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "assist_gas_low_pressure",
+      "text": "Morning startup on line 2, noticed the alarm light was already blinking before we even ran our first part. Pressure gauge on the supply panel read 7.2 bar — usually sits right at 8 or above. Figured one of the cylinders must be getting low. Didn't collapse or anything, just slipped under the limit."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "assist_gas_pressure_collapse",
+      "text": "Was mid-cut on line 3 doing the door panel blanks and the gas just dropped. Like, instantly. One second it was fine, then alarm screaming and the sensor said 1.2 bar. Heard a hiss from somewhere behind the machine. Hit the big red button right away, then got safety on the phone."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "assist_gas_pressure_collapse",
+      "text": "Near the end of third shift on the unit by the south wall, the assist gas went to basically nothing mid-cycle. Didn't taper off, just fell off a cliff. Readout showed sub-2-bar in under two seconds, and there was a distinct smell of nitrogen in the area. Stopped everything and got safety involved immediately."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "assist_gas_pressure_collapse",
+      "text": "Line 1, cutting aluminum blanks. Suddenly the cut stopped, big alarm, gas pressure at the panel showing 0.8 bar — basically zero. Regulator on the cylinder bank looked like it was venting. This wasn't a slow drop, it was an instant crash. Full stop, called maintenance and safety both."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "assist_gas_overpressure",
+      "text": "High-pressure alarm went off on the unit by line 6 during the stainless job. Checked the readout — showing 17.5 bar, well above where it should be. Machine automatically paused the program but we weren't sure what to do from there. Nothing hissing or leaking, just the alarm going. Reported to maintenance."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "assist_gas_overpressure",
+      "text": "First shift, the machine on line 2 started alarming and the panel showed the gas pressure had climbed above the red line — 16-point-something bar. Nothing leaking, no hissing, but the machine halted itself. Tech came over and vented it back down before we resumed."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "chiller_coolant_temp_high",
+      "text": "The chiller on line 5 was reading 23 degrees this afternoon, which is above where it normally sits during a run. Machine was still cutting fine, no red alarms, just that amber warning light on the chiller. Hot day in the plant, might be ambient. Reported but didn't stop cutting."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "chiller_coolant_temp_high",
+      "text": "Mid-afternoon on second shift, the coolant temp gauge on the unit near the inspection staging area was creeping up — got to about 24 degrees. Everything still running, no emergency alarms, just the amber indicator lit up. We got maintenance to take a look and boost the fan."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "chiller_coolant_temp_high",
+      "text": "Line 3, around 2pm. Coolant outlet temp was at 22.5 degrees — just over the limit. The chiller fan was running but wasn't keeping up with the heat load. Called it in. Machine continued operating but we logged it. That bay always runs hot in the afternoon with the sun on the roof."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "chiller_coolant_temp_critical",
+      "text": "Had to kill the laser on line 2 — the chiller temp hit 29 degrees and the red alarm was going off, not the amber one. That's the one that means the module could get fried. Stopped the cut immediately, whole job had to wait. Maintenance said the chiller pump was struggling badly."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "chiller_coolant_temp_critical",
+      "text": "Third shift, unit by the north exit. Temperature on the chiller climbed past 28 and kept going — got to 30 before we cut power to the laser head. The red fault light was flashing, not the amber warning. Everything shut down, called maintenance and the shift supervisor. Couldn't touch it until it cooled down."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "chiller_coolant_temp_critical",
+      "text": "We were running the thick mild-steel job on line 4 when the chiller went critical. Sensor reading 29.5 degrees — way past the caution level, that's the stop-everything threshold. Hit the E-stop, disabled emission. Supervisor said this was potential module damage territory, whole line was down for two hours."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "chiller_coolant_low_level",
+      "text": "Came in for first shift on line 3 and the chiller had its low-level light on. Opened the reservoir to check — yeah, it was below the MIN mark. Temp was fine, pressure fine, just low on fluid. Grabbed the jug from the storage cabinet and topped it up before the shift started."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "chiller_coolant_low_level",
+      "text": "Low coolant alarm on the unit near loading dock 2. Temperature was totally normal, it wasn't a heat issue at all — just the level sensor reading low. Maintenance came over and refilled it from the cabinet. Wasn't on the PM schedule for another two weeks but it was clearly low."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "cutting_head_collision",
+      "text": "The machine on line 4 banged the nozzle into the sheet mid-program — must've been a curl on the blank from the coil. Heard the thud and it threw a fault right away. We hit E-stop, the collision sensor had tripped. Told the tech there was contact, job is on hold until they clear it."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "cutting_head_collision",
+      "text": "Second shift, line 1. Robot program was running the head over a new fixture setup and it clipped the edge of a clamp. Alarm came on, head stopped mid-traverse. Collision sensor showing fault. Didn't look like physical damage to the head but we stopped everything and reported it before resuming."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "laser_power_low",
+      "text": "Cuts were looking rough on line 6 — dross getting worse on the mild steel, edges not clean but still cutting through. Looked at the power readout and it was sitting around 87% of what the program calls for. Machine was still running, just not at spec. Paused the job and called maintenance."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "laser_power_low",
+      "text": "Line 3, stainless job. Cut edges had bad striations, worse than usual, but the machine wasn't faulting. Operator panel showed power at about 89% of setpoint — still firing, just not at full strength. Guessed the lens might be getting dirty. Put in a maintenance request and paused."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "laser_power_low",
+      "text": "Running thin aluminum blanks on line 5 and they were almost separating but not quite — parts hanging on by a thread. Checked the readings and the laser output was low, like 91%, right on the boundary. No fault codes anywhere, no error on the screen. Paused and called it in."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "laser_power_fault",
+      "text": "Line 2, middle of a production run. Laser just stopped firing — no arc, no beam, nothing coming out. Screen showing fault code F-04, emission indicator went dark. Not a power level thing, the source itself threw an error code. Hit E-stop, called maintenance, they're looking at the module."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "laser_power_fault",
+      "text": "The unit on line 5 dropped out completely during a cut on the door reinforcement parts. Head was moving like normal but nothing was being cut. Display showed a module fault — not just low power, like zero output. Tried to reset from the panel, got the same fault back. Maintenance needed."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "laser_power_fault",
+      "text": "Third shift near the end of the run, machine suddenly stopped cutting and threw a source error on the panel. Readout showed full-on fault, no emission whatsoever — totally different from the power-a-bit-low warning we sometimes see. That one still cuts. This was the machine completely refusing to fire at all."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "exhaust_airflow_low",
+      "text": "Fume extraction on line 3 started alarming mid-shift. You could actually smell something faintly in the area — shouldn't smell anything when the extraction is working right. The airflow indicator on the panel was below the normal band. Paused the cut and called the tech."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "exhaust_airflow_low",
+      "text": "Line 6, the ventilation alarm came on about halfway through the shift. Exhaust fan was spinning but the airflow reading was well below minimum. Checked the filter housing and it did look pretty loaded up. Stopped cutting per the posted procedure and reported to maintenance to get it sorted."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "focus_lens_replacement",
+      "text": "Maintenance ticket came through for line 4's laser head — lens swap was overdue per the PM schedule. Tech came out, powered down emission, and did the lens change during the morning break. We were back up and running in about 20 minutes. No quality issues, just routine."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "focus_lens_replacement",
+      "text": "After the optics inspection tech flagged the lens on line 2 as showing burn spots during a scheduled check, they scheduled a replacement for that afternoon. Machine was taken off-line mid-shift, lens pulled out and new one installed. Verified output afterwards before releasing back to production."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "nozzle_inspection_cleaning",
+      "text": "Quality caught a few parts off line 5 with inconsistent cut edges — not bad enough to scrap but definitely flagging. Maintenance said it was time for a nozzle check anyway. They paused the machine, pulled the nozzle, and found some spatter buildup around the tip. Cleaned it up."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "nozzle_inspection_cleaning",
+      "text": "The PM schedule flagged a nozzle inspection for the unit on line 1 at the end of first shift. Maintenance paused the machine and checked it — orifice had some wear and carbon deposits. Cleaned it up, let quality know, and they did a spot check on the next few parts before clearing it."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "cover_glass_replacement",
+      "text": "During the shift changeover walkdown on line 3, the tech noticed the cover glass inside the cutting head was fogged up with haze — not the lens itself, just the protective window in front of it. Scheduled swap happened right there. Emission was disabled, old glass out, new one in. Different job from a full lens change."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "cover_glass_replacement",
+      "text": "Line 6 PM checklist said the cover window was due for replacement. Tech came during the lunch break, popped the head open, and the glass had oil haze contamination around the edges. Replaced just the cover glass, put the head back in service, and logged it. Lens itself was fine."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "chiller_coolant_scheduled_refill",
+      "text": "Monthly PM run on line 2's chiller. No alarm, no fault light, machine was running perfectly normal. Calendar said it was time to top off the coolant. Tech checked the level — about 80%, not low enough to trip any sensor. Topped it off from the storage cabinet as scheduled."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "chiller_coolant_scheduled_refill",
+      "text": "Maintenance came through line 4 for the routine coolant service on Tuesday. Chiller running fine, no warnings at all. Level check showed it was slightly down from last month, around 85%, topped it off as per the PM plan. Not the same as when the alarm goes off — this was just the planned monthly top-up."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "exhaust_filter_replacement",
+      "text": "The differential pressure on the exhaust housing for line 5 finally hit the saturation limit after a heavy month of stainless cutting. Tech swapped the filter during the lunch break. System was paused for maybe 15 minutes. After the change the airflow went right back up to normal range."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "exhaust_filter_replacement",
+      "text": "PM interval was up for line 1's fume extraction filter. Maintenance pulled it during scheduled downtime on Friday afternoon and replaced it. Old filter was visibly dark and noticeably heavier than a new one. Restarted the extraction fan after installation and confirmed good airflow before signing off."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "laser_power_calibration",
+      "text": "After the tech replaced the focus lens on line 3, they put the machine through a full calibration cycle before releasing it back to production. Power meter was set up at the station, readings were taken and logged, and the tech confirmed everything was within spec. Took about 30 minutes total."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "laser_power_calibration",
+      "text": "Quarterly calibration check on line 6 was due. Machine was pulled from the schedule for about an hour, calibration mode was engaged, power readings taken at the meter station, and the output was verified and confirmed at setpoint. Back in service for the afternoon shift."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "linear_guide_lubrication",
+      "text": "PM calendar flagged lubrication on the guide rails for line 4 this week. Maintenance came in during the overlap between shifts, disabled the laser, and worked grease into both the X and Y rails. Ran a test traverse cycle afterwards to distribute it before putting the machine back on the schedule."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "linear_guide_lubrication",
+      "text": "Axis motion on line 2 was slightly noisy — a faint squeak on fast Y moves. Tech said it was just overdue for a lube. PM was scheduled anyway so they did it right then. Rails greased on both axes, machine homed, and the noise was gone on the test run."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "lockout_tagout_laser",
+      "text": "Maintenance needed to get inside line 5's machine to replace the beam delivery fiber. Before anyone touched anything, the full energy isolation was done — E-stop pressed, main disconnect thrown at the panel, hasp locked on, personal tag hung. Nobody goes in without seeing that tag. Took about 45 minutes to do the fiber work."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "lockout_tagout_laser",
+      "text": "Tech was going into the enclosure on line 3 to clean the internal beam path optics — you can't do that with any live energy on the machine. Full isolation procedure was followed. Power was killed at the wall-mounted disconnect, lockout hasp installed, tag attached with tech's name on it. Worked safely in there for about an hour."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "coolant_spill_response",
+      "text": "Found a puddle under the chiller on line 1 at the start of second shift — looked like it had been slowly dripping from a hose fitting overnight. About half a liter on the floor. Paused the machine, got a spill kit from the station, soaked it up. Called safety and maintenance. Safety officer came over to verify cleanup."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "coolant_spill_response",
+      "text": "Maintenance was doing a visual check on the chiller by line 4 and bumped a quick-connect fitting — coolant splashed out onto the floor, maybe a liter. Stopped the machine right away, grabbed absorbent pads from the spill kit station by the bay entrance, and contained it. Logged the spill per safety requirements."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "fire_estop_response",
+      "text": "Someone loaded a powder-coated part on line 3 by mistake — shouldn't have been in the nest at all. It caught during the cut, small flame visible through the window inside the enclosure. Hit the red button immediately, killed the gas valve at the supply panel, called safety. Fire was already out by the time the extinguisher arrived."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "fire_estop_response",
+      "text": "Second shift on line 6, the enclosure smoke detector went off during a cut. Couldn't see an open flame through the viewing window but there was definitely smoke building inside. Hit E-stop, killed emission, shut the assist gas at the supply panel. Got safety in before anyone opened the enclosure door."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "startup_sequence",
+      "text": "Line 2, beginning of first shift Monday. Robot ran through the morning checks — powered up the main panel, confirmed coolant level on the chiller was good, verified the gas supply was reading 12 bar at the panel, then enabled emission. Everything in range, machine was ready and cutting by 6:15am."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "startup_sequence",
+      "text": "After the weekend maintenance window on line 5, startup was run Monday morning before production. Coolant level checked out, assist gas was sitting at 11 bar, all pre-checks passed. Emission was enabled and we ran a test cut to verify before releasing the machine to the operators for regular parts."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "shutdown_sequence",
+      "text": "End of second shift on line 4. Finished the last nest of the run, stopped the cycle, disabled emission, closed off the gas supply at the panel, waited out the 5-minute cooldown per the posted procedure, then powered down main. Everything off by 11pm as scheduled."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "shutdown_sequence",
+      "text": "Planned maintenance window starting tomorrow meant we had to do a full shutdown on line 1 at end of day today. Stopped the cycle mid-afternoon, disabled emission, shut the assist gas valve, waited the full cooldown period, then hit main power off. Maintenance team was coming in at 6am and needed the machine fully de-energized."
+    }
+  ]
+}

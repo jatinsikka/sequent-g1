@@ -1,0 +1,578 @@
+{
+  "family": "SMT Reflow Oven",
+  "sops": [
+    {
+      "ref": "zone_temp_below_setpoint",
+      "title": "Zone Temperature Below Profile Setpoint",
+      "condition": "One or more zone thermocouples read 5–15°C below the configured reflow profile setpoint during an active production run.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor zone_temp_sensor",
+        "press_button alarm_acknowledge_button",
+        "wait 120 seconds",
+        "read_sensor zone_temp_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["control_panel", "zone_temp_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "zone_temp_sudden_collapse",
+      "title": "Zone Temperature Sudden Collapse",
+      "condition": "Any zone thermocouple drops more than 25°C within a 60-second window, indicating a probable heater element failure.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor zone_temp_sensor",
+        "press_button estop_button",
+        "walk_to zone_access_panel",
+        "read_sensor heater_fault_indicator",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "zone_temp_sensor", "estop_button", "zone_access_panel", "heater_fault_indicator"]
+    },
+    {
+      "ref": "zone_temp_above_ceiling",
+      "title": "Zone Temperature Above Upper Ceiling Limit",
+      "condition": "Any zone thermocouple exceeds the configured upper ceiling temperature limit, activating an over-temperature alarm.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor zone_temp_sensor",
+        "press_button conveyor_stop_button",
+        "press_button fan_override_button",
+        "wait 60 seconds",
+        "read_sensor zone_temp_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["control_panel", "zone_temp_sensor", "conveyor_stop_button", "fan_override_button"]
+    },
+    {
+      "ref": "conveyor_speed_degraded",
+      "title": "Conveyor Speed Below Programmed Setpoint",
+      "condition": "The conveyor belt speed sensor reads more than 10% below the programmed profile setpoint for a continuous period exceeding 30 seconds, while the belt remains in motion.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor conveyor_speed_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to conveyor_tensioner",
+        "read_sensor belt_tension_indicator",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_speed_sensor", "alarm_acknowledge_button", "conveyor_tensioner", "belt_tension_indicator"]
+    },
+    {
+      "ref": "conveyor_fully_stopped",
+      "title": "Conveyor Motion Complete Stop During Run",
+      "condition": "The conveyor motion sensor reads zero belt movement while the oven is in active production mode with boards loaded.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button estop_button",
+        "read_sensor conveyor_speed_sensor",
+        "walk_to entry_zone",
+        "read_sensor entry_board_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "estop_button", "conveyor_speed_sensor", "entry_zone", "entry_board_sensor"]
+    },
+    {
+      "ref": "board_jam_entry",
+      "title": "PCB Jam at Oven Entry Zone",
+      "condition": "The entry zone board-present sensor remains continuously blocked for more than 30 seconds during a production run.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to entry_zone",
+        "read_sensor entry_board_sensor",
+        "wait 10 seconds",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_stop_button", "entry_zone", "entry_board_sensor"]
+    },
+    {
+      "ref": "board_jam_exit",
+      "title": "PCB Jam at Oven Exit or Cooling Zone",
+      "condition": "The exit or cooling zone board-present sensor remains continuously blocked for more than 30 seconds while boards are in process.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to exit_zone",
+        "read_sensor exit_board_sensor",
+        "wait 10 seconds",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_stop_button", "exit_zone", "exit_board_sensor"]
+    },
+    {
+      "ref": "exhaust_airflow_low_warning",
+      "title": "Exhaust Airflow Below Advisory Warning Threshold",
+      "condition": "The exhaust duct airflow sensor drops below the minimum advisory warning threshold, triggering a non-critical alarm on the control panel while oven remains operational.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor exhaust_airflow_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to filter_cabinet",
+        "read_sensor exhaust_airflow_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["control_panel", "exhaust_airflow_sensor", "alarm_acknowledge_button", "filter_cabinet"]
+    },
+    {
+      "ref": "exhaust_airflow_critical",
+      "title": "Exhaust Airflow Critical Failure Emergency",
+      "condition": "The exhaust duct airflow sensor reads near-zero, indicating complete fan failure or fully blocked ductwork, creating an immediate fume accumulation hazard requiring immediate shutdown.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button estop_button",
+        "read_sensor exhaust_airflow_sensor",
+        "notify safety_officer",
+        "notify maintenance_technician",
+        "walk_to exhaust_fan_access"
+      ],
+      "equipment": ["control_panel", "estop_button", "exhaust_airflow_sensor", "exhaust_fan_access"]
+    },
+    {
+      "ref": "nitrogen_pressure_low",
+      "title": "Nitrogen Supply Pressure Below Minimum Setpoint",
+      "condition": "The nitrogen supply pressure sensor reads below the minimum setpoint required to maintain an inert atmosphere in the reflow tunnel.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor nitrogen_pressure_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to nitrogen_supply_line",
+        "read_sensor nitrogen_pressure_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["control_panel", "nitrogen_pressure_sensor", "alarm_acknowledge_button", "nitrogen_supply_line"]
+    },
+    {
+      "ref": "cooling_zone_overtemp",
+      "title": "Cooling Zone Exceeds Maximum Exit Temperature",
+      "condition": "The cooling zone thermocouple reads above the maximum permissible board exit temperature limit, risking thermal damage to assembled components.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor cooling_zone_temp_sensor",
+        "press_button conveyor_stop_button",
+        "walk_to fan_access_panel",
+        "read_sensor cooling_zone_temp_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["control_panel", "cooling_zone_temp_sensor", "conveyor_stop_button", "fan_access_panel"]
+    },
+    {
+      "ref": "heater_electrical_fault",
+      "title": "Heater Zone Electrical or Ground Fault Alarm",
+      "condition": "A heater zone SCR driver or ground fault alarm activates on the control panel display during oven operation.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor heater_fault_indicator",
+        "press_button estop_button",
+        "walk_to loto_station",
+        "pick loto_lock",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "heater_fault_indicator", "estop_button", "loto_station", "loto_lock"]
+    },
+    {
+      "ref": "conveyor_chain_lubrication",
+      "title": "Scheduled Conveyor Chain Lubrication",
+      "condition": "The preventive maintenance calendar indicates the scheduled conveyor chain lubrication interval has elapsed.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to lubrication_station",
+        "pick chain_lubrication_cartridge",
+        "walk_to conveyor_chain_access",
+        "place chain_lubrication_cartridge",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_stop_button", "lubrication_station", "chain_lubrication_cartridge", "conveyor_chain_access"]
+    },
+    {
+      "ref": "exhaust_filter_change",
+      "title": "Exhaust Flux Filter Replacement",
+      "condition": "The exhaust filter differential pressure gauge reaches the change-required limit or the scheduled replacement interval elapses on the maintenance calendar.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to filter_cabinet",
+        "pick replacement_exhaust_filter",
+        "walk_to exhaust_filter_housing",
+        "place replacement_exhaust_filter",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_stop_button", "filter_cabinet", "replacement_exhaust_filter", "exhaust_filter_housing"]
+    },
+    {
+      "ref": "thermocouple_calibration",
+      "title": "Zone Thermocouple Calibration Verification",
+      "condition": "The periodic calibration schedule is due or a zone thermocouple drift exceeding ±2°C relative to the reference standard is detected.",
+      "steps": [
+        "walk_to calibration_station",
+        "pick calibration_reference_block",
+        "walk_to zone_access_panel",
+        "place calibration_reference_block",
+        "read_sensor zone_temp_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["calibration_station", "calibration_reference_block", "zone_access_panel", "zone_temp_sensor"]
+    },
+    {
+      "ref": "conveyor_belt_inspection",
+      "title": "Scheduled Conveyor Belt Tension and Wear Inspection",
+      "condition": "The preventive maintenance calendar indicates the conveyor belt tension and wear inspection interval has been reached.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to conveyor_tensioner",
+        "read_sensor belt_tension_indicator",
+        "wait 10 seconds",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_stop_button", "conveyor_tensioner", "belt_tension_indicator"]
+    },
+    {
+      "ref": "nitrogen_flowmeter_cleaning",
+      "title": "Nitrogen Flow Meter Sensor Scheduled Cleaning",
+      "condition": "The scheduled nitrogen flow meter sensor cleaning interval has elapsed per the preventive maintenance calendar.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to nitrogen_supply_line",
+        "pick nitrogen_flowmeter_lens_cloth",
+        "place nitrogen_flowmeter_lens_cloth",
+        "read_sensor nitrogen_flow_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_stop_button", "nitrogen_supply_line", "nitrogen_flowmeter_lens_cloth", "nitrogen_flow_sensor"]
+    },
+    {
+      "ref": "cooling_fan_cleaning",
+      "title": "Cooling Zone Fan Blade Cleaning",
+      "condition": "The scheduled cooling zone fan blade cleaning interval has elapsed or visual inspection reveals significant flux residue accumulation on fan blades.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button conveyor_stop_button",
+        "walk_to fan_access_panel",
+        "pick fan_cleaning_brush",
+        "place fan_cleaning_brush",
+        "read_sensor cooling_zone_temp_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "conveyor_stop_button", "fan_access_panel", "fan_cleaning_brush", "cooling_zone_temp_sensor"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Reflow Oven Lockout Tagout Procedure",
+      "condition": "A maintenance task requiring physical access inside the reflow oven enclosure is scheduled to begin.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button main_power_button",
+        "wait 30 seconds",
+        "walk_to loto_station",
+        "pick loto_lock",
+        "walk_to energy_isolation_point",
+        "place loto_lock"
+      ],
+      "equipment": ["control_panel", "main_power_button", "loto_station", "loto_lock", "energy_isolation_point"]
+    },
+    {
+      "ref": "minor_flux_spill",
+      "title": "Minor Flux Residue Spill Response",
+      "condition": "A flux residue spill of less than one liter is observed on the oven exterior surface or immediately adjacent floor area.",
+      "steps": [
+        "walk_to spill_kit_station",
+        "pick flux_absorbent_pads",
+        "walk_to spill_location",
+        "place flux_absorbent_pads",
+        "wait 60 seconds",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["spill_kit_station", "flux_absorbent_pads", "spill_location"]
+    },
+    {
+      "ref": "major_flux_spill",
+      "title": "Major Flux Container Rupture and Spill Response",
+      "condition": "A flux container failure or rupture releases more than five liters of flux in or around the oven area, creating an immediate chemical exposure hazard.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button estop_button",
+        "notify safety_officer",
+        "walk_to spill_kit_station",
+        "pick safety_gloves",
+        "place safety_gloves",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "estop_button", "spill_kit_station", "safety_gloves"]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Reflow Oven Cold Start Startup Procedure",
+      "condition": "The reflow oven is in a fully de-energized and cold state and requires startup for production.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button main_power_button",
+        "press_button conveyor_start_button",
+        "wait 1800 seconds",
+        "read_sensor zone_temp_sensor",
+        "read_sensor conveyor_speed_sensor",
+        "notify process_engineer"
+      ],
+      "equipment": ["control_panel", "main_power_button", "conveyor_start_button", "zone_temp_sensor", "conveyor_speed_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-RO-001",
+      "sop_ref": "zone_temp_below_setpoint",
+      "text": "Line 3 reflow unit had zone 2 reading low all morning — sitting about 8 degrees under where it should be for the profile we're running. Product was still moving but I'm watching it. Waited a couple minutes and it pulled itself back into tolerance."
+    },
+    {
+      "id": "INC-RO-002",
+      "sop_ref": "zone_temp_below_setpoint",
+      "text": "Second shift flagged zone 4 on the unit by the loading dock — it was trailing cold by maybe 10 degrees, boards still running through. Nothing drastic, just not hitting its number."
+    },
+    {
+      "id": "INC-RO-003",
+      "sop_ref": "zone_temp_below_setpoint",
+      "text": "Zone 1 was reading shy of target during the afternoon run on line 2 — roughly 12 degrees low, gradual drift, belt was still rolling the whole time. Kept checking it every few minutes."
+    },
+    {
+      "id": "INC-RO-004",
+      "sop_ref": "zone_temp_sudden_collapse",
+      "text": "Zone 3 just fell off a cliff — display went from 240 down to 205 in maybe 45 seconds. Nothing gradual about it, total loss. Heater's definitely gone on line 1."
+    },
+    {
+      "id": "INC-RO-005",
+      "sop_ref": "zone_temp_sudden_collapse",
+      "text": "Was watching the profile trace on the unit near tooling storage and zone 5 cratered — dropped 30 degrees in under a minute. Went from setpoint to way below in no time flat."
+    },
+    {
+      "id": "INC-RO-006",
+      "sop_ref": "zone_temp_sudden_collapse",
+      "text": "Zone 2 tanked hard right at the start of the afternoon run. Reading was fine and then suddenly it was 28 below. Not a slow drift — it just quit. Looks like the heater element died."
+    },
+    {
+      "id": "INC-RO-007",
+      "sop_ref": "zone_temp_above_ceiling",
+      "text": "Zone 4 overtemp alarm went off during the run on line 3 — display was showing way past the max mark, alarm was screaming. Had to stop the belt right away."
+    },
+    {
+      "id": "INC-RO-008",
+      "sop_ref": "zone_temp_above_ceiling",
+      "text": "Zone 1 was cooking hot — alarm lit and the reading was above the red line on the gauge. Boards were still on the belt when the alarm hit."
+    },
+    {
+      "id": "INC-RO-009",
+      "sop_ref": "zone_temp_above_ceiling",
+      "text": "Got an overtemp on zone 3 during first shift, reading was 18 degrees past the ceiling limit. Alarm was going off and the number just kept climbing."
+    },
+    {
+      "id": "INC-RO-010",
+      "sop_ref": "conveyor_speed_degraded",
+      "text": "Belt on the line 2 oven was dragging — not stopped, but definitely slow. Boards were taking longer to come out than the recipe calls for. Looked at the readout and it was running about 12% under the programmed speed."
+    },
+    {
+      "id": "INC-RO-011",
+      "sop_ref": "conveyor_speed_degraded",
+      "text": "Speed was low all of first shift, maybe 15% below the setting. Belt was still turning, just sluggish. Started noticing boards were dwelling too long in the preheat zones."
+    },
+    {
+      "id": "INC-RO-012",
+      "sop_ref": "conveyor_speed_degraded",
+      "text": "Noticed the conveyor on the line 4 unit wasn't keeping pace — speed gauge well below target but the belt wasn't dead. It's been off for at least half an hour according to the log."
+    },
+    {
+      "id": "INC-RO-013",
+      "sop_ref": "conveyor_fully_stopped",
+      "text": "Belt just froze mid-panel on line 1. Completely stopped, boards sitting there going nowhere. Nothing was moving at all — wasn't slow, wasn't sluggish, just dead stopped."
+    },
+    {
+      "id": "INC-RO-014",
+      "sop_ref": "conveyor_fully_stopped",
+      "text": "Walked over to the unit near the exit door and the whole conveyor was dead — zero movement. Could see the boards parked inside the tunnel, totally motionless. Hit the e-stop fast."
+    },
+    {
+      "id": "INC-RO-015",
+      "sop_ref": "conveyor_fully_stopped",
+      "text": "Line 2 oven alarm went off and when I got there the belt had stopped entirely. Not running slow — fully stopped. Boards just sitting in the hot zone."
+    },
+    {
+      "id": "INC-RO-016",
+      "sop_ref": "board_jam_entry",
+      "text": "Boards piling up at the front of the unit on line 3 — three of them stacked at the entry curtain. Won't feed in, just backing up at the load end."
+    },
+    {
+      "id": "INC-RO-017",
+      "sop_ref": "board_jam_entry",
+      "text": "Load side got backed up on second shift — panel boards stacking at the intake, nothing moving through the front gate. Entry sensor light was solid on the display."
+    },
+    {
+      "id": "INC-RO-018",
+      "sop_ref": "board_jam_exit",
+      "text": "Exit end is blocked on line 4 — boards coming out of the hot zone can't get through, bunching up at the unload curtain. Started noticing it halfway through second shift."
+    },
+    {
+      "id": "INC-RO-019",
+      "sop_ref": "board_jam_exit",
+      "text": "Boards are stacking at the cool end of the unit by the QC bench — can't come out. Exit sensor's been lit solid and I can see them piled up in there."
+    },
+    {
+      "id": "INC-RO-020",
+      "sop_ref": "exhaust_airflow_low_warning",
+      "text": "Advisory alarm came on the panel of the line 3 oven — exhaust flow is showing low but it's just the warning indicator, nothing critical. Still running, not smelling anything, just flagged it."
+    },
+    {
+      "id": "INC-RO-021",
+      "sop_ref": "exhaust_airflow_low_warning",
+      "text": "Airflow indicator dropped to the yellow zone on the display, production still going. Not shut down, no smell, just the advisory lamp. Probably the filter is getting dirty again."
+    },
+    {
+      "id": "INC-RO-022",
+      "sop_ref": "exhaust_airflow_low_warning",
+      "text": "Got a heads-up lamp on the line 1 oven panel for exhaust — flow reading is below the safe band but it's not an emergency level. We're still in production, need to get eyes on the filter."
+    },
+    {
+      "id": "INC-RO-023",
+      "sop_ref": "exhaust_airflow_critical",
+      "text": "Fan completely died on the unit near the back wall — exhaust reading was at zero and you could smell the flux vapors building up right away. Had to kill it immediately, second shift."
+    },
+    {
+      "id": "INC-RO-024",
+      "sop_ref": "exhaust_airflow_critical",
+      "text": "Exhaust went out entirely on line 2. The smell was bad — fumes hanging right over the machine. Airflow display was flatlined. Hit the estop fast and cleared the area."
+    },
+    {
+      "id": "INC-RO-025",
+      "sop_ref": "nitrogen_pressure_low",
+      "text": "N2 supply pressure alarm came on mid-run, reading was down from where it needs to be to keep the atmosphere right inside the tunnel. Worried about oxidation on the joints."
+    },
+    {
+      "id": "INC-RO-026",
+      "sop_ref": "nitrogen_pressure_low",
+      "text": "Nitrogen dropped during the afternoon batch on line 3. Pressure wasn't where it should be for the profile — had to check whether the cylinder bank was switching over correctly."
+    },
+    {
+      "id": "INC-RO-027",
+      "sop_ref": "cooling_zone_overtemp",
+      "text": "Boards coming off the exit on line 4 are way too hot to handle — picked one up and dropped it. Burned fingers. Cooling section isn't pulling the heat out properly."
+    },
+    {
+      "id": "INC-RO-028",
+      "sop_ref": "cooling_zone_overtemp",
+      "text": "Assembly coming out of the line 3 oven was warm enough to warp if you stacked them. Exit board temp was way high, not right at all."
+    },
+    {
+      "id": "INC-RO-029",
+      "sop_ref": "heater_electrical_fault",
+      "text": "Ground fault alarm lit up on the panel for zone 3 heater bank — never seen that one before. Killed power right away and called it in."
+    },
+    {
+      "id": "INC-RO-030",
+      "sop_ref": "heater_electrical_fault",
+      "text": "SCR fault showed up on the zone 2 heater bank display during first shift on line 1. Red indicator was on and the alarm was active."
+    },
+    {
+      "id": "INC-RO-031",
+      "sop_ref": "conveyor_chain_lubrication",
+      "text": "Chain on the line 2 oven started making a dry squeaking noise during the run — checked the PM board and lubrication was due five days ago on this unit."
+    },
+    {
+      "id": "INC-RO-032",
+      "sop_ref": "conveyor_chain_lubrication",
+      "text": "Maintenance schedule flagged the conveyor drive on the line 4 oven for lube — interval ran out, need to service it before the next production run."
+    },
+    {
+      "id": "INC-RO-033",
+      "sop_ref": "exhaust_filter_change",
+      "text": "Differential pressure gauge on the exhaust housing is in the red — filter's packed solid with flux residue, needs swapping out before it chokes off."
+    },
+    {
+      "id": "INC-RO-034",
+      "sop_ref": "exhaust_filter_change",
+      "text": "Filter change was flagged on the PM board for line 3 oven. Pressure drop across the filter is maxed out and it's starting to drag the airflow down."
+    },
+    {
+      "id": "INC-RO-035",
+      "sop_ref": "thermocouple_calibration",
+      "text": "Zone 2 TC was reading 3.5 degrees off when we ran it against the reference standard during the monthly check on line 1. Too much drift to leave it."
+    },
+    {
+      "id": "INC-RO-036",
+      "sop_ref": "thermocouple_calibration",
+      "text": "Calibration was due on zone 4 of the unit by the loading dock and the tech caught it drifting above tolerance during the scheduled verification. Had to log it."
+    },
+    {
+      "id": "INC-RO-037",
+      "sop_ref": "conveyor_belt_inspection",
+      "text": "Belt inspection came up on the PM schedule for line 1 — noticed some fraying at the edges of the wire mesh during the walkthrough. Needs to be logged and assessed."
+    },
+    {
+      "id": "INC-RO-038",
+      "sop_ref": "conveyor_belt_inspection",
+      "text": "Inspection due date came up for the line 3 unit and when we checked belt tension it was looser than spec — belt must have stretched over the last run cycle."
+    },
+    {
+      "id": "INC-RO-039",
+      "sop_ref": "nitrogen_flowmeter_cleaning",
+      "text": "N2 flow reading on line 2 was jumping all over the place — not steady at all. Probably the sensor lens is dirty again, cleaning interval was past due."
+    },
+    {
+      "id": "INC-RO-040",
+      "sop_ref": "nitrogen_flowmeter_cleaning",
+      "text": "Flow meter on the nitrogen line for the line 4 oven was erratic, bouncing up and down during the run. Cleaning was overdue per the PM sheet."
+    },
+    {
+      "id": "INC-RO-041",
+      "sop_ref": "cooling_fan_cleaning",
+      "text": "Noticed heavy flux deposits on the cooling fan blades during the PM walkthrough on line 3 — thick buildup, definitely restricting airflow in there."
+    },
+    {
+      "id": "INC-RO-042",
+      "sop_ref": "cooling_fan_cleaning",
+      "text": "Fan in the cooling section of the line 1 oven was making a grinding sound. Pulled the access panel and the blades were caked with flux residue."
+    },
+    {
+      "id": "INC-RO-043",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needed to get inside the tunnel on line 2 to swap out a heater rod. Had to do full energy isolation before anyone went in. All clear from safety before the work started."
+    },
+    {
+      "id": "INC-RO-044",
+      "sop_ref": "lockout_tagout",
+      "text": "Tech needed access to the interior of the line 4 oven to inspect the conveyor drive components. Couldn't start work until the full isolation was done and the physical lock was on."
+    },
+    {
+      "id": "INC-RO-045",
+      "sop_ref": "minor_flux_spill",
+      "text": "Small flux drip on the side panel of the line 2 oven — maybe 300 milliliters, didn't spread far. Caught it early before it set. Just needs cleanup."
+    },
+    {
+      "id": "INC-RO-046",
+      "sop_ref": "minor_flux_spill",
+      "text": "Found a little puddle of flux on the floor next to the unit by the QC bench — half a cup's worth at most, came from somewhere on the housing. Nothing major, clean it up."
+    },
+    {
+      "id": "INC-RO-047",
+      "sop_ref": "minor_flux_spill",
+      "text": "Bit of flux got on the outer casing near the conveyor inlet on line 3 — small patch, under a liter for sure. Caught it early before it ran anywhere significant."
+    },
+    {
+      "id": "INC-RO-048",
+      "sop_ref": "major_flux_spill",
+      "text": "Whole two-liter flux jug tipped off the shelf above the line 1 oven and hit the floor — splattered everywhere under the machine and across the aisle. Fumes were immediate, had to clear the area."
+    },
+    {
+      "id": "INC-RO-049",
+      "sop_ref": "major_flux_spill",
+      "text": "Flux supply line blew a fitting near the line 3 oven and dumped probably six liters across the base of the unit and onto the floor. Strong fumes right away, had to stop everything and get people out."
+    },
+    {
+      "id": "INC-RO-050",
+      "sop_ref": "startup_procedure",
+      "text": "Coming in on first shift Monday after the holiday weekend — oven on line 1 was completely off and stone cold. Needed to bring it all the way up from dead before we could run anything."
+    },
+    {
+      "id": "INC-RO-051",
+      "sop_ref": "startup_procedure",
+      "text": "Line 4 oven had been shut down over the weekend maintenance window. First shift had to do the full cold restart procedure before production could start for the week."
+    }
+  ]
+}

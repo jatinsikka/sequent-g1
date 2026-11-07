@@ -1,0 +1,758 @@
+{
+  "family": "Press Brake",
+  "sops": [
+    {
+      "ref": "low_hydraulic_pressure",
+      "title": "Low Hydraulic Pressure During Bend Cycle",
+      "condition": "The hydraulic_pressure_sensor reads below 180 bar while the ram is executing an active bend stroke.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read hydraulic_pressure_sensor to confirm sub-180 bar reading",
+        "Press red_estop_button to halt the ram immediately",
+        "Walk to press_brake_hydraulic_unit",
+        "Read hydraulic_oil_level_sensor to check for a fluid deficit contributing to low pressure",
+        "Notify maintenance_supervisor with the current hydraulic_pressure_sensor and hydraulic_oil_level_sensor readings"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_pressure_sensor",
+        "red_estop_button",
+        "press_brake_hydraulic_unit",
+        "hydraulic_oil_level_sensor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "high_hydraulic_pressure",
+      "title": "Hydraulic Pressure Exceeds Safe Ceiling",
+      "condition": "The hydraulic_pressure_sensor reads above 220 bar during or between bend strokes, indicating an overpressure condition in the hydraulic circuit.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read hydraulic_pressure_sensor to confirm above-220 bar reading",
+        "Press hydraulic_pump_stop_button to de-energize the pump and allow natural pressure decay",
+        "Wait 60 seconds for system pressure to dissipate through the relief valve",
+        "Read hydraulic_pressure_sensor again to verify pressure has fallen below 200 bar",
+        "Notify maintenance_supervisor if pressure remains above 200 bar after 60 seconds"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_pressure_sensor",
+        "hydraulic_pump_stop_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "hydraulic_pressure_collapse",
+      "title": "Sudden Hydraulic Pressure Collapse Mid-Stroke",
+      "condition": "The hydraulic_pressure_sensor drops from operating range to below 50 bar within one stroke second, indicating a catastrophic line rupture or major seal failure accompanied by visible fluid loss.",
+      "steps": [
+        "Walk to press_brake_control_panel and press red_estop_button immediately to freeze all ram motion",
+        "Read hydraulic_pressure_sensor to confirm near-zero pressure reading",
+        "Walk to press_brake_hydraulic_unit",
+        "Read hydraulic_oil_level_sensor to assess the volume of fluid already lost",
+        "Walk to spill_kit_station and pick spill_absorbent_pads",
+        "Place spill_absorbent_pads around the oil pool perimeter to contain the spread",
+        "Notify maintenance_supervisor and plant_safety_officer with location and estimated fluid loss"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "red_estop_button",
+        "hydraulic_pressure_sensor",
+        "press_brake_hydraulic_unit",
+        "hydraulic_oil_level_sensor",
+        "spill_kit_station",
+        "spill_absorbent_pads",
+        "maintenance_supervisor",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "ram_overtravel_warning",
+      "title": "Ram Overtravel Soft-Limit Warning",
+      "condition": "The ram_position_sensor triggers a soft-limit caution at Y-axis depth 5 mm beyond the programmed stop, flagging incremental drift while allowing production to continue without a machine lockout.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read ram_position_sensor to record the actual Y-axis depth at the alarm event",
+        "Press alarm_acknowledge_button to clear the caution indicator without halting production",
+        "Wait 300 seconds then read ram_position_sensor again to determine whether drift is progressing",
+        "Notify process_engineer with the recorded depth deviation value and drift trend"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "ram_position_sensor",
+        "alarm_acknowledge_button",
+        "process_engineer"
+      ]
+    },
+    {
+      "ref": "ram_overtravel_fault",
+      "title": "Ram Hard-Limit Fault — Full Machine Lockout",
+      "condition": "The ram_position_sensor exceeds the hard-limit threshold at Y-axis depth 10 mm beyond programmed stop, triggering an automatic full machine lockout that requires supervisor clearance before any reset can be attempted.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read ram_position_sensor to record the exact hard-limit breach depth",
+        "Press red_estop_button to confirm the machine is fully de-energized",
+        "Walk to press_brake_ram_area and read ram_position_sensor at the tooling contact point to assess tooling damage",
+        "Notify maintenance_supervisor and process_engineer immediately with breach depth reading",
+        "Wait for maintenance_supervisor verbal clearance then press control_panel_reset_button to attempt fault reset"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "ram_position_sensor",
+        "red_estop_button",
+        "press_brake_ram_area",
+        "maintenance_supervisor",
+        "process_engineer",
+        "control_panel_reset_button"
+      ]
+    },
+    {
+      "ref": "back_gauge_position_error",
+      "title": "Back Gauge X-Axis Position Deviation Alarm",
+      "condition": "The back_gauge_position_sensor reads more than 0.5 mm offset from the programmed X-axis target during a production run, causing bent-part flange-length rejection.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read back_gauge_position_sensor to record the actual versus programmed X-axis position",
+        "Press alarm_acknowledge_button to pause the bend cycle",
+        "Walk to press_brake_back_gauge_area and read back_gauge_position_sensor at the physical finger reference surface",
+        "Press back_gauge_home_button to execute a full re-home sequence",
+        "Read back_gauge_position_sensor to confirm the finger returned to datum within 0.1 mm",
+        "Notify process_engineer with the recorded deviation value and whether re-home resolved it"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "back_gauge_position_sensor",
+        "alarm_acknowledge_button",
+        "press_brake_back_gauge_area",
+        "back_gauge_home_button",
+        "process_engineer"
+      ]
+    },
+    {
+      "ref": "tonnage_overload",
+      "title": "Punch Tonnage Overload Fault",
+      "condition": "The tonnage_monitor reads a peak bending force exceeding the machine-rated 200-tonne capacity during a stroke, triggering an overload fault and halting the ram.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read tonnage_monitor to record the exact peak overload force value",
+        "Press red_estop_button to prevent additional bend strokes",
+        "Walk to press_brake_ram_area",
+        "Pick punch_tool and place it on parts_inspection_table for visual damage assessment",
+        "Notify process_engineer and maintenance_supervisor with the recorded tonnage value and suspected cause"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "tonnage_monitor",
+        "red_estop_button",
+        "press_brake_ram_area",
+        "punch_tool",
+        "parts_inspection_table",
+        "process_engineer",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "oil_temp_high",
+      "title": "Hydraulic Oil Temperature High",
+      "condition": "The hydraulic_oil_temp_sensor reads above 60 degrees C, indicating the cooling system cannot keep pace with the current production duty cycle.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read hydraulic_oil_temp_sensor to confirm above-60 degree C reading",
+        "Press hydraulic_pump_stop_button to remove load and allow oil to cool",
+        "Wait 300 seconds then read hydraulic_oil_temp_sensor again",
+        "Walk to press_brake_hydraulic_unit and read hydraulic_oil_level_sensor to rule out a low-fluid contribution to overheating",
+        "Notify maintenance_supervisor if temperature does not fall below 55 degrees C within 5 minutes"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_oil_temp_sensor",
+        "hydraulic_pump_stop_button",
+        "press_brake_hydraulic_unit",
+        "hydraulic_oil_level_sensor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "hydraulic_filter_change",
+      "title": "Scheduled Hydraulic Return-Line Filter Replacement",
+      "condition": "The hydraulic_filter_differential_pressure_sensor reads above 6 bar, or the 500-hour maintenance interval has elapsed, requiring the return-line filter element to be replaced.",
+      "steps": [
+        "Walk to press_brake_control_panel and press hydraulic_pump_stop_button",
+        "Walk to maintenance_supply_cabinet and pick replacement_hydraulic_filter",
+        "Walk to press_brake_hydraulic_unit",
+        "Pick used_hydraulic_filter and place it in oil_drain_pan",
+        "Place replacement_hydraulic_filter into hydraulic_filter_housing",
+        "Press hydraulic_pump_start_button and read hydraulic_filter_differential_pressure_sensor to confirm differential is below 3 bar",
+        "Notify maintenance_supervisor that filter replacement is complete and log the service date"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_pump_stop_button",
+        "maintenance_supply_cabinet",
+        "replacement_hydraulic_filter",
+        "press_brake_hydraulic_unit",
+        "used_hydraulic_filter",
+        "oil_drain_pan",
+        "hydraulic_filter_housing",
+        "hydraulic_pump_start_button",
+        "hydraulic_filter_differential_pressure_sensor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "hydraulic_oil_level_check",
+      "title": "Hydraulic Oil Level Verification and Top-Off",
+      "condition": "The daily startup checklist requires oil-level verification, or the hydraulic_oil_level_sensor triggers a low-level caution during operation.",
+      "steps": [
+        "Walk to press_brake_hydraulic_unit",
+        "Read hydraulic_oil_level_sensor to record the current level reading",
+        "Walk to oil_storage_area and pick hydraulic_oil_drum",
+        "Place hydraulic_oil_drum beside the oil_fill_port at press_brake_hydraulic_unit",
+        "Press oil_fill_pump_start_button to transfer oil until hydraulic_oil_level_sensor reads within the normal band",
+        "Wait 30 seconds and read hydraulic_oil_level_sensor to confirm the level is correct"
+      ],
+      "equipment": [
+        "press_brake_hydraulic_unit",
+        "hydraulic_oil_level_sensor",
+        "oil_storage_area",
+        "hydraulic_oil_drum",
+        "oil_fill_port",
+        "oil_fill_pump_start_button"
+      ]
+    },
+    {
+      "ref": "ram_guide_lubrication",
+      "title": "Ram Guide Column Scheduled Lubrication",
+      "condition": "The 250-hour lubrication interval for ram guide columns has elapsed, or visible dry scoring appears on column surfaces during inspection.",
+      "steps": [
+        "Walk to press_brake_control_panel and press hydraulic_pump_stop_button",
+        "Walk to maintenance_supply_cabinet and pick grease_gun",
+        "Walk to press_brake_ram_area",
+        "Place grease_gun at each ram_guide_column_zerk_fitting to inject the specified quantity of ram_guide_grease",
+        "Wait 10 seconds to allow grease to distribute into the guide surfaces",
+        "Notify maintenance_supervisor that ram guide lubrication is complete and log the service date"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_pump_stop_button",
+        "maintenance_supply_cabinet",
+        "grease_gun",
+        "press_brake_ram_area",
+        "ram_guide_column_zerk_fitting",
+        "ram_guide_grease",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "back_gauge_rail_lubrication",
+      "title": "Back Gauge Linear Rail and Lead Screw Lubrication",
+      "condition": "The 250-hour lubrication interval for back gauge rails has elapsed, or the back_gauge_position_sensor shows positioning repeatability scatter exceeding 0.1 mm indicating friction-induced stick-slip.",
+      "steps": [
+        "Walk to press_brake_control_panel and press hydraulic_pump_stop_button",
+        "Walk to maintenance_supply_cabinet and pick back_gauge_lubricant_bottle",
+        "Walk to press_brake_back_gauge_area",
+        "Place back_gauge_lubricant_bottle along back_gauge_linear_rail surface and lead_screw to apply lubricant evenly",
+        "Press back_gauge_home_button to cycle the finger back and forth and distribute lubricant",
+        "Notify maintenance_supervisor that back gauge rail lubrication is complete and log the service date"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_pump_stop_button",
+        "maintenance_supply_cabinet",
+        "back_gauge_lubricant_bottle",
+        "press_brake_back_gauge_area",
+        "back_gauge_linear_rail",
+        "lead_screw",
+        "back_gauge_home_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "tooling_inspection",
+      "title": "Punch and Die Tooling Dimensional Inspection",
+      "condition": "Every 1000 bends, or when a first-off part fails the bend angle check, the punch tip radius and die shoulder radius must be measured and compared against the 0.3 mm maximum wear tolerance.",
+      "steps": [
+        "Walk to press_brake_ram_area and pick punch_tool",
+        "Place punch_tool on parts_inspection_table",
+        "Walk to parts_inspection_table and pick tooling_caliper",
+        "Place tooling_caliper against punch_tip then read tooling_caliper to record the tip radius",
+        "Pick die_tool from press_brake_ram_area and place die_tool on parts_inspection_table",
+        "Place tooling_caliper against die_shoulder then read tooling_caliper to record the shoulder radius",
+        "Notify process_engineer with both caliper readings if either dimension exceeds the 0.3 mm wear tolerance"
+      ],
+      "equipment": [
+        "press_brake_ram_area",
+        "punch_tool",
+        "parts_inspection_table",
+        "tooling_caliper",
+        "die_tool",
+        "process_engineer"
+      ]
+    },
+    {
+      "ref": "oil_cooler_filter_clean",
+      "title": "Hydraulic Oil Cooler Filter Cleaning",
+      "condition": "The 1000-hour maintenance interval has elapsed for the oil cooler filter, or the hydraulic_oil_temp_sensor trends above 55 degrees C despite a correct oil level and moderate duty cycle.",
+      "steps": [
+        "Walk to press_brake_control_panel and press hydraulic_pump_stop_button",
+        "Wait 120 seconds for oil temperature to drop before handling cooler components",
+        "Walk to press_brake_hydraulic_unit and pick cooler_filter_element",
+        "Place cooler_filter_element at maintenance_wash_basin",
+        "Walk to maintenance_supply_cabinet and pick compressed_air_gun",
+        "Place compressed_air_gun against cooler_filter_element to blow accumulated debris free",
+        "Walk to press_brake_hydraulic_unit and place cleaned cooler_filter_element back in cooler_housing; notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_pump_stop_button",
+        "press_brake_hydraulic_unit",
+        "cooler_filter_element",
+        "maintenance_wash_basin",
+        "maintenance_supply_cabinet",
+        "compressed_air_gun",
+        "cooler_housing",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "electrical_cabinet_filter_service",
+      "title": "Electrical Cabinet Cooling Filter Service",
+      "condition": "The 500-hour interval for electrical cabinet filter replacement has elapsed, or the cabinet_temperature_sensor reads above 45 degrees C indicating restricted cooling airflow.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read cabinet_temperature_sensor to record the current cabinet air temperature",
+        "Walk to maintenance_supply_cabinet and pick replacement_cabinet_filter",
+        "Walk to press_brake_electrical_cabinet",
+        "Pick used_cabinet_filter and place it in waste_bin",
+        "Place replacement_cabinet_filter into cabinet_filter_housing",
+        "Notify maintenance_supervisor that cabinet filter has been replaced and log the service date"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "cabinet_temperature_sensor",
+        "maintenance_supply_cabinet",
+        "replacement_cabinet_filter",
+        "press_brake_electrical_cabinet",
+        "used_cabinet_filter",
+        "waste_bin",
+        "cabinet_filter_housing",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Full Machine Lockout and Tagout Before Maintenance",
+      "condition": "Any maintenance, tooling change, or repair requiring removal of guards or access to hydraulic, electrical, or mechanical hazard zones must be preceded by full LOTO with verification of de-energized state.",
+      "steps": [
+        "Walk to press_brake_control_panel and press red_estop_button",
+        "Press hydraulic_pump_stop_button to de-energize the hydraulic system",
+        "Walk to main_disconnect_panel and press loto_isolation_switch to cut the main electrical supply",
+        "Walk to maintenance_supply_cabinet and pick loto_padlock and pick loto_tag",
+        "Place loto_padlock on main_disconnect_panel latch and place loto_tag on loto_padlock",
+        "Read estop_relay_status to confirm the machine is fully de-energized",
+        "Notify maintenance_supervisor that LOTO is applied and the machine is cleared for work"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "red_estop_button",
+        "hydraulic_pump_stop_button",
+        "main_disconnect_panel",
+        "loto_isolation_switch",
+        "maintenance_supply_cabinet",
+        "loto_padlock",
+        "loto_tag",
+        "estop_relay_status",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "hydraulic_spill_response",
+      "title": "Hydraulic Oil Minor Spill Containment and Cleanup",
+      "condition": "Hydraulic oil is observed pooling on the floor beneath the press brake from a fitting seep or hose drip, covering an area smaller than 1 square metre with no pressure collapse or ongoing spray.",
+      "steps": [
+        "Walk to press_brake_control_panel and press hydraulic_pump_stop_button",
+        "Walk to spill_kit_station and pick spill_absorbent_pads",
+        "Place spill_absorbent_pads around the oil pool perimeter to contain the spread",
+        "Pick spill_containment_boom and place it at the floor_drain nearest to the oil pool to block entry",
+        "Walk to press_brake_hydraulic_unit and read hydraulic_oil_level_sensor to estimate volume lost",
+        "Notify plant_safety_officer and maintenance_supervisor with the spill location and estimated fluid volume"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "hydraulic_pump_stop_button",
+        "spill_kit_station",
+        "spill_absorbent_pads",
+        "spill_containment_boom",
+        "floor_drain",
+        "press_brake_hydraulic_unit",
+        "hydraulic_oil_level_sensor",
+        "plant_safety_officer",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "estop_response",
+      "title": "Emergency Stop Activation and Controlled Machine Recovery",
+      "condition": "Any operator, safety device, or light curtain triggers an emergency stop, halting the ram mid-stroke or between cycles and placing the machine in a fault state that blocks all normal controls.",
+      "steps": [
+        "Walk to press_brake_control_panel",
+        "Read ram_position_sensor to record the current Y-axis depth and confirm the ram is stationary",
+        "Read hydraulic_pressure_sensor to confirm system pressure has dissipated to below 10 bar",
+        "Notify maintenance_supervisor with the ram position reading and the stated reason for the e-stop",
+        "Wait for maintenance_supervisor verbal clearance before touching any reset controls",
+        "Press control_panel_reset_button to acknowledge and clear the e-stop fault",
+        "Press green_power_on_button to restore the machine to the ready state"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "ram_position_sensor",
+        "hydraulic_pressure_sensor",
+        "maintenance_supervisor",
+        "control_panel_reset_button",
+        "green_power_on_button"
+      ]
+    },
+    {
+      "ref": "fire_safety_check",
+      "title": "Monthly Fire Extinguisher and Safety Device Inspection",
+      "condition": "The monthly safety inspection schedule requires confirming the press brake area fire extinguisher is charged and unobstructed, and that the e-stop circuit tests healthy.",
+      "steps": [
+        "Walk to fire_extinguisher_station near press_brake_area",
+        "Pick fire_extinguisher and read fire_extinguisher_pressure_gauge to confirm the needle is in the green zone",
+        "Place fire_extinguisher back at fire_extinguisher_station",
+        "Walk to press_brake_control_panel",
+        "Read estop_relay_status to confirm the e-stop circuit shows continuity",
+        "Notify safety_officer that the monthly press brake safety check is complete"
+      ],
+      "equipment": [
+        "fire_extinguisher_station",
+        "fire_extinguisher",
+        "fire_extinguisher_pressure_gauge",
+        "press_brake_control_panel",
+        "estop_relay_status",
+        "safety_officer"
+      ]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Daily Press Brake Startup Procedure",
+      "condition": "Beginning of each production shift, or after any machine shutdown exceeding 2 hours, requires a full controlled startup sequence before releasing the machine for production.",
+      "steps": [
+        "Walk to press_brake_control_panel and press green_power_on_button",
+        "Press hydraulic_pump_start_button and wait 60 seconds for the hydraulic system to pressurize",
+        "Read hydraulic_pressure_sensor to confirm the operating range is between 185 and 215 bar",
+        "Read hydraulic_oil_temp_sensor to confirm oil temperature is above 20 degrees C before production begins",
+        "Press back_gauge_home_button to reference the back gauge to machine datum",
+        "Read back_gauge_position_sensor to confirm home position is within 0.1 mm of datum",
+        "Notify process_engineer that the machine has passed startup checks and is ready for production"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "green_power_on_button",
+        "hydraulic_pump_start_button",
+        "hydraulic_pressure_sensor",
+        "hydraulic_oil_temp_sensor",
+        "back_gauge_home_button",
+        "back_gauge_position_sensor",
+        "process_engineer"
+      ]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "End-of-Shift Press Brake Shutdown Procedure",
+      "condition": "End of production shift or planned downtime exceeding 2 hours requires the ram to be parked at top dead centre and the hydraulic system to be de-energized in a controlled sequence.",
+      "steps": [
+        "Walk to press_brake_control_panel and press ram_jog_up_button to retract the ram fully to top dead centre",
+        "Read ram_position_sensor to confirm the ram has reached the top-dead-centre park position",
+        "Press hydraulic_pump_stop_button to de-energize the hydraulic pump",
+        "Wait 30 seconds then read hydraulic_pressure_sensor to confirm residual pressure is below 10 bar",
+        "Press red_estop_button to place the machine in the safe-off state",
+        "Notify maintenance_supervisor that the shutdown sequence is complete"
+      ],
+      "equipment": [
+        "press_brake_control_panel",
+        "ram_jog_up_button",
+        "ram_position_sensor",
+        "hydraulic_pump_stop_button",
+        "hydraulic_pressure_sensor",
+        "red_estop_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "bend_angle_inspection",
+      "title": "First-Off and Periodic Bend Angle Quality Inspection",
+      "condition": "The first part of each production run, and every 50th part thereafter, must be measured for bend angle accuracy within plus or minus 0.5 degrees of the nominal programmed angle.",
+      "steps": [
+        "Walk to press_brake_ram_area and pick first_off_part",
+        "Place first_off_part on parts_inspection_table",
+        "Walk to parts_inspection_table and pick angle_gauge",
+        "Place angle_gauge against the bent_flange of first_off_part then read angle_gauge to record the actual bend angle",
+        "Place first_off_part in approved_parts_bin if the angle is within plus or minus 0.5 degrees of nominal",
+        "Place first_off_part in reject_bin if the angle is outside tolerance",
+        "Notify process_engineer with the recorded angle value whenever a part is placed in reject_bin"
+      ],
+      "equipment": [
+        "press_brake_ram_area",
+        "first_off_part",
+        "parts_inspection_table",
+        "angle_gauge",
+        "approved_parts_bin",
+        "reject_bin",
+        "process_engineer"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "low_hydraulic_pressure",
+      "text": "Line 4, night shift around 2 AM. The ram was moving way slower than normal on the downstroke and you could hear the pump really straining. Gauge on the unit was reading around 160, way below where we usually run. Parts weren't fully bending before the machine stalled mid-stroke."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "low_hydraulic_pressure",
+      "text": "Second shift, cell 3. Operator said the ram kept stalling partway through bends, like it didn't have enough force to push through the material. When I got there the hydraulic readout was sitting in the low 170s - usually we're at 190 or above when things are normal. Oil level looked a bit down on the sight glass too."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "high_hydraulic_pressure",
+      "text": "Unit on the east wall started making a grinding whine about an hour into first shift. Glanced at the pressure readout on the panel and it was sitting at 228 - way above where we normally run. The relief valve was making that chattering noise it makes when it's cycling constantly. Didn't want to keep going."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "high_hydraulic_pressure",
+      "text": "Bay 5 press brake, afternoon shift. Came back from break and there was an amber light on the panel. Machine wasn't mid-cycle but the system pressure gauge showed 225 bar and the pump was still running. Pressure was stuck up there with no obvious reason."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "hydraulic_pressure_collapse",
+      "text": "Middle of a bend on line 3, there was a loud bang from behind the unit and then the ram just sagged down. Oil sprayed out from behind the hydraulic unit and soaked about ten square feet of floor in maybe fifteen seconds. Gauge dropped to basically nothing - maybe 20 bar. There was fluid everywhere and the smell hit you from across the cell."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "hydraulic_pressure_collapse",
+      "text": "Night shift, the press brake near the loading dock. Operator hit the foot pedal, ram started down, then there was a hissing pop and the whole machine went dead on the hydraulics instantly. Gauge jumped from 195 down to under 30 in what felt like one second. There was a wet patch forming fast behind the machine - smelled like burned rubber mixed with oil."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "hydraulic_pressure_collapse",
+      "text": "First shift, bay 6 brake. The ram couldn't hold its position mid-stroke and it sagged down suddenly rather than moving controlled. Looked behind the unit and a puddle was forming rapidly - not a slow drip, it was actively pooling. Pressure gauge read 35 bar from a normal 195 operating point. Completely different from the gradual stuff we see sometimes."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "ram_overtravel_warning",
+      "text": "Line 1 press brake this morning - yellow caution light came on but the machine kept running through the cycle without stopping. Operator said the bends were coming out just a hair sharper than spec but production continued. Panel was showing some kind of position flag but it wasn't a hard stop."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "ram_overtravel_warning",
+      "text": "Second shift, bay 3. Machine beeped and showed a yellow indicator on the HMI screen but didn't stop or fault out. Parts looked acceptable but I figured I should write it up. The Y-axis number on the touchscreen was a few millimeters past where the program normally stops the ram."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "ram_overtravel_fault",
+      "text": "Press brake on line 5 completely locked itself out mid-run. Red fault light on everything, zero response from the panel. The ram was stuck down in the tooling and I couldn't jog it back up no matter what I pressed. Machine was totally frozen - nothing was going to happen until someone with supervisor access showed up."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "ram_overtravel_fault",
+      "text": "Bay 2 brake, day shift. Loud clunk and then the whole machine went into a hard fault. It wasn't like a regular alarm you can clear - the control panel went fully red, the machine was immovable, and the ram was buried about a centimeter deeper into the die than it should ever go. Had to wait for the maintenance super before anyone could touch the reset."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "ram_overtravel_fault",
+      "text": "The big press brake in the back of the plant went into a full lockout during second shift production. Not a pause, not a caution - full red fault across the board and everything was dead. The entire control system locked and the ram was jammed deep into the tooling. Cell was shut down until management cleared it."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "back_gauge_position_error",
+      "text": "Started getting rejects from line 4 - all the flange lengths were coming out about a millimeter short. Quality caught it after about 12 parts. The back stop finger must have drifted because every part had the same offset and the dimension was consistently wrong, not random."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "back_gauge_position_error",
+      "text": "Second shift, bay 7 press. The back gauge finger was stuttering between jobs and by mid-run the parts started having the bend too close to the edge. Checked the position on the screen and the X-axis was showing a different number than what the program called for. Parts had inconsistent flange dimensions across the batch."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "back_gauge_position_error",
+      "text": "Quality flagged a bunch of parts from the press in cell 2. Bend locations were off - the crease was in the wrong spot relative to the edge of the blank. When I checked the backstop finger it wasn't sitting where the CNC said it should be. Looked like it had shifted from its reference point sometime during the run."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "tonnage_overload",
+      "text": "Line 3, first shift. Switched over to the thicker plate job and the machine threw a red fault about four bends in. Bend didn't complete and the alarm panel lit up. The punch looked like it had taken a serious hit - we probably had the wrong die opening for that material thickness."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "tonnage_overload",
+      "text": "Press brake in bay 4, morning shift. Machine faulted hard when we moved to the 8mm bracket job and wouldn't complete the stroke. The force display on the screen was way into the red - higher than I've seen it on any normal job. Ram stopped dead mid-stroke and the machine went into fault."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "oil_temp_high",
+      "text": "Running continuous production on line 2 all morning, by about noon the machine started feeling different - slower response on the pedal, slightly sluggish on the downstroke. Panel was showing a temp warning. We'd been doing short-cycle high-volume work for about five straight hours with no cooldown."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "oil_temp_high",
+      "text": "Bay 5 press, after lunch. Operator said the pedal felt softer than usual and the ram was taking a beat longer to build force. High temp light came on the panel. Oil reservoir felt noticeably warm even standing a couple feet away. The sweet burning smell was starting to come off the unit."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "hydraulic_filter_change",
+      "text": "The filter pressure light came on the press brake in bay 3 during startup check this morning. Machine was running but the amber indicator was on the whole shift. Filter hasn't been swapped out since before my rotation started - probably well overdue."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "hydraulic_filter_change",
+      "text": "During my weekly walk-around on second shift I noticed the differential pressure indicator on the filter housing on the press near the dock doors was in the red zone. That indicator hasn't been in the red before. We're past the time interval and the oil is probably bypassing the filter element at this point."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "hydraulic_oil_level_check",
+      "text": "Startup check on line 1 this morning - the sight glass was hard to read but looked low. The level sensor was right on the edge of the yellow zone, not alarming yet but definitely down from where we should be running. Wanted to top it off before the shift got going."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "hydraulic_oil_level_check",
+      "text": "Doing morning rounds on bay 3 and the oil level looked visually low through the sight glass on the reservoir - you could see it was down from the normal line. No sensor alarm yet but you could tell it had dropped since last week. Flagged it before production started."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "ram_guide_lubrication",
+      "text": "Been hearing a dry squeaking sound from the columns on the press brake in bay 2 during the downstroke for about a week. Machine is running fine and nothing is alarming, but the noise is getting louder. Ran my hand along the column and the surface felt dry - no lubrication visible."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "ram_guide_lubrication",
+      "text": "Second shift operator on the back press complained about a grinding feeling when the ram comes down - tactile, not audible over the plant noise. Wiped the guide column with a rag and there was dark grayish metal dust on it. No alarms, machine runs, but something is dry in the guides."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "back_gauge_rail_lubrication",
+      "text": "The back gauge on the press brake in bay 7 is moving jerky instead of smooth. It stutters and catches when repositioning between bends - you can hear a click-click-click during the X-axis move. No position errors thrown yet but it clearly isn't moving like it should."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "back_gauge_rail_lubrication",
+      "text": "Second shift, the brake near the quality table. Back gauge finger hesitates for about half a second before moving to the next position between bends - like it's sticking and then releasing. Rail surfaces looked dull and dry when I used a flashlight on them. No faults but the motion is clearly not right."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "tooling_inspection",
+      "text": "Quality flagged a run of parts from line 3 - the inner bend radius was getting progressively larger over the course of a couple hundred parts. Gradual change, not a sudden jump. The punch tip is probably worn because the radius kept opening up as the run went on."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "tooling_inspection",
+      "text": "After a tooling change on the press in bay 4, the first few parts had slightly different radii than the drawing called for. Not sure if the punch got nicked when it was stored or if it's just wear from the previous long job. Need to measure the tool before deciding whether to run or swap it out."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "oil_cooler_filter_clean",
+      "text": "The hydraulic oil on the press brake in bay 5 keeps running warm even on moderate jobs. Oil level is fine, we checked. Been noticing the temp has been creeping up about five degrees each week over the last month. The cooler probably can't pull enough heat through a dirty element."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "oil_cooler_filter_clean",
+      "text": "During a PM walkthrough on the brake by the north wall I noticed the cooler fins were packed solid with metal dust and fiber lint from the floor. Machine runs warm and you can visually see the cooler isn't getting airflow through it. Nothing is alarming yet but the trend is bad."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "electrical_cabinet_filter_service",
+      "text": "Press brake on line 6 threw an electrical fault mid-morning. Maintenance pulled the cabinet side panel and the filter on the intake was completely plugged - looked like a gray felt blanket. Inside the cabinet was noticeably hotter than ambient. The drive was cooking itself."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "electrical_cabinet_filter_service",
+      "text": "During the quarterly PM on the bay 8 press I found the cabinet cooling filter hadn't been changed in over a year. It was so clogged you could feel the restricted airflow just by holding your hand near the vent. Cabinet ran hot and the filter was due - should have been caught sooner."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "lockout_tagout",
+      "text": "Going in to swap out the lower die on the press in bay 2. Tooling change requires getting hands up under the ram and into the die area, so we need the machine completely isolated before I touch anything. Can't do it with just an e-stop."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance crew is set to replace a hydraulic hose on the back of the press brake in cell 5. It's a pressure line, so we have to be sure main power is off and all residual hydraulic pressure is bled before anyone cracks a fitting. Full isolation required before the job starts."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "lockout_tagout",
+      "text": "Electrician came to rewire a proximity limit switch on the press brake near the loading dock. Before he could open the cabinet or touch any wiring, the machine had to be fully isolated - main disconnect, lock on the panel, tag applied. No work starts until that's confirmed."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "hydraulic_spill_response",
+      "text": "Found a small puddle of reddish oil under the press brake in bay 6 when I came in at the start of second shift. Came from one of the fittings on the unit - slow drip but there was already a wet spot about the size of a dinner plate on the floor. Machine had been running all first shift."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "hydraulic_spill_response",
+      "text": "Line 3 press brake. One of the hose connections was weeping oil - not gushing, just a steady drip. Floor around the machine was getting slick and we could smell the hydraulic fluid from a few feet away. Small puddle, maybe a foot across, but it was spreading and heading toward the floor drain."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "hydraulic_spill_response",
+      "text": "During a walk-through I noticed oil streaking down the side of the hydraulic power unit on the press by bay 4. Tracking onto the floor, maybe half a square foot of wet area. Not spraying, just seeping from somewhere on the unit. Close enough to the floor drain to be a concern if left."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "estop_response",
+      "text": "Operator on line 1 hit the red mushroom button when a piece of sheet metal slipped out of position while the ram was coming down. Machine stopped hard mid-stroke, ram frozen partway into the die. The control panel is showing a fault now and nothing on the normal buttons responds."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "estop_response",
+      "text": "The light curtain on the press brake in bay 7 tripped during a production run - machine went into e-stop automatically. No injury, just a part that went sideways during loading and broke the beam. The machine is locked out and the panel won't clear without going through the restart steps."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "estop_response",
+      "text": "Second shift, press near the paint line. Someone bumped the emergency pull cord walking past the machine. Ram stopped mid-cycle with the work piece still under it. Control panel is faulted, nothing responds. Need to verify the ram position before we can start the reset sequence."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "fire_safety_check",
+      "text": "Safety audit is coming up next week and I need to make sure the extinguisher in the press brake area is tagged and in good shape. The one near the big press by the north wall hasn't been looked at in a while and I want it confirmed before the auditors walk through."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "fire_safety_check",
+      "text": "Monthly safety round on line 4. Needed to verify the extinguisher by the press brake is accessible and charged. Last month someone had stacked some flat bar stock in front of it and it was half-blocked. Also wanted to confirm the pull cord on the stop circuit hadn't been tampered with."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "startup_procedure",
+      "text": "Coming in on day shift after a long weekend - machine has been off since Friday afternoon. Need to bring the press brake in bay 3 up from cold. Oil's been sitting, backstop needs to reference, and I want to confirm pressure is in range before I let anyone load parts."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "startup_procedure",
+      "text": "Line 2 press brake, coming back after a planned 4-hour maintenance window. Machine has been completely off. Job planner wants sign-off that the brake is ready before releasing the next work order. Need to go through the full bring-up sequence and confirm everything checks out."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of first shift on line 5. Last batch done, now need to put the press brake away correctly. Ram needs to go home, pump off, machine into safe-off before I hand the floor over to second shift and walk. Don't want to leave it mid-stroke or with the pump running."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of week on bay 3, press brake going into a planned 3-day maintenance hold over the long weekend. Proper shutdown sequence required before the maintenance crew tapes it off and hangs the out-of-service tag. Pulling the main breaker without parking the ram first is not acceptable."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "bend_angle_inspection",
+      "text": "First part off the die on line 3 after a tooling change. Angle looks roughly right visually but we need hard numbers before running the rest of the batch. Had a bad experience last month running 150 parts before catching a setup error at final inspection."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "bend_angle_inspection",
+      "text": "Press in cell 4, third shift. Operator said a handful of parts toward the end of the run looked slightly open compared to earlier parts - subtle but noticeable. Need to pull some of those parts and get the gauge on them before releasing the batch to the next operation."
+    }
+  ]
+}

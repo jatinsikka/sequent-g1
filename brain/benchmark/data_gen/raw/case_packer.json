@@ -1,0 +1,573 @@
+{
+  "family": "Case Packer",
+  "sops": [
+    {
+      "ref": "glue_temp_low",
+      "title": "Glue Temperature Below Setpoint",
+      "condition": "The hot-melt glue temperature sensor reads below the minimum operating setpoint, causing the adhesive to become viscous and poorly flowable during a production run.",
+      "steps": [
+        "walk_to glue_hmi_panel",
+        "read_sensor glue_temp_sensor",
+        "press_button glue_heater_increase_button",
+        "wait 120",
+        "read_sensor glue_temp_sensor",
+        "notify shift_supervisor if temperature has not recovered to setpoint"
+      ],
+      "equipment": ["glue_hmi_panel", "glue_temp_sensor", "glue_heater_increase_button"]
+    },
+    {
+      "ref": "glue_temp_high",
+      "title": "Glue Temperature Above Upper Limit",
+      "condition": "The hot-melt glue temperature sensor reads above the maximum allowable limit, causing adhesive scorching and runny bead formation on carton flaps.",
+      "steps": [
+        "walk_to glue_hmi_panel",
+        "press_button glue_heater_off_button",
+        "read_sensor glue_temp_sensor",
+        "wait 60",
+        "read_sensor glue_temp_sensor",
+        "press_button glue_heater_on_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["glue_hmi_panel", "glue_temp_sensor", "glue_heater_off_button", "glue_heater_on_button"]
+    },
+    {
+      "ref": "glue_temp_collapse",
+      "title": "Sudden Glue Temperature Collapse Mid-Run",
+      "condition": "The hot-melt glue temperature drops more than 40 degrees Celsius within 60 seconds during an active production run, indicating a heater element failure or sudden power interruption.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to glue_unit_station",
+        "read_sensor glue_temp_sensor",
+        "read_sensor glue_heater_status_sensor",
+        "notify maintenance_technician",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["red_estop_button", "glue_unit_station", "glue_temp_sensor", "glue_heater_status_sensor"]
+    },
+    {
+      "ref": "glue_level_warning",
+      "title": "Glue Tank Level Low Warning",
+      "condition": "The glue tank level sensor triggers the yellow warning threshold at approximately 25 percent capacity, signaling that a refill is needed soon but the machine continues running normally.",
+      "steps": [
+        "walk_to glue_tank_station",
+        "read_sensor glue_level_sensor",
+        "pick glue_pellet_bag",
+        "place glue_pellet_bag at glue_tank_hopper",
+        "wait 30",
+        "read_sensor glue_level_sensor"
+      ],
+      "equipment": ["glue_tank_station", "glue_level_sensor", "glue_pellet_bag", "glue_tank_hopper"]
+    },
+    {
+      "ref": "glue_level_critical",
+      "title": "Glue Tank Empty Critical Alarm",
+      "condition": "The glue tank level sensor hits the red critical threshold and the machine halts dispensing entirely, triggering a red alarm and full production stoppage.",
+      "steps": [
+        "press_button red_estop_button",
+        "notify production_supervisor",
+        "walk_to glue_tank_station",
+        "pick glue_pellet_bag",
+        "place glue_pellet_bag at glue_tank_hopper",
+        "wait 120",
+        "read_sensor glue_level_sensor"
+      ],
+      "equipment": ["red_estop_button", "glue_tank_station", "glue_level_sensor", "glue_pellet_bag", "glue_tank_hopper"]
+    },
+    {
+      "ref": "infeed_jam",
+      "title": "Case Blank Jam at Infeed Conveyor",
+      "condition": "A case blank becomes misaligned or folded at the infeed conveyor or erector entry point, triggering the infeed jam sensor and stopping the blank feed mechanism.",
+      "steps": [
+        "press_button infeed_stop_button",
+        "walk_to infeed_conveyor",
+        "read_sensor infeed_jam_sensor",
+        "pick jammed_case_blank",
+        "place jammed_case_blank at reject_bin",
+        "press_button infeed_start_button"
+      ],
+      "equipment": ["infeed_stop_button", "infeed_conveyor", "infeed_jam_sensor", "jammed_case_blank", "reject_bin", "infeed_start_button"]
+    },
+    {
+      "ref": "discharge_jam",
+      "title": "Packed Case Jam at Discharge Conveyor",
+      "condition": "A fully packed and sealed case becomes misaligned or wedged on the discharge conveyor downstream of the glue station, blocking subsequent cases and triggering the discharge jam sensor.",
+      "steps": [
+        "press_button discharge_stop_button",
+        "walk_to discharge_conveyor",
+        "read_sensor discharge_jam_sensor",
+        "pick jammed_packed_case",
+        "place jammed_packed_case at staging_pallet",
+        "press_button discharge_start_button"
+      ],
+      "equipment": ["discharge_stop_button", "discharge_conveyor", "discharge_jam_sensor", "jammed_packed_case", "staging_pallet", "discharge_start_button"]
+    },
+    {
+      "ref": "pusher_overload",
+      "title": "Pusher Servo Overload Fault",
+      "condition": "The pusher servo drive detects an overcurrent or mechanical overload and faults out, stopping the pusher arm and halting case loading into the former.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to pusher_control_panel",
+        "read_sensor pusher_fault_sensor",
+        "notify maintenance_technician",
+        "wait 300",
+        "press_button pusher_fault_reset_button",
+        "press_button machine_start_button"
+      ],
+      "equipment": ["red_estop_button", "pusher_control_panel", "pusher_fault_sensor", "pusher_fault_reset_button", "machine_start_button"]
+    },
+    {
+      "ref": "former_belt_slip",
+      "title": "Former Belt Slipping and Misaligned",
+      "condition": "The former belt is drifting laterally off its center guide and occasionally skipping, causing intermittent misfolded case bottoms, but the belt continues to move at reduced effectiveness.",
+      "steps": [
+        "walk_to former_station",
+        "read_sensor belt_tracking_sensor",
+        "press_button former_belt_tension_increase_button",
+        "wait 30",
+        "read_sensor belt_tracking_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["former_station", "belt_tracking_sensor", "former_belt_tension_increase_button"]
+    },
+    {
+      "ref": "former_belt_stopped",
+      "title": "Former Belt Fully Stopped or Broken",
+      "condition": "The former belt has completely stopped moving or has physically broken, causing total cessation of case erection and triggering the former belt fault sensor.",
+      "steps": [
+        "press_button red_estop_button",
+        "notify maintenance_technician",
+        "walk_to former_station",
+        "read_sensor former_belt_sensor",
+        "pick worn_former_belt",
+        "place worn_former_belt at scrap_bin",
+        "pick replacement_former_belt",
+        "place replacement_former_belt at former_station"
+      ],
+      "equipment": ["red_estop_button", "former_station", "former_belt_sensor", "worn_former_belt", "scrap_bin", "replacement_former_belt"]
+    },
+    {
+      "ref": "vfd_drive_fault",
+      "title": "VFD Drive Electrical Fault Alarm",
+      "condition": "The variable-frequency drive controlling the main conveyor motor trips and displays a fault code, stopping the conveyor without any mechanical jam present.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to electrical_panel",
+        "read_sensor vfd_fault_display_sensor",
+        "notify electrical_technician",
+        "press_button vfd_fault_reset_button",
+        "wait 30",
+        "read_sensor vfd_status_sensor"
+      ],
+      "equipment": ["red_estop_button", "electrical_panel", "vfd_fault_display_sensor", "vfd_fault_reset_button", "vfd_status_sensor"]
+    },
+    {
+      "ref": "minor_glue_leak",
+      "title": "Minor Glue Drip at Nozzle Head",
+      "condition": "A slow, continuous glue drip or seep is detected at the nozzle head fitting or manifold, forming a small puddle on the deck plate without spray or pressure loss.",
+      "steps": [
+        "press_button glue_pump_stop_button",
+        "walk_to glue_nozzle_station",
+        "read_sensor glue_pressure_sensor",
+        "pick absorbent_pad",
+        "place absorbent_pad at glue_drip_point",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["glue_pump_stop_button", "glue_nozzle_station", "glue_pressure_sensor", "absorbent_pad", "glue_drip_point"]
+    },
+    {
+      "ref": "major_glue_leak",
+      "title": "Major Hot Melt Hose Rupture",
+      "condition": "A hot-melt glue hose or high-pressure fitting fails catastrophically, releasing a large volume of pressurized hot adhesive onto the floor and surrounding equipment.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to glue_unit_station",
+        "press_button glue_heater_off_button",
+        "notify maintenance_technician",
+        "notify safety_officer",
+        "pick spill_kit_container",
+        "place spill_kit_container at leak_area"
+      ],
+      "equipment": ["red_estop_button", "glue_unit_station", "glue_heater_off_button", "spill_kit_container", "leak_area"]
+    },
+    {
+      "ref": "nozzle_cleaning",
+      "title": "Scheduled Glue Nozzle Cleaning",
+      "condition": "Preventive maintenance schedule requires cleaning of the glue nozzle orifice to remove charred adhesive buildup that restricts bead consistency.",
+      "steps": [
+        "press_button glue_pump_stop_button",
+        "walk_to glue_nozzle_station",
+        "pick nozzle_cleaning_brush",
+        "place nozzle_cleaning_brush at nozzle_head",
+        "wait 60",
+        "pick clean_cloth",
+        "place clean_cloth at nozzle_head"
+      ],
+      "equipment": ["glue_pump_stop_button", "glue_nozzle_station", "nozzle_cleaning_brush", "nozzle_head", "clean_cloth"]
+    },
+    {
+      "ref": "conveyor_lubrication",
+      "title": "Conveyor Chain and Rail Lubrication",
+      "condition": "Preventive maintenance schedule requires lubrication of conveyor chains and guide rails to prevent wear, noise, and premature failure.",
+      "steps": [
+        "press_button conveyor_stop_button",
+        "walk_to conveyor_lubrication_point",
+        "pick grease_gun",
+        "place grease_gun at conveyor_chain",
+        "wait 10",
+        "place grease_gun at conveyor_rail",
+        "press_button conveyor_start_button"
+      ],
+      "equipment": ["conveyor_stop_button", "conveyor_lubrication_point", "grease_gun", "conveyor_chain", "conveyor_rail", "conveyor_start_button"]
+    },
+    {
+      "ref": "former_belt_replacement",
+      "title": "Former Belt Scheduled Replacement",
+      "condition": "The former belt has reached its scheduled end-of-life interval or shows visible cracking, splitting, or fraying that warrants a planned replacement during a scheduled maintenance window.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to former_station",
+        "pick worn_former_belt",
+        "place worn_former_belt at scrap_bin",
+        "pick replacement_former_belt",
+        "place replacement_former_belt at former_station",
+        "press_button machine_start_button"
+      ],
+      "equipment": ["red_estop_button", "former_station", "worn_former_belt", "scrap_bin", "replacement_former_belt", "machine_start_button"]
+    },
+    {
+      "ref": "glue_filter_replacement",
+      "title": "Hot Melt Glue Filter Replacement",
+      "condition": "Preventive maintenance schedule requires replacement of the hot-melt glue filter element, or reduced glue flow is observed with a full tank indicating filter restriction.",
+      "steps": [
+        "press_button glue_pump_stop_button",
+        "walk_to glue_filter_housing",
+        "pick spent_glue_filter",
+        "place spent_glue_filter at waste_bin",
+        "pick replacement_glue_filter",
+        "place replacement_glue_filter at glue_filter_housing",
+        "press_button glue_pump_start_button"
+      ],
+      "equipment": ["glue_pump_stop_button", "glue_filter_housing", "spent_glue_filter", "waste_bin", "replacement_glue_filter", "glue_pump_start_button"]
+    },
+    {
+      "ref": "glue_tank_refill",
+      "title": "Scheduled Hot Melt Glue Tank Refill",
+      "condition": "The glue tank level reads between 25 and 50 percent during a planned refill window before a production shift, with the machine still operational and no alarm active.",
+      "steps": [
+        "walk_to glue_tank_station",
+        "read_sensor glue_level_sensor",
+        "pick glue_pellet_bag",
+        "place glue_pellet_bag at glue_tank_hopper",
+        "wait 60",
+        "read_sensor glue_level_sensor"
+      ],
+      "equipment": ["glue_tank_station", "glue_level_sensor", "glue_pellet_bag", "glue_tank_hopper"]
+    },
+    {
+      "ref": "encoder_calibration",
+      "title": "Case Position Encoder Recalibration",
+      "condition": "After a maintenance rebuild or mechanical adjustment to the infeed drive, the case position encoder reads incorrectly, causing cases to phase out of sync with the pusher and former timing.",
+      "steps": [
+        "walk_to encoder_panel",
+        "press_button encoder_calibration_button",
+        "wait 30",
+        "read_sensor encoder_position_sensor",
+        "press_button encoder_confirm_button",
+        "notify quality_technician"
+      ],
+      "equipment": ["encoder_panel", "encoder_calibration_button", "encoder_position_sensor", "encoder_confirm_button"]
+    },
+    {
+      "ref": "quality_inspection",
+      "title": "Packed Case Seal and Dimension Inspection",
+      "condition": "Routine quality checkpoint requires sampling of finished cases from the discharge conveyor to verify glue seal integrity and dimensional compliance to specification.",
+      "steps": [
+        "walk_to discharge_conveyor",
+        "pick sample_packed_case",
+        "place sample_packed_case at inspection_table",
+        "read_sensor case_seal_sensor",
+        "read_sensor case_dimension_sensor",
+        "place sample_packed_case at approved_pallet",
+        "notify quality_technician"
+      ],
+      "equipment": ["discharge_conveyor", "sample_packed_case", "inspection_table", "case_seal_sensor", "case_dimension_sensor", "approved_pallet"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Full Machine Lockout Tagout",
+      "condition": "Maintenance work requiring entry into guarded areas or contact with mechanical or electrical components of the case packer requires full lockout and tagout of all energy sources.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to main_power_panel",
+        "press_button main_disconnect_switch",
+        "pick lockout_hasp",
+        "place lockout_hasp at main_disconnect_switch",
+        "pick personal_lock",
+        "place personal_lock at lockout_hasp"
+      ],
+      "equipment": ["red_estop_button", "main_power_panel", "main_disconnect_switch", "lockout_hasp", "personal_lock"]
+    },
+    {
+      "ref": "estop_response",
+      "title": "Emergency Stop Activation and Area Clearance",
+      "condition": "A safety hazard such as a fire, severe injury risk, or detected electrical short requires immediate emergency stop activation and evacuation of the machine area.",
+      "steps": [
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "notify safety_officer",
+        "walk_to emergency_station",
+        "read_sensor emergency_status_sensor",
+        "wait 60"
+      ],
+      "equipment": ["red_estop_button", "emergency_station", "emergency_status_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-CP-001",
+      "sop_ref": "glue_temp_low",
+      "text": "Line 3 case packer was running slow and sticky this morning. Boxes coming off with weak flap seals - they were peeling open by the time they hit the staging area. Checked the glue head and the adhesive looked thick and stringy, not flowing right. Display was reading noticeably under where we normally run temperature-wise."
+    },
+    {
+      "id": "INC-CP-002",
+      "sop_ref": "glue_temp_low",
+      "text": "Second shift on the unit by the loading dock noticed cartons had glue that was pulling threads instead of bonding clean. The nozzle was barely squirting anything out and what it did put down was too thick to wet the flap. HMI showed we were well under spec on the heat side of things."
+    },
+    {
+      "id": "INC-CP-003",
+      "sop_ref": "glue_temp_high",
+      "text": "The east-side case packer threw a yellow alarm on the glue system around 10am. There was a faint smoke haze coming off the nozzle area and the glue was real watery, running past the flap joints and dripping on the conveyor frame. Boxes had glue squeeze-out all over the outside."
+    },
+    {
+      "id": "INC-CP-004",
+      "sop_ref": "glue_temp_high",
+      "text": "Third shift on line 2 - glue was scorching bad. Could smell something burning from across the floor. HMI had a flashing alert and what was coming out of the nozzle was so thin it just ran right off the carton flap instead of bonding."
+    },
+    {
+      "id": "INC-CP-005",
+      "sop_ref": "glue_temp_collapse",
+      "text": "We were mid-run on line 1, maybe 400 cases in, and glue suddenly stopped sticking at all. Looked at the readout and the temp had dropped like a rock in under a minute - nothing gradual about it, just crashed from normal to way below usable in one shot. Completely different from when it just drifts low over a few hours."
+    },
+    {
+      "id": "INC-CP-006",
+      "sop_ref": "glue_temp_collapse",
+      "text": "The packer near the press room just died on us during the afternoon run - glue side tanked fast. Maintenance came out and said the heater element had actually failed, which is why it went from fine to completely cold almost instantly. Nothing like the usual slow drift we see when the setpoint is off."
+    },
+    {
+      "id": "INC-CP-007",
+      "sop_ref": "glue_level_warning",
+      "text": "Saw a yellow beacon on the packer dashboard around 2pm on line 4. Machine was still running fine, no slowdown or bad seals - just that advance flag telling us the tank was getting low. Had plenty of time to deal with it before it became a real problem."
+    },
+    {
+      "id": "INC-CP-008",
+      "sop_ref": "glue_level_warning",
+      "text": "End of line 3 packer flagged a yellow indicator during the morning run. No alarm, no stoppage - just the pre-warn light. Output quality was still fine. Shift lead asked us to check the level and top it off if we could get to it."
+    },
+    {
+      "id": "INC-CP-009",
+      "sop_ref": "glue_level_critical",
+      "text": "Line 2 packer went dead stop around 3pm shift change. No glue coming out at all - boxes were just going through with open flaps. Red alarm was screaming and the tank was completely bone dry. Full stoppage, had to hold the line."
+    },
+    {
+      "id": "INC-CP-010",
+      "sop_ref": "glue_level_critical",
+      "text": "Lost a good 12 minutes on line 5 because the hot melt ran out during peak hours with no advance warning being caught. Cases started coming off with unsealed bottoms and then the machine killed itself on the red alarm. Whole downstream area backed up."
+    },
+    {
+      "id": "INC-CP-011",
+      "sop_ref": "glue_level_critical",
+      "text": "The case packer near the dock doors shut itself down completely and wouldn't restart. Nozzle wasn't dispensing anything and the drive kept cycling trying to run. Found the hot melt reservoir completely empty - had to do an emergency refill before we could get back on line."
+    },
+    {
+      "id": "INC-CP-012",
+      "sop_ref": "infeed_jam",
+      "text": "Had a blank fold up accordion-style right at the mouth of the packer on line 3. Machine stopped and the infeed sensor lit. The blank had gotten creased bad by the feed rollers and wouldn't release on its own. Had to pull it out manually."
+    },
+    {
+      "id": "INC-CP-013",
+      "sop_ref": "infeed_jam",
+      "text": "Line 1 packer wouldn't take the next blank in the stack - it went in sideways and clogged the entry chute to the erector. Machine stopped itself. Took a couple minutes to fish the crumpled blank out before the feed would restart."
+    },
+    {
+      "id": "INC-CP-014",
+      "sop_ref": "discharge_jam",
+      "text": "Packed boxes started backing up at the exit end of the line 4 packer. A finished case had rotated on the belt somehow - got crossways right after the tuck-flap station and blocked the next three coming out behind it. Machine kept trying to push more into the jam."
+    },
+    {
+      "id": "INC-CP-015",
+      "sop_ref": "discharge_jam",
+      "text": "Second shift found a blockage right past the glue station on the exit belt of the line 2 unit. A sealed case had canted sideways - the glue must have grabbed wrong and torqued it - and stopped everything behind it cold."
+    },
+    {
+      "id": "INC-CP-016",
+      "sop_ref": "discharge_jam",
+      "text": "The run chute on line 6 was backed up solid at end of shift. A mostly-sealed carton had tipped over on the discharge conveyor and wedged itself diagonally. Nothing to do with the infeed - all the jam was on the output side after the sealing station."
+    },
+    {
+      "id": "INC-CP-017",
+      "sop_ref": "pusher_overload",
+      "text": "The loading arm on line 3 case packer seized up mid-cycle and threw a drive fault. Machine went into alarm and the whole unit stopped. Couldn't clear it with a normal reset - had to get maintenance involved to check if something was mechanically bound up inside."
+    },
+    {
+      "id": "INC-CP-018",
+      "sop_ref": "pusher_overload",
+      "text": "Pusher on the unit at station 7 locked hard during the morning run. Heard a loud clunk and then the machine cut itself out. Drive panel was showing a fault. Maintenance said it was an overcurrent trip, probably from a product piece getting wedged in the pusher path."
+    },
+    {
+      "id": "INC-CP-019",
+      "sop_ref": "former_belt_slip",
+      "text": "Box blanks were coming through at a slight angle on line 4 during the afternoon run - about every fifth case had a misfolded bottom tab. Looked at the former and the belt was drifting to one side but still moving. No full stop, just inconsistent output."
+    },
+    {
+      "id": "INC-CP-020",
+      "sop_ref": "former_belt_slip",
+      "text": "Noticed cases erecting crooked during my QC walk on line 2. The former belt was wandering off its guide but hadn't stopped - it was still turning, just not tracking right. Had an occasional skip every 8-10 cycles."
+    },
+    {
+      "id": "INC-CP-021",
+      "sop_ref": "former_belt_stopped",
+      "text": "Line 3 packer went completely dark on box erecting. The former belt had snapped and wrapped around the back pulley. No cases being formed at all - machine was cycling but nothing was coming out the erector."
+    },
+    {
+      "id": "INC-CP-022",
+      "sop_ref": "former_belt_stopped",
+      "text": "Heard a loud snap from the packer near the press room right at the start of changeover. Found the former belt completely off - not slipping, not misaligned, just physically broken. Machine was trying to form cases on nothing and faulted out."
+    },
+    {
+      "id": "INC-CP-023",
+      "sop_ref": "vfd_drive_fault",
+      "text": "Conveyor on the case packer at line 6 started stuttering and then died outright mid-shift. Checked the control panel and there was a drive error code flashing. No jams anywhere on the belt - the belt itself looked completely fine, motor just wouldn't turn."
+    },
+    {
+      "id": "INC-CP-024",
+      "sop_ref": "vfd_drive_fault",
+      "text": "Line 1 packer conveyor stopped with no warning during the afternoon run. Panel was showing a drive fault code - not a jam, not a belt issue. Electrician said it was a drive trip, probably a thermal event in the cabinet."
+    },
+    {
+      "id": "INC-CP-025",
+      "sop_ref": "minor_glue_leak",
+      "text": "Noticed a drip coming from behind the nozzle head on line 3 packer during my rounds. Slow but steady - had maybe a golf ball size puddle on the deck plate after about an hour of running. Boxes were still sealing fine, just made a mess on the frame."
+    },
+    {
+      "id": "INC-CP-026",
+      "sop_ref": "minor_glue_leak",
+      "text": "Glue was seeping from a fitting near the nozzle manifold on the unit by dock 2. Not spraying or blowing out - just slowly weeping. Output quality looked OK but it was building up on the frame and dripping to the floor. Enough that someone could slip on it."
+    },
+    {
+      "id": "INC-CP-027",
+      "sop_ref": "major_glue_leak",
+      "text": "Hot melt hose on line 5 packer blew apart at the elbow fitting during first shift. Glue was spraying in a fan pattern - hit the floor, a nearby cable tray, and the side of the conveyor frame. Burns hazard, cleared the area immediately."
+    },
+    {
+      "id": "INC-CP-028",
+      "sop_ref": "major_glue_leak",
+      "text": "Glue system on line 3 had a catastrophic fitting failure during startup warmup. Half the tank pressure released through a split hose joint. Floor was covered in hot adhesive within seconds - completely different scale from the little drip we had last week."
+    },
+    {
+      "id": "INC-CP-029",
+      "sop_ref": "major_glue_leak",
+      "text": "Second shift heard a pop from behind the glue unit on line 4 and then saw adhesive shooting out in a stream. An operator caught a splash on their forearm - minor burn, went straight to first aid. Full emergency shutdown, plant safety called in."
+    },
+    {
+      "id": "INC-CP-030",
+      "sop_ref": "nozzle_cleaning",
+      "text": "QC flagged inconsistent glue bead on line 2 output during their morning walk. Pulled the nozzle cover and found a carbon buildup around the orifice from dried adhesive that had charred. PM was due anyway - bead pattern was definitely affected."
+    },
+    {
+      "id": "INC-CP-031",
+      "sop_ref": "nozzle_cleaning",
+      "text": "PM check on line 4 packer - nozzle tip had a partial blockage of charred glue residue. Output was still running but the bead was narrower than spec on one side. Cleaning was on the weekly schedule."
+    },
+    {
+      "id": "INC-CP-032",
+      "sop_ref": "conveyor_lubrication",
+      "text": "Line 3 conveyor chain was squeaking badly during the morning run - could hear it from 10 feet away. Checked the PM log and lubrication was 2 days overdue. No faults yet but it was getting loud."
+    },
+    {
+      "id": "INC-CP-033",
+      "sop_ref": "conveyor_lubrication",
+      "text": "The transfer chain on the case packer at station 5 was getting noticeably noisy during the afternoon. Running rough and jerky on the return side. PM schedule showed we were past the grease interval."
+    },
+    {
+      "id": "INC-CP-034",
+      "sop_ref": "former_belt_replacement",
+      "text": "Former belt on line 1 packer was showing cracks along the edge during the PM inspection on Saturday. Reached the scheduled replacement interval and the surface had visible wear grooves. Proactive swap before it fails in production."
+    },
+    {
+      "id": "INC-CP-035",
+      "sop_ref": "former_belt_replacement",
+      "text": "Belt on the box erector at line 6 had visible splits and fraying at the splice seam during our monthly check. PM mileage showed it was at change-out time. Swapped it before the morning shift started."
+    },
+    {
+      "id": "INC-CP-036",
+      "sop_ref": "glue_filter_replacement",
+      "text": "Glue pressure was reading low on line 3 even though the tank was full. Maintenance figured it was a clogged filter and pulled the element - it was completely packed with char. Filter PM had slipped past due by about a week."
+    },
+    {
+      "id": "INC-CP-037",
+      "sop_ref": "glue_filter_replacement",
+      "text": "Hot melt system on line 5 had noticeably reduced flow coming through the nozzle. Tank was fine, heater was fine. Pulled the filter and it was caked solid with burnt adhesive. Scheduled interval was coming up anyway so we did the swap."
+    },
+    {
+      "id": "INC-CP-038",
+      "sop_ref": "glue_tank_refill",
+      "text": "Running the morning pre-shift fill on line 2 packer. Tank was at about 30 percent - not in alarm, just the routine top-off before the day shift kicked in so we have a full buffer going into the run."
+    },
+    {
+      "id": "INC-CP-039",
+      "sop_ref": "glue_tank_refill",
+      "text": "Ops supervisor asked us to top off the glue on line 4 before second shift took over. Still had around 40 percent in there but policy is to not hand off to second shift with less than half a tank. No alarms, just scheduled housekeeping."
+    },
+    {
+      "id": "INC-CP-040",
+      "sop_ref": "encoder_calibration",
+      "text": "Case packer on line 3 was misjudging the position of blanks after we swapped out the infeed section bearings yesterday. Cases were phasing wrong and missing the tuck every few cycles. Position reads were off from where the blank actually was."
+    },
+    {
+      "id": "INC-CP-041",
+      "sop_ref": "encoder_calibration",
+      "text": "After the maintenance rebuild on the erector drive over the weekend, line 1 packer was off on its timing coming into the former. Position sensor reads did not match actual case location. Had about a half-inch of drift from where it expected things to be."
+    },
+    {
+      "id": "INC-CP-042",
+      "sop_ref": "quality_inspection",
+      "text": "QC walk on line 2 first thing in the morning - pulled 3 cases from the discharge end for sampling. One had a weak bond on the minor bottom flap, not fully adhered. Sent the last 20-minute production batch back for 100 percent review."
+    },
+    {
+      "id": "INC-CP-043",
+      "sop_ref": "quality_inspection",
+      "text": "Shift supervisor called for a spot check on line 5 packer output after a customer feedback flag came in. Pulled 2 samples and found the end-fold overlap was about 3mm short of spec. Had to adjust the former and pull more samples."
+    },
+    {
+      "id": "INC-CP-044",
+      "sop_ref": "quality_inspection",
+      "text": "Line 4 packer had a complaint flag from the warehouse - cases were coming apart in transit. Pulled samples from the discharge and found the glue bead was landing off-center on the seal joint, probably not enough contact area to hold under stack weight."
+    },
+    {
+      "id": "INC-CP-045",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needed to go in and pull the former belt on line 3 packer. Before anyone went inside the guarded area, we had to fully de-energize and lock out the machine. Took about 10 minutes to get all the LOTO hardware in place."
+    },
+    {
+      "id": "INC-CP-046",
+      "sop_ref": "lockout_tagout",
+      "text": "Scheduled major PM on the line 6 case packer over the weekend. Both electrical and mechanical energy sources had to be isolated and locked out before the team would enter. Whole crew had personal locks on before anybody touched anything inside."
+    },
+    {
+      "id": "INC-CP-047",
+      "sop_ref": "estop_response",
+      "text": "Operator on line 4 smelled something burning near the drive cabinet of the case packer around 9am. Hit the big red mushroom and cleared everyone from the area. Maintenance found a wire had shorted against the cabinet frame - would have been a fire if we hadn't stopped it."
+    },
+    {
+      "id": "INC-CP-048",
+      "sop_ref": "estop_response",
+      "text": "Line 2 packer had a near-miss - a worker's glove got pulled toward the pusher arm entry zone during a manual clear attempt. Hit the nearest e-stop immediately, everything on the machine stopped within a second. Incident report filed."
+    },
+    {
+      "id": "INC-CP-049",
+      "sop_ref": "estop_response",
+      "text": "A small grease fire started on the floor near the base of the line 3 case packer during second shift - somebody had over-lubed the chain and excess dripped onto the motor housing. E-stop was pulled as a precaution while the fire extinguisher was used."
+    }
+  ]
+}

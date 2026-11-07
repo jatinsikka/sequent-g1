@@ -1,0 +1,592 @@
+{
+  "family": "Main Electrical Panel",
+  "sops": [
+    {
+      "ref": "low_bus_voltage",
+      "title": "Bus Voltage Below Minimum Setpoint",
+      "condition": "The bus voltage sensor reads a sustained value below the 460 V minimum operating setpoint for more than 30 consecutive seconds.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor bus_voltage_sensor",
+        "read_sensor phase_a_current_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify electrical_supervisor",
+        "wait 60",
+        "read_sensor bus_voltage_sensor"
+      ],
+      "equipment": ["main_panel", "bus_voltage_sensor", "phase_a_current_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "bus_voltage_collapse",
+      "title": "Sudden Bus Voltage Collapse",
+      "condition": "Bus voltage drops from normal operating range to below 50 V within a single one-second scan cycle, indicating catastrophic and instantaneous loss of supply voltage.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor bus_voltage_sensor",
+        "press_button emergency_stop_button",
+        "notify electrical_supervisor",
+        "notify plant_manager",
+        "walk_to electrical_room_entrance",
+        "wait 30"
+      ],
+      "equipment": ["main_panel", "bus_voltage_sensor", "emergency_stop_button", "electrical_room_entrance"]
+    },
+    {
+      "ref": "high_bus_voltage",
+      "title": "Bus Voltage Exceeds Maximum Ceiling",
+      "condition": "The bus voltage sensor reads above 510 V, exceeding the maximum permissible ceiling for connected equipment.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor bus_voltage_sensor",
+        "read_sensor phase_b_current_sensor",
+        "read_sensor phase_c_current_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify electrical_supervisor",
+        "notify utility_contact"
+      ],
+      "equipment": ["main_panel", "bus_voltage_sensor", "phase_b_current_sensor", "phase_c_current_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "overcurrent_warning",
+      "title": "Phase Current at Warning Threshold",
+      "condition": "Any phase current sensor reads between 80 percent and 99 percent of the main breaker rated ampacity, triggering a warning-level alarm without yet tripping the breaker.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor phase_a_current_sensor",
+        "read_sensor phase_b_current_sensor",
+        "read_sensor phase_c_current_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify electrical_supervisor",
+        "wait 120"
+      ],
+      "equipment": ["main_panel", "phase_a_current_sensor", "phase_b_current_sensor", "phase_c_current_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "overcurrent_trip",
+      "title": "Main Breaker Tripped on Overcurrent",
+      "condition": "The main circuit breaker has already opened due to a sustained overcurrent condition, removing power from all downstream distribution loads.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor breaker_status_indicator",
+        "notify electrical_supervisor",
+        "notify plant_manager",
+        "wait 30",
+        "read_sensor phase_a_current_sensor",
+        "press_button breaker_reset_button"
+      ],
+      "equipment": ["main_panel", "breaker_status_indicator", "phase_a_current_sensor", "breaker_reset_button"]
+    },
+    {
+      "ref": "ground_fault_alarm",
+      "title": "Ground Fault Relay Activated",
+      "condition": "The ground fault protection relay has detected leakage current to earth and the ground fault indicator lamp is illuminated on the panel face.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor ground_fault_indicator",
+        "press_button alarm_acknowledge_button",
+        "notify electrical_supervisor",
+        "read_sensor bus_voltage_sensor",
+        "wait 15",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_panel", "ground_fault_indicator", "alarm_acknowledge_button", "bus_voltage_sensor"]
+    },
+    {
+      "ref": "phase_imbalance_alarm",
+      "title": "Three-Phase Current Imbalance Detected",
+      "condition": "The difference between the highest and lowest phase current readings exceeds ten percent of the average three-phase current, triggering the imbalance alarm relay.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor phase_a_current_sensor",
+        "read_sensor phase_b_current_sensor",
+        "read_sensor phase_c_current_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify electrical_supervisor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_panel", "phase_a_current_sensor", "phase_b_current_sensor", "phase_c_current_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "panel_overtemp_caution",
+      "title": "Panel Internal Temperature at Caution Level",
+      "condition": "The panel internal temperature sensor reads between 45 degrees C and 59 degrees C, exceeding the caution setpoint but remaining below the emergency shutdown threshold.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor panel_temp_sensor",
+        "press_button panel_fan_switch",
+        "press_button alarm_acknowledge_button",
+        "notify electrical_supervisor",
+        "wait 300",
+        "read_sensor panel_temp_sensor"
+      ],
+      "equipment": ["main_panel", "panel_temp_sensor", "panel_fan_switch", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "panel_overtemp_emergency",
+      "title": "Panel Internal Temperature at Emergency Threshold",
+      "condition": "The panel internal temperature sensor reads 60 degrees C or above, reaching the emergency threshold that requires immediate shutdown to prevent equipment damage or fire.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor panel_temp_sensor",
+        "press_button emergency_stop_button",
+        "notify electrical_supervisor",
+        "notify plant_manager",
+        "notify fire_safety_officer",
+        "walk_to electrical_room_entrance"
+      ],
+      "equipment": ["main_panel", "panel_temp_sensor", "emergency_stop_button", "electrical_room_entrance"]
+    },
+    {
+      "ref": "meter_comm_fault",
+      "title": "Power Meter Error Code or Frozen Reading",
+      "condition": "The panel-mounted power meter display shows an alphanumeric error code or the kWh and kW readings have not updated for more than five minutes, indicating a meter communication or hardware fault.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor meter_display",
+        "read_sensor bus_voltage_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify electrical_supervisor",
+        "wait 30",
+        "read_sensor meter_display"
+      ],
+      "equipment": ["main_panel", "meter_display", "bus_voltage_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "breaker_visual_inspection",
+      "title": "Scheduled Circuit Breaker Visual Inspection",
+      "condition": "The scheduled preventive maintenance interval for visual inspection of all circuit breakers has been reached per the monthly maintenance calendar.",
+      "steps": [
+        "walk_to safety_station",
+        "pick ppe_kit",
+        "walk_to main_panel",
+        "read_sensor breaker_status_indicator",
+        "pick inspection_log",
+        "place inspection_log",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["safety_station", "ppe_kit", "main_panel", "breaker_status_indicator", "inspection_log"]
+    },
+    {
+      "ref": "busbar_cleaning_pm",
+      "title": "Busbar and Panel Interior Cleaning",
+      "condition": "Scheduled quarterly cleaning of busbars and panel interior surfaces is due per the preventive maintenance plan.",
+      "steps": [
+        "walk_to safety_station",
+        "pick ppe_kit",
+        "pick cleaning_cloth",
+        "walk_to main_panel",
+        "place cleaning_cloth",
+        "read_sensor breaker_status_indicator",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["safety_station", "ppe_kit", "cleaning_cloth", "main_panel", "breaker_status_indicator"]
+    },
+    {
+      "ref": "power_meter_calibration",
+      "title": "Panel Power Meter Calibration Verification",
+      "condition": "Scheduled annual calibration verification of the panel-mounted power meter is due per the instrument calibration plan.",
+      "steps": [
+        "walk_to safety_station",
+        "pick calibration_reference",
+        "walk_to main_panel",
+        "read_sensor meter_display",
+        "read_sensor bus_voltage_sensor",
+        "place calibration_reference",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["safety_station", "calibration_reference", "main_panel", "meter_display", "bus_voltage_sensor"]
+    },
+    {
+      "ref": "panel_filter_replacement",
+      "title": "Panel Ventilation Filter Replacement",
+      "condition": "The panel enclosure ventilation filter has reached its scheduled replacement interval or the cooling differential pressure sensor indicates filter clogging.",
+      "steps": [
+        "walk_to safety_station",
+        "pick replacement_filter",
+        "walk_to main_panel",
+        "pick spent_filter",
+        "place spent_filter",
+        "place replacement_filter",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["safety_station", "replacement_filter", "main_panel", "spent_filter"]
+    },
+    {
+      "ref": "thermal_scan_pm",
+      "title": "Scheduled Thermal Imaging Scan of Panel Internals",
+      "condition": "The scheduled semi-annual thermal imaging inspection of panel internals is due per the preventive maintenance plan.",
+      "steps": [
+        "walk_to safety_station",
+        "pick thermal_camera",
+        "pick ppe_kit",
+        "walk_to main_panel",
+        "read_sensor panel_temp_sensor",
+        "place thermal_camera",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["safety_station", "thermal_camera", "ppe_kit", "main_panel", "panel_temp_sensor"]
+    },
+    {
+      "ref": "panel_loto",
+      "title": "Main Panel Lockout-Tagout Procedure",
+      "condition": "Maintenance work requiring de-energization of the main electrical panel is scheduled to begin and all personnel clearances have been obtained.",
+      "steps": [
+        "walk_to safety_station",
+        "pick loto_lock",
+        "pick loto_tag",
+        "walk_to main_panel",
+        "press_button panel_main_breaker_button",
+        "place loto_lock",
+        "place loto_tag"
+      ],
+      "equipment": ["safety_station", "loto_lock", "loto_tag", "main_panel", "panel_main_breaker_button"]
+    },
+    {
+      "ref": "panel_emergency_stop",
+      "title": "Main Panel Emergency Shutdown",
+      "condition": "An imminent safety hazard such as visible arcing, smoke, or structural damage at the panel face requires immediate emergency de-energization of the main panel.",
+      "steps": [
+        "walk_to main_panel",
+        "press_button emergency_stop_button",
+        "notify electrical_supervisor",
+        "notify plant_manager",
+        "notify fire_safety_officer",
+        "walk_to electrical_room_entrance",
+        "wait 30"
+      ],
+      "equipment": ["main_panel", "emergency_stop_button", "electrical_room_entrance"]
+    },
+    {
+      "ref": "arc_flash_response",
+      "title": "Arc Flash Event Response at Main Panel",
+      "condition": "An arc flash event has occurred at or near the main electrical panel as evidenced by a visible flash, loud bang, or blast pressure wave from the enclosure.",
+      "steps": [
+        "walk_to electrical_room_entrance",
+        "notify fire_safety_officer",
+        "notify electrical_supervisor",
+        "notify plant_manager",
+        "wait 60",
+        "read_sensor bus_voltage_sensor",
+        "read_sensor breaker_status_indicator"
+      ],
+      "equipment": ["electrical_room_entrance", "bus_voltage_sensor", "breaker_status_indicator"]
+    },
+    {
+      "ref": "panel_energize_sequence",
+      "title": "Main Panel Energization After Maintenance Outage",
+      "condition": "All maintenance work on the main electrical panel is complete, LOTO devices have been removed by authorized personnel, and the panel is ready to be re-energized.",
+      "steps": [
+        "walk_to main_panel",
+        "pick loto_lock",
+        "place loto_lock",
+        "press_button panel_main_breaker_button",
+        "read_sensor bus_voltage_sensor",
+        "read_sensor breaker_status_indicator",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["main_panel", "loto_lock", "panel_main_breaker_button", "bus_voltage_sensor", "breaker_status_indicator"]
+    },
+    {
+      "ref": "panel_controlled_shutdown",
+      "title": "Main Panel Controlled Shutdown for Planned Maintenance",
+      "condition": "A planned maintenance window has been scheduled and all downstream loads have been confirmed de-energized, permitting controlled shutdown of the main panel.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor breaker_status_indicator",
+        "notify electrical_supervisor",
+        "press_button panel_main_breaker_button",
+        "read_sensor bus_voltage_sensor",
+        "wait 30",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_panel", "breaker_status_indicator", "panel_main_breaker_button", "bus_voltage_sensor"]
+    },
+    {
+      "ref": "power_quality_check",
+      "title": "Routine Power Factor and Harmonic Distortion Inspection",
+      "condition": "The scheduled monthly power quality inspection is due, requiring review of power factor and total harmonic distortion readings from the panel-mounted instruments.",
+      "steps": [
+        "walk_to main_panel",
+        "read_sensor power_factor_meter",
+        "read_sensor harmonic_analyzer",
+        "read_sensor bus_voltage_sensor",
+        "pick inspection_log",
+        "place inspection_log",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["main_panel", "power_factor_meter", "harmonic_analyzer", "bus_voltage_sensor", "inspection_log"]
+    },
+    {
+      "ref": "breaker_torque_check",
+      "title": "Breaker Terminal Torque Verification",
+      "condition": "The scheduled annual torque verification of all circuit breaker terminal connections is due per the preventive maintenance plan.",
+      "steps": [
+        "walk_to safety_station",
+        "pick torque_wrench",
+        "pick ppe_kit",
+        "walk_to main_panel",
+        "read_sensor breaker_status_indicator",
+        "place torque_wrench",
+        "notify electrical_supervisor"
+      ],
+      "equipment": ["safety_station", "torque_wrench", "ppe_kit", "main_panel", "breaker_status_indicator"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-EP-001",
+      "sop_ref": "low_bus_voltage",
+      "text": "Line 4 VFDs have been throwing undervoltage warnings for the last few minutes. Checked the meter on the main panel and it's reading maybe 452, 453 - definitely below where it should be. It's been like this since the start of second shift. Nothing has tripped but the drives keep complaining. Might be a utility sag."
+    },
+    {
+      "id": "INC-EP-002",
+      "sop_ref": "low_bus_voltage",
+      "text": "Over by the loading dock the press machines are sluggish and the operator said his indicator lights look dim. Panel meter has been reading low for a good half hour now - not tripping anything but definitely starving for volts. Started gradual around 6 AM."
+    },
+    {
+      "id": "INC-EP-003",
+      "sop_ref": "low_bus_voltage",
+      "text": "Been getting nuisance trips on the smaller feeders on line 2 all morning. Electrician checked the panel and said the main meter is reading about 8 volts under nominal. Nothing sudden, just been sagging steadily since the big stamping machines kicked on at the start of first shift."
+    },
+    {
+      "id": "INC-EP-004",
+      "sop_ref": "bus_voltage_collapse",
+      "text": "Entire line 3 stamping area just went dark with no warning at all. One second everything was running, next second lights out and all motors coasting down. Happened instantaneously - not a gradual fade, it just blinked off. Called supervisor right away."
+    },
+    {
+      "id": "INC-EP-005",
+      "sop_ref": "bus_voltage_collapse",
+      "text": "The whole east wing just died - presses, conveyors, overhead lighting, everything. It wasn't a slow fade at all, it was like someone threw a switch. We're talking zero in under a second. Third shift, around 2 AM. Never seen anything like it."
+    },
+    {
+      "id": "INC-EP-006",
+      "sop_ref": "high_bus_voltage",
+      "text": "VFD on press 7 is throwing E05 overvoltage faults and won't restart. Checked the main panel meter and it's reading way higher than it should be - numbers I've never seen on that gauge before. Couple of other drives on the same line are alarming too."
+    },
+    {
+      "id": "INC-EP-007",
+      "sop_ref": "high_bus_voltage",
+      "text": "Half the equipment on lines 5 and 6 started alarming at the same time. Walked over to the main electrical room and the voltage meter on the panel is pinned high - well above the normal band. Must be something upstream, transformer secondary or utility side."
+    },
+    {
+      "id": "INC-EP-008",
+      "sop_ref": "overcurrent_warning",
+      "text": "Amber warning light came on the main panel about 20 minutes into the peak production run. Nothing actually tripped, still got power everywhere, but the needle on the amp gauge is creeping up into the yellow. Told line leads to hold off on starting any more equipment."
+    },
+    {
+      "id": "INC-EP-009",
+      "sop_ref": "overcurrent_warning",
+      "text": "Load indicator on the panel face has been sitting in the yellow zone for a good 25 minutes now. Everything is still running fine, breaker hasn't moved. First shift supervisor noticed it creeping up right after they brought the second body press online."
+    },
+    {
+      "id": "INC-EP-010",
+      "sop_ref": "overcurrent_warning",
+      "text": "Panel is showing a load warning since we went to full headcount this morning. Amp reading is high but the main breaker hasn't opened. Just sitting there in the high yellow - hasn't gotten worse but I don't want it sitting there all shift without someone knowing."
+    },
+    {
+      "id": "INC-EP-011",
+      "sop_ref": "overcurrent_trip",
+      "text": "Everything on the assembly floor just dropped. Walked to the electrical room and the main breaker handle is in the middle fault position. Lines 1 through 4 are all dead. Happened right as the big hydraulic press cycled at the top of the hour."
+    },
+    {
+      "id": "INC-EP-012",
+      "sop_ref": "overcurrent_trip",
+      "text": "Full blackout on our side of the building. The big disconnect in the main electrical room has opened up - handle flopped to the tripped spot. All lines stopped, all lights on battery backup only. Can't just flip it back without figuring out what caused it."
+    },
+    {
+      "id": "INC-EP-013",
+      "sop_ref": "ground_fault_alarm",
+      "text": "A red lamp I've never noticed before lit up on the main panel box over by door 3. Looks like some kind of fault indicator, not the usual alarm lamps. Came on about five minutes after the wash-down crew finished working the floor drains near that panel."
+    },
+    {
+      "id": "INC-EP-014",
+      "sop_ref": "ground_fault_alarm",
+      "text": "Strange warning lamp on the panel - it's red and it's not one of the indicators I recognize from the daily checklist. Came on right after the maintenance guys hooked up the new MIG welder on circuit 12. Panel is still on, nothing tripped, but that light is definitely not normal."
+    },
+    {
+      "id": "INC-EP-015",
+      "sop_ref": "ground_fault_alarm",
+      "text": "During my morning walkthrough I spotted a red indicator glowing on the face of the main panel. Guys on nights said it came on around 3 AM but nobody called it in. Panel seems to be running okay but there's something funky going on."
+    },
+    {
+      "id": "INC-EP-016",
+      "sop_ref": "phase_imbalance_alarm",
+      "text": "Motors on the body press line keep running hot and tripping thermal protection every couple hours. Electrician went to the main panel and said the load isn't splitting evenly across the three legs - one leg is doing way more work than the other two."
+    },
+    {
+      "id": "INC-EP-017",
+      "sop_ref": "phase_imbalance_alarm",
+      "text": "Two drives on line 5 are overheating and winding temps keep climbing on the motor monitors. Maintenance guy checked at the panel and said the amperages across the three conductors are noticeably different from each other - one leg is reading maybe 15 percent higher than the others."
+    },
+    {
+      "id": "INC-EP-018",
+      "sop_ref": "panel_overtemp_caution",
+      "text": "The electrical room near the stamping bay smells a little warm when you walk past it. Checked the temp readout on the panel face and it's sitting in the yellow zone. Ventilation fan on the panel doesn't seem to be spinning - might be seized."
+    },
+    {
+      "id": "INC-EP-019",
+      "sop_ref": "panel_overtemp_caution",
+      "text": "Ambient got really hot in that corner of the building today - HVAC must be struggling with the outside temps. Caution light on the panel enclosure came on about an hour ago. It's not at the alarm level yet but the temp display is elevated."
+    },
+    {
+      "id": "INC-EP-020",
+      "sop_ref": "panel_overtemp_caution",
+      "text": "Panel feels warm to the touch on the outside surface when I did my rounds. Temp display is creeping up toward the top of the yellow band - not in the red, just elevated. Think the cooling fan might be sluggish, only heard it running intermittently."
+    },
+    {
+      "id": "INC-EP-021",
+      "sop_ref": "panel_overtemp_emergency",
+      "text": "Strong burning smell coming from the main electrical room. Walked in and the temp gauge on the panel is redlined - way past anywhere I've ever seen it. Cleared everyone out immediately and called it in. This is not a yellow caution situation."
+    },
+    {
+      "id": "INC-EP-022",
+      "sop_ref": "panel_overtemp_emergency",
+      "text": "Panel started making a continuous alarm and the big red HIGH TEMP indicator lit up. You could smell something hot even from outside the electrical room door before you even opened it. Got on the radio right away - this needs immediate attention."
+    },
+    {
+      "id": "INC-EP-023",
+      "sop_ref": "meter_comm_fault",
+      "text": "Power readout on the panel hasn't budged in about 10 minutes - the exact same kW number just sitting there frozen. Every other readout I can see is changing with the load but this one is stuck. Might be the display or the meter itself gone bad."
+    },
+    {
+      "id": "INC-EP-024",
+      "sop_ref": "meter_comm_fault",
+      "text": "Main panel meter is showing E4 on the screen - never seen that error code before. Numbers aren't updating either, they're stuck. Started about an hour into second shift. Power seems fine everywhere else on the floor, it's just that display."
+    },
+    {
+      "id": "INC-EP-025",
+      "sop_ref": "breaker_visual_inspection",
+      "text": "Doing my morning rounds on line 1 side and noticed the housing on one of the breakers in the main panel looks cracked. Handle still moves but there's a visible split in the plastic casing on the outside. Should get someone with the right PPE to look at it up close."
+    },
+    {
+      "id": "INC-EP-026",
+      "sop_ref": "breaker_visual_inspection",
+      "text": "PM schedule shows the monthly breaker check is overdue by two weeks - we were short-staffed the last couple rounds. Manager wants it done today before end of first shift. Nothing has failed but we need to get eyes on all of them properly."
+    },
+    {
+      "id": "INC-EP-027",
+      "sop_ref": "busbar_cleaning_pm",
+      "text": "Quarterly cleaning is due on the main panel interior. Last time it was done the tech found carbon dust buildup on the copper strips inside. Need to get in there and wipe it down before the contamination builds up to the point it causes a problem."
+    },
+    {
+      "id": "INC-EP-028",
+      "sop_ref": "busbar_cleaning_pm",
+      "text": "Thermal camera picked up some discoloration on the copper bars inside the panel last week during the walkthrough. Maintenance coordinator says we should clean those up as part of the quarterly PM before it gets worse. Scheduled for this afternoon after the changeover."
+    },
+    {
+      "id": "INC-EP-029",
+      "sop_ref": "power_meter_calibration",
+      "text": "Annual cert on the kWh meter in the main panel is coming up next week - calibration binder shows it hasn't been done in almost 11 months. Need to pull the reference standard and verify it's still reading accurately before the cert expires."
+    },
+    {
+      "id": "INC-EP-030",
+      "sop_ref": "power_meter_calibration",
+      "text": "Finance team flagged that our energy readings don't match what the utility is billing us - difference is running about 3 percent. Maintenance thinks the panel meter may have drifted. Time to pull the calibration reference and check it against a known standard."
+    },
+    {
+      "id": "INC-EP-031",
+      "sop_ref": "panel_filter_replacement",
+      "text": "Filter on the main panel is absolutely clogged - held it up to the shop light and can't see daylight through it at all. Way past due. Fan is running noticeably louder than normal trying to pull any air through it."
+    },
+    {
+      "id": "INC-EP-032",
+      "sop_ref": "panel_filter_replacement",
+      "text": "Ventilation fan on the electrical panel near the press bay is making more noise than usual - really straining. Pulled the filter cover and the filter mat is dark gray and compacted, barely any airflow getting through. Needs a fresh one today."
+    },
+    {
+      "id": "INC-EP-033",
+      "sop_ref": "thermal_scan_pm",
+      "text": "Semi-annual IR inspection is on the schedule for this week. Maintenance coordinator says it needs to be done before the holiday shutdown window. Last scan six months ago was clean but we haven't looked inside since spring."
+    },
+    {
+      "id": "INC-EP-034",
+      "sop_ref": "thermal_scan_pm",
+      "text": "Last thermography run found one lug connection running noticeably hotter than the surrounding hardware. We tightened it and applied antioxidant. Follow-up check is now due per the corrective action tracker to confirm the fix held."
+    },
+    {
+      "id": "INC-EP-035",
+      "sop_ref": "thermal_scan_pm",
+      "text": "IR gun during my walkthrough caught what looked like a warm spot near the top of the panel enclosure on the outside surface. Not alarming by itself, but the semi-annual thermography PM is due anyway - might as well do the full scan while we have the camera out."
+    },
+    {
+      "id": "INC-EP-036",
+      "sop_ref": "panel_loto",
+      "text": "We're swapping out a 200-amp breaker on the main panel this morning. Electrician is geared up and waiting but nobody has applied isolation yet. Need to get the panel secured before he opens that door and touches anything inside."
+    },
+    {
+      "id": "INC-EP-037",
+      "sop_ref": "panel_loto",
+      "text": "Replacing the power meter on the panel face today as part of the meter upgrade project. Job cannot start until the panel is properly isolated and tagged out. Tech is standing by at the electrical room entrance waiting for the isolation step."
+    },
+    {
+      "id": "INC-EP-038",
+      "sop_ref": "panel_loto",
+      "text": "Going to be working on the busbar connection torquing this afternoon. Safety coordinator reminded the crew this morning that full isolation has to happen before anyone opens that panel enclosure for the connection work. Need the lock and tag applied first."
+    },
+    {
+      "id": "INC-EP-039",
+      "sop_ref": "panel_emergency_stop",
+      "text": "Saw smoke coming out of the top vent slots on the main panel box. Did not wait around to see what it was - hit the big red button immediately and cleared the area. Called it in right after. Smoke was definitely coming from inside the enclosure itself."
+    },
+    {
+      "id": "INC-EP-040",
+      "sop_ref": "panel_emergency_stop",
+      "text": "Heard a loud pop and saw sparks shooting from the side of the panel near the compressor room. Immediately hit the emergency cutoff. Did not know what was burning but wasn't going to risk it. Got everyone away from that whole corner of the room."
+    },
+    {
+      "id": "INC-EP-041",
+      "sop_ref": "arc_flash_response",
+      "text": "Big white flash came out of the main panel when the new tech opened the door without wearing arc flash PPE. The blast knocked him back a step. Everyone backed away fast and we are keeping the area clear until the right people arrive. This is serious."
+    },
+    {
+      "id": "INC-EP-042",
+      "sop_ref": "arc_flash_response",
+      "text": "Heard a massive bang from the main switchgear room and immediately smelled burnt copper and ozone in the hallway. Didn't see it happen but based on the sound and that smell it was definitely something arcing hard. Kept everyone out and got on the radio."
+    },
+    {
+      "id": "INC-EP-043",
+      "sop_ref": "panel_energize_sequence",
+      "text": "Weekend maintenance job on the panel is completely wrapped up. All the techs have signed the clearance form, isolation devices are off, and the supervisor gave the all-clear. Ready to restore power - need to bring the main back up in the right sequence."
+    },
+    {
+      "id": "INC-EP-044",
+      "sop_ref": "panel_energize_sequence",
+      "text": "Last tag came off the panel five minutes ago - LOTO removal is complete for all workers. Area is cleared and the safety coordinator signed the restoration permit. Ready to bring the main panel back online after the three-day outage."
+    },
+    {
+      "id": "INC-EP-045",
+      "sop_ref": "panel_controlled_shutdown",
+      "text": "Got a planned maintenance window tonight for the busbar replacement job. Need to take the main panel down in sequence - all loads on this side have been verified off already. Maintenance crew is standing by waiting for the panel to go dark before they start."
+    },
+    {
+      "id": "INC-EP-046",
+      "sop_ref": "panel_controlled_shutdown",
+      "text": "Scheduled PM window starts at midnight. Need to shut the main panel down cleanly before the crew can get inside. All production lines on this side of the building have been signed off as stopped and verified de-energized. Just need to drop the main now."
+    },
+    {
+      "id": "INC-EP-047",
+      "sop_ref": "power_quality_check",
+      "text": "Monthly power check is on the calendar for today. Energy bills have been higher than expected for the last two months and the plant engineer wants to see the harmonics and PF numbers before he makes any recommendations to management."
+    },
+    {
+      "id": "INC-EP-048",
+      "sop_ref": "power_quality_check",
+      "text": "Couple of VFDs on line 6 are running rough and the drives tech thinks it could be a power quality issue. Monthly inspection is due anyway, so going to pull the PF and distortion readings off the panel instruments and see what they show."
+    },
+    {
+      "id": "INC-EP-049",
+      "sop_ref": "breaker_torque_check",
+      "text": "Annual torque check is coming up this week. Last year the tech found a loose lug on the 100-amp feeder breaker that could have been a real problem if it had been missed. Want to go through all terminal connections systematically this time with a calibrated wrench."
+    },
+    {
+      "id": "INC-EP-050",
+      "sop_ref": "breaker_torque_check",
+      "text": "Electrician doing the visual PM this morning noticed two of the breaker lugs had some give when he grabbed them - felt loose. PM schedule shows the torque verification is due this quarter anyway, so good timing to get it done now."
+    },
+    {
+      "id": "INC-EP-051",
+      "sop_ref": "breaker_torque_check",
+      "text": "Supervisor spotted discoloration around the terminals on a couple of breakers during the monthly walkthrough - looks like they might have been running warm at some point. Torque check is already on the annual PM schedule, going to pull it in early given what he saw."
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 """GATE 7 v0 — the FULL loop: incident TICKET -> BRAIN (SOP retrieval) -> PLAN -> SIM EXECUTION.
 
   1. INPUT   an incident ticket string (default: INC-00073 from the brain's held-out test set)
-  2. BRAIN   subprocess into sop_planner_baseline/.venv_brain -> brain_query.py -> JSON
-             (trained bi-encoder, R@1 0.584): top-5 SOPs + the top SOP's steps
+  2. BRAIN   subprocess into brain/benchmark/brain_query.py (SEQUENT_BRAIN_DIR) -> JSON
+             (fine-tuned bi-encoder, R@1 0.577 over 5 seeds): top-5 SOPs + the top SOP's steps
   3. PLAN    map SOP 'skill entity' steps to sim skills:
                walk_to X      -> WALK phase (AMO locomotion)
                press_button X -> PRESS phase (RL curriculum policy)
@@ -17,12 +17,10 @@ Usage: python ticket_demo.py ["custom ticket text"]
 """
 import sys, os, json, subprocess, textwrap, time
 
-PROJ = r"C:\Users\sikka\Documents\Academic\Grad_Research\HCR_Research\Sequent-robotics"
-BRAIN_DIR = r"C:\Users\sikka\Documents\Academic\Grad_Research\HCR_Research\sop_planner_baseline"
-BRAIN_PY = os.path.join(BRAIN_DIR, r".venv_brain\Scripts\python.exe")
-BRAIN_QUERY = os.path.join(BRAIN_DIR, "brain_query.py")
+from demo_paths import PROJ, BRAIN_DIR, BRAIN_PY, BRAIN_QUERY, require
 CKPT = "checkpoints_button/curr_v2_latest.zip"
 sys.path.insert(0, PROJ); os.chdir(PROJ)
+require(CKPT)
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -94,7 +92,7 @@ print("=" * 78)
 print(f"[TICKET] {ticket}\n")
 
 # ---------------------------------------------------------------- 2. BRAIN (retrieval)
-print("[BRAIN] querying sop_planner_baseline retriever (bi-encoder, .venv_brain subprocess)...")
+print("[BRAIN] querying sop_planner_baseline retriever (bi-encoder subprocess)...")
 t0 = time.time()
 r = subprocess.run([BRAIN_PY, BRAIN_QUERY, ticket, "5"], capture_output=True, text=True,
                    encoding="utf-8", cwd=BRAIN_DIR, timeout=600)

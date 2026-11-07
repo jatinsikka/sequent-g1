@@ -1,0 +1,412 @@
+sop_id,step,safety
+SOP-0199,Press spindle_stop_button to halt spindle rotation immediately.,True
+SOP-0199,Walk to HMI_panel and read_sensor spindle_rpm_display to confirm the overspeed reading.,False
+SOP-0199,Press feed_hold_button to suspend all axis motion.,False
+SOP-0200,Press feed_hold_button to pause axis feed without terminating the program.,False
+SOP-0200,"If RPM remains below setpoint, press spindle_stop_button and notify maintenance_technician.",True
+SOP-0201,Press estop_button immediately to halt all machine motion and power to drives.,True
+SOP-0201,Press coolant_off_button to stop coolant flow and prevent flooding the engaged workpiece.,False
+SOP-0202,Press feed_hold_button to suspend axis motion while coolant delivery is insufficient.,False
+SOP-0202,Walk to coolant_pump_panel and read_sensor coolant_pump_status_light to verify pump state.,False
+SOP-0202,"Press coolant_pump_reset_button if pump has tripped, then read_sensor coolant_pressure_gauge to confirm recovery.",False
+SOP-0203,Press coolant_off_button immediately to de-energize the coolant pump.,False
+SOP-0203,Walk to coolant_filter_housing and read_sensor filter_bypass_indicator to check for filter blockage causing back-pressure.,False
+SOP-0203,"If filter_bypass_indicator is active, pick coolant_filter_element and place at inspection_bench for replacement.",False
+SOP-0204,Press spindle_stop_button immediately to halt cutting with no coolant present.,True
+SOP-0204,Walk to coolant_pump_panel and read_sensor coolant_pump_status_light to check pump state.,False
+SOP-0205,Press feed_hold_button to prevent any automatic restart command from the controller.,False
+SOP-0205,Walk to servo_cabinet and read_sensor servo_drive_status_led to confirm drive fault state.,False
+SOP-0205,Press servo_reset_button on the affected axis drive card.,False
+SOP-0206,Press feed_hold_button immediately to prevent further commanded motion.,False
+SOP-0206,Walk to HMI_panel and press axis_override_enable_button to permit limited manual jog movement.,False
+SOP-0206,Press jog_axis_retract_button in the reverse direction to back the axis off the limit switch.,False
+SOP-0207,Press estop_button to prevent further motion commands from reaching the ATC mechanism.,True
+SOP-0207,Walk to atc_access_panel and read_sensor atc_home_sensor to confirm the carousel's actual position.,False
+SOP-0208,Press chip_conveyor_stop_button to fully de-energize the conveyor drive.,True
+SOP-0208,Walk to chip_conveyor_access_door and pick chip_clearing_hook.,False
+SOP-0208,Press chip_conveyor_reset_button to reset the overload relay.,False
+SOP-0208,Press chip_conveyor_start_button and read_sensor chip_conveyor_overload_indicator to confirm normal current draw.,False
+SOP-0209,Walk to maintenance_supply_cabinet and pick spindle_oil_cartridge.,False
+SOP-0209,Walk to spindle_lubrication_port.,False
+SOP-0209,Press lubrication_pump_button to inject the metered oil dose into the spindle bearings.,False
+SOP-0210,Walk to maintenance_supply_cabinet and pick way_oil_reservoir.,False
+SOP-0210,Walk to automatic_lube_unit.,False
+SOP-0210,Press lube_unit_fill_button to transfer oil into the automatic lube unit reservoir.,False
+SOP-0211,Press coolant_pump_off_button to de-energize the coolant system.,False
+SOP-0211,Walk to coolant_filter_housing and pick used_coolant_filter.,False
+SOP-0211,Press coolant_pump_on_button and read_sensor coolant_pressure_gauge to verify pressure is within normal range.,False
+SOP-0212,Walk to machine_lockout_station and pick lockout_hasp.,True
+SOP-0212,Walk to spindle_belt_access_cover and pick belt_cover_bolts.,False
+SOP-0213,Press coolant_pump_off_button and wait 30 seconds for fluid to drain back to the sump.,False
+SOP-0213,Walk to coolant_drain_valve and press coolant_drain_open_button to begin emptying the tank.,False
+SOP-0213,Press coolant_rinse_valve_button to flush the tank interior with clean water.,False
+SOP-0214,Press atc_index_disable_button to lock the carousel against rotation during the service.,False
+SOP-0214,Walk to maintenance_supply_cabinet and pick atc_grease_cartridge.,False
+SOP-0214,Walk to atc_cam_grease_fitting.,False
+SOP-0214,Press grease_inject_button to deliver the metered grease dose to the cam mechanism.,False
+SOP-0214,Walk to atc_gripper_lubrication_point and place atc_grease_cartridge at atc_gripper_lubrication_point to grease the gripper jaws.,False
+SOP-0215,Press spindle_stop_button then press coolant_pump_off_button to stop all active systems.,True
+SOP-0215,Walk to main_power_disconnect and press disconnect_off_button to cut all main power.,False
+SOP-0216,Walk to the machine perimeter and read_sensor axis_position_display to document the axis positions at time of stop.,False
+SOP-0216,Press estop_reset_button only after maintenance_technician has investigated and authorized restart.,True
+SOP-0217,Walk to spill_kit_cabinet and pick absorbent_mat_roll.,False
+SOP-0218,Press estop_button immediately to stop all machine motion and the coolant pump.,True
+SOP-0218,Press coolant_pump_emergency_off_button to cut coolant supply at the source.,True
+SOP-0218,Walk to spill_kit_cabinet and pick large_spill_berm_kit.,False
+SOP-0219,Walk to main_power_disconnect and press disconnect_on_button to restore main electrical power.,False
+SOP-0219,Press control_power_on_button on HMI_panel to initiate CNC controller boot sequence.,False
+SOP-0219,Press coolant_pump_on_button and read_sensor coolant_pressure_gauge to verify coolant system is within normal range.,False
+SOP-0219,Press automatic_lube_cycle_button to execute the initial way lubrication cycle before first axis motion.,False
+SOP-0220,Press spindle_stop_button to ensure the spindle is fully de-energized.,True
+SOP-0220,Press coolant_pump_off_button to stop coolant circulation.,False
+SOP-0220,Walk to chip_conveyor_panel and press chip_conveyor_off_button to stop the chip conveyor.,False
+SOP-0220,Press control_power_off_button on HMI_panel to initiate CNC controller shutdown.,True
+SOP-0220,Walk to main_power_disconnect and press disconnect_off_button to cut main electrical power.,False
+SOP-0397,Walk to zone1_control_panel,False
+SOP-0397,Read zone1_temp_sensor to determine deviation magnitude,False
+SOP-0397,Press heating_enable_button at zone1_control_panel to boost heat output,False
+SOP-0397,Read zone1_temp_sensor to verify return to setpoint,False
+SOP-0398,Press red_estop_button at zone1_control_panel to halt all operations immediately,True
+SOP-0398,Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button,True
+SOP-0398,Read heating_element_current_sensor to check for open-circuit fault,False
+SOP-0399,Walk to zone1_control_panel and press heating_disable_button immediately,False
+SOP-0399,Read zone1_temp_sensor and zone2_temp_sensor to confirm overtemperature reading,False
+SOP-0399,Press conveyor_stop_button at zone1_control_panel to halt part movement,True
+SOP-0400,Walk to atmosphere_control_panel and read atm_flow_sensor,False
+SOP-0400,Read atm_pressure_sensor to check upstream supply pressure,False
+SOP-0400,Walk to filter_housing and visually assess for restriction,False
+SOP-0401,Press red_estop_button at zone1_control_panel immediately,True
+SOP-0401,Press conveyor_stop_button at zone1_control_panel to freeze part positions,True
+SOP-0401,Walk to gas_shutoff_station and press atmosphere_shutoff_valve_button,True
+SOP-0402,Walk to quench_tank and read quench_level_sensor,False
+SOP-0402,Walk to oil_storage_area and pick quench_oil_drum,False
+SOP-0402,Walk to quench_tank and place quench_oil_drum at fill_port,False
+SOP-0402,Press quench_pump_stop_button at quench_control_panel,True
+SOP-0402,Press quench_pump_start_button at quench_control_panel to resume quench circulation,False
+SOP-0403,Walk to quench_control_panel and read quench_temp_sensor,False
+SOP-0403,Press quench_pump_stop_button at quench_control_panel,True
+SOP-0403,Press cooling_fan_start_button at quench_control_panel to accelerate cooling,False
+SOP-0403,Press quench_pump_start_button once temperature returns to operating range,False
+SOP-0404,Walk to zone1_control_panel and read heating_element_current_sensor,False
+SOP-0404,Press heating_disable_button at zone1_control_panel,False
+SOP-0404,Press conveyor_stop_button to hold parts in current zone positions,True
+SOP-0405,Walk to loto_panel and press loto_panel_button to initiate lockout sequence,True
+SOP-0405,Walk to filter_housing and pick replacement_atmosphere_filter,False
+SOP-0405,Walk to atmosphere_control_panel and press atmosphere_enable_button,False
+SOP-0406,Walk to loto_panel and press loto_panel_button to initiate lockout,True
+SOP-0406,Walk to quench_tank and pick oil_drain_plug,False
+SOP-0406,Read quench_level_sensor to confirm proper fill level,False
+SOP-0407,Walk to loto_panel and press loto_panel_button to initiate lockout,True
+SOP-0407,Walk to door_seal_station and read door_seal_sensor,False
+SOP-0407,Walk to atmosphere_control_panel and read atm_pressure_sensor to verify seal integrity,False
+SOP-0408,Walk to loto_panel and press loto_panel_button to initiate lockout,True
+SOP-0408,Walk to thermocouple_junction_box and pick thermocouple_calibrator,False
+SOP-0408,Read zone1_temp_sensor and compare to thermocouple_calibrator reference,False
+SOP-0408,Walk to zone2_control_panel and read zone2_temp_sensor against thermocouple_calibrator,False
+SOP-0409,Walk to loto_panel and press loto_panel_button to initiate lockout,True
+SOP-0409,Walk to zone1_control_panel and read heating_element_current_sensor for pre-inspection baseline,False
+SOP-0409,Walk to zone2_control_panel and read zone2_temp_sensor as reference,False
+SOP-0409,Press heating_enable_button at zone1_control_panel only after maintenance_tech clearance and lockout removal,True
+SOP-0410,Walk to loto_panel and press loto_panel_button to initiate lockout,True
+SOP-0410,Press quench_pump_stop_button at quench_control_panel,True
+SOP-0410,Walk to lubrication_station and pick grease_cartridge,False
+SOP-0410,Walk to quench_tank and place grease_cartridge at agitator_bearing_port,False
+SOP-0411,Walk to loto_panel and press loto_panel_button to initiate lockout,True
+SOP-0411,Press conveyor_stop_button at zone1_control_panel,True
+SOP-0411,Walk to lubrication_station and pick grease_cartridge,False
+SOP-0411,Walk to conveyor_access_panel and place grease_cartridge at chain_lubrication_port,False
+SOP-0411,Press conveyor_start_button at zone1_control_panel after lockout removal,True
+SOP-0412,Walk to zone1_control_panel and press stop_button,True
+SOP-0412,Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button,True
+SOP-0412,Press quench_pump_stop_button at quench_control_panel,True
+SOP-0412,Walk to loto_panel and press loto_panel_button,False
+SOP-0413,Press red_estop_button at zone1_control_panel immediately,True
+SOP-0413,Walk to gas_shutoff_station and press atmosphere_shutoff_valve_button,True
+SOP-0413,Read co_gas_sensor to quantify leak concentration in the area,False
+SOP-0413,Walk to fire_extinguisher_station and pick fire_extinguisher,False
+SOP-0414,Press red_estop_button at zone1_control_panel immediately,True
+SOP-0414,Walk to fire_extinguisher_station and pick fire_extinguisher,False
+SOP-0414,Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button,True
+SOP-0414,Press quench_pump_stop_button at quench_control_panel,True
+SOP-0415,Walk to maintenance_cabinet and pick oil_absorbent_pads,False
+SOP-0415,Walk to quench_tank spill area and place oil_absorbent_pads over spill,False
+SOP-0415,Read quench_level_sensor to assess volume of oil lost,False
+SOP-0416,Walk to loto_panel and read loto_panel_button status to confirm all lockouts are cleared,True
+SOP-0416,Walk to atmosphere_control_panel and press atmosphere_enable_button,False
+SOP-0416,Walk to zone1_control_panel and press start_button,False
+SOP-0416,Press heating_enable_button at zone1_control_panel to begin heat ramp,False
+SOP-0416,Read zone1_temp_sensor and notify shift_supervisor that furnace is production-ready,False
+SOP-0417,Walk to zone1_control_panel and press heating_disable_button,False
+SOP-0417,Press conveyor_stop_button at zone1_control_panel,True
+SOP-0417,Walk to atmosphere_control_panel and press atmosphere_shutoff_valve_button,True
+SOP-0417,Press quench_pump_stop_button at quench_control_panel,True
+SOP-0417,Read zone1_temp_sensor to confirm temperature is falling safely,False
+SOP-0418,Walk to parts_load_area and pick parts_basket,False
+SOP-0705,Walk to press_brake_control_panel,False
+SOP-0705,Read hydraulic_pressure_sensor to confirm sub-180 bar reading,False
+SOP-0705,Press red_estop_button to halt the ram immediately,True
+SOP-0705,Walk to press_brake_hydraulic_unit,False
+SOP-0705,Read hydraulic_oil_level_sensor to check for a fluid deficit contributing to low pressure,False
+SOP-0706,Walk to press_brake_control_panel,False
+SOP-0706,Read hydraulic_pressure_sensor to confirm above-220 bar reading,False
+SOP-0706,Press hydraulic_pump_stop_button to de-energize the pump and allow natural pressure decay,True
+SOP-0706,Read hydraulic_pressure_sensor again to verify pressure has fallen below 200 bar,False
+SOP-0707,Walk to press_brake_control_panel and press red_estop_button immediately to freeze all ram motion,True
+SOP-0707,Read hydraulic_pressure_sensor to confirm near-zero pressure reading,False
+SOP-0707,Walk to press_brake_hydraulic_unit,False
+SOP-0707,Read hydraulic_oil_level_sensor to assess the volume of fluid already lost,False
+SOP-0707,Walk to spill_kit_station and pick spill_absorbent_pads,False
+SOP-0708,Walk to press_brake_control_panel,False
+SOP-0708,Read ram_position_sensor to record the actual Y-axis depth at the alarm event,False
+SOP-0708,Press alarm_acknowledge_button to clear the caution indicator without halting production,False
+SOP-0709,Walk to press_brake_control_panel,False
+SOP-0709,Read ram_position_sensor to record the exact hard-limit breach depth,False
+SOP-0709,Press red_estop_button to confirm the machine is fully de-energized,True
+SOP-0709,Walk to press_brake_ram_area and read ram_position_sensor at the tooling contact point to assess tooling damage,False
+SOP-0710,Walk to press_brake_control_panel,False
+SOP-0710,Read back_gauge_position_sensor to record the actual versus programmed X-axis position,False
+SOP-0710,Press alarm_acknowledge_button to pause the bend cycle,False
+SOP-0710,Walk to press_brake_back_gauge_area and read back_gauge_position_sensor at the physical finger reference surface,False
+SOP-0710,Press back_gauge_home_button to execute a full re-home sequence,False
+SOP-0710,Read back_gauge_position_sensor to confirm the finger returned to datum within 0.1 mm,False
+SOP-0711,Walk to press_brake_control_panel,False
+SOP-0711,Read tonnage_monitor to record the exact peak overload force value,False
+SOP-0711,Press red_estop_button to prevent additional bend strokes,True
+SOP-0711,Walk to press_brake_ram_area,False
+SOP-0712,Walk to press_brake_control_panel,False
+SOP-0712,Read hydraulic_oil_temp_sensor to confirm above-60 degree C reading,False
+SOP-0712,Press hydraulic_pump_stop_button to remove load and allow oil to cool,True
+SOP-0712,Walk to press_brake_hydraulic_unit and read hydraulic_oil_level_sensor to rule out a low-fluid contribution to overheating,False
+SOP-0713,Walk to press_brake_control_panel and press hydraulic_pump_stop_button,True
+SOP-0713,Walk to maintenance_supply_cabinet and pick replacement_hydraulic_filter,False
+SOP-0713,Walk to press_brake_hydraulic_unit,False
+SOP-0713,Press hydraulic_pump_start_button and read hydraulic_filter_differential_pressure_sensor to confirm differential is below 3 bar,False
+SOP-0714,Walk to press_brake_hydraulic_unit,False
+SOP-0714,Read hydraulic_oil_level_sensor to record the current level reading,False
+SOP-0714,Walk to oil_storage_area and pick hydraulic_oil_drum,False
+SOP-0714,Press oil_fill_pump_start_button to transfer oil until hydraulic_oil_level_sensor reads within the normal band,False
+SOP-0715,Walk to press_brake_control_panel and press hydraulic_pump_stop_button,True
+SOP-0715,Walk to maintenance_supply_cabinet and pick grease_gun,False
+SOP-0715,Walk to press_brake_ram_area,False
+SOP-0716,Walk to press_brake_control_panel and press hydraulic_pump_stop_button,True
+SOP-0716,Walk to maintenance_supply_cabinet and pick back_gauge_lubricant_bottle,False
+SOP-0716,Walk to press_brake_back_gauge_area,False
+SOP-0716,Press back_gauge_home_button to cycle the finger back and forth and distribute lubricant,False
+SOP-0717,Walk to press_brake_ram_area and pick punch_tool,False
+SOP-0717,Walk to parts_inspection_table and pick tooling_caliper,False
+SOP-0718,Walk to press_brake_control_panel and press hydraulic_pump_stop_button,True
+SOP-0718,Walk to press_brake_hydraulic_unit and pick cooler_filter_element,False
+SOP-0718,Walk to maintenance_supply_cabinet and pick compressed_air_gun,False
+SOP-0718,Walk to press_brake_hydraulic_unit and place cleaned cooler_filter_element back in cooler_housing; notify maintenance_supervisor,False
+SOP-0719,Walk to press_brake_control_panel,False
+SOP-0719,Read cabinet_temperature_sensor to record the current cabinet air temperature,False
+SOP-0719,Walk to maintenance_supply_cabinet and pick replacement_cabinet_filter,False
+SOP-0719,Walk to press_brake_electrical_cabinet,False
+SOP-0720,Walk to press_brake_control_panel and press red_estop_button,True
+SOP-0720,Press hydraulic_pump_stop_button to de-energize the hydraulic system,True
+SOP-0720,Walk to main_disconnect_panel and press loto_isolation_switch to cut the main electrical supply,True
+SOP-0720,Walk to maintenance_supply_cabinet and pick loto_padlock and pick loto_tag,False
+SOP-0720,Read estop_relay_status to confirm the machine is fully de-energized,True
+SOP-0721,Walk to press_brake_control_panel and press hydraulic_pump_stop_button,True
+SOP-0721,Walk to spill_kit_station and pick spill_absorbent_pads,False
+SOP-0721,Walk to press_brake_hydraulic_unit and read hydraulic_oil_level_sensor to estimate volume lost,False
+SOP-0722,Walk to press_brake_control_panel,False
+SOP-0722,Read ram_position_sensor to record the current Y-axis depth and confirm the ram is stationary,False
+SOP-0722,Read hydraulic_pressure_sensor to confirm system pressure has dissipated to below 10 bar,False
+SOP-0722,Press control_panel_reset_button to acknowledge and clear the e-stop fault,True
+SOP-0722,Press green_power_on_button to restore the machine to the ready state,False
+SOP-0723,Walk to fire_extinguisher_station near press_brake_area,False
+SOP-0723,Walk to press_brake_control_panel,False
+SOP-0723,Read estop_relay_status to confirm the e-stop circuit shows continuity,True
+SOP-0724,Walk to press_brake_control_panel and press green_power_on_button,False
+SOP-0724,Press hydraulic_pump_start_button and wait 60 seconds for the hydraulic system to pressurize,False
+SOP-0724,Read hydraulic_pressure_sensor to confirm the operating range is between 185 and 215 bar,False
+SOP-0724,Read hydraulic_oil_temp_sensor to confirm oil temperature is above 20 degrees C before production begins,False
+SOP-0724,Press back_gauge_home_button to reference the back gauge to machine datum,False
+SOP-0724,Read back_gauge_position_sensor to confirm home position is within 0.1 mm of datum,False
+SOP-0725,Walk to press_brake_control_panel and press ram_jog_up_button to retract the ram fully to top dead centre,False
+SOP-0725,Read ram_position_sensor to confirm the ram has reached the top-dead-centre park position,False
+SOP-0725,Press hydraulic_pump_stop_button to de-energize the hydraulic pump,True
+SOP-0725,Press red_estop_button to place the machine in the safe-off state,True
+SOP-0726,Walk to press_brake_ram_area and pick first_off_part,False
+SOP-0726,Walk to parts_inspection_table and pick angle_gauge,False
+SOP-0771,Walk to zone_1_control_panel to reach the faulted drive.,False
+SOP-0771,Read zone_1_current_sensor to confirm the overcurrent fault code is active and record the displayed amperage.,False
+SOP-0771,Press zone_1_stop_button to halt the zone motor immediately.,True
+SOP-0771,Read zone_1_current_sensor again to verify amperage has returned to within the rated normal range.,False
+SOP-0771,Press zone_1_start_button to restart the zone only after maintenance_supervisor grants clearance.,False
+SOP-0772,Walk to photo_eye_zone_2_location to inspect the sensor and its field of view.,False
+SOP-0772,Read photo_eye_zone_2_sensor to confirm the blocked status is active with no product in the zone.,False
+SOP-0772,Read photo_eye_zone_2_sensor to confirm the beam is restored and the alarm has cleared.,False
+SOP-0773,Walk to jam_location_zone_3 to reach the stalled carrier.,False
+SOP-0773,Read zone_3_jam_sensor to confirm product movement has stopped and the motor is still energized.,False
+SOP-0773,Press zone_3_stop_button to shut down the zone motor and prevent further drive strain.,True
+SOP-0773,Press zone_3_start_button to resume zone operation after the jam site is confirmed clear.,False
+SOP-0774,Walk to gap_sensor_zone_2_location to access the speed control for the affected zone.,False
+SOP-0774,Read gap_sensor_zone_2 to confirm the current spacing reading is below the 150 mm minimum threshold.,False
+SOP-0774,Press zone_2_speed_decrease_button to reduce zone 2 conveyor speed by one programmed increment.,False
+SOP-0774,Read gap_sensor_zone_2 to verify the gap has increased to within the acceptable 150–600 mm range.,False
+SOP-0775,Walk to gap_sensor_zone_2_location to access the speed control for the affected zone.,False
+SOP-0775,Read gap_sensor_zone_2 to confirm the current spacing reading exceeds the 600 mm maximum threshold.,False
+SOP-0775,Press zone_2_speed_increase_button to raise zone 2 conveyor speed by one programmed increment.,False
+SOP-0775,Read gap_sensor_zone_2 to verify the gap has decreased to within the acceptable 150–600 mm range.,False
+SOP-0776,Walk to accumulation_zone_4_control_panel to view the current buffer count.,False
+SOP-0776,Read accumulation_counter_zone_4 to confirm the count exceeds the maximum configured buffer limit.,False
+SOP-0776,Press zone_3_feed_stop_button to halt upstream product feeding into the full zone.,True
+SOP-0776,Read accumulation_counter_zone_4 to verify the count has dropped below the high-buffer threshold.,False
+SOP-0776,Press zone_3_feed_start_button to resume upstream feeding now that buffer space is available.,False
+SOP-0777,Walk to accumulation_zone_4_control_panel to view the current buffer count.,False
+SOP-0777,Read accumulation_counter_zone_4 to confirm the count is below the minimum buffer threshold.,False
+SOP-0777,Press zone_3_feed_boost_button to temporarily increase the upstream feed rate and replenish the buffer.,False
+SOP-0777,Read accumulation_counter_zone_4 to confirm the count has risen above the minimum threshold.,False
+SOP-0778,Walk to zone_2_drive_panel to access speed and current readouts.,False
+SOP-0778,Read zone_2_speed_encoder to confirm the measured speed is below the setpoint by 15% or more.,False
+SOP-0778,Read zone_2_current_sensor to check whether elevated motor current indicates an increased mechanical load.,False
+SOP-0778,Press zone_2_stop_button to shut down the zone in a controlled manner.,True
+SOP-0778,Press zone_2_start_button to restart the zone and verify that speed recovers to setpoint.,False
+SOP-0779,Walk to zone_2_drive_panel to access drive readouts.,False
+SOP-0779,Read zone_2_speed_encoder to confirm the measured speed exceeds the setpoint by 10% or more.,False
+SOP-0779,Press zone_2_stop_button immediately to halt the overspeed zone and prevent product damage.,True
+SOP-0779,Read zone_2_speed_encoder to verify the output reads zero before any restart attempt.,False
+SOP-0780,Walk to zone_1_drive_panel to inspect the drive status with no E-stop active.,True
+SOP-0780,Read zone_1_speed_encoder to confirm zero speed and the absence of any active E-stop signal.,True
+SOP-0780,Read zone_1_current_sensor to check for zero-current indicating an open circuit or failed contactor.,False
+SOP-0780,Press zone_1_stop_button to place the zone in a confirmed controlled-stop state before investigation.,True
+SOP-0780,Press zone_1_start_button to attempt a controlled restart and observe whether the zone responds.,False
+SOP-0781,Walk to photo_eye_zone_1_location to access the sensor during live production.,False
+SOP-0781,Read photo_eye_zone_1_sensor to log the current output signal level during a product pass.,False
+SOP-0781,Read photo_eye_zone_1_sensor to verify the output signal is consistent and stable during subsequent product passes.,False
+SOP-0782,Walk to estop_north_button_location to identify which E-stop station is engaged.,True
+SOP-0782,Read estop_status_sensor to confirm which zone or station triggered the stop and verify all zones have ceased motion.,True
+SOP-0782,Walk to hazard_location adjacent to the engaged E-stop to visually verify the area is clear of personnel and obstructions.,True
+SOP-0782,Read zone_1_speed_encoder to confirm all conveyor motion has fully ceased before reset.,False
+SOP-0782,Press estop_north_reset_button to release the E-stop latch only after the area is confirmed safe by safety_officer.,True
+SOP-0782,Press conveyor_master_start_button to restore conveyor operation in sequence.,False
+SOP-0783,Walk to maintenance_station to retrieve lubrication supplies.,False
+SOP-0783,Walk to zone_1_drive_chain_access_panel to reach the drive chain.,False
+SOP-0783,Read chain_tension_indicator_zone_1 to confirm the chain tension reading is within the specified range.,False
+SOP-0784,Walk to tool_crib to retrieve bearing replacement tooling.,False
+SOP-0784,Walk to faulty_roller_location on the conveyor frame.,False
+SOP-0784,Read vibration_sensor_roller to confirm the vibration level has returned to within the normal operating range.,False
+SOP-0785,Walk to maintenance_station to retrieve scheduled cleaning supplies.,False
+SOP-0785,Walk to photo_eye_zone_3_location to access the scheduled sensor.,False
+SOP-0785,Read photo_eye_zone_3_sensor to confirm beam signal strength is within the calibration acceptance range.,False
+SOP-0786,Walk to zone_2_drive_panel to access the speed encoder coupling.,False
+SOP-0786,Read zone_2_speed_encoder to record the current output at the known reference speed.,False
+SOP-0786,Read zone_2_speed_encoder a second time to compare against the calibration standard tolerance.,False
+SOP-0787,Walk to zone_motor_filter_access_zone_1 to reach the motor cooling filter housing.,False
+SOP-0787,Read filter_pressure_sensor_zone_1 to confirm the differential pressure exceeds the replacement threshold.,False
+SOP-0787,Press zone_1_stop_button to shut down the zone motor before opening the filter housing.,True
+SOP-0788,Walk to conveyor_master_control_panel to initiate the isolation sequence.,True
+SOP-0788,Press conveyor_master_stop_button to halt all zones and confirm the line is at rest.,True
+SOP-0788,Read estop_status_sensor to confirm a zero-energy state across all zones.,True
+SOP-0789,Walk to oil_spill_location identified by the reporting operator.,False
+SOP-0789,Read spill_detection_sensor to confirm the spill extent and verify no product carriers are entering the contaminated area.,False
+SOP-0790,Walk to conveyor_master_control_panel to begin the startup sequence.,False
+SOP-0790,Read estop_status_sensor to confirm no emergency stop buttons are engaged before energizing.,True
+SOP-0790,Press conveyor_master_start_button to energize all zones in the programmed sequential startup order.,False
+SOP-0790,Read zone_1_speed_encoder to verify the infeed zone is running at the target speed.,False
+SOP-0790,Read zone_3_speed_encoder to verify the mid-line zone is running at the target speed.,False
+SOP-0791,Walk to accumulation_zone_4_control_panel to verify all zones are clear before shutdown.,True
+SOP-0791,Read accumulation_counter_zone_4 to confirm the buffer zone shows zero carriers and all zones are empty.,False
+SOP-0791,Walk to conveyor_master_control_panel to initiate the shutdown sequence.,True
+SOP-0791,Press zone_3_stop_button to halt the exit zone first.,True
+SOP-0791,Press zone_1_stop_button to halt the infeed zone and complete the upstream shutdown.,True
+SOP-0792,Walk to zone_1_inspection_point at the infeed end of the conveyor line.,False
+SOP-0792,Read vibration_sensor_roller to check roller bearing vibration levels against the baseline specification.,False
+SOP-0792,Walk to zone_3_inspection_point at the mid-line inspection station.,False
+SOP-0792,Read photo_eye_zone_3_sensor to verify beam alignment and signal strength are within calibration limits.,False
+SOP-0792,Read chain_tension_indicator_zone_1 to confirm drive chain tension is within the specified range.,False
+SOP-0792,Walk to conveyor_master_control_panel and notify production_supervisor that the inspection walkthrough is complete.,False
+SOP-0815,Walk to stretch_wrapper_station,False
+SOP-0815,Read film_tension_sensor to confirm the reading is below 120 N,False
+SOP-0815,Press cycle_stop_button to halt the active wrap cycle,True
+SOP-0815,Read pre_stretch_ratio_sensor to check the current pre-stretch percentage,False
+SOP-0815,Press green_start_button only after maintenance_tech confirms tension is within the 120-280 N specification,False
+SOP-0816,Walk to stretch_wrapper_station,False
+SOP-0816,Press cycle_stop_button immediately to prevent film tear,True
+SOP-0816,Read film_tension_sensor to log the peak over-tension value,False
+SOP-0816,Read pre_stretch_ratio_sensor to determine if the roller ratio is set too high,False
+SOP-0816,Press yellow_reset_button to clear the tension fault alarm before restarting,False
+SOP-0817,Walk to stretch_wrapper_station,False
+SOP-0817,Press cycle_stop_button to stop turntable rotation immediately,True
+SOP-0817,Walk to film_carriage_control_panel,False
+SOP-0817,Press film_carriage_down_button to lower the carriage to the base position,False
+SOP-0818,Walk to stretch_wrapper_station,False
+SOP-0818,Press cycle_stop_button to pause the wrap cycle,True
+SOP-0818,Read film_roll_sensor to confirm roll diameter is below 50 mm,False
+SOP-0818,Walk to film_storage_rack and pick film_roll_new,False
+SOP-0819,Walk to stretch_wrapper_station,False
+SOP-0819,Read turntable_speed_sensor to confirm the sustained under-speed condition,False
+SOP-0819,Press cycle_stop_button to prevent an under-wrapped pallet from leaving the station,True
+SOP-0819,Read motor_temp_sensor to check for drive motor thermal stress,False
+SOP-0820,Walk to wrapper_main_panel,False
+SOP-0820,Read turntable_speed_sensor to confirm the zero-speed fault reading,False
+SOP-0820,Press red_estop_button to place the machine in a safe state,True
+SOP-0820,Read turntable_load_sensor to determine whether an overweight pallet caused the stall,False
+SOP-0821,Walk to wrapper_main_panel,False
+SOP-0821,Read turntable_load_sensor to record the overcurrent value at the moment of trip,False
+SOP-0821,Press red_estop_button to lock out further drive restart attempts,True
+SOP-0821,Press yellow_reset_button only after maintenance_tech clears the motor overload relay and authorizes restart,False
+SOP-0822,Walk to film_carriage_control_panel,False
+SOP-0822,Read film_carriage_position_sensor to record the stuck carriage height,False
+SOP-0822,Press cycle_stop_button to halt all carriage and turntable motion,True
+SOP-0822,Press film_carriage_up_button and hold for 3 seconds to attempt to free minor mechanical binding,False
+SOP-0822,Read film_carriage_position_sensor again to determine whether the carriage has moved,False
+SOP-0823,Walk to stretch_wrapper_station,False
+SOP-0823,Read cutter_position_sensor to confirm the cutter did not reach its full-cut position,False
+SOP-0823,Press cutter_manual_actuate_button once to attempt a manual cut,False
+SOP-0823,Read cutter_position_sensor to verify whether the manual actuation succeeded,False
+SOP-0824,Walk to stretch_wrapper_station,False
+SOP-0824,Read load_height_sensor to confirm the over-height measurement,False
+SOP-0824,Press cycle_stop_button to prevent the wrap cycle from initiating,True
+SOP-0824,Read load_height_sensor after correction to confirm the load is within the 2200 mm limit before pressing green_start_button,False
+SOP-0825,Walk to stretch_wrapper_station,False
+SOP-0825,Read load_height_sensor to confirm the under-height measurement,False
+SOP-0825,Press cycle_stop_button to prevent a wasteful and ineffective wrap cycle,True
+SOP-0825,Read load_height_sensor after correction to verify the load exceeds the 300 mm minimum before restarting,False
+SOP-0826,Walk to stretch_wrapper_station,False
+SOP-0826,Read photoeye_sensor_A to identify whether the A-channel beam is faulted,False
+SOP-0826,Read photoeye_sensor_B to check whether the B-channel beam is also affected,False
+SOP-0826,Press cycle_stop_button to prevent any inadvertent cycle start while the safety zone status is uncertain,True
+SOP-0827,Walk to wrapper_main_panel,False
+SOP-0827,Press red_estop_button to halt all machine motion,True
+SOP-0827,Press main_disconnect_switch to remove power from the stretch wrapper,False
+SOP-0828,Walk to wrapper_main_panel,False
+SOP-0828,Press red_estop_button to secure the wrapper before lubrication work,True
+SOP-0828,Walk to film_carriage_control_panel,False
+SOP-0828,Press film_carriage_up_button to raise the carriage to the top of the mast for full-rail access,False
+SOP-0828,Press film_carriage_down_button to cycle the carriage fully down and verify smooth travel after lubrication,False
+SOP-0829,Walk to wrapper_main_panel,False
+SOP-0829,Press red_estop_button to stop the machine before roller access,True
+SOP-0829,Read pre_stretch_ratio_sensor to record the baseline ratio before cleaning,False
+SOP-0829,Read pre_stretch_ratio_sensor after cleaning to confirm the ratio has returned to the 250 percent setpoint,False
+SOP-0830,Walk to wrapper_main_panel,False
+SOP-0830,Press red_estop_button and confirm lockout per loto_procedure before touching the cutter,True
+SOP-0830,Walk to stretch_wrapper_station,False
+SOP-0831,Walk to wrapper_main_panel,False
+SOP-0831,Press red_estop_button and confirm lockout per loto_procedure before opening the drive housing,True
+SOP-0831,Walk to stretch_wrapper_station,False
+SOP-0831,Read turntable_speed_sensor to log the current variance reading before belt access,False
+SOP-0832,Press red_estop_button at the nearest panel without delay,True
+SOP-0832,Walk to stretch_wrapper_station to visually confirm all machine motion has ceased,False
+SOP-0832,Read turntable_speed_sensor to verify zero-speed state,False
+SOP-0832,Read film_carriage_position_sensor to verify the carriage has stopped moving,False
+SOP-0833,Walk to stretch_wrapper_station,False
+SOP-0833,Press cycle_stop_button to halt any active or pending wrap cycle before entering the floor zone,True
+SOP-0833,Read photoeye_sensor_A to confirm no debris remains in the safety beam path,False
+SOP-0834,Walk to wrapper_main_panel,False
+SOP-0834,Press green_start_button to power up the control panel and initialize the PLC,False
+SOP-0834,Read film_tension_sensor to confirm tension reads within the 120 to 280 N window,False
+SOP-0834,Read turntable_speed_sensor during the jog test to verify the turntable reaches 6 RPM within 5 seconds,False
+SOP-0834,Read load_height_sensor to confirm the height sensor self-test returns a valid non-fault reading,False
+SOP-0834,Read photoeye_sensor_A and photoeye_sensor_B to confirm both safety beams are unobstructed,False
+SOP-0835,Walk to stretch_wrapper_station,False
+SOP-0835,Press cycle_stop_button to ensure no wrap cycle is pending or mid-queue,True
+SOP-0835,Walk to wrapper_main_panel,False
+SOP-0835,Press red_estop_button to cut control power for the duration of the shutdown period,True
+SOP-0836,Walk to wrapper_main_panel,False
+SOP-0836,Press red_estop_button to secure the machine before calibration setup,True
+SOP-0836,Read film_tension_sensor to record the measured tension against the known calibration weight value,False
+SOP-0836,Read pre_stretch_ratio_sensor to verify the displayed ratio matches the reference value within 2 percent,False
+SOP-0836,Press yellow_reset_button to accept calibration and return the wrapper to run mode,False

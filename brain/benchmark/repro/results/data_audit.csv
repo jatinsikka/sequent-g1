@@ -1,0 +1,12 @@
+metric,value
+n_sops,1013.0
+n_families,313.0
+n_train,1859.0
+n_val,210.0
+n_test,269.0
+test_golds_seen_in_train,269.0
+test_train_maxcos_mean,0.1343461703816217
+test_train_maxcos_gt0.9,0.0
+nn_train_incident_same_gold,0.20074349442379183
+title_overlap_mean,0.319361833952912
+title_overlap_zero_frac,0.17472118959107807

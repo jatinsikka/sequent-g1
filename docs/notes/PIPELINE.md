@@ -1,3 +1,5 @@
+> **Historical note (Nov 2026).** This is a working log from June 2026. Several claims here were superseded by the re-audit in [`brain/benchmark/REPRO_REPORT.md`](../../brain/benchmark/REPRO_REPORT.md): notably, the Flan-T5 planner's "0/20 valid plans" was caused by a setup bug (T5's tokenizer has no `{` or `}`), not a finding about learned planners. Current numbers are in the README and that report.
+
 # The Sequent Pipeline — language → SOP → verified action
 
 The thesis in one line: **an operator describes an incident in plain English; the robot

@@ -1,0 +1,715 @@
+{
+  "family": "Hydraulic Press",
+  "sops": [
+    {
+      "ref": "low_pressure_warning",
+      "title": "Hydraulic Pressure Below Setpoint Warning",
+      "condition": "The hydraulic pressure sensor reads between the low-pressure warning threshold and the critical alarm floor while the press is actively cycling.",
+      "steps": [
+        "walk_to hydraulic_control_panel",
+        "read_sensor hydraulic_pressure_gauge",
+        "read_sensor oil_temperature_sensor",
+        "walk_to pump_unit",
+        "read_sensor pump_discharge_pressure_gauge",
+        "notify maintenance_supervisor",
+        "notify shift_lead"
+      ],
+      "equipment": [
+        "hydraulic_control_panel",
+        "hydraulic_pressure_gauge",
+        "oil_temperature_sensor",
+        "pump_unit",
+        "pump_discharge_pressure_gauge"
+      ]
+    },
+    {
+      "ref": "pressure_collapse",
+      "title": "Sudden Hydraulic Pressure Collapse During Cycle",
+      "condition": "Hydraulic system pressure drops instantaneously to below ten percent of the operating setpoint while the ram is mid-stroke under forming load.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to hydraulic_pump_unit",
+        "read_sensor hydraulic_pressure_gauge",
+        "read_sensor pump_outlet_pressure_gauge",
+        "notify maintenance_supervisor",
+        "notify plant_safety_officer",
+        "walk_to main_hydraulic_panel"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "hydraulic_pump_unit",
+        "hydraulic_pressure_gauge",
+        "pump_outlet_pressure_gauge",
+        "main_hydraulic_panel"
+      ]
+    },
+    {
+      "ref": "high_pressure_alarm",
+      "title": "Hydraulic Pressure Exceeds Maximum Rated Ceiling",
+      "condition": "The hydraulic pressure sensor reading exceeds the system maximum rated operating pressure alarm threshold, indicating runaway pressure build-up.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to main_hydraulic_panel",
+        "read_sensor hydraulic_pressure_gauge",
+        "walk_to pressure_relief_valve_station",
+        "read_sensor relief_valve_indicator",
+        "notify maintenance_supervisor",
+        "notify shift_lead"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "main_hydraulic_panel",
+        "hydraulic_pressure_gauge",
+        "pressure_relief_valve_station",
+        "relief_valve_indicator"
+      ]
+    },
+    {
+      "ref": "slow_ram_descent",
+      "title": "Ram Descent Velocity Below Specified Rate",
+      "condition": "The ram is descending but at a speed measurably slower than the programmed cycle time tolerance, with no full stop occurring.",
+      "steps": [
+        "walk_to press_operator_panel",
+        "read_sensor ram_velocity_display",
+        "read_sensor ram_position_sensor",
+        "walk_to hydraulic_flow_control_valve",
+        "read_sensor flow_control_indicator",
+        "read_sensor hydraulic_pressure_gauge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_operator_panel",
+        "ram_velocity_display",
+        "ram_position_sensor",
+        "hydraulic_flow_control_valve",
+        "flow_control_indicator",
+        "hydraulic_pressure_gauge"
+      ]
+    },
+    {
+      "ref": "ram_stall_mid_stroke",
+      "title": "Ram Completely Stalled at Mid-Stroke Position",
+      "condition": "The ram has ceased all movement at an intermediate position and will not advance or retract in response to any control input.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to press_operator_panel",
+        "read_sensor ram_position_sensor",
+        "read_sensor hydraulic_pressure_gauge",
+        "notify maintenance_supervisor",
+        "notify shift_lead",
+        "walk_to main_hydraulic_panel"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "press_operator_panel",
+        "ram_position_sensor",
+        "hydraulic_pressure_gauge",
+        "main_hydraulic_panel"
+      ]
+    },
+    {
+      "ref": "oil_temp_warning",
+      "title": "Hydraulic Oil Temperature Elevated Above Normal Range",
+      "condition": "The oil temperature sensor reading exceeds the normal operating upper limit but remains below the automatic shutdown interlock threshold, and the press continues to run.",
+      "steps": [
+        "walk_to hydraulic_reservoir",
+        "read_sensor oil_temperature_sensor",
+        "walk_to oil_cooler_unit",
+        "read_sensor cooler_fan_status_indicator",
+        "read_sensor oil_cooler_inlet_temp_sensor",
+        "notify maintenance_supervisor",
+        "wait 300"
+      ],
+      "equipment": [
+        "hydraulic_reservoir",
+        "oil_temperature_sensor",
+        "oil_cooler_unit",
+        "cooler_fan_status_indicator",
+        "oil_cooler_inlet_temp_sensor"
+      ]
+    },
+    {
+      "ref": "oil_temp_emergency",
+      "title": "Hydraulic Oil Temperature Triggers Automatic Shutdown Interlock",
+      "condition": "Oil temperature exceeds the automatic shutdown interlock setpoint, causing the press control system to disable the hydraulic pump and halt all press motion.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to main_hydraulic_panel",
+        "read_sensor oil_temperature_sensor",
+        "notify plant_safety_officer",
+        "notify maintenance_supervisor",
+        "walk_to oil_cooler_unit",
+        "read_sensor cooler_fan_status_indicator"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "main_hydraulic_panel",
+        "oil_temperature_sensor",
+        "oil_cooler_unit",
+        "cooler_fan_status_indicator"
+      ]
+    },
+    {
+      "ref": "minor_oil_leak",
+      "title": "Minor Hydraulic Oil Seep at Fitting or Cylinder Seal",
+      "condition": "A slow drip or surface seep of hydraulic oil is detected at a hose fitting, connection, or cylinder seal with no floor pooling observed.",
+      "steps": [
+        "walk_to hydraulic_press_area",
+        "read_sensor oil_level_sight_glass",
+        "pick oil_absorbent_pad",
+        "place oil_absorbent_pad",
+        "walk_to hydraulic_control_panel",
+        "read_sensor hydraulic_pressure_gauge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "hydraulic_press_area",
+        "oil_level_sight_glass",
+        "oil_absorbent_pad",
+        "hydraulic_control_panel",
+        "hydraulic_pressure_gauge"
+      ]
+    },
+    {
+      "ref": "major_hose_rupture",
+      "title": "High-Pressure Hydraulic Hose Rupture and Oil Spray",
+      "condition": "A hydraulic hose or pressurized fitting fails catastrophically, producing high-velocity oil spray or rapid large-volume oil discharge that reaches the floor or surrounding equipment.",
+      "steps": [
+        "press_button red_estop_button",
+        "notify plant_safety_officer",
+        "notify maintenance_supervisor",
+        "walk_to spill_kit_station",
+        "pick oil_containment_boom",
+        "place oil_containment_boom",
+        "walk_to main_hydraulic_panel"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "spill_kit_station",
+        "oil_containment_boom",
+        "main_hydraulic_panel"
+      ]
+    },
+    {
+      "ref": "relief_valve_chatter",
+      "title": "Pressure Relief Valve Rapid Cycling Under Load",
+      "condition": "The hydraulic relief valve is audibly and measurably cycling open and closed in rapid succession while the press operates under normal forming load.",
+      "steps": [
+        "walk_to main_hydraulic_panel",
+        "read_sensor hydraulic_pressure_gauge",
+        "read_sensor relief_valve_pressure_indicator",
+        "walk_to pump_unit",
+        "read_sensor pump_discharge_pressure_gauge",
+        "notify maintenance_supervisor",
+        "wait 30"
+      ],
+      "equipment": [
+        "main_hydraulic_panel",
+        "hydraulic_pressure_gauge",
+        "relief_valve_pressure_indicator",
+        "pump_unit",
+        "pump_discharge_pressure_gauge"
+      ]
+    },
+    {
+      "ref": "pump_motor_overload",
+      "title": "Hydraulic Pump Motor Thermal Overload Trip",
+      "condition": "The hydraulic pump motor thermal overload relay has tripped, cutting power to the pump and halting all hydraulic flow.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to motor_control_center",
+        "read_sensor overload_relay_status_indicator",
+        "read_sensor motor_winding_temp_sensor",
+        "notify maintenance_electrician",
+        "notify shift_lead",
+        "wait 600"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "motor_control_center",
+        "overload_relay_status_indicator",
+        "motor_winding_temp_sensor"
+      ]
+    },
+    {
+      "ref": "position_sensor_fault",
+      "title": "Ram Position Sensor Signal Lost or Erratic",
+      "condition": "The ram position encoder or proximity sensor generates an out-of-range, intermittent, or frozen signal that triggers a position fault alarm on the press controller.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to press_operator_panel",
+        "read_sensor ram_position_sensor",
+        "read_sensor ram_position_sensor_backup",
+        "notify maintenance_electrician",
+        "notify shift_lead",
+        "walk_to main_hydraulic_panel"
+      ],
+      "equipment": [
+        "cycle_stop_button",
+        "press_operator_panel",
+        "ram_position_sensor",
+        "ram_position_sensor_backup",
+        "main_hydraulic_panel"
+      ]
+    },
+    {
+      "ref": "hydraulic_filter_change",
+      "title": "Scheduled Hydraulic Oil Filter Element Replacement",
+      "condition": "The hydraulic filter differential-pressure indicator reaches the scheduled change threshold or the planned preventive maintenance interval has elapsed.",
+      "steps": [
+        "walk_to loto_panel",
+        "press_button pump_isolation_switch",
+        "walk_to hydraulic_filter_housing",
+        "pick replacement_filter_element",
+        "place replacement_filter_element",
+        "read_sensor filter_dp_indicator",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "loto_panel",
+        "pump_isolation_switch",
+        "hydraulic_filter_housing",
+        "replacement_filter_element",
+        "filter_dp_indicator"
+      ]
+    },
+    {
+      "ref": "reservoir_oil_topoff",
+      "title": "Hydraulic Reservoir Oil Level Inspection and Top-Off",
+      "condition": "The reservoir oil level sight glass reads below the minimum operating mark during a routine daily inspection, with no sign of oil degradation.",
+      "steps": [
+        "walk_to hydraulic_reservoir",
+        "read_sensor oil_level_sight_glass",
+        "walk_to oil_storage_area",
+        "pick hydraulic_oil_drum",
+        "walk_to reservoir_fill_port",
+        "place hydraulic_oil_drum",
+        "read_sensor oil_level_sight_glass"
+      ],
+      "equipment": [
+        "hydraulic_reservoir",
+        "oil_level_sight_glass",
+        "oil_storage_area",
+        "hydraulic_oil_drum",
+        "reservoir_fill_port"
+      ]
+    },
+    {
+      "ref": "full_oil_change",
+      "title": "Complete Hydraulic Oil Drain Flush and Refill",
+      "condition": "The scheduled full oil-change interval has been reached or oil analysis results indicate fluid degradation beyond acceptable contamination limits.",
+      "steps": [
+        "walk_to loto_panel",
+        "press_button pump_isolation_switch",
+        "walk_to hydraulic_reservoir",
+        "pick drain_hose_assembly",
+        "place drain_hose_assembly",
+        "pick hydraulic_oil_drum",
+        "place hydraulic_oil_drum"
+      ],
+      "equipment": [
+        "loto_panel",
+        "pump_isolation_switch",
+        "hydraulic_reservoir",
+        "drain_hose_assembly",
+        "hydraulic_oil_drum",
+        "reservoir_fill_port"
+      ]
+    },
+    {
+      "ref": "pump_coupling_lubrication",
+      "title": "Hydraulic Pump Drive Coupling Grease Application",
+      "condition": "The scheduled lubrication interval for the pump drive coupling has elapsed per the preventive maintenance calendar.",
+      "steps": [
+        "walk_to loto_panel",
+        "press_button pump_isolation_switch",
+        "walk_to pump_coupling_guard",
+        "pick grease_gun",
+        "place grease_gun",
+        "read_sensor coupling_grease_port_indicator",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "loto_panel",
+        "pump_isolation_switch",
+        "pump_coupling_guard",
+        "grease_gun",
+        "coupling_grease_port_indicator"
+      ]
+    },
+    {
+      "ref": "oil_cooler_cleaning",
+      "title": "Hydraulic Oil Cooler Heat Exchanger Cleaning",
+      "condition": "The temperature differential across the oil cooler exceeds the inspection threshold or the scheduled cleaning interval has elapsed, indicating fouled cooler fins.",
+      "steps": [
+        "walk_to loto_panel",
+        "press_button cooler_fan_switch",
+        "walk_to oil_cooler_unit",
+        "pick compressed_air_nozzle",
+        "place compressed_air_nozzle",
+        "read_sensor oil_cooler_inlet_temp_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "loto_panel",
+        "cooler_fan_switch",
+        "oil_cooler_unit",
+        "compressed_air_nozzle",
+        "oil_cooler_inlet_temp_sensor"
+      ]
+    },
+    {
+      "ref": "relief_valve_calibration",
+      "title": "Pressure Relief Valve Setpoint Testing and Adjustment",
+      "condition": "The scheduled relief-valve calibration interval has elapsed or a maintenance work order has been raised following a pressure anomaly event requiring setpoint verification.",
+      "steps": [
+        "walk_to loto_panel",
+        "press_button pump_isolation_switch",
+        "walk_to pressure_relief_valve_station",
+        "pick calibration_pressure_gauge",
+        "place calibration_pressure_gauge",
+        "read_sensor calibration_pressure_gauge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "loto_panel",
+        "pump_isolation_switch",
+        "pressure_relief_valve_station",
+        "calibration_pressure_gauge"
+      ]
+    },
+    {
+      "ref": "lockout_tagout_press",
+      "title": "Hydraulic Press Lockout Tagout Energy Isolation",
+      "condition": "A maintenance or repair task requires entry into the press hazard zone or physical contact with any hydraulic or electrical component.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to main_hydraulic_panel",
+        "press_button pump_isolation_switch",
+        "walk_to loto_panel",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "main_hydraulic_panel",
+        "pump_isolation_switch",
+        "loto_panel",
+        "lockout_hasp"
+      ]
+    },
+    {
+      "ref": "oil_spill_response",
+      "title": "Hydraulic Oil Spill Containment and Cleanup",
+      "condition": "Hydraulic oil is observed pooling on the floor in any quantity sufficient to create a slip hazard or approach a floor drain.",
+      "steps": [
+        "notify plant_safety_officer",
+        "walk_to spill_kit_station",
+        "pick oil_containment_boom",
+        "place oil_containment_boom",
+        "pick oil_absorbent_pad",
+        "place oil_absorbent_pad",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "spill_kit_station",
+        "oil_containment_boom",
+        "oil_absorbent_pad"
+      ]
+    },
+    {
+      "ref": "emergency_estop_response",
+      "title": "Emergency Stop Activation and Press Safe-Down Procedure",
+      "condition": "An e-stop button has been activated by any person due to an immediate safety hazard at or near the hydraulic press.",
+      "steps": [
+        "press_button red_estop_button",
+        "notify plant_safety_officer",
+        "notify shift_lead",
+        "walk_to main_hydraulic_panel",
+        "read_sensor hydraulic_pressure_gauge",
+        "read_sensor ram_position_sensor",
+        "wait 60"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "main_hydraulic_panel",
+        "hydraulic_pressure_gauge",
+        "ram_position_sensor"
+      ]
+    },
+    {
+      "ref": "press_startup_shutdown",
+      "title": "Daily Press Startup and End-of-Shift Shutdown Sequence",
+      "condition": "The press is being placed into or removed from normal production service at the start or end of a scheduled shift.",
+      "steps": [
+        "walk_to main_hydraulic_panel",
+        "press_button pump_start_button",
+        "wait 120",
+        "read_sensor hydraulic_pressure_gauge",
+        "read_sensor oil_temperature_sensor",
+        "read_sensor oil_level_sight_glass",
+        "notify shift_lead"
+      ],
+      "equipment": [
+        "main_hydraulic_panel",
+        "pump_start_button",
+        "hydraulic_pressure_gauge",
+        "oil_temperature_sensor",
+        "oil_level_sight_glass"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "low_pressure_warning",
+      "text": "Been watching the gauge on press 4 all morning shift — needle's sitting about 15 bar below where it should be but she's still cycling. Nothing tripped, no alarm, just soft. Wanted to flag it before second shift takes over."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "low_pressure_warning",
+      "text": "Line 2 stamping cell, the readout on the main panel is running below the green zone. Machine kept right on running through the whole shift. Not making any funny noise, just consistently under where we'd expect it. Tech needs to take a look."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "pressure_collapse",
+      "text": "We were punching blanks on the line 3 press, right in the middle of a stroke, and the whole system just lost it in under a second. Ram froze halfway down. Nothing slow about it — the gauge just fell to the floor instantly."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "pressure_collapse",
+      "text": "Heard a kind of whomp from the far press bay on second shift. Operator said the gauge dropped to nothing while they were mid-form — didn't gradually trend down, literally gone in a blink. Part was stuck under the tooling."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "pressure_collapse",
+      "text": "Press 7 near the loading dock dropped out completely during a forming cycle. System went from full operating pressure to basically zero while the ram was loaded — not a slow bleed, a total instant loss. Called it in right away."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Alarm went off on the big press near the loading dock — the gauge is pegged past the red line. Machine was still trying to cycle. Shift lead cleared everyone back from the area fast."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Second shift, line 1 — pressure reading is higher than I've ever seen on that unit. Pump is humming loud and the needle is buried past the maximum mark on the dial. Something's not venting."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "high_pressure_alarm",
+      "text": "The panel on press 5 lit up red during a run. When I walked over the gauge was way into the danger zone — far above anything normal. Nowhere near the low end, completely the opposite. Had to stop production."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "slow_ram_descent",
+      "text": "The ram on press 5 is still going down but it's taking almost twice as long to reach the bottom of stroke. Parts are stacking up because the cycle just drags. Never actually stopped, just real sluggish."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "slow_ram_descent",
+      "text": "Line 4 has been running lazy all morning shift. Ram is definitely moving — you can see it creeping down — but takt time is way off. Supervisor noticed the count was behind and I went to check. The descent just takes forever."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "ram_stall_mid_stroke",
+      "text": "Press 3 locked up on us mid-stroke. The ram is just sitting there about halfway down, won't go forward, won't come back up. Tried the selector switch, tried cycling the mode — nothing responds."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "ram_stall_mid_stroke",
+      "text": "The unit by the loading dock froze up completely on third shift. Part's still under the tooling and nothing is moving. It's not slow — it is completely stopped. Operator couldn't get it to move in either direction."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "ram_stall_mid_stroke",
+      "text": "Line 6 press jammed solid about midway through the down-stroke. Ram is stuck between top and bottom, just hanging there. Different from when it runs slow — this thing is not moving at all, and it won't retract either."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "oil_temp_warning",
+      "text": "Temp on the reservoir for press bay 2 was reading orange on the display but the press never stopped on its own. Maintenance lead told the operator to keep an eye on it. Machine was still making parts — just running hot."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "oil_temp_warning",
+      "text": "End of day shift on line 3, noticed the oil temp number was creeping up past the normal band on the display. Fan looked like it was spinning. The machine was still operational and the interlock never kicked. Just hotter than usual."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "oil_temp_emergency",
+      "text": "Press bay 2 killed itself on third shift — came in and the pump was dead quiet, big red fault on the panel, and the whole machine was locked out. Reservoir was so hot you could feel the heat standing a foot away from it."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "oil_temp_emergency",
+      "text": "Line 5 press shut down by itself during a stamping run. No one hit E-stop — the machine just went offline. Temp gauge was buried and the interlock had already tripped everything off. Had to call maintenance right away."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "minor_oil_leak",
+      "text": "Spotted a wet fitting on press 6 near the cylinder block — just a small bead of fluid running down the hose. No puddle on the floor yet. Put a rag under it and flagged it for the next maintenance window."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "minor_oil_leak",
+      "text": "There's a weep at one of the connections on the back of press 2. Maybe a drip every few seconds — you'd miss it if you weren't looking. Floor underneath is dry. Definitely not right though, and I wrote it up."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "major_hose_rupture",
+      "text": "First shift, line 3 — a hose let go completely. Fluid was spraying across the bay, hit the guarding and the floor. Had to push everyone back fast. Big spreading puddle within seconds of it blowing."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "major_hose_rupture",
+      "text": "The high-pressure line on press bay 4 blew out mid-cycle. We're talking a jet, not a drip — covered the floor and got on the operator's PPE. Nothing gradual about it. Press area is completely shut down."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "major_hose_rupture",
+      "text": "Press 8 near the south wall threw a hose during a forming run. The spray was strong enough to reach the adjacent conveyor. Floor is flooded. Nothing like the little weeps we see sometimes — this was a full blowout."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "relief_valve_chatter",
+      "text": "There's this fast clicking noise coming from the press bay near the pump — like a valve ticking 10 times a second. Pressure needle is bouncing. Nothing else obvious wrong, machine is still under load."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "relief_valve_chatter",
+      "text": "Line 6 press sounds like a machine gun when it gets under load. The tech said it's the relief valve hammering back and forth. Only happens when we're stamping the heavier blanks. Pressure gauge is oscillating fast."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "pump_motor_overload",
+      "text": "Motor control cabinet for press 1 tripped out and the pump went completely quiet. No alarm sounded — it just died. When the tech checked, the reset button was popped on the overload relay inside the cabinet."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "pump_motor_overload",
+      "text": "Third shift — pump motor on line 2 cut out mid-run. The MCC breaker looks fine when you check it, but the overload is tripped and the machine won't restart. Hydraulics are flat, nothing moving."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "position_sensor_fault",
+      "text": "Press 4 keeps throwing a fault alarm on the controller even when the ram is sitting still at the top of stroke. The position display on the panel is jumping all over the place — numbers don't make sense."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "position_sensor_fault",
+      "text": "Line 3 started giving erratic stroke counts — the encoder readout is flickering between two different values and the press stopped itself. Electrician thinks the sensor is flaking out. Controls faulted, not hydraulics."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "hydraulic_filter_change",
+      "text": "PM schedule said the filter on press 2 was due last Friday. The bypass indicator on the housing is in the red this morning. Maintenance flagged it at the start of first shift and ordered the element."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "hydraulic_filter_change",
+      "text": "The differential indicator on the filter housing of the line 4 press has been amber for a full week. This week's PM interval crossed over so the element needs swapping out — no fault yet but it's overdue."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "reservoir_oil_topoff",
+      "text": "Routine walkaround this morning on press 3 — the sight glass is right below the low mark. Nothing urgent, just needs a top-up before first shift gets into full production."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "reservoir_oil_topoff",
+      "text": "Line 1 press reservoir is visibly low in the glass during the daily check. Last topped off two weeks ago. Oil looks fine, just low on volume. Needs maybe a quart or two to bring it back to the mark."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "full_oil_change",
+      "text": "Oil analysis came back on the line 5 press and the contamination numbers are way too high for continued service. Lab report says change out the whole system — not just the filter, a full flush and fresh fill."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "full_oil_change",
+      "text": "The PM counter on press bay 3 hit the full-change milestone this quarter. Oil looks dark and the tech said it smells burnt when you pull the dipstick. Whole system needs draining — topping off won't cut it this time."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "pump_coupling_lubrication",
+      "text": "Maintenance log shows the coupling grease on press 1 pump is six months overdue. Could hear a faint squeal coming from that area on second shift — caught it early before it gets worse."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "pump_coupling_lubrication",
+      "text": "Line 6 PM inspection — the lube sticker on the pump coupling guard still shows last year's date. Calendar says this month is the interval. No complaint from the machine yet but it's definitely time to grease it."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "oil_cooler_cleaning",
+      "text": "Oil temp on line 4 press has been creeping up week over week even when the shop isn't particularly hot. Tech pulled the cooler shroud and the fins are completely packed with dust and metal fines."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "oil_cooler_cleaning",
+      "text": "The cooler on press bay 2 looks like it hasn't been touched in over a year — fins are black with debris. The temperature difference across it during production is way off what it should be."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "relief_valve_calibration",
+      "text": "Work order came in after last month's pressure event on line 3 press. The relief valve needs its annual setpoint verification before we can close the corrective action and sign off on the machine."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "relief_valve_calibration",
+      "text": "PM calendar flag on press 5 — the setpoint check is overdue by two weeks. No current problem to report, just the scheduled verification cycle. Tech needs to pull the calibrated gauge and do the test."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "lockout_tagout_press",
+      "text": "Maintenance is going into press 2 to replace a cylinder seal. Before anyone touches it the electrician is pulling the LOTO kit from the cabinet — can't have stored energy in the system while someone's in there."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "lockout_tagout_press",
+      "text": "Second shift, line 6 — tech needs to get inside the tooling area to clear a stuck blank. Can't do anything until we have full energy isolation on the machine. Hasp goes on before anyone reaches in."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "lockout_tagout_press",
+      "text": "Inspection crew needs to remove the cylinder guard on press 4 for a scheduled internal check. Job safety analysis says full isolation before any guard removal — pulling the tag kit now before work starts."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "oil_spill_response",
+      "text": "There's a puddle of hydraulic fluid spreading across the aisle between press bay 3 and press bay 4. Started small but it's big enough to be a slip hazard. Someone put a cone out but we need the spill kit."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "oil_spill_response",
+      "text": "Came in first thing on day shift and found a trail of oil from press 1 all the way toward the floor drain. Big enough that one of the operators nearly went down. Area is roped off and safety needs to know."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "emergency_estop_response",
+      "text": "Operator on line 5 hit the mushroom button when a blank misloaded and they weren't sure their hand was clear. Machine stopped hard. Everything is locked out. Need a full inspection before it gets released."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "emergency_estop_response",
+      "text": "Someone hit the big red on press bay 1 — saw a worker step into the light curtain zone during a run. Machine locked out immediately. Safety officer and shift lead need to clear it before restart."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "emergency_estop_response",
+      "text": "The E-stop on press 7 was smacked by a forklift bumping the guarding — machine tripped offline. Nobody was hurt, but the system is in fault state and the ram position needs to be verified before we can do anything."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "press_startup_shutdown",
+      "text": "First shift coming on for press 3 — previous shift left it powered down for the long weekend. Need to do the full warmup walkthrough: pressure build, temp stabilization, level check before we start punching parts."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "press_startup_shutdown",
+      "text": "End of Friday second shift on line 2. Shutting down for the weekend. Need to go through the safe-down sequence properly before facilities locks up the building — can't just kill the main breaker and walk out."
+    }
+  ]
+}

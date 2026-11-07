@@ -1,0 +1,747 @@
+{
+  "family": "Surface Grinder",
+  "sops": [
+    {
+      "ref": "startup_sequence",
+      "title": "Machine Startup Sequence",
+      "condition": "Surface grinder is powered off at shift start or after a maintenance hold and must be brought to full operational readiness.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button hydraulic_power_switch",
+        "wait 30",
+        "read_sensor hydraulic_pressure_sensor",
+        "press_button coolant_pump_switch",
+        "press_button green_start_button",
+        "read_sensor wheel_speed_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "hydraulic_power_switch",
+        "hydraulic_pressure_sensor",
+        "coolant_pump_switch",
+        "green_start_button",
+        "wheel_speed_sensor"
+      ]
+    },
+    {
+      "ref": "shutdown_sequence",
+      "title": "End-of-Shift Shutdown",
+      "condition": "Production shift is ending and the surface grinder must be powered down in a controlled, orderly manner.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button table_feed_switch",
+        "press_button wheel_spindle_switch",
+        "wait 20",
+        "press_button coolant_pump_switch",
+        "press_button hydraulic_power_switch",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "table_feed_switch",
+        "wheel_spindle_switch",
+        "coolant_pump_switch",
+        "hydraulic_power_switch",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "emergency_shutdown",
+      "title": "Emergency Stop Activation",
+      "condition": "An immediate hazard is detected — such as an operator injury, uncontrolled workpiece ejection, or visible smoke — requiring instantaneous machine halt with no sequenced power-down.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "wait 5",
+        "read_sensor wheel_speed_sensor",
+        "notify safety_officer",
+        "notify line_supervisor",
+        "place warning_cone"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "wheel_speed_sensor",
+        "warning_cone",
+        "safety_officer",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout Procedure",
+      "condition": "Planned maintenance or tooling work is scheduled on the surface grinder, requiring all energy sources to be isolated and locked before any personnel entry into the work envelope.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "walk_to electrical_disconnect_panel",
+        "press_button loto_lockout_switch",
+        "pick loto_padlock",
+        "place loto_padlock",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "electrical_disconnect_panel",
+        "loto_lockout_switch",
+        "loto_padlock",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "coolant_spill_minor",
+      "title": "Minor Coolant Spill Response",
+      "condition": "A small coolant leak of less than one gallon is observed pooling within the drip pan or the immediate floor area around the machine base, with no spread into walkways.",
+      "steps": [
+        "walk_to spill_kit_cabinet",
+        "pick spill_absorbent_pad",
+        "place spill_absorbent_pad",
+        "walk_to main_control_panel",
+        "read_sensor coolant_flow_sensor",
+        "notify line_supervisor",
+        "wait 60"
+      ],
+      "equipment": [
+        "spill_kit_cabinet",
+        "spill_absorbent_pad",
+        "main_control_panel",
+        "coolant_flow_sensor",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "coolant_spill_major",
+      "title": "Major Coolant Rupture Response",
+      "condition": "A large-volume coolant rupture is occurring — reservoir or hose burst — with fluid spreading beyond the drip pan and into the aisle floor, creating a slip hazard across a wide area.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "press_button coolant_pump_switch",
+        "notify safety_officer",
+        "walk_to spill_kit_cabinet",
+        "pick spill_containment_boom",
+        "place spill_containment_boom"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "coolant_pump_switch",
+        "safety_officer",
+        "spill_kit_cabinet",
+        "spill_containment_boom"
+      ]
+    },
+    {
+      "ref": "coolant_pressure_low",
+      "title": "Low Coolant Pressure Alarm",
+      "condition": "The coolant pressure sensor reads below the 25 PSI minimum setpoint for more than ten continuous seconds, triggering the amber low-pressure advisory; the decline is gradual, consistent with a depleted reservoir rather than a line failure.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor coolant_pressure_sensor",
+        "read_sensor coolant_level_sensor",
+        "walk_to coolant_reservoir_station",
+        "pick coolant_refill_container",
+        "place coolant_refill_container",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "coolant_pressure_sensor",
+        "coolant_level_sensor",
+        "coolant_reservoir_station",
+        "coolant_refill_container",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "coolant_pressure_sudden_drop",
+      "title": "Sudden Coolant Pressure Collapse",
+      "condition": "Coolant pressure drops from normal operating range to near-zero within two seconds, indicating a burst hose or catastrophic pump failure rather than gradual reservoir depletion; the pump audibly strains and flow ceases immediately.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "press_button coolant_pump_switch",
+        "read_sensor coolant_flow_sensor",
+        "notify maintenance_supervisor",
+        "walk_to coolant_reservoir_station",
+        "read_sensor coolant_level_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "coolant_pump_switch",
+        "coolant_flow_sensor",
+        "maintenance_supervisor",
+        "coolant_reservoir_station",
+        "coolant_level_sensor"
+      ]
+    },
+    {
+      "ref": "coolant_pressure_high",
+      "title": "High Coolant Pressure Alarm",
+      "condition": "The coolant pressure sensor reads above the 80 PSI maximum ceiling, indicating a downstream blockage or a stuck pressure-relief valve that is preventing the system from regulating pressure.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor coolant_pressure_sensor",
+        "press_button coolant_pump_switch",
+        "wait 15",
+        "read_sensor coolant_flow_sensor",
+        "notify maintenance_supervisor",
+        "press_button alarm_reset_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "coolant_pressure_sensor",
+        "coolant_pump_switch",
+        "coolant_flow_sensor",
+        "maintenance_supervisor",
+        "alarm_reset_button"
+      ]
+    },
+    {
+      "ref": "hydraulic_pressure_warning",
+      "title": "Hydraulic Pressure Warning Alarm",
+      "condition": "The hydraulic pressure sensor triggers the yellow advisory at the 1200 PSI low threshold, indicating the hydraulic circuit is approaching the bottom of its acceptable operating range; the machine remains operational and no immediate safety risk exists.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor hydraulic_pressure_sensor",
+        "walk_to hydraulic_unit",
+        "read_sensor hydraulic_pressure_sensor",
+        "pick hydraulic_fluid_container",
+        "place hydraulic_fluid_container",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "hydraulic_pressure_sensor",
+        "hydraulic_unit",
+        "hydraulic_fluid_container",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "hydraulic_pressure_emergency",
+      "title": "Hydraulic Pressure Critical Fault",
+      "condition": "The hydraulic pressure sensor activates the red critical alarm at or below 800 PSI, indicating imminent loss of table clamping force and a serious risk of workpiece release during grinding; the machine must be halted immediately.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify safety_officer",
+        "notify maintenance_supervisor",
+        "walk_to hydraulic_unit",
+        "place warning_cone"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "hydraulic_pressure_sensor",
+        "safety_officer",
+        "maintenance_supervisor",
+        "hydraulic_unit",
+        "warning_cone"
+      ]
+    },
+    {
+      "ref": "wheel_imbalance_alarm",
+      "title": "Grinding Wheel Imbalance Alarm",
+      "condition": "The wheel balance sensor detects vibration amplitude exceeding 0.5 mm/s RMS during spindle rotation, signaling that the abrasive wheel is running dynamically out of balance.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button wheel_spindle_switch",
+        "wait 10",
+        "read_sensor wheel_balance_sensor",
+        "notify maintenance_supervisor",
+        "walk_to wheel_guard_panel",
+        "pick wheel_balance_weights"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "wheel_spindle_switch",
+        "wheel_balance_sensor",
+        "maintenance_supervisor",
+        "wheel_guard_panel",
+        "wheel_balance_weights"
+      ]
+    },
+    {
+      "ref": "magnetic_chuck_failure",
+      "title": "Magnetic Chuck Demagnetization Fault",
+      "condition": "The magnetic chuck sensor reads holding force below 3 kg/cm², indicating that the electromagnet has lost sufficient clamping strength to safely retain the workpiece during grinding passes.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button table_feed_switch",
+        "press_button wheel_spindle_switch",
+        "read_sensor magnetic_chuck_sensor",
+        "press_button magnetic_chuck_switch",
+        "wait 10",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "table_feed_switch",
+        "wheel_spindle_switch",
+        "magnetic_chuck_sensor",
+        "magnetic_chuck_switch",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "coolant_flow_blockage",
+      "title": "Coolant Flow Blockage",
+      "condition": "The coolant flow sensor reads zero or near-zero delivery at the nozzle despite the pump running at normal operating pressure, indicating that a clogged nozzle or filter obstruction is preventing coolant from reaching the grinding zone.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button table_feed_switch",
+        "read_sensor coolant_flow_sensor",
+        "read_sensor coolant_pressure_sensor",
+        "walk_to coolant_filter_housing",
+        "pick replacement_coolant_filter",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "table_feed_switch",
+        "coolant_flow_sensor",
+        "coolant_pressure_sensor",
+        "coolant_filter_housing",
+        "replacement_coolant_filter",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "table_feed_jam",
+      "title": "Table Reciprocation Jam",
+      "condition": "The table position sensor reports that the grinding table has stalled mid-stroke and is no longer reciprocating, indicating a mechanical obstruction or hydraulic drive fault has seized the traverse movement.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "read_sensor table_position_sensor",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_supervisor",
+        "wait 30",
+        "press_button alarm_reset_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "table_position_sensor",
+        "hydraulic_pressure_sensor",
+        "maintenance_supervisor",
+        "alarm_reset_button"
+      ]
+    },
+    {
+      "ref": "spindle_overheat",
+      "title": "Spindle Overheat Fault",
+      "condition": "The spindle temperature sensor reads above 85 degrees Celsius, triggering the thermal overload alarm and indicating inadequate spindle cooling or a failing bearing that requires the spindle to cool before further diagnosis.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button wheel_spindle_switch",
+        "read_sensor spindle_temp_sensor",
+        "wait 120",
+        "read_sensor coolant_flow_sensor",
+        "notify maintenance_supervisor",
+        "press_button alarm_reset_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "wheel_spindle_switch",
+        "spindle_temp_sensor",
+        "coolant_flow_sensor",
+        "maintenance_supervisor",
+        "alarm_reset_button"
+      ]
+    },
+    {
+      "ref": "wheel_dressing",
+      "title": "Abrasive Wheel Dressing",
+      "condition": "The grinding wheel surface shows glazing or loading artifacts and the process engineer has confirmed a surface finish deviation on recent parts, requiring wheel truing before production can resume.",
+      "steps": [
+        "walk_to maintenance_tool_cabinet",
+        "pick wheel_dresser_tool",
+        "walk_to wheel_guard_panel",
+        "place wheel_dresser_tool",
+        "press_button wheel_dress_button",
+        "wait 45",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "maintenance_tool_cabinet",
+        "wheel_dresser_tool",
+        "wheel_guard_panel",
+        "wheel_dress_button",
+        "process_engineer"
+      ]
+    },
+    {
+      "ref": "coolant_filter_change",
+      "title": "Coolant Filter Replacement",
+      "condition": "The coolant filter differential-pressure indicator has reached the red band or the scheduled 500-hour service interval has elapsed, requiring the filter element to be replaced to restore full flow capacity.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button coolant_pump_switch",
+        "walk_to coolant_filter_housing",
+        "pick replacement_coolant_filter",
+        "place replacement_coolant_filter",
+        "press_button coolant_pump_switch",
+        "read_sensor coolant_flow_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "coolant_pump_switch",
+        "coolant_filter_housing",
+        "replacement_coolant_filter",
+        "coolant_flow_sensor"
+      ]
+    },
+    {
+      "ref": "wheel_change",
+      "title": "Grinding Wheel Replacement",
+      "condition": "The abrasive wheel has worn to minimum safe diameter or has sustained visible structural damage such as chipping or cracking, requiring full wheel removal and installation of a new wheel before grinding can resume.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "walk_to wheel_guard_panel",
+        "pick wheel_flange_wrench",
+        "place wheel_flange_wrench",
+        "pick replacement_grinding_wheel",
+        "notify process_engineer"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "wheel_guard_panel",
+        "wheel_flange_wrench",
+        "replacement_grinding_wheel",
+        "process_engineer"
+      ]
+    },
+    {
+      "ref": "magnetic_chuck_cleaning",
+      "title": "Magnetic Chuck Surface Cleaning",
+      "condition": "The scheduled weekly cleaning interval is due or metallic swarf buildup on the chuck face is visibly causing workpiece seating errors, and the chuck itself is holding force within normal range.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button magnetic_chuck_switch",
+        "walk_to maintenance_tool_cabinet",
+        "pick chuck_cleaning_cloth",
+        "walk_to magnetic_chuck_surface",
+        "place chuck_cleaning_cloth",
+        "read_sensor magnetic_chuck_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "magnetic_chuck_switch",
+        "maintenance_tool_cabinet",
+        "chuck_cleaning_cloth",
+        "magnetic_chuck_surface",
+        "magnetic_chuck_sensor"
+      ]
+    },
+    {
+      "ref": "lubrication_check",
+      "title": "Way Lubrication System Inspection and Refill",
+      "condition": "The scheduled 8-hour lubrication interval has elapsed or the lube level indicator at the lubrication panel is in the yellow zone, requiring way oil inspection and replenishment to prevent slideways from running dry.",
+      "steps": [
+        "walk_to lubrication_panel",
+        "read_sensor lube_level_sensor",
+        "pick lubricant_cartridge",
+        "place lubricant_cartridge",
+        "wait 10",
+        "read_sensor lube_level_sensor",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "lubrication_panel",
+        "lube_level_sensor",
+        "lubricant_cartridge",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "wheel_speed_underspeed",
+      "title": "Grinding Wheel Underspeed Fault",
+      "condition": "The wheel speed sensor reads below the 1450 RPM minimum operating threshold during a run, indicating the spindle drive is failing to maintain target speed rather than exhibiting vibration from imbalance.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button table_feed_switch",
+        "read_sensor wheel_speed_sensor",
+        "press_button wheel_spindle_switch",
+        "wait 30",
+        "press_button wheel_spindle_switch",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "table_feed_switch",
+        "wheel_speed_sensor",
+        "wheel_spindle_switch",
+        "maintenance_supervisor"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "startup_sequence",
+      "text": "Came in for the six AM shift on grinder 4 over by bay 7 and nothing was live on the panel when I tried to kick it on. Maintenance had pulled power to it overnight for a bearing inspection. Hydraulics were at zero, spindle wouldn't even try to engage. Had to walk the whole bring-up from scratch before I could load any parts."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "startup_sequence",
+      "text": "After the three-day holiday weekend the surface grinder on line 2 was completely cold — second shift had done a full de-energize Friday afternoon. All the gauges were zeroed out and the table wouldn't move. Took about ten minutes to get hydraulics up, then coolant, then finally spin up the wheel before we could do anything."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "startup_sequence",
+      "text": "The grinder near the south loading dock had been tagged out all morning for a scheduled PM. PM crew cleared it around 8 AM and handed it back to production. Every system was down — had to bring it up in the right order or the control panel throws a fault. Pressure has to build before you can touch the spindle."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "shutdown_sequence",
+      "text": "End of Friday evening shift on line 3, I needed to put the grinder to bed before the weekend. Stopped the table traverse first, then the wheel, let it coast all the way down, then killed coolant and finally hydraulics in sequence. You can't just pull the main breaker on these — it has to be done in order."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "shutdown_sequence",
+      "text": "Night shift supervisor asked me to secure the unit near the loading dock before I clocked out at 11 PM. No maintenance coming until morning so it needed a proper power-down, not just walked away from. Ran through the whole step-by-step: table off, spindle off, let it coast, then coolant, then hydraulics."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "emergency_shutdown",
+      "text": "Was running a finishing pass on grinder 6 and a part popped clean off the chuck and sailed across the aisle — cleared two machines before it hit the guard rail. Hit the big red mushroom button without thinking, threw a couple cones around the work area, and called the supervisor. Nobody hurt but it needed to be documented."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "emergency_shutdown",
+      "text": "Third shift on bay 2, I saw a thin wisp of smoke coming from behind the wheel guard. I didn't wait around to figure out what it was — hit the stop, cleared my coworker out of the area, and got the super on the phone immediately. Machine was still coasting when safety showed up."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance had a bearing replacement scheduled on the grinder by the inspection station for second shift. Before the tech could get anywhere near the spindle housing, we needed the full energy isolation run — power pulled and physically locked at the disconnect. Just flagging it out of service isn't enough for internal work."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "lockout_tagout",
+      "text": "A wheel swap was coming up on the line 4 grinder and the process engineer wanted the flanges inspected before the new wheel went on. That means the tech is inside the guard envelope, so we had to isolate all energy sources and run the full physical lock procedure before anyone touched anything. You can't just do a visual clear on these."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "coolant_spill_minor",
+      "text": "Spotted a small puddle forming under the grinder on aisle C this morning — stayed inside the drip tray, maybe a pint of fluid at most. Didn't need any major response, just grabbed the absorbent pads from the kit by the wall and soaked it up, then flagged the supervisor to get maintenance to trace the seeping fitting."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "coolant_spill_minor",
+      "text": "Line 2 grinder had a compression fitting that was weeping — found roughly half a gallon sitting in the pan under the unit when I did my walkdown. It was all contained in the tray, nothing reaching the floor. Small enough to handle on the spot with absorbent material without pulling the machine offline."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "coolant_spill_major",
+      "text": "A flex hose behind the reservoir on the grinder near bay 5 let go completely — coolant was shooting out across the floor. By the time I got to the panel it had already spread past two adjacent machines. Had to kill the machine immediately and get the containment gear out; the whole aisle was becoming a slip hazard."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "coolant_spill_major",
+      "text": "Second shift came in and found the big surface grinder by the press line sitting in a puddle that extended halfway across the aisle. Looks like a reservoir fitting had blown sometime during the gap between shifts. That's not a mop job — fluid was way beyond the drip pan and heading toward the press area. We needed containment booms and an immediate machine kill."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "coolant_pressure_low",
+      "text": "The amber light on the coolant gauge started flickering on the line 3 grinder around 9 AM. The reading was low — not zero, just slowly crept below where it should be sitting. Looked like the tank was getting lean. Had time to go check the reservoir level without killing the machine."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "coolant_pressure_low",
+      "text": "About two hours into the first shift run on grinder 2 the advisory dinged and the coolant gauge was nudging below the mark. Fluid wasn't gone, just low enough to trip the alarm after drifting down gradually all morning. Topped up the reservoir and the reading settled right back into the green."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "coolant_pressure_low",
+      "text": "The grinder over by the south wall was showing a slow bleed in the coolant reading all shift — not a spike, not a sudden thing, just drifting lower over several hours. When I finally checked the tank it was about a third down from the fill line. Classic slow leak somewhere, not a burst."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "coolant_pressure_sudden_drop",
+      "text": "Running grinder 5 on second shift and the coolant gauge literally fell off a cliff — went from a perfectly normal reading to basically nothing in a couple of seconds. Absolutely not a gradual drain-down. Found a burst flex hose behind the reservoir dumping fluid onto the floor. Killed the machine right away."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "coolant_pressure_sudden_drop",
+      "text": "Middle of a part run on the line 4 grinder, everything looked fine and then the alarm screamed and the coolant reading hit zero instantly. Not low — just gone. The pump sound changed at the same time. We shut it down fast because that kind of instant drop means a line failure, not an empty tank."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "coolant_pressure_sudden_drop",
+      "text": "One minute the coolant was flowing fine on bay 3, next second the gauge flatlined and the alarm went off. No gradual drop, no warning signs before it — just instant zero. The pump was clearly straining and we could hear it. Suspected a blown connection right away, not a reservoir issue."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "coolant_pressure_high",
+      "text": "The grinder on line 2 started making a high-pitched hissing sound around the coolant fittings during first shift. Checked the panel and the coolant gauge was pinned well above the normal operating band. Something downstream of the pump was blocked and the pressure had nowhere to go."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "coolant_pressure_high",
+      "text": "Second shift noticed the coolant reading was way into the red zone on the panel gauge at the grinder near bay 6. Pump was running normally but the pressure just kept climbing. The relief valve wasn't opening like it should. Definitely an over-pressure situation, not a low-flow problem."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "hydraulic_pressure_warning",
+      "text": "The yellow caution indicator on the hydraulic display of grinder 1 came on during the middle of first shift. Machine was still running fine — no faults, table moving okay — but the readout was showing hydraulic pressure nudging down toward the bottom edge of the acceptable range. Just the advisory, nothing hard tripped."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "hydraulic_pressure_warning",
+      "text": "Toward the tail end of the run on the line 3 grinder I noticed the yellow hydraulic indicator had lit up. Pressure was reading close to the low end of the scale but the machine hadn't faulted out and the table was still traversing normally. Advisory only — no red light, no e-stop."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "hydraulic_pressure_emergency",
+      "text": "Red alarm lit up on the grinder near bay 4 mid-run. Hydraulic pressure was way in the basement — way below the yellow level we saw last week. Table was already moving sluggish before the red came on. We didn't mess around, killed it immediately. If the chuck can't grip at those readings the part is going to move."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "hydraulic_pressure_emergency",
+      "text": "The grinder on line 2 threw a hard fault in the middle of a production run — red hydraulic alarm, panel screaming. Not a yellow advisory, a full red. We hit the stop without waiting. At that pressure level the workholding isn't reliable and it's a safety call, not a judgment call."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "hydraulic_pressure_emergency",
+      "text": "Third shift called me in for grinder 7 at about 2 AM — the red fault had tripped and pressure was critically low. Couldn't reset it from the panel, table movement wasn't trustworthy at those readings. Had to cordon off the machine and get maintenance in before morning shift could use it."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "wheel_imbalance_alarm",
+      "text": "The grinder over by the inspection bench started chattering noticeably around 10 AM — you could feel the vibration through the floor tiles standing three feet away. The alarm came on shortly after. Could feel in my hand on the guard that the rotation wasn't smooth."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "wheel_imbalance_alarm",
+      "text": "Second shift on grinder 4, the whole machine was shaking more than usual from almost the moment I started the wheel. The vibration alarm tripped before I could even walk over to check the guard. Felt like the wheel wasn't spinning true from the start of the run."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "wheel_imbalance_alarm",
+      "text": "I could hear something was off on the surface grinder on aisle B during warm-up — a rhythmic throbbing sound you don't normally get, once per revolution. The alarm confirmed what my ears told me. The wheel had a wobble in it, not a glazing issue, not a bearing sound."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "magnetic_chuck_failure",
+      "text": "Line 3 grinder, a part I was finishing slid slightly during the cut — I barely caught it before it went off the back edge. The chuck definitely wasn't gripping the way it normally does on steel. Ran a force check and the hold reading was way below the minimum — not a dirty chuck, the magnetism itself was weak."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "magnetic_chuck_failure",
+      "text": "Noticed the part coming off bay 2 had a witness mark on the side face — something had moved it during the grinding pass. Did a pull-off test and the magnetic clamping force was showing a weak reading. The chuck surface was clean, this wasn't a swarf issue. The holding strength had degraded."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "magnetic_chuck_failure",
+      "text": "First shift on grinder 5, the operator flagged that the workpiece had shifted slightly during what should have been a light finishing pass. The chuck face was clean — we had just wiped it down. But the pull force reading on the sensor was dangerously low. The magnet was failing to hold properly, not a contamination problem."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "coolant_flow_blockage",
+      "text": "Running grinder 3 and the part started getting really hot during the pass — you could see the heat discoloration forming on the workpiece surface and there was no mist coming off the contact zone at all. The pump was humming normally, pressure looked fine, but nothing was reaching the wheel. Something was blocking the path."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "coolant_flow_blockage",
+      "text": "Second shift on line 4 grinder, the coolant nozzle wasn't putting out anything. Could hear the pump running fine and the pressure gauge on the panel was normal, but when I looked at the nozzle — dry. Fluid was pressurized in the system but not making it through to where the wheel contacts the part."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "table_feed_jam",
+      "text": "The table on grinder 2 just stopped dead mid-stroke during a run — didn't reach the end of travel, didn't trip a limit switch, just froze in the middle of the work zone. The wheel was still spinning and digging in. Had to hit the stop before it burned a groove into the part or damaged the spindle."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "table_feed_jam",
+      "text": "Line 5 grinder, the table stalled about two-thirds of the way through its stroke and just sat there grinding away in one spot instead of traversing back and forth. Classic sign that the traverse drive had tripped or something had seized up mechanically. Killed it immediately — you can't let it dwell."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "spindle_overheat",
+      "text": "The grinder over by the east wall started giving off that hot bearing smell around the two-hour mark of a long run — not burning, not smoke, just that distinctive dry heat smell. Checked the temperature display and the spindle reading was past the upper limit mark. Pulled the spindle off and let it cool down."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "spindle_overheat",
+      "text": "Third shift on line 3 grinder, the thermal fault light came on about 90 minutes into the run. The temperature readout on the spindle was up well above the normal operating zone. Coolant was flowing — I could see it at the nozzle — but something inside was still generating excess heat."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "spindle_overheat",
+      "text": "About halfway through a long production run on grinder 6, the heat fault lit up on the panel. Temperature was reading in the danger zone. Machine had been running clean all morning — this wasn't a coolant blockage, it felt more like a bearing issue developing. Maintenance needed to inspect it before we ran another batch."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "wheel_dressing",
+      "text": "Parts coming off grinder 4 on line 2 were showing a slight repeating crosshatch scratch pattern — surface finish was clearly off from what the engineer specced. Got a flashlight on the wheel face and it looked glassy and smooth instead of sharp. The cutting face had glazed over."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "wheel_dressing",
+      "text": "Second shift on bay 3, the top face of the finished parts had a dull haze to it that wasn't there in the morning run. Quality pulled two parts off the line and both had Ra readings rougher than the tolerance allows. When I looked at the wheel face there was a grayish buildup — material had loaded into the grit."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "wheel_dressing",
+      "text": "The grinder by the south inspection bench was leaving faint streaks across the top ground surface — looked like the abrasive wasn't cutting clean, just rubbing and burnishing instead. Process engineer flagged three consecutive rejects before he came to me. The wheel face had a shiny look to it where it should be dull and open."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "coolant_filter_change",
+      "text": "The red band on the differential pressure indicator at the coolant housing has been creeping up all week on the line 3 grinder. Crossed into the red zone this morning — that's the filter telling you it's choked and it's time to swap the element before it starts restricting flow."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "coolant_filter_change",
+      "text": "Maintenance log showed we're past the 500-hour mark on the coolant element for grinder 2 and the filter pressure differential indicator had been climbing steadily over the last two weeks. Due for a pull and replacement — no fault yet but waiting for a fault is the wrong way to manage it."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "wheel_change",
+      "text": "The wheel on line 4 grinder was worn all the way down to the safety ring marked on the blotter — too small to dress again without going below minimum diameter. Had to pull it and get a new wheel out of the cage before we could run any more parts."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "wheel_change",
+      "text": "Found a chip and what looked like a hairline crack on the side face of the grinding wheel on bay 5 during pre-shift walkaround. You absolutely cannot grind on a cracked wheel — that's a projectile waiting to happen. Pulled it and got a replacement out without hesitation."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "magnetic_chuck_cleaning",
+      "text": "Monday morning on grinder 1 before the first run, the chuck face had a solid layer of swarf and metallic fines packed into the T-slots from the previous week. Parts weren't going to sit flat on that surface — they'd rock. Needed a thorough wipe-down before anyone put a workpiece on it."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "magnetic_chuck_cleaning",
+      "text": "Before the morning run on line 3 grinder I found grinding residue and metallic debris built up across the entire chuck face. Workpieces were skewing when I set them down — couldn't get them square. Chuck force reading was fine, this was just accumulated contamination from regular use, past its cleaning interval."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "lubrication_check",
+      "text": "About eight hours into the run on grinder 3 the slideway movement started feeling a little sticky near the end of each stroke — slightly more resistance than normal. Checked the lube indicator on the panel and it had dropped into the yellow zone. Oil was getting low on the ways."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "lubrication_check",
+      "text": "During my pre-shift walkdown on line 2 I noticed the lube reservoir sight glass on the grinder near the south wall was sitting right at the bottom of the green zone. Not empty, not in the red, but close enough that I wasn't going to start a full shift without topping it off first."
+    },
+    {
+      "id": "INC-051",
+      "sop_ref": "wheel_speed_underspeed",
+      "text": "Grinder 3 on line 4 was running sluggish during a production pass — the wheel just didn't sound like it was up to speed. No unusual vibration, no wobble, just clearly not spinning fast enough. The tachometer readout on the panel confirmed it was pulling below the minimum RPM. Drive issue, not a balance issue."
+    },
+    {
+      "id": "INC-052",
+      "sop_ref": "wheel_speed_underspeed",
+      "text": "About thirty minutes into a run on the grinder by bay 6, second shift noticed the parts were coming out with a rougher finish than expected and the cut sounded labored — more of a dragging noise than a clean grind. Checked the RPM display and the wheel was running well under where it needs to be. Not shaking, just slow."
+    }
+  ]
+}

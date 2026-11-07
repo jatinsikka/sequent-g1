@@ -49,6 +49,8 @@ _demo_plan.json
 *.zip
 *.pt
 brain/artifacts/
+brain/benchmark/artifacts/
+brain/benchmark/repro/results/scores_*.npz
 
 # published README/paper media (exceptions to the *.gif/*.png blanket)
 !docs/figures/*.png

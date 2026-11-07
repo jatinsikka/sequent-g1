@@ -55,3 +55,4 @@ brain/benchmark/repro/results/scores_*.npz
 # published README/paper media (exceptions to the *.gif/*.png blanket)
 !docs/figures/*.png
 !docs/media/*.gif
+!docs/static/videos/*.mp4

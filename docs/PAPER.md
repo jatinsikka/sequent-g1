@@ -218,14 +218,3 @@ The AMO whole-body controller is by Li, Cheng et al. [9] and is used frozen. Tra
 **Simulator.** MuJoCo 3.2.3 [15], 29-DoF Unitree G1 with a Robotiq 2F-85 gripper on the right wrist, AMO at 50 Hz.
 
 **Reproducing.** `brain/benchmark/REPRO_REPORT.md` lists every retrieval number with the script and CSV that produced it. RL checkpoints are not released.
-
-## Paper checklist
-
-1. For all student authors:
-   a. Spell and grammar checked the full document? **[Yes]**
-   b. LaTeX organized per the lab sample paper? **[No]** (standalone LaTeX generated from this file; lab template not used)
-   c. All plots legible, at least 20 pt, using the plotting guidelines? **[Yes]** (Figs. 2 and 3 are generated from CSVs by `docs/figures/make_figures.py`)
-   d. Peer reviewed by another student? **[No]**
-   e. All references include the venue? **[Yes]**
-   f. Common reference files used? **[N/A]**
-   g. Paper outlined with Heilmeier answers at the top? **[Yes]** (`docs/OUTLINE.md`)

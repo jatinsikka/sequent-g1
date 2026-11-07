@@ -132,14 +132,65 @@ def fig_pipeline():
     save(fig, "fig_pipeline")
 
 
-def fig_envelope():
+def fig_pipeline_col():
+    """Single-column version of the system diagram for the two-column paper (top right of page 1)."""
+    fig, ax = plt.subplots(figsize=(9.2, 7.0))
+    ax.set_xlim(0, 10); ax.set_ylim(0, 7.6); ax.axis("off")
+
+    def box(x, y, w, h, title, sub, learned, tfs=22, sfs=16.5):
+        fc = "#dbe9fb" if learned else "#f2f1ed"
+        ec = BLUE_STRONG if learned else INK2
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.16",
+                                    fc=fc, ec=ec, lw=3, zorder=2))
+        ax.text(x + w / 2, y + h * 0.66, title, ha="center", va="center", fontsize=tfs, fontweight="bold", zorder=3)
+        ax.text(x + w / 2, y + h * 0.28, sub, ha="center", va="center", fontsize=sfs, color=INK2, zorder=3)
+
+    def arrow(x0, y0, x1, y1):
+        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=24, lw=3,
+                                     color=INK, zorder=1))
+
+    w, h = 2.95, 1.75
+    xs = [0.1, 3.52, 6.95]
+    ya, yb = 5.7, 3.25
+    box(xs[0], ya, w, h, "Ticket", "operator's\nown words", False)
+    box(xs[1], ya, w, h, "Retriever", "fine-tuned,\n1,012 SOPs", True)
+    box(xs[2], ya, w, h, "Planner", "one skill per\nSOP step", False)
+    arrow(xs[0] + w, ya + h / 2, xs[1], ya + h / 2)
+    arrow(xs[1] + w, ya + h / 2, xs[2], ya + h / 2)
+    box(xs[2], yb, w, h, "Verifier", "pre/post checks\nfrom sim state", False)
+    box(xs[1], yb, w, h, "Verdict", "resolved /\npartial / failed", False)
+    arrow(xs[2] + w / 2, ya, xs[2] + w / 2, yb + h)
+    arrow(xs[2], yb + h / 2, xs[1] + w, yb + h / 2)
+
+    skills = [("walk", "AMO\n(frozen)", True), ("pick", "IK + force\nlatch", False),
+              ("press", "PPO +\ncurriculum", True), ("lever", "BC, DAgger,\nPPO (partial)", True)]
+    sw, sh, sy = 2.3, 1.75, 0.15
+    sxs = [0.1 + i * (sw + 0.2) for i in range(4)]
+    for (t, sub, learned), sx in zip(skills, sxs):
+        box(sx, sy, sw, sh, t, sub, learned, tfs=20, sfs=15.5)
+    for i, sx in enumerate(sxs):
+        arrow(xs[2] + 0.35 + i * 0.75, yb, sx + sw / 2, sy + sh)
+
+    # legend in the free slot left of the verdict
+    ax.add_patch(FancyBboxPatch((0.2, 4.5), 0.5, 0.36, boxstyle="round,pad=0.02", fc="#dbe9fb", ec=BLUE_STRONG, lw=3))
+    ax.text(0.85, 4.68, "learned", va="center", fontsize=17)
+    ax.add_patch(FancyBboxPatch((0.2, 3.75), 0.5, 0.36, boxstyle="round,pad=0.02", fc="#f2f1ed", ec=INK2, lw=3))
+    ax.text(0.85, 3.93, "rules /\ncontroller", va="center", fontsize=17)
+    save(fig, "fig_pipeline_col")
+
+
+def fig_envelope(narrow=False):
+    """narrow=True: single-column version for the two-column paper."""
     df = pd.read_csv(HERE / "data" / "action_envelope.csv")
-    labels = [f"{t}: {j}" for t, j in zip(df.task, df.joint)]
-    fig, ax = plt.subplots(figsize=(13.5, 5.6))
+    labels = [f"{t}:\n{j}" if narrow else f"{t}: {j}" for t, j in zip(df.task, df.joint)]
+    fig, ax = plt.subplots(figsize=(8.6, 7.4) if narrow else (13.5, 5.6))
     y = np.arange(len(df))[::-1]
-    ax.barh(y, df.required_offset_rad, height=0.55, color=BLUE_MID, edgecolor=INK, linewidth=1.5, zorder=2)
+    ax.barh(y, df.required_offset_rad, height=0.55, color=BLUE_STRONG if narrow else BLUE_MID, edgecolor=INK, linewidth=1.5, zorder=2)
     for yy, v in zip(y, df.required_offset_rad):
-        ax.text(v + 0.02, yy, f"{v:.2f}", va="center", fontsize=19, color=INK)
+        if narrow:  # inside the bar end, so labels never collide with the envelope lines
+            ax.text(v - 0.03, yy, f"{v:.2f}", va="center", ha="right", fontsize=20, color="#ffffff", fontweight="bold")
+        else:
+            ax.text(v + 0.02, yy, f"{v:.2f}", va="center", fontsize=19, color=INK)
     for x, style, lab in [(0.5, "--", "original envelope (0.5)"), (0.8, ":", "widened, press (0.8)"),
                           (1.2, "-.", "widened, lever (1.2)")]:
         ax.axvline(x, color=INK if x == 0.5 else INK2, linestyle=style, linewidth=3, label=lab, zorder=3)
@@ -148,11 +199,14 @@ def fig_envelope():
     ax.set_xlim(0, 1.35)
     ax.xaxis.grid(True, color="#e6e5e0", linewidth=1.2, zorder=0)
     ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(loc="lower left", bbox_to_anchor=(0, 1.02), ncol=3, frameon=False, fontsize=20, handlelength=2.4, columnspacing=1.2)
-    save(fig, "fig_envelope")
+    ax.legend(loc="lower left", bbox_to_anchor=(-0.02 if narrow else 0, 1.02), ncol=1 if narrow else 3, frameon=False,
+              fontsize=20, handlelength=2.4, columnspacing=1.2)
+    save(fig, "fig_envelope_col" if narrow else "fig_envelope")
 
 
 if __name__ == "__main__":
     fig_retrieval()
     fig_pipeline()
+    fig_pipeline_col()
     fig_envelope()
+    fig_envelope(narrow=True)

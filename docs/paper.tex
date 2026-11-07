@@ -3,9 +3,10 @@
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 \documentclass[
-  10pt]{article}
+  10pt,
+  twocolumn]{article}
 \usepackage{xcolor}
-\usepackage[margin=0.9in]{geometry}
+\usepackage[margin=0.75in,columnsep=0.25in]{geometry}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{5}
 \usepackage{iftex}
@@ -68,8 +69,6 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\usepackage{float}
-\floatplacement{figure}{tbp}
 \usepackage{caption}
 \captionsetup{font=small}
 \usepackage{bookmark}
@@ -120,7 +119,7 @@ training metrics.
 
 \section{Introduction}\label{introduction}
 
-\begin{figure}
+\begin{figure}[t]
 \centering
 \pandocbounded{\includegraphics[keepaspectratio,alt={Only the retriever
 and three of the skills are learned. A ticket is matched to one of 1,012
@@ -128,7 +127,7 @@ SOPs by the fine-tuned retriever. The planner maps each written step to
 a skill by rule. The verifier runs each skill inside a
 precondition/postcondition check measured from simulator state and
 reports a verdict. Blue: learned. Grey: rules and
-controllers.}]{figures/fig_pipeline.png}}
+controllers.}]{figures/fig_pipeline_col.png}}
 \caption{\textbf{Only the retriever and three of the skills are
 learned.} A ticket is matched to one of 1,012 SOPs by the fine-tuned
 retriever. The planner maps each written step to a skill by rule. The
@@ -345,14 +344,16 @@ the full system: success as decided by the verifier.
 1,012 SOPs. Fine-tuned rows are the mean and standard deviation over 5
 seeds.
 
-\begin{longtable}[]{@{}
+\begin{table}[t]
+\centering\small
+\caption{\textbf{Fine-tuning adds 17 points of R@1 over the same encoder
+untuned.} The off-the-shelf reranker lowers R@1, so it is not
+used.}
+\begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
-\caption{\textbf{Fine-tuning adds 17 points of R@1 over the same encoder
-untuned.} The off-the-shelf reranker lowers R@1, so it is not
-used.}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Method
@@ -364,21 +365,7 @@ R@5
 MRR
 \end{minipage} \\
 \midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Method
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-R@1
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-R@5
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-MRR
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
+
 TF-IDF & 0.301 & 0.535 & 0.408 \\
 BM25 & 0.357 & 0.569 & 0.461 \\
 MiniLM-0 & 0.409 & 0.677 & 0.529 \\
@@ -386,7 +373,9 @@ bge-small-0 & 0.465 & 0.717 & 0.578 \\
 \textbf{MiniLM-FT (ours)} & \textbf{0.577 ± 0.006} & \textbf{0.856 ±
 0.006} & \textbf{0.695 ± 0.005} \\
 MiniLM-FT + CE & 0.452 ± 0.006 & 0.843 ± 0.003 & 0.611 ± 0.004 \\
-\end{longtable}
+\bottomrule
+\end{tabular}
+\end{table}
 
 \textbf{Generalization.} Every test SOP also has training tickets, so
 the test above is closed-set. We add two harder splits. In the first,
@@ -397,7 +386,7 @@ and 0.447 and 0.311 for BM25. Each split has its own test set, so only
 within-split comparisons are meaningful. The model is learning how
 operators describe problems, not memorizing the training SOPs.
 
-\begin{figure}
+\begin{figure*}[t]
 \centering
 \pandocbounded{\includegraphics[keepaspectratio,alt={The fine-tuned
 model's advantage is largest on vague tickets. R@1 on the vague test
@@ -410,7 +399,7 @@ tickets.} R@1 on the vague test tickets, on the same tickets with the
 machine named up front, and on 92 clear tickets from an operator who
 knows the system. Fine-tuned bars: mean ± std over 3 seeds. On clear
 tickets every method does well.}
-\end{figure}
+\end{figure*}
 
 \textbf{Ticket clarity.} Real operators vary. We test the same index
 with three kinds of ticket (Fig. 2): the vague test tickets (R@1 0.577),
@@ -440,14 +429,16 @@ but not built into the system.
 
 \subsection{Skills}\label{skills-1}
 
-\begin{longtable}[]{@{}
+\begin{table*}[t]
+\centering\small
+\caption{\textbf{Controllers where the task is geometric, RL where
+contact dominates.} Lever and grasp results are small-sample or negative
+and are reported as such.}
+\begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
-\caption{\textbf{Controllers where the task is geometric, RL where
-contact dominates.} Lever and grasp results are small-sample or negative
-and are reported as such.}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Skill
@@ -459,21 +450,7 @@ Result
 How measured
 \end{minipage} \\
 \midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Skill
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Method
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Result
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-How measured
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
+
 Pick & IK + force-gated latch & 11 of 12 held lifts & fixed-base
 validation \\
 Pick (in walk→pick run) & same & 11.9 cm held lift & one continuous
@@ -484,7 +461,9 @@ Lever & BC → DAgger → PPO & 1 of 2 completed throws & deterministic
 episodes \\
 RL grasp, gripper humanoid & PPO, several reward variants & 0\% verified
 & deterministic evaluation \\
-\end{longtable}
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \textbf{Why grasping became a controller.} RL grasping on the
 gripper-equipped humanoid reached 0\% verified success, although the
@@ -497,14 +476,14 @@ first day. RL did work on an earlier fixed-base rig with a different
 hand (55\% verified), so the conclusion is about this embodiment and
 contact setup, not about RL grasping in general.
 
-\begin{figure}
+\begin{figure}[t]
 \centering
 \pandocbounded{\includegraphics[keepaspectratio,alt={The policy could
 not reach the button from rest. Required rest-to-contact joint offsets
 versus the action range. The original ±0.5 rad range was smaller than
 every offset the tasks require, so far-start attempts saturated silently
 at the clamp. Widening it to 0.8 rad (press) and 1.2 rad (lever)
-unblocked training.}]{figures/fig_envelope.png}}
+unblocked training.}]{figures/fig_envelope_col.png}}
 \caption{\textbf{The policy could not reach the button from rest.}
 Required rest-to-contact joint offsets versus the action range. The
 original ±0.5 rad range was smaller than every offset the tasks require,
@@ -542,13 +521,15 @@ written together, and TF-IDF also ranks it first, this run shows the
 pipeline end to end rather than retrieval accuracy. Of three takes, the
 best is:
 
-\begin{longtable}[]{@{}
+\begin{table}[t]
+\centering\small
+\caption{\textbf{The system reports its own failure.} Verdict:
+``partially resolved.'' In the weakest take, place, press, and lever all
+failed and the verifier reported each.}
+\begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
-\caption{\textbf{The system reports its own failure.} Verdict:
-``partially resolved.'' In the weakest take, place, press, and lever all
-failed and the verifier reported each.}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Step
@@ -558,37 +539,29 @@ Measured outcome
 Verdict
 \end{minipage} \\
 \midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Step
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Measured outcome
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Verdict
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
+
 pick & box gripped, lifted, held & pass \\
 carry, place & carried to the panel, placed upright & pass \\
 press & 33.8 mm, held & pass \\
 lever & 0.443 rad; success requires \textless{} 0.25 rad (best of 4
 stance variants; others 0.595 and 0.627) & fail \\
 notify & verdict card sent & pass \\
-\end{longtable}
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Reward hacks}\label{reward-hacks}
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\begin{table*}[t]
+\centering\small
 \caption{\textbf{Every hack was found by watching rollouts, not from a
 metric.} Three fix classes recur: end what can be farmed, move
 constraints from the reward into the controller, and judge sustained
-states instead of instantaneous ones.}\tabularnewline
+states instead of instantaneous ones.}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Reward term
@@ -598,19 +571,7 @@ What the policy did
 Fix
 \end{minipage} \\
 \midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Reward term
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-What the policy did
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Fix
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
+
 Proximity income near the button & Hovered 5 cm short and collected it
 indefinitely & Narrow the band from 0.20 to 0.05 m, double the distance
 penalty \\
@@ -625,7 +586,9 @@ than the penalty (jerk 0.83) & Low-pass filter on the arm command, α =
 0.12 (jerk 0.001) \\
 Lift height & Launched the box out of a crushing pinch & Replace RL with
 a controller; verify a sustained held state \\
-\end{longtable}
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \textbf{Limitations.} Everything runs in MuJoCo; no hardware transfer
 was attempted. The SOPs and tickets come from one generator, and there
@@ -767,38 +730,5 @@ Robotiq 2F-85 gripper on the right wrist, AMO at 50 Hz.
 \textbf{Reproducing.} \texttt{brain/benchmark/REPRO\_REPORT.md} lists
 every retrieval number with the script and CSV that produced it. RL
 checkpoints are not released.
-
-\section*{Paper checklist}\label{paper-checklist}
-\addcontentsline{toc}{section}{Paper checklist}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  For all student authors:
-
-  \begin{enumerate}
-  \def\labelenumii{\alph{enumii}.}
-  \tightlist
-  \item
-    Spell and grammar checked the full document? \textbf{{[}Yes{]}}
-  \item
-    LaTeX organized per the lab sample paper? \textbf{{[}No{]}}
-    (standalone LaTeX generated from this file; lab template not used)
-  \item
-    All plots legible, at least 20 pt, using the plotting guidelines?
-    \textbf{{[}Yes{]}} (Figs. 2 and 3 are generated from CSVs by
-    \texttt{docs/figures/make\_figures.py})
-  \item
-    Peer reviewed by another student? \textbf{{[}No{]}}
-  \item
-    All references include the venue? \textbf{{[}Yes{]}}
-  \item
-    Common reference files used? \textbf{{[}N/A{]}}
-  \item
-    Paper outlined with Heilmeier answers at the top? \textbf{{[}Yes{]}}
-    (\texttt{docs/OUTLINE.md})
-  \end{enumerate}
-\end{enumerate}
 
 \end{document}

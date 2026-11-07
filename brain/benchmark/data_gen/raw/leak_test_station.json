@@ -1,0 +1,587 @@
+{
+  "family": "Leak Test Station",
+  "sops": [
+    {
+      "ref": "low_pressure_gradual",
+      "title": "Gradual Pressure Decay Below Setpoint During Hold",
+      "condition": "Chamber pressure declines steadily below the hold-phase setpoint over 30 or more seconds, indicating a slow continuous leak through the part or a degraded seal interface.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor pressure_transducer_1",
+        "press_button test_abort_button",
+        "walk_to test_chamber",
+        "pick test_part",
+        "place rejection_bin",
+        "notify quality_engineer"
+      ],
+      "equipment": ["control_panel", "pressure_transducer_1", "test_abort_button", "test_chamber", "test_part", "rejection_bin", "quality_engineer"]
+    },
+    {
+      "ref": "pressure_sudden_collapse",
+      "title": "Sudden Pressure Collapse Mid-Test Cycle",
+      "condition": "Chamber pressure drops abruptly from the full hold value to below 10 percent of setpoint within three seconds during an active test cycle, indicating a catastrophic event rather than a slow drift.",
+      "steps": [
+        "press_button test_abort_button",
+        "walk_to control_panel",
+        "read_sensor pressure_transducer_1",
+        "notify shift_supervisor",
+        "walk_to test_chamber",
+        "pick test_part",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["test_abort_button", "control_panel", "pressure_transducer_1", "shift_supervisor", "test_chamber", "test_part", "rejection_bin", "maintenance_technician"]
+    },
+    {
+      "ref": "pressure_above_ceiling",
+      "title": "Overpressure Exceedance During Fill Phase",
+      "condition": "Pressure transducer reads above the upper test limit while the station is still in the pressurization fill phase, before the stabilization window has opened.",
+      "steps": [
+        "press_button test_abort_button",
+        "walk_to relief_valve_panel",
+        "read_sensor supply_pressure_sensor",
+        "press_button purge_button",
+        "wait 15",
+        "notify maintenance_technician",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["test_abort_button", "relief_valve_panel", "supply_pressure_sensor", "purge_button", "maintenance_technician", "shift_supervisor"]
+    },
+    {
+      "ref": "pressure_below_floor",
+      "title": "Pressure Fails to Reach Minimum Fill Target",
+      "condition": "After the fill phase timer expires, chamber pressure is still below the minimum test threshold, preventing the hold phase from starting due to insufficient fill from supply or a large part leak.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor pressure_transducer_1",
+        "read_sensor supply_pressure_sensor",
+        "press_button test_abort_button",
+        "walk_to test_chamber",
+        "pick test_part",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "pressure_transducer_1", "supply_pressure_sensor", "test_abort_button", "test_chamber", "test_part", "maintenance_technician"]
+    },
+    {
+      "ref": "seal_warning_minor",
+      "title": "Seal Condition Warning — Marginal Deformation Detected",
+      "condition": "The seal condition sensor reports marginal deformation on one sealing element while the measured pressure loss rate remains within the upper band of acceptable tolerance, triggering a caution-level warning rather than a test abort.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor seal_condition_sensor",
+        "notify shift_supervisor",
+        "walk_to seal_storage_rack",
+        "pick replacement_seal_kit",
+        "place maintenance_cart",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "seal_condition_sensor", "shift_supervisor", "seal_storage_rack", "replacement_seal_kit", "maintenance_cart", "maintenance_technician"]
+    },
+    {
+      "ref": "seal_failure_major",
+      "title": "Catastrophic Seal Rupture During Active Pressurization",
+      "condition": "The seal condition sensor reports a critical failure state and chamber pressure simultaneously collapses to zero within one second of the failure signal, indicating a full structural breach of the sealing assembly under load.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to control_panel",
+        "read_sensor seal_condition_sensor",
+        "notify safety_officer",
+        "notify maintenance_technician",
+        "walk_to lockout_station",
+        "pick loto_lock"
+      ],
+      "equipment": ["red_estop_button", "control_panel", "seal_condition_sensor", "safety_officer", "maintenance_technician", "lockout_station", "loto_lock"]
+    },
+    {
+      "ref": "sensor_alarm_drift",
+      "title": "Pressure Sensor Calibration Drift Alarm",
+      "condition": "The primary pressure transducer generates a drift fault code indicating its live output deviates from its last stored calibration reference by more than the allowable tolerance, calling the validity of all recent test readings into question.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor pressure_transducer_1",
+        "press_button test_abort_button",
+        "walk_to calibration_kit_station",
+        "pick calibration_gauge",
+        "notify maintenance_technician",
+        "wait 300"
+      ],
+      "equipment": ["control_panel", "pressure_transducer_1", "test_abort_button", "calibration_kit_station", "calibration_gauge", "maintenance_technician"]
+    },
+    {
+      "ref": "fixture_jam",
+      "title": "Part Fixture Mechanical Jam on Engagement or Release Stroke",
+      "condition": "The fixture position sensor reports that the clamp mechanism failed to complete its engagement or release stroke within the allotted time window, leaving the part unseated or trapped in the fixture.",
+      "steps": [
+        "press_button test_abort_button",
+        "walk_to control_panel",
+        "read_sensor fixture_position_sensor",
+        "notify maintenance_technician",
+        "walk_to fixture_assembly",
+        "read_sensor fixture_position_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["test_abort_button", "control_panel", "fixture_position_sensor", "maintenance_technician", "fixture_assembly", "shift_supervisor"]
+    },
+    {
+      "ref": "electrical_fault_sensor_loss",
+      "title": "Primary Pressure Sensor Signal Loss Fault",
+      "condition": "The control system reports complete loss of signal from the primary pressure transducer channel, placing the station in a fault-hold state and suspending all test operations until the signal is restored.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor pressure_transducer_1",
+        "press_button test_abort_button",
+        "walk_to electrical_panel",
+        "read_sensor pressure_transducer_2",
+        "notify maintenance_technician",
+        "wait 120"
+      ],
+      "equipment": ["control_panel", "pressure_transducer_1", "test_abort_button", "electrical_panel", "pressure_transducer_2", "maintenance_technician"]
+    },
+    {
+      "ref": "overpressure_relief_trip",
+      "title": "Supply-Side Overpressure Relief Valve Activation",
+      "condition": "An upstream pressure spike causes the pneumatic relief valve on the supply manifold to open and vent to atmosphere, triggering the relief-trip alarm on the station control panel before the test chamber is affected.",
+      "steps": [
+        "walk_to relief_valve_panel",
+        "read_sensor supply_pressure_sensor",
+        "press_button test_abort_button",
+        "notify shift_supervisor",
+        "walk_to air_supply_manifold",
+        "press_button purge_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["relief_valve_panel", "supply_pressure_sensor", "test_abort_button", "shift_supervisor", "air_supply_manifold", "purge_button", "maintenance_technician"]
+    },
+    {
+      "ref": "seal_replacement_scheduled",
+      "title": "Scheduled PM Seal Set Replacement",
+      "condition": "The seal replacement interval counter on the control panel reaches the scheduled preventive maintenance cycle limit, requiring the full seal set to be replaced before the next production test run.",
+      "steps": [
+        "walk_to lockout_station",
+        "pick loto_lock",
+        "walk_to electrical_panel",
+        "place electrical_panel",
+        "walk_to seal_storage_rack",
+        "pick replacement_seal_kit",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["lockout_station", "loto_lock", "electrical_panel", "seal_storage_rack", "replacement_seal_kit", "maintenance_technician"]
+    },
+    {
+      "ref": "filter_change_inlet",
+      "title": "Inlet Air Filter Element Replacement",
+      "condition": "The differential pressure indicator on the inlet filter housing reaches the red zone, or the PM interval timer expires, indicating the filter element must be replaced to restore adequate airflow to the pressurization system.",
+      "steps": [
+        "walk_to lockout_station",
+        "pick loto_lock",
+        "walk_to electrical_panel",
+        "place electrical_panel",
+        "walk_to filter_storage_shelf",
+        "pick replacement_inlet_filter",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["lockout_station", "loto_lock", "electrical_panel", "filter_storage_shelf", "replacement_inlet_filter", "inlet_filter_housing", "inlet_pressure_sensor", "maintenance_technician"]
+    },
+    {
+      "ref": "pressure_sensor_calibration",
+      "title": "Periodic Pressure Transducer Calibration Verification",
+      "condition": "The scheduled calibration interval for the primary pressure transducer has elapsed, requiring the sensor output to be verified and adjusted against a traceable reference standard before further production testing.",
+      "steps": [
+        "walk_to lockout_station",
+        "pick loto_lock",
+        "walk_to electrical_panel",
+        "place electrical_panel",
+        "walk_to calibration_kit_station",
+        "pick calibration_gauge",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["lockout_station", "loto_lock", "electrical_panel", "calibration_kit_station", "calibration_gauge", "maintenance_technician"]
+    },
+    {
+      "ref": "fixture_lubrication",
+      "title": "Fixture Clamping Mechanism Lubrication",
+      "condition": "The lubrication interval counter reaches its PM threshold, or the fixture clamping stroke cycle time increases beyond the acceptable operating range, indicating dry running on the clamp guide rails or actuator.",
+      "steps": [
+        "walk_to maintenance_cart",
+        "pick lubricant_cartridge",
+        "walk_to fixture_assembly",
+        "place fixture_assembly",
+        "wait 60",
+        "read_sensor fixture_position_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["maintenance_cart", "lubricant_cartridge", "fixture_assembly", "fixture_position_sensor", "shift_supervisor"]
+    },
+    {
+      "ref": "chamber_cleaning",
+      "title": "Test Chamber Interior and Seal Face Cleaning",
+      "condition": "The end-of-week PM schedule is reached, or visible contamination including chips, residue, or debris is observed on the sealing surfaces or chamber interior, requiring cleaning before the next production run.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button test_abort_button",
+        "walk_to maintenance_cart",
+        "pick cleaning_kit",
+        "walk_to test_chamber",
+        "place test_chamber",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["control_panel", "test_abort_button", "maintenance_cart", "cleaning_kit", "test_chamber", "shift_supervisor"]
+    },
+    {
+      "ref": "pressure_regulator_inspection",
+      "title": "Pressure Regulator Weekly Inspection and Adjustment",
+      "condition": "Supply pressure to the station deviates from the nominal setting by more than five percent during the weekly inspection walkdown, or following any pressure-related fault event that may have disturbed the regulator.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor supply_pressure_sensor",
+        "walk_to pressure_regulator_panel",
+        "read_sensor supply_pressure_sensor",
+        "notify maintenance_technician",
+        "wait 180",
+        "read_sensor supply_pressure_sensor"
+      ],
+      "equipment": ["control_panel", "supply_pressure_sensor", "pressure_regulator_panel", "maintenance_technician"]
+    },
+    {
+      "ref": "lockout_tagout_full",
+      "title": "Full Lockout-Tagout for Maintenance Access to Pressurized Components",
+      "condition": "Planned maintenance requires physical access inside the test chamber or to pressurized fittings and actuators, necessitating full energy isolation and verification of zero-energy state before personnel entry.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button test_abort_button",
+        "walk_to air_supply_manifold",
+        "press_button purge_button",
+        "walk_to lockout_station",
+        "pick loto_lock",
+        "place electrical_panel"
+      ],
+      "equipment": ["control_panel", "test_abort_button", "air_supply_manifold", "purge_button", "lockout_station", "loto_lock", "loto_tag", "electrical_panel"]
+    },
+    {
+      "ref": "air_line_blowout_spill",
+      "title": "Pressurized Air Supply Line Disconnection Event",
+      "condition": "A supply air hose or inlet fitting disconnects or ruptures while under pressure, creating an uncontrolled high-pressure air release with potential for debris scatter and personnel hazard in the station area.",
+      "steps": [
+        "press_button red_estop_button",
+        "notify safety_officer",
+        "notify shift_supervisor",
+        "walk_to air_supply_manifold",
+        "press_button purge_button",
+        "wait 30",
+        "read_sensor supply_pressure_sensor"
+      ],
+      "equipment": ["red_estop_button", "safety_officer", "shift_supervisor", "air_supply_manifold", "purge_button", "supply_pressure_sensor"]
+    },
+    {
+      "ref": "emergency_estop",
+      "title": "Emergency Stop Activation During Live Pressurized Test",
+      "condition": "An operator or the robot system activates the emergency stop during an active pressurized test cycle due to an immediate observed safety concern that is not covered or not yet detected by the station's automated fault logic.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to control_panel",
+        "read_sensor pressure_transducer_1",
+        "notify shift_supervisor",
+        "wait 60",
+        "read_sensor supply_pressure_sensor",
+        "notify safety_officer"
+      ],
+      "equipment": ["red_estop_button", "control_panel", "pressure_transducer_1", "shift_supervisor", "supply_pressure_sensor", "safety_officer"]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Daily Production Shift Startup Sequence",
+      "condition": "The beginning of a production shift requires the leak test station to be powered on, supply pressure established, and all sensors and fixtures verified ready before the first part of the day is loaded.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button green_resume_button",
+        "read_sensor supply_pressure_sensor",
+        "read_sensor pressure_transducer_1",
+        "walk_to fixture_assembly",
+        "read_sensor fixture_position_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["control_panel", "green_resume_button", "supply_pressure_sensor", "pressure_transducer_1", "fixture_assembly", "fixture_position_sensor", "shift_supervisor"]
+    },
+    {
+      "ref": "end_of_shift_shutdown",
+      "title": "End-of-Shift Station Shutdown and Depressurization",
+      "condition": "The production shift ends and the station must be safely depressurized and powered down in the correct sequence to leave it in a safe state before personnel depart.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button test_abort_button",
+        "press_button purge_button",
+        "wait 30",
+        "read_sensor supply_pressure_sensor",
+        "press_button loto_lockout_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["control_panel", "test_abort_button", "purge_button", "supply_pressure_sensor", "loto_lockout_button", "shift_supervisor"]
+    },
+    {
+      "ref": "post_maintenance_restart",
+      "title": "Controlled Station Restart After Maintenance Lockout Release",
+      "condition": "Maintenance or a LOTO hold has been completed and all locks cleared, requiring a controlled restart sequence and sensor verification before returning the station to production to confirm integrity of any work performed.",
+      "steps": [
+        "walk_to electrical_panel",
+        "pick loto_lock",
+        "walk_to lockout_station",
+        "place lockout_station",
+        "walk_to control_panel",
+        "press_button green_resume_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["electrical_panel", "loto_lock", "lockout_station", "control_panel", "green_resume_button", "pressure_transducer_1", "shift_supervisor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-LT-001",
+      "sop_ref": "low_pressure_gradual",
+      "text": "First shift, line 3 unit. We were mid-hold and the number was just slowly backing off — not crashing, just creeping down over maybe a minute and a half. Test eventually flagged it but it took forever to hit the reject point. Tech said it was probably a hairline crack in the part, not our equipment."
+    },
+    {
+      "id": "INC-LT-002",
+      "sop_ref": "low_pressure_gradual",
+      "text": "Station B by the loading dock, second shift. Hold phase looked okay at first but the readout kept losing ground, real gradual-like. By about forty seconds in it was clearly headed the wrong way. We pulled the part and tossed it in the bin."
+    },
+    {
+      "id": "INC-LT-003",
+      "sop_ref": "low_pressure_gradual",
+      "text": "Night shift, bay 2. Ran three parts in a row that all bled off at roughly the same rate during the hold portion. Slow and steady each time, not a spike or anything. Quality came over to look at the whole batch."
+    },
+    {
+      "id": "INC-LT-004",
+      "sop_ref": "pressure_sudden_collapse",
+      "text": "Line 4, first shift — everyone on the floor heard it. We were mid-run and the number just vanished. Went from full hold reading to basically nothing in like two seconds flat. Was not a slow thing at all, it just died instantly."
+    },
+    {
+      "id": "INC-LT-005",
+      "sop_ref": "pressure_sudden_collapse",
+      "text": "Station 1 by the press room, morning shift. Unit was charging normally, then during stabilization the whole thing tanked in under three seconds. Screen went to near-zero and the alarm lit up. Looked like something let go hard inside the chamber."
+    },
+    {
+      "id": "INC-LT-006",
+      "sop_ref": "pressure_above_ceiling",
+      "text": "Second shift on line 2, the unit just kept climbing during the charging part of the cycle. Wouldn't stop building — went right through the normal stop point on the display. Alarm kicked before we even got to the stabilization phase."
+    },
+    {
+      "id": "INC-LT-007",
+      "sop_ref": "pressure_above_ceiling",
+      "text": "Bay 3 night shift, the fill portion of the test went way past where it's supposed to level off. The display hit the top of the red zone while it was still charging up. Never even made it to hold."
+    },
+    {
+      "id": "INC-LT-008",
+      "sop_ref": "pressure_below_floor",
+      "text": "Third shift, station 2. Fill cycle finished the same as always but we were still sitting way under the target. The hold phase wouldn't even kick in. Maintenance thought it might be the supply line or a bad part — couldn't tell which right away."
+    },
+    {
+      "id": "INC-LT-009",
+      "sop_ref": "pressure_below_floor",
+      "text": "Line 3 morning shift. After the charge-up finished, the readout was still barely showing anything useful. Way below where it needs to be for the test to actually run. The whole cycle just stalled out there and wouldn't proceed."
+    },
+    {
+      "id": "INC-LT-010",
+      "sop_ref": "pressure_below_floor",
+      "text": "Unit near the northeast corner of the floor, afternoon shift. Charge completed on time but the final reading was nowhere near what we need before starting the hold. Tech came over and said supply pressure was suspect upstream."
+    },
+    {
+      "id": "INC-LT-011",
+      "sop_ref": "seal_warning_minor",
+      "text": "First shift, station 3. HMI threw a yellow flag on the seal check — one of them came back marginal on the condition readout. But everything was still holding within the acceptable band, no real loss of function. Shift lead said to flag it for the PM crew but keep running for now."
+    },
+    {
+      "id": "INC-LT-012",
+      "sop_ref": "seal_warning_minor",
+      "text": "Line 2 second shift. Got a caution-level code on the HMI for one of the seals, said it was reading out of spec on the condition check. Test performance was still inside the acceptance range though. Not a full stop, more of a heads-up type message."
+    },
+    {
+      "id": "INC-LT-013",
+      "sop_ref": "seal_failure_major",
+      "text": "Third shift, line 1 near the window. Big pop from inside the test cell, loud enough to hear over the equipment noise. Chamber went dead instantly, nothing useful on the readout. The main seal had completely given way while the part was under load."
+    },
+    {
+      "id": "INC-LT-014",
+      "sop_ref": "seal_failure_major",
+      "text": "Station 4, night shift. Part was fully pressurized and then the whole front of the assembly just let go. Heard it from across the shop. Chamber breached, the reading crashed to zero, and the test cell smelled like burnt rubber afterward."
+    },
+    {
+      "id": "INC-LT-015",
+      "sop_ref": "seal_failure_major",
+      "text": "Second shift, bay 2. During a live cycle the whole sealing assembly blew out catastrophically — not a slow thing, instant. Part was still in the fixture, reading went to zero in maybe a second. Had to call the floor clear and get maintenance over there."
+    },
+    {
+      "id": "INC-LT-016",
+      "sop_ref": "sensor_alarm_drift",
+      "text": "Morning shift, station 2. Unit threw a fault code we hadn't seen in a while — something about the sensor being outside its valid range. We grabbed the reference unit to compare and the readings didn't match by a fair margin. Couldn't trust any of the test results from the last hour."
+    },
+    {
+      "id": "INC-LT-017",
+      "sop_ref": "sensor_alarm_drift",
+      "text": "Line 4 first shift. Transducer was giving a calibration-related error on the HMI. Tech compared it to the secondary gauge and said the primary was reading off by more than it should be. Had to pull testing until maintenance could look at it."
+    },
+    {
+      "id": "INC-LT-018",
+      "sop_ref": "fixture_jam",
+      "text": "Line 3, afternoon shift. Fixture wouldn't close all the way — kept timing out before it got to the seated position. Part was just loose in there, couldn't run a test. Looked mechanical, not a software hiccup."
+    },
+    {
+      "id": "INC-LT-019",
+      "sop_ref": "fixture_jam",
+      "text": "End of day on station 1 by the die press. After the test cycle finished the fixture wouldn't let go of the part. Sat there cycling away for what felt like forever. Maintenance had to come over and release it by hand."
+    },
+    {
+      "id": "INC-LT-020",
+      "sop_ref": "electrical_fault_sensor_loss",
+      "text": "Bay 4 night shift. The pressure channel on the HMI just went blank — showing dashes instead of a number. Unit faulted and suspended everything. It was like the sensor just dropped off the network entirely."
+    },
+    {
+      "id": "INC-LT-021",
+      "sop_ref": "electrical_fault_sensor_loss",
+      "text": "Line 2 second shift. Mid-run, the primary readout dropped out completely. No signal, no number, nothing displayed. Unit went into a fault hold and wouldn't continue. Maintenance said it looked like a wiring issue on the transducer side."
+    },
+    {
+      "id": "INC-LT-022",
+      "sop_ref": "overpressure_relief_trip",
+      "text": "First shift, station 3. Heard the pop-off vent open up on the back of the machine — that loud hiss you don't want to hear. Alarm panel lit up with the relief code right after. Supply coming into the station had spiked way over what it should be."
+    },
+    {
+      "id": "INC-LT-023",
+      "sop_ref": "overpressure_relief_trip",
+      "text": "Night shift, line 4. The vent valve on the inlet side let go and started blowing off to atmosphere. Alarm said relief tripped. Compressor upstream was running hot and had pushed the line way too high coming into our station."
+    },
+    {
+      "id": "INC-LT-024",
+      "sop_ref": "seal_replacement_scheduled",
+      "text": "First shift, station 2. PM counter hit the limit right at the start of the shift — the display was showing the seal change was due before we could run any more parts. Had to hold up production until the swap was done."
+    },
+    {
+      "id": "INC-LT-025",
+      "sop_ref": "seal_replacement_scheduled",
+      "text": "Line 3 morning startup. The interval flag was showing redline on the display before we even loaded the first part of the day. Couldn't proceed without pulling the old set and putting in a fresh kit. Maintenance came in to handle it."
+    },
+    {
+      "id": "INC-LT-026",
+      "sop_ref": "filter_change_inlet",
+      "text": "Second shift, bay 2. The little color indicator on the filter housing flipped to red during the routine walk-around. That thing doesn't lie — element was past due. Supply flow was feeling a bit restricted too, just slightly."
+    },
+    {
+      "id": "INC-LT-027",
+      "sop_ref": "filter_change_inlet",
+      "text": "Weekly PM walk on line 4, first shift. Tech noticed the inlet housing indicator had moved into the change band. We'd been running for a while and it was due. Pulled the element out and it was pretty gunked up inside."
+    },
+    {
+      "id": "INC-LT-028",
+      "sop_ref": "filter_change_inlet",
+      "text": "Station 3 morning shift. Filter indicator went red, and on top of that the supply reading during startup checks was slightly below where it normally sits. Both pointing the same direction, so we flagged it for an element swap."
+    },
+    {
+      "id": "INC-LT-029",
+      "sop_ref": "pressure_sensor_calibration",
+      "text": "Line 2, quality hold at start of week. The calibration sticker on the primary transducer was past its expiry date, and the maintenance planner had it on the schedule. Station pulled offline for the verification check before running any more good parts."
+    },
+    {
+      "id": "INC-LT-030",
+      "sop_ref": "pressure_sensor_calibration",
+      "text": "First shift, station 4. Maintenance showed up with the dead-weight reference tester because the interval on the transducer had lapsed. Had to take the unit offline and do the full reference verification before quality would release it."
+    },
+    {
+      "id": "INC-LT-031",
+      "sop_ref": "fixture_lubrication",
+      "text": "Line 3, morning shift. Clamping stroke was getting noticeably sluggish — taking a lot longer than usual to fully seat. PM board showed the lube interval was due. Maintenance tech came by with the grease cartridge between parts."
+    },
+    {
+      "id": "INC-LT-032",
+      "sop_ref": "fixture_lubrication",
+      "text": "Station 2 afternoon shift. Fixture was moving real slow on the closing stroke and our cycle time was creeping up. The PM counter had hit the threshold for the lubrication service. Maintenance took care of it during the next part load."
+    },
+    {
+      "id": "INC-LT-033",
+      "sop_ref": "chamber_cleaning",
+      "text": "End of week on line 4, second shift. The sealing surfaces inside the chamber had some gunk and metal chips sitting on them from the week's runs. Had to do the scrub-out before the weekend so Monday morning would start clean."
+    },
+    {
+      "id": "INC-LT-034",
+      "sop_ref": "chamber_cleaning",
+      "text": "Station 1, Friday afternoon. Operator spotted debris and residue on the inside contact faces during a routine visual check. Called for the clean-out before the weekend shutdown so we'd start fresh on Monday."
+    },
+    {
+      "id": "INC-LT-035",
+      "sop_ref": "pressure_regulator_inspection",
+      "text": "Weekly walkdown, line 2 first shift. Supply to the station was running about 8 psi over what the setting should be at that time of day. Regulator hadn't been touched but was clearly out of adjustment."
+    },
+    {
+      "id": "INC-LT-036",
+      "sop_ref": "pressure_regulator_inspection",
+      "text": "After the pressure event last Tuesday on station 3, maintenance went to check the regulator setting as part of the follow-up. It was sitting off from nominal by more than the allowable amount and needed to be reset."
+    },
+    {
+      "id": "INC-LT-037",
+      "sop_ref": "lockout_tagout_full",
+      "text": "Line 3, first shift maintenance window. Tech needed to get inside the test cell to swap out the internal fittings. Had to do a full energy isolation before anyone went in — locks and tags on the panel, all verified."
+    },
+    {
+      "id": "INC-LT-038",
+      "sop_ref": "lockout_tagout_full",
+      "text": "Station 4 scheduled maintenance, second shift. Tech was going in to service the clamping hardware inside the chamber. Full energy control procedure was required before they could open it up and start working."
+    },
+    {
+      "id": "INC-LT-039",
+      "sop_ref": "air_line_blowout_spill",
+      "text": "Bay 2 morning shift. Supply hose on the back of the unit whipped free while still under full line pressure. Hissing and blowing everywhere, really loud. Nobody was standing near it but we cleared the whole area immediately."
+    },
+    {
+      "id": "INC-LT-040",
+      "sop_ref": "air_line_blowout_spill",
+      "text": "Line 4 second shift. A fitting on the inlet line let go without any warning — air was shooting straight across the aisle. Had to get people back and get someone to the supply shutoff. Fitting threads had stripped."
+    },
+    {
+      "id": "INC-LT-041",
+      "sop_ref": "emergency_estop",
+      "text": "First shift, station 2. Operator noticed something looked off about how the part was sitting in the fixture before the cycle had even stabilized — hit the red button right away. Turned out the part was loaded crooked and would have failed the seal."
+    },
+    {
+      "id": "INC-LT-042",
+      "sop_ref": "emergency_estop",
+      "text": "Line 3 second shift. A chip of metal fell into the fixture area during a live pressurized cycle. Robot hit the mushroom button immediately without waiting for the automatic fault system to pick it up first."
+    },
+    {
+      "id": "INC-LT-043",
+      "sop_ref": "emergency_estop",
+      "text": "Bay 1 night shift. Tech nearby heard an unusual noise mid-cycle and hit the stop as a precaution. Everything was still live and pressurized at the time. Nobody was going to stand there and wait to see what it was."
+    },
+    {
+      "id": "INC-LT-044",
+      "sop_ref": "daily_startup",
+      "text": "First shift crew bringing up station 3 on Monday morning after the weekend. Went through the whole bring-up sequence before running any parts — nothing unusual, just checking everything after two days sitting idle."
+    },
+    {
+      "id": "INC-LT-045",
+      "sop_ref": "daily_startup",
+      "text": "Line 2 morning startup at shift change. Operator went through the checklist to power up and verify the unit before the first part of the day. Everything looked good coming up."
+    },
+    {
+      "id": "INC-LT-046",
+      "sop_ref": "end_of_shift_shutdown",
+      "text": "Last call on second shift, line 4. Went through the close-out on the leak tester before heading home — vent, depressurize, button everything up in the right order. Clean handoff for the third shift crew."
+    },
+    {
+      "id": "INC-LT-047",
+      "sop_ref": "end_of_shift_shutdown",
+      "text": "End of night shift, station 1. Had to bring the unit down safely before everyone left. Ran through the sequence to make sure there was no pressure left sitting in the system before the morning crew came in."
+    },
+    {
+      "id": "INC-LT-048",
+      "sop_ref": "post_maintenance_restart",
+      "text": "Line 3, first shift after the overnight maintenance window. PM crew had finished the seal swap and cleared all their locks. We did the controlled bring-back to make sure everything was right before quality ran a first-article check on it."
+    },
+    {
+      "id": "INC-LT-049",
+      "sop_ref": "post_maintenance_restart",
+      "text": "Station 2, morning after the maintenance lockout. PM crew released the isolation and signed off the work order. Had to run through the restart verification before we could put it back into production flow."
+    },
+    {
+      "id": "INC-LT-050",
+      "sop_ref": "post_maintenance_restart",
+      "text": "Bay 4, second shift. Electrician had been in the panel and released the lockout. Robot ran through the restart check — pulled the lock off, powered up, verified the readouts — then notified the shift supervisor the unit was back and ready."
+    }
+  ]
+}

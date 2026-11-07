@@ -1,0 +1,736 @@
+{
+  "family": "Cooling Tower",
+  "sops": [
+    {
+      "ref": "basin_level_low",
+      "title": "Basin Water Level Below Minimum Setpoint",
+      "condition": "The basin level sensor reads below the 18-inch minimum setpoint while the recirculating pump is running, risking pump cavitation.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor basin_level_sensor",
+        "walk_to makeup_water_valve_station",
+        "press_button makeup_water_manual_open_button",
+        "wait 120",
+        "read_sensor basin_level_sensor",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "basin_level_sensor",
+        "makeup_water_valve_station",
+        "makeup_water_manual_open_button",
+        "water_treatment_technician"
+      ]
+    },
+    {
+      "ref": "basin_level_high",
+      "title": "Basin Water Level Above Maximum Setpoint",
+      "condition": "The basin level sensor reads above the 26-inch maximum setpoint, creating imminent overflow risk onto the mechanical room floor.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor basin_level_sensor",
+        "walk_to blowdown_valve_station",
+        "press_button blowdown_manual_open_button",
+        "wait 180",
+        "read_sensor basin_level_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "basin_level_sensor",
+        "blowdown_valve_station",
+        "blowdown_manual_open_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "fan_motor_overtemp",
+      "title": "Fan Motor Temperature High Alarm While Running",
+      "condition": "The fan motor temperature sensor triggers the high-temperature alarm threshold while the fan continues to rotate at normal speed.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor fan_motor_temp_sensor",
+        "read_sensor fan_rpm_sensor",
+        "walk_to cooling_tower_fan_deck",
+        "notify maintenance_supervisor",
+        "press_button fan_motor_stop_button",
+        "notify electrical_technician"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "fan_motor_temp_sensor",
+        "fan_rpm_sensor",
+        "cooling_tower_fan_deck",
+        "fan_motor_stop_button",
+        "maintenance_supervisor",
+        "electrical_technician"
+      ]
+    },
+    {
+      "ref": "fan_motor_stopped",
+      "title": "Fan Motor Complete Stoppage with Overload Trip",
+      "condition": "The fan tachometer reads zero RPM and the motor overload relay has tripped, indicating the fan has ceased all rotation due to a fault.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor fan_rpm_sensor",
+        "read_sensor motor_overload_relay_indicator",
+        "notify electrical_technician",
+        "press_button fan_motor_reset_button",
+        "wait 30",
+        "read_sensor fan_rpm_sensor"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "fan_rpm_sensor",
+        "motor_overload_relay_indicator",
+        "fan_motor_reset_button",
+        "electrical_technician"
+      ]
+    },
+    {
+      "ref": "fan_speed_low",
+      "title": "Fan Running Below Minimum Required Speed",
+      "condition": "The fan tachometer reads a sustained value below 80 percent of design RPM while the motor remains energized and the shaft is still turning.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor fan_rpm_sensor",
+        "read_sensor fan_motor_temp_sensor",
+        "walk_to fan_belt_access_panel",
+        "pick inspection_mirror",
+        "place inspection_mirror",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "fan_rpm_sensor",
+        "fan_motor_temp_sensor",
+        "fan_belt_access_panel",
+        "inspection_mirror",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "makeup_water_no_flow",
+      "title": "Makeup Water Supply Zero Flow Fault",
+      "condition": "The makeup water flow meter reads zero while the basin level sensor concurrently indicates the water level is dropping below setpoint.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor makeup_water_flow_meter",
+        "read_sensor basin_level_sensor",
+        "walk_to makeup_water_supply_valve",
+        "read_sensor makeup_water_pressure_sensor",
+        "notify maintenance_supervisor",
+        "notify facilities_manager"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "makeup_water_flow_meter",
+        "basin_level_sensor",
+        "makeup_water_supply_valve",
+        "makeup_water_pressure_sensor",
+        "maintenance_supervisor",
+        "facilities_manager"
+      ]
+    },
+    {
+      "ref": "conductivity_high",
+      "title": "Basin Water Conductivity Exceeds Upper Treatment Limit",
+      "condition": "The online conductivity probe reads above 1500 microsiemens per centimeter, indicating dissolved solids are concentrated beyond the treatment program ceiling.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor conductivity_sensor",
+        "walk_to blowdown_valve_station",
+        "press_button blowdown_manual_open_button",
+        "wait 300",
+        "read_sensor conductivity_sensor",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "conductivity_sensor",
+        "blowdown_valve_station",
+        "blowdown_manual_open_button",
+        "water_treatment_technician"
+      ]
+    },
+    {
+      "ref": "conductivity_low",
+      "title": "Basin Water Conductivity Below Minimum Treatment Threshold",
+      "condition": "The online conductivity probe reads below 500 microsiemens per centimeter, indicating excessive dilution that wastes chemical treatment program dosage.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor conductivity_sensor",
+        "walk_to blowdown_valve_station",
+        "press_button blowdown_manual_close_button",
+        "walk_to chemical_dosing_station",
+        "read_sensor conductivity_sensor",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "conductivity_sensor",
+        "blowdown_valve_station",
+        "blowdown_manual_close_button",
+        "chemical_dosing_station",
+        "water_treatment_technician"
+      ]
+    },
+    {
+      "ref": "blowdown_valve_stuck",
+      "title": "Blowdown Valve Fail-to-Operate Fault",
+      "condition": "The blowdown valve position sensor shows a discrepancy between the commanded position and the actual position persisting beyond 30 seconds.",
+      "steps": [
+        "walk_to blowdown_valve_station",
+        "read_sensor blowdown_valve_position_sensor",
+        "read_sensor blowdown_valve_actuator_status",
+        "notify maintenance_supervisor",
+        "pick valve_manual_override_tool",
+        "place valve_manual_override_tool",
+        "notify instrumentation_technician"
+      ],
+      "equipment": [
+        "blowdown_valve_station",
+        "blowdown_valve_position_sensor",
+        "blowdown_valve_actuator_status",
+        "valve_manual_override_tool",
+        "maintenance_supervisor",
+        "instrumentation_technician"
+      ]
+    },
+    {
+      "ref": "drift_eliminator_alarm",
+      "title": "Drift Eliminator Differential Pressure High Alarm",
+      "condition": "Differential pressure across the drift eliminator section exceeds 0.8 inches water column, indicating biological fouling or structural damage to the media.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor drift_eliminator_dp_sensor",
+        "walk_to cooling_tower_access_ladder",
+        "pick inspection_flashlight",
+        "place inspection_flashlight",
+        "notify maintenance_supervisor",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "drift_eliminator_dp_sensor",
+        "cooling_tower_access_ladder",
+        "inspection_flashlight",
+        "maintenance_supervisor",
+        "water_treatment_technician"
+      ]
+    },
+    {
+      "ref": "vibration_high",
+      "title": "Fan Assembly Vibration Warning Level Alarm",
+      "condition": "The fan shaft vibration sensor reads above the 0.3 in/sec warning threshold but remains below the 0.6 in/sec emergency trip setpoint, and the fan continues to run.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor fan_vibration_sensor",
+        "read_sensor fan_rpm_sensor",
+        "walk_to cooling_tower_fan_deck",
+        "pick vibration_meter",
+        "place vibration_meter",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "fan_vibration_sensor",
+        "fan_rpm_sensor",
+        "cooling_tower_fan_deck",
+        "vibration_meter",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "vibration_critical",
+      "title": "Fan Assembly Vibration Emergency Shutdown",
+      "condition": "The fan shaft vibration sensor has exceeded the 0.6 in/sec emergency trip setpoint, causing the control system to automatically de-energize the fan motor.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor fan_vibration_sensor",
+        "press_button fan_motor_estop_button",
+        "notify maintenance_supervisor",
+        "notify safety_officer",
+        "walk_to cooling_tower_fan_deck",
+        "read_sensor fan_vibration_sensor"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "fan_vibration_sensor",
+        "fan_motor_estop_button",
+        "cooling_tower_fan_deck",
+        "maintenance_supervisor",
+        "safety_officer"
+      ]
+    },
+    {
+      "ref": "fill_media_inspection",
+      "title": "Scheduled Quarterly Fill Media Inspection",
+      "condition": "The quarterly preventive maintenance calendar interval for fill media structural and fouling assessment has been reached.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor drift_eliminator_dp_sensor",
+        "walk_to cooling_tower_access_ladder",
+        "pick inspection_flashlight",
+        "place inspection_flashlight",
+        "pick fill_media_sample_probe",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "drift_eliminator_dp_sensor",
+        "cooling_tower_access_ladder",
+        "inspection_flashlight",
+        "fill_media_sample_probe",
+        "water_treatment_technician"
+      ]
+    },
+    {
+      "ref": "belt_replacement",
+      "title": "Fan Drive Belt Scheduled Replacement",
+      "condition": "The fan drive belt has reached its 2000-hour service interval or visible cracking and glazing are confirmed on the belt surface during inspection.",
+      "steps": [
+        "walk_to fan_belt_access_panel",
+        "pick worn_drive_belt",
+        "place worn_drive_belt",
+        "pick replacement_drive_belt",
+        "place replacement_drive_belt",
+        "read_sensor fan_rpm_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "fan_belt_access_panel",
+        "worn_drive_belt",
+        "replacement_drive_belt",
+        "fan_rpm_sensor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "basin_cleaning",
+      "title": "Scheduled Basin Sediment Cleanout",
+      "condition": "Quarterly basin cleaning interval has elapsed or sediment accumulation is visually confirmed at more than 2 inches depth during a basin walkdown.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "press_button basin_drain_pump_start_button",
+        "wait 600",
+        "read_sensor basin_level_sensor",
+        "walk_to basin_access_hatch",
+        "pick sediment_removal_tool",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "basin_drain_pump_start_button",
+        "basin_level_sensor",
+        "basin_access_hatch",
+        "sediment_removal_tool",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "biocide_dosing",
+      "title": "Scheduled Weekly Biocide Chemical Treatment",
+      "condition": "The weekly water treatment program schedule requires addition of an oxidizing biocide to basin water to control Legionella and biological fouling.",
+      "steps": [
+        "walk_to chemical_dosing_station",
+        "read_sensor conductivity_sensor",
+        "pick biocide_chemical_container",
+        "place biocide_chemical_container",
+        "press_button chemical_metering_pump_start_button",
+        "wait 30",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "chemical_dosing_station",
+        "conductivity_sensor",
+        "biocide_chemical_container",
+        "chemical_metering_pump_start_button",
+        "water_treatment_technician"
+      ]
+    },
+    {
+      "ref": "lubrication_fan_bearings",
+      "title": "Fan Shaft Bearing Scheduled Lubrication",
+      "condition": "The monthly OEM-specified lubrication interval for fan shaft pillow block bearings has been reached per the preventive maintenance calendar.",
+      "steps": [
+        "walk_to cooling_tower_fan_deck",
+        "read_sensor fan_motor_temp_sensor",
+        "pick grease_gun",
+        "place grease_gun",
+        "pick bearing_grease_cartridge",
+        "place bearing_grease_cartridge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "cooling_tower_fan_deck",
+        "fan_motor_temp_sensor",
+        "grease_gun",
+        "bearing_grease_cartridge",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "water_sample_collection",
+      "title": "Routine Weekly Water Quality Sample Collection",
+      "condition": "The weekly water quality monitoring schedule requires collection of basin water for laboratory analysis of treatment chemistry balance and microbiological content.",
+      "steps": [
+        "walk_to basin_sample_port",
+        "pick sample_bottle",
+        "place sample_bottle",
+        "read_sensor conductivity_sensor",
+        "walk_to chemical_dosing_station",
+        "pick sample_collection_bag",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "basin_sample_port",
+        "sample_bottle",
+        "conductivity_sensor",
+        "chemical_dosing_station",
+        "sample_collection_bag",
+        "water_treatment_technician"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Cooling Tower Lockout-Tagout Energy Isolation",
+      "condition": "Maintenance work requiring entry into the tower structure or physical contact with energized components mandates full lockout-tagout isolation prior to access.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "press_button fan_motor_stop_button",
+        "press_button makeup_water_isolation_button",
+        "walk_to cooling_tower_mcc_panel",
+        "pick loto_lockout_device",
+        "place loto_lockout_device",
+        "notify safety_officer"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "fan_motor_stop_button",
+        "makeup_water_isolation_button",
+        "cooling_tower_mcc_panel",
+        "loto_lockout_device",
+        "safety_officer"
+      ]
+    },
+    {
+      "ref": "chemical_spill_response",
+      "title": "Water Treatment Chemical Spill Containment Response",
+      "condition": "A water treatment chemical has been released onto the floor at the basin area or dosing station and requires immediate pump shutdown, containment, and decontamination.",
+      "steps": [
+        "walk_to chemical_dosing_station",
+        "press_button chemical_metering_pump_stop_button",
+        "notify safety_officer",
+        "pick chemical_spill_kit",
+        "place chemical_spill_kit",
+        "walk_to cooling_tower_control_panel",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "chemical_dosing_station",
+        "chemical_metering_pump_stop_button",
+        "chemical_spill_kit",
+        "cooling_tower_control_panel",
+        "safety_officer",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Cooling Tower Planned Startup Sequence",
+      "condition": "The cooling tower is ready to be returned to service following a planned maintenance outage, seasonal recommissioning, or extended production shutdown.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "read_sensor basin_level_sensor",
+        "press_button makeup_water_isolation_button",
+        "wait 120",
+        "press_button fan_motor_start_button",
+        "read_sensor fan_rpm_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "basin_level_sensor",
+        "makeup_water_isolation_button",
+        "fan_motor_start_button",
+        "fan_rpm_sensor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "Cooling Tower Planned Shutdown Sequence",
+      "condition": "A controlled shutdown of the cooling tower is required for scheduled maintenance, seasonal decommissioning, or extended planned production downtime.",
+      "steps": [
+        "walk_to cooling_tower_control_panel",
+        "press_button fan_motor_stop_button",
+        "wait 60",
+        "press_button makeup_water_isolation_button",
+        "read_sensor basin_level_sensor",
+        "notify maintenance_supervisor",
+        "notify water_treatment_technician"
+      ],
+      "equipment": [
+        "cooling_tower_control_panel",
+        "fan_motor_stop_button",
+        "makeup_water_isolation_button",
+        "basin_level_sensor",
+        "maintenance_supervisor",
+        "water_treatment_technician"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-CT-001",
+      "sop_ref": "basin_level_low",
+      "text": "Was doing rounds on the east side around 6 AM and the HMI on the tower by the stamping bay was flashing red. Walked over and the water in the pan looked real shallow, almost like I could see the concrete bottom through it. Pump was making that sucking sound for a second before I caught it."
+    },
+    {
+      "id": "INC-CT-002",
+      "sop_ref": "basin_level_low",
+      "text": "Came in on third shift and found the basin alarm had been going off for who knows how long. Tower near the loading dock, the float ball was sitting way too low - thing looked almost bone dry. Had to kick on makeup water manually before the pumps starved out completely."
+    },
+    {
+      "id": "INC-CT-003",
+      "sop_ref": "basin_level_low",
+      "text": "Tower 2 was alarming right at the start of the line startup this morning. Level gauge on the side of the basin was reading under the red mark - we were way down on water. Wasn't sure if the float valve seized up or what, but the pan was noticeably empty."
+    },
+    {
+      "id": "INC-CT-004",
+      "sop_ref": "basin_level_high",
+      "text": "Second shift called it in - the big coolant tower by the press room was just about overflowing. Water was trickling over the edge of the basin pan onto the mechanical room floor. Had to dodge a puddle just walking past the unit."
+    },
+    {
+      "id": "INC-CT-005",
+      "sop_ref": "basin_level_high",
+      "text": "Line 4 side tower had water pooling under it when I got in this morning. Level gauge was pegged at the absolute top of the sight glass and the float didn't seem to be shutting off the fill. A good chunk of the floor around the base was soaked."
+    },
+    {
+      "id": "INC-CT-006",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "I was up top doing my morning check on the north tower and the motor casing was burning hot to the touch - I could barely keep my hand on it for two seconds. Blades were still spinning just fine though, airflow felt normal, motor just radiated serious heat."
+    },
+    {
+      "id": "INC-CT-007",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "Control panel threw up a yellow caution for the tower fan on line 3 this afternoon. Walked out to check and the fan was turning fine, no problem there. But the motor housing was way too warm and I could pick up a faint smell like hot electrical varnish coming off it."
+    },
+    {
+      "id": "INC-CT-008",
+      "sop_ref": "fan_motor_stopped",
+      "text": "Walked by the tower on line 3 side and the whole thing was dead quiet - zero airflow, nothing. Looked up at the fan stack and the blades weren't moving at all, not even a slow crawl. Starter cabinet had the overload reset indicator lit up orange."
+    },
+    {
+      "id": "INC-CT-009",
+      "sop_ref": "fan_motor_stopped",
+      "text": "Maintenance got called in because the big tower near the dock completely locked out. Total dead unit - nothing spinning, no noise, the MCC showed a tripped fault on that circuit. Heat rejection was zero and process temps on that loop were already climbing."
+    },
+    {
+      "id": "INC-CT-010",
+      "sop_ref": "fan_motor_stopped",
+      "text": "Process coolant temps started creeping up on our side of the building around mid-afternoon. Traced it back to the tower - went out there and it was completely dead, blades not turning at all. Starter panel had a fault light and the whole unit was silent as a tomb."
+    },
+    {
+      "id": "INC-CT-011",
+      "sop_ref": "fan_speed_low",
+      "text": "Tower fan on the north side was running this morning but something sounded off about it - kind of a labored, slow pitch instead of the usual roar. The RPM readout on the panel showed it was barely hitting 60 percent and the airflow out of the top was weak, like a gentle breeze."
+    },
+    {
+      "id": "INC-CT-012",
+      "sop_ref": "fan_speed_low",
+      "text": "Second shift noticed coolant temps creeping up on line 2. Went and checked the tower - fan was definitely moving, motor was humming, but it was turning real slow. You could almost count individual blade passes. Nothing tripped, just sluggish."
+    },
+    {
+      "id": "INC-CT-013",
+      "sop_ref": "makeup_water_no_flow",
+      "text": "Basin on the tower by the tool room was draining down real slow all morning even though no extra blowdown was happening. Checked the fill line and absolutely nothing was coming through - flow gauge read flat zero. Had to figure out if someone had killed the city supply upstream."
+    },
+    {
+      "id": "INC-CT-014",
+      "sop_ref": "makeup_water_no_flow",
+      "text": "First shift reported the tower was getting low on water and the auto-fill wasn't doing a thing about it. Went to the supply line and the pressure gauge was reading zero - like the tap was completely closed somewhere. Definitely no water making it to the unit."
+    },
+    {
+      "id": "INC-CT-015",
+      "sop_ref": "conductivity_high",
+      "text": "Water treatment tech flagged it during her morning walk - the online probe on the south tower was way up there, reading over 1600 on the display. The water in the basin looked a bit dingy and cloudy too. We were way above the cycles-of-concentration limit."
+    },
+    {
+      "id": "INC-CT-016",
+      "sop_ref": "conductivity_high",
+      "text": "Tower over by the paint shop was showing some really ugly numbers on the controller. When it reads that high the scaling potential goes through the roof - heat transfer surfaces were probably already starting to coat up with mineral deposits."
+    },
+    {
+      "id": "INC-CT-017",
+      "sop_ref": "conductivity_high",
+      "text": "Night shift log showed the meter was pegged way up on tower 1. The automatic dump must not have been keeping pace with evaporation losses during that hot day. Had to go manual on the drain valve to knock the reading back down."
+    },
+    {
+      "id": "INC-CT-018",
+      "sop_ref": "conductivity_low",
+      "text": "Water treatment called and said we were burning through chemical at twice the normal rate for no reason. Checked the probe and it was reading down in the 300s - way too much fresh water getting in somewhere. Either the blowdown was stuck cracked open or the controller was overcycling the dump."
+    },
+    {
+      "id": "INC-CT-019",
+      "sop_ref": "conductivity_low",
+      "text": "Noticed the dosing intervals seemed off on tower 2 this week - treatment program was running almost constantly. Pulled up the panel reading and conductivity was well below the bottom of the target band. Running that dilute makes the whole treatment program almost useless."
+    },
+    {
+      "id": "INC-CT-020",
+      "sop_ref": "blowdown_valve_stuck",
+      "text": "Tried to get the dump valve on the east tower to open from the panel and it just sat there. Position indicator said closed, controller was commanding open, but nothing was happening. Had to call instrumentation because it wouldn't budge either way."
+    },
+    {
+      "id": "INC-CT-021",
+      "sop_ref": "blowdown_valve_stuck",
+      "text": "Blowdown valve on tower 3 was stuck somewhere mid-travel - not fully open, not fully closed, just frozen in place. Conductivity went off the charts because nothing was purging out. The actuator was buzzing like crazy but the stem wasn't going anywhere."
+    },
+    {
+      "id": "INC-CT-022",
+      "sop_ref": "drift_eliminator_alarm",
+      "text": "Differential pressure gauge on the tower internals went into alarm this morning on the HMI. Delta-P was almost double what we normally see on that unit. Climbed up the access ladder for a look and found some chunks of fill media sitting sideways in the top section, blocking flow."
+    },
+    {
+      "id": "INC-CT-023",
+      "sop_ref": "drift_eliminator_alarm",
+      "text": "Tower near building 7 threw a high dP alarm on the SCADA screen during first shift. When I checked the access hatch I could see white calcium deposits caked along the edges of the top section. Something was definitely restricting the flow path up there."
+    },
+    {
+      "id": "INC-CT-024",
+      "sop_ref": "vibration_high",
+      "text": "Tower fan on the south side was running fine but there was a noticeable wobble to it during my morning check - nothing violent, but definitely not right. The vibration indicator on the panel was in the yellow caution zone. Put our handheld analyzer on the bearing and it was elevated but hadn't hit the danger mark yet."
+    },
+    {
+      "id": "INC-CT-025",
+      "sop_ref": "vibration_high",
+      "text": "Heard a rhythmic low thumping coming from the north tower during rounds. Unit never tripped, fan kept running, but the vibration indicator was showing caution. Could actually feel it in the handrail when I climbed the access stairs. Something was out of balance but it hadn't gotten critical."
+    },
+    {
+      "id": "INC-CT-026",
+      "sop_ref": "vibration_critical",
+      "text": "Bang - the tower fan on the line 5 side tripped hard and locked out midway through first shift. Whole unit was visibly shaking bad right before it kicked off - you could feel it in the mechanical room floor. The automatic trip had fired and killed the motor before anyone touched anything."
+    },
+    {
+      "id": "INC-CT-027",
+      "sop_ref": "vibration_critical",
+      "text": "Came in on third shift and the tower by receiving dock was already down and locked out. Pulled up the fault log and it showed a vibration emergency trip - exceeded the critical cutoff limit. Guard rail on the fan deck had scrape marks on it like something had been moving real bad up there before it shut itself off."
+    },
+    {
+      "id": "INC-CT-028",
+      "sop_ref": "vibration_critical",
+      "text": "Tower 1 went down hard right in the middle of peak production and threw an emergency alarm. The thing literally shuddered before the shutoff activated - operators on the floor felt it. We had to do a full safety check of the deck and fan stack before anyone was allowed up there."
+    },
+    {
+      "id": "INC-CT-029",
+      "sop_ref": "fill_media_inspection",
+      "text": "Had the quarterly walk-through on the south tower today as part of the PM schedule. Climbed up to look at the fill packs and a couple sections had white scale caked on them pretty thick. Nothing fallen or collapsed yet, but made detailed notes for the treatment team to review."
+    },
+    {
+      "id": "INC-CT-030",
+      "sop_ref": "fill_media_inspection",
+      "text": "Doing the scheduled check on the tower by the loading area this week - it was on the Q3 PM calendar. Some of the fill media had algae sliming up on the surface and two pieces at the bottom had cracked clean through. Nothing had fallen in yet but it was close."
+    },
+    {
+      "id": "INC-CT-031",
+      "sop_ref": "belt_replacement",
+      "text": "Hit the 2,000-hour mark on the drive belt for tower 3 fan and pulled the access panel during the PM stop. Belt had visible cracking along the inner surface and the sides were glazed shiny - classic age wear. Swapped it out right then before it could let go at a bad time."
+    },
+    {
+      "id": "INC-CT-032",
+      "sop_ref": "belt_replacement",
+      "text": "During my inspection I spotted the v-belt on the fan drive was getting shiny on the sheave contact surface and had a small crack forming on the outside edge. We were sitting at about 1,900 hours so we just went ahead and changed it out rather than gamble on it lasting another month."
+    },
+    {
+      "id": "INC-CT-033",
+      "sop_ref": "basin_cleaning",
+      "text": "Q3 basin cleanout on the east tower finally happened today - it was on the schedule. Pumped it all the way down and there was a solid inch and a half of brown sludge covering the floor of the pan. Algae, dirt, whatever that organic stuff is. Took a few hours to hose and scrape it all out."
+    },
+    {
+      "id": "INC-CT-034",
+      "sop_ref": "basin_cleaning",
+      "text": "Scheduled the basin cleanout on the tower by the stamping press for this week. Drained it down and had to physically shovel the gunk out of the corners. Sediment buildup was especially thick near the outlet strainer - good thing we caught it before it started choking off the pump suction."
+    },
+    {
+      "id": "INC-CT-035",
+      "sop_ref": "biocide_dosing",
+      "text": "Thursday biocide run on the cooling towers. Grabbed the weekly jug from the chemical storage room, brought it over to the dosing skid, and ran it through the metering pump like normal. Logged the time, the batch number, and the dosage amount in the treatment log binder."
+    },
+    {
+      "id": "INC-CT-036",
+      "sop_ref": "biocide_dosing",
+      "text": "Water treatment tech dropped off the weekly biocide supply this morning and I added it to the dosing station on the south tower per the schedule. Ran the metering pump through its cycle and noted it in the log. Standard weekly add, nothing unusual."
+    },
+    {
+      "id": "INC-CT-037",
+      "sop_ref": "biocide_dosing",
+      "text": "It was biocide day, so I loaded up the chemical on both towers and ran the dose on each one during the midday lull. Water treatment tech swung by afterward to check the residual level was in the right range before she signed off on it."
+    },
+    {
+      "id": "INC-CT-038",
+      "sop_ref": "lubrication_fan_bearings",
+      "text": "Monthly greasing due on the tower fan bearings per the PM card. Climbed up to the fan deck with the grease gun, hit both pillow blocks with the specified number of pumps, and recorded it in the lube log. Bearings sounded smooth after, no grinding or resistance."
+    },
+    {
+      "id": "INC-CT-039",
+      "sop_ref": "lubrication_fan_bearings",
+      "text": "PM schedule showed the fan bearing lube was past due on tower 2. Went up with the gun and cartridge and pumped grease into each fitting. One of the zerks felt a bit stiff accepting the grease but it eventually took it. No other issues, just the regular monthly task."
+    },
+    {
+      "id": "INC-CT-040",
+      "sop_ref": "water_sample_collection",
+      "text": "Did the water grab samples on both towers this afternoon - pulled from the sample tap on the basin. Filled up the bottles, labeled them with the date and tower ID, and sealed them in the bag for lab pickup on Tuesday. Also noted the field reading from the online probe at the time."
+    },
+    {
+      "id": "INC-CT-041",
+      "sop_ref": "water_sample_collection",
+      "text": "Weekly sample run this afternoon. Pulled the grab from the basin tap on tower 1, got a field reading off the probe panel, and packaged the bottles up. Treatment tech needs them before end of shift so the courier can pick them up for the outside lab."
+    },
+    {
+      "id": "INC-CT-042",
+      "sop_ref": "lockout_tagout",
+      "text": "Before we opened up the tower for the annual internal inspection, we had to run the full LOTO sequence. Stopped the fan at the panel, isolated the water supply, and had everyone apply their personal lock to the MCC breaker before we cracked any access panels. Safety coordinator signed off on the verification before we went in."
+    },
+    {
+      "id": "INC-CT-043",
+      "sop_ref": "lockout_tagout",
+      "text": "Electrical was going into the fan motor terminal box to check the insulation, so we ran the full energy isolation first. Stopped the unit at the local panel, then went to the MCC room and applied our lock to the disconnect. Nobody enters until every personal lock is accounted for and verified."
+    },
+    {
+      "id": "INC-CT-044",
+      "sop_ref": "chemical_spill_response",
+      "text": "Someone knocked a full container of scale inhibitor off the shelf at the dosing station and it splashed all over the floor. Got the spill kit out from under the bench and started soaking it up right away, called the safety lead on the radio before anything else."
+    },
+    {
+      "id": "INC-CT-045",
+      "sop_ref": "chemical_spill_response",
+      "text": "Biocide drum had a pinhole crack at the bottom fitting and it had been slowly pooling under the dosing skid - found it during my afternoon rounds. Called safety, stopped the metering pump so it wouldn't add more to the mess, then we suited up and cleaned it with the spill kit."
+    },
+    {
+      "id": "INC-CT-046",
+      "sop_ref": "chemical_spill_response",
+      "text": "Line 2 operator reported a funky yellow chemical smell near the tower treatment area. Found a discharge fitting on the drum had worked itself loose and the stuff was running out slow. Contained it with the absorbent kit and got safety and maintenance on the radio to come assess."
+    },
+    {
+      "id": "INC-CT-047",
+      "sop_ref": "startup_procedure",
+      "text": "Tower was coming back online after the weekend maintenance window. Verified the pan had enough water in it, opened up the supply, then brought the fan up to speed. Logged the exact restart time and confirmed the RPM reading was good before calling the unit clear for production."
+    },
+    {
+      "id": "INC-CT-048",
+      "sop_ref": "startup_procedure",
+      "text": "Monday morning restart on the cooling tower after the two-week outage for the new fill media install. Ran through the bring-up steps in order - got the water level established, fired the fan, and waited for it to stabilize before calling production that the cooling loop was back in service."
+    },
+    {
+      "id": "INC-CT-049",
+      "sop_ref": "shutdown_procedure",
+      "text": "Friday afternoon we took the east tower offline ahead of the scheduled basin cleaning next week. Brought the fan down first, then closed the supply, and noted the water level in the logbook before walking away. Also let the treatment tech know so she could adjust the chemistry on the active units."
+    },
+    {
+      "id": "INC-CT-050",
+      "sop_ref": "shutdown_procedure",
+      "text": "Planned the tower offline before the holiday weekend since production was going dark anyway. Took it down in the right order - fan first, then isolated the makeup water, confirmed the level in the basin was documented. No alarms, no drama, just an orderly step-down before the long weekend."
+    }
+  ]
+}

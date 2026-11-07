@@ -1,0 +1,586 @@
+{
+  "family": "Belt Conveyor",
+  "sops": [
+    {
+      "ref": "belt_speed_low_warn",
+      "title": "Belt Speed Below Minimum Setpoint",
+      "condition": "The belt speed sensor reads below the minimum operating threshold (setpoint minus 10%) while the conveyor is commanded to run, triggering a yellow warning but no overload trip.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor belt_speed_sensor",
+        "press_button alarm_silence_button",
+        "press_button belt_speed_increase_button",
+        "wait 15 seconds",
+        "read_sensor belt_speed_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["conveyor_control_panel", "belt_speed_sensor", "alarm_silence_button", "belt_speed_increase_button"]
+    },
+    {
+      "ref": "belt_speed_high_fault",
+      "title": "Belt Overspeed Alarm",
+      "condition": "The belt speed sensor reads above the maximum rated speed ceiling, triggering a red overspeed fault that requires an immediate controlled stop before investigation.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor belt_speed_sensor",
+        "press_button red_estop_button",
+        "wait 30 seconds",
+        "notify maintenance_tech",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["conveyor_control_panel", "belt_speed_sensor", "red_estop_button"]
+    },
+    {
+      "ref": "belt_stopped_jam",
+      "title": "Belt Fully Stopped Due to Jam",
+      "condition": "The belt has come to a complete hard stop and the drive motor has tripped its overload relay due to a material jam or mechanical blockage in the belt path.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor motor_current_sensor",
+        "press_button alarm_silence_button",
+        "notify maintenance_tech",
+        "walk_to belt_midspan_area",
+        "read_sensor belt_speed_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["conveyor_control_panel", "motor_current_sensor", "alarm_silence_button", "belt_midspan_area", "belt_speed_sensor"]
+    },
+    {
+      "ref": "photo_eye_blocked_fault",
+      "title": "Photo-Eye Fault During Production",
+      "condition": "A photo-eye on the infeed or outfeed has tripped unexpectedly during normal production without any actual obstruction present, halting conveyor motion.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor photo_eye_infeed",
+        "read_sensor photo_eye_outfeed",
+        "press_button alarm_silence_button",
+        "notify shift_supervisor",
+        "wait 10 seconds",
+        "press_button estop_reset_button"
+      ],
+      "equipment": ["conveyor_control_panel", "photo_eye_infeed", "photo_eye_outfeed", "alarm_silence_button", "estop_reset_button"]
+    },
+    {
+      "ref": "belt_mistracking_warn",
+      "title": "Belt Mistracking Warning",
+      "condition": "The belt tracking sensor detects the belt has drifted off-center beyond the warning band but has not yet contacted the conveyor frame, allowing continued operation.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor belt_tracking_sensor_left",
+        "read_sensor belt_tracking_sensor_right",
+        "walk_to tail_pulley_area",
+        "read_sensor belt_tracking_sensor_left",
+        "notify maintenance_tech",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["conveyor_control_panel", "belt_tracking_sensor_left", "belt_tracking_sensor_right", "tail_pulley_area"]
+    },
+    {
+      "ref": "belt_mistracking_severe",
+      "title": "Belt Severe Mistracking Emergency",
+      "condition": "The belt has ridden fully off-track and is in hard contact with the conveyor frame, generating a frame-contact fault that commands an immediate emergency stop.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "notify maintenance_tech",
+        "walk_to belt_midspan_area",
+        "read_sensor belt_tracking_sensor_right",
+        "notify safety_officer"
+      ],
+      "equipment": ["conveyor_control_panel", "red_estop_button", "belt_midspan_area", "belt_tracking_sensor_right"]
+    },
+    {
+      "ref": "drive_motor_overtemp",
+      "title": "Drive Motor Overtemperature Alarm",
+      "condition": "The drive motor temperature sensor exceeds the high-temperature alarm setpoint, triggering a thermal overload warning while the belt is still running.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor motor_temp_sensor",
+        "press_button alarm_silence_button",
+        "notify maintenance_tech",
+        "walk_to conveyor_drive_end",
+        "read_sensor motor_temp_sensor",
+        "wait 60 seconds"
+      ],
+      "equipment": ["conveyor_control_panel", "motor_temp_sensor", "alarm_silence_button", "conveyor_drive_end"]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Emergency Stop Activation Response",
+      "condition": "An emergency stop button has been activated on the conveyor, causing an immediate uncontrolled halt; the root cause must be identified and cleared before any reset is permitted.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor belt_speed_sensor",
+        "notify shift_supervisor",
+        "walk_to conveyor_drive_end",
+        "press_button alarm_silence_button",
+        "wait 30 seconds",
+        "press_button estop_reset_button"
+      ],
+      "equipment": ["conveyor_control_panel", "belt_speed_sensor", "alarm_silence_button", "estop_reset_button", "conveyor_drive_end"]
+    },
+    {
+      "ref": "belt_tension_check",
+      "title": "Scheduled Belt Tension Measurement",
+      "condition": "The weekly preventive maintenance interval requires verification that belt tension is within the specified operating range before the production shift begins.",
+      "steps": [
+        "walk_to maintenance_cabinet",
+        "pick belt_tension_gauge",
+        "walk_to tail_pulley_area",
+        "place belt_tension_gauge",
+        "read_sensor belt_tension_sensor",
+        "pick belt_tension_gauge",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["maintenance_cabinet", "belt_tension_gauge", "tail_pulley_area", "belt_tension_sensor"]
+    },
+    {
+      "ref": "pulley_bearing_lube",
+      "title": "Head and Tail Pulley Bearing Lubrication",
+      "condition": "The monthly lubrication interval for head and tail pulley bearings has elapsed per the preventive maintenance schedule.",
+      "steps": [
+        "walk_to maintenance_cabinet",
+        "pick bearing_grease_cartridge",
+        "walk_to head_pulley_area",
+        "place bearing_grease_cartridge",
+        "walk_to tail_pulley_area",
+        "place bearing_grease_cartridge",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["maintenance_cabinet", "bearing_grease_cartridge", "head_pulley_area", "tail_pulley_area"]
+    },
+    {
+      "ref": "drive_vbelt_replace",
+      "title": "Drive V-Belt Replacement",
+      "condition": "The drive V-belt connecting the motor to the head pulley has reached its wear limit or shows visible cracking and glazing, requiring replacement during a scheduled downtime window.",
+      "steps": [
+        "walk_to maintenance_cabinet",
+        "pick v_belt_replacement",
+        "walk_to conveyor_drive_end",
+        "place v_belt_replacement",
+        "wait 10 seconds",
+        "read_sensor belt_speed_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["maintenance_cabinet", "v_belt_replacement", "conveyor_drive_end", "belt_speed_sensor"]
+    },
+    {
+      "ref": "conveyor_belt_replace",
+      "title": "Full Conveyor Belt Replacement",
+      "condition": "The conveyor belt has exceeded its service life or sustained irreparable damage such as exposed cords or a longitudinal tear, requiring complete removal and replacement of the belt.",
+      "steps": [
+        "walk_to maintenance_cabinet",
+        "pick conveyor_belt_roll",
+        "walk_to tail_pulley_area",
+        "place conveyor_belt_roll",
+        "walk_to head_pulley_area",
+        "read_sensor belt_tension_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["maintenance_cabinet", "conveyor_belt_roll", "tail_pulley_area", "head_pulley_area", "belt_tension_sensor"]
+    },
+    {
+      "ref": "photo_eye_clean",
+      "title": "Scheduled Photo-Eye Lens Cleaning",
+      "condition": "The bi-weekly PM schedule requires cleaning of all photo-eye lenses to prevent nuisance trips caused by accumulated metal dust and coolant mist.",
+      "steps": [
+        "walk_to maintenance_cabinet",
+        "pick cleaning_rag",
+        "walk_to conveyor_line3_section",
+        "place cleaning_rag",
+        "read_sensor photo_eye_infeed",
+        "read_sensor photo_eye_outfeed",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["maintenance_cabinet", "cleaning_rag", "conveyor_line3_section", "photo_eye_infeed", "photo_eye_outfeed"]
+    },
+    {
+      "ref": "motor_filter_replace",
+      "title": "Drive Motor Ventilation Filter Replacement",
+      "condition": "The drive motor cooling filter has reached its replacement interval, or a sustained upward trend in motor temperature readings indicates restricted airflow through the filter screen.",
+      "steps": [
+        "walk_to maintenance_cabinet",
+        "pick replacement_filter",
+        "walk_to conveyor_drive_end",
+        "place replacement_filter",
+        "read_sensor motor_temp_sensor",
+        "wait 120 seconds",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["maintenance_cabinet", "replacement_filter", "conveyor_drive_end", "motor_temp_sensor"]
+    },
+    {
+      "ref": "belt_surface_inspect",
+      "title": "Periodic Belt Surface Wear Inspection",
+      "condition": "The monthly inspection interval requires evaluation of the belt surface for cuts, tears, exposed cords, or excessive top-cover wear that threatens structural integrity.",
+      "steps": [
+        "walk_to tail_pulley_area",
+        "read_sensor belt_speed_sensor",
+        "walk_to belt_midspan_area",
+        "read_sensor belt_tension_sensor",
+        "walk_to head_pulley_area",
+        "notify maintenance_tech",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["tail_pulley_area", "belt_speed_sensor", "belt_midspan_area", "belt_tension_sensor", "head_pulley_area"]
+    },
+    {
+      "ref": "scraper_blade_replace",
+      "title": "Belt Scraper Blade Replacement",
+      "condition": "The primary belt scraper blade has worn below the minimum contact thickness or is no longer clearing material from the belt surface at the head pulley.",
+      "steps": [
+        "walk_to maintenance_cabinet",
+        "pick scraper_blade",
+        "walk_to head_pulley_area",
+        "place scraper_blade",
+        "wait 10 seconds",
+        "read_sensor belt_speed_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["maintenance_cabinet", "scraper_blade", "head_pulley_area", "belt_speed_sensor"]
+    },
+    {
+      "ref": "conveyor_lockout",
+      "title": "Conveyor Lockout Tagout Procedure",
+      "condition": "Maintenance or repair work requiring physical access to the conveyor mechanism must be preceded by full isolation and locking of all energy sources.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "press_button red_estop_button",
+        "walk_to motor_junction_box",
+        "pick lock_hasp",
+        "place lock_hasp",
+        "pick personal_lock",
+        "place personal_lock"
+      ],
+      "equipment": ["conveyor_control_panel", "red_estop_button", "motor_junction_box", "lock_hasp", "personal_lock"]
+    },
+    {
+      "ref": "parts_spill_response",
+      "title": "Parts Spill on Conveyor Area Response",
+      "condition": "Automotive components have fallen off the belt or spilled from a container onto the floor or into the conveyor structure, creating a slip hazard and potential jam risk.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "walk_to maintenance_cabinet",
+        "pick spill_kit",
+        "walk_to belt_midspan_area",
+        "place spill_kit"
+      ],
+      "equipment": ["conveyor_control_panel", "red_estop_button", "maintenance_cabinet", "spill_kit", "belt_midspan_area"]
+    },
+    {
+      "ref": "conveyor_fire_response",
+      "title": "Fire or Smoke Detected Near Conveyor",
+      "condition": "Smoke or open flame has been observed near the conveyor drive motor, belt surface, or surrounding structure, requiring immediate emergency shutdown and fire suppression.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "press_button red_estop_button",
+        "notify safety_officer",
+        "notify shift_supervisor",
+        "walk_to maintenance_cabinet",
+        "pick fire_extinguisher",
+        "notify safety_officer"
+      ],
+      "equipment": ["conveyor_control_panel", "red_estop_button", "maintenance_cabinet", "fire_extinguisher"]
+    },
+    {
+      "ref": "conveyor_startup",
+      "title": "Standard Shift Startup Sequence",
+      "condition": "Beginning of shift startup requires the conveyor to be energized and brought to operating speed in the correct sequence with pre-run sensor verification.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor belt_speed_sensor",
+        "read_sensor motor_temp_sensor",
+        "press_button green_start_button",
+        "wait 10 seconds",
+        "read_sensor belt_speed_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["conveyor_control_panel", "belt_speed_sensor", "motor_temp_sensor", "green_start_button"]
+    },
+    {
+      "ref": "conveyor_shutdown",
+      "title": "Standard Shift Shutdown Sequence",
+      "condition": "End of shift requires the conveyor to be stopped in a controlled ramp-down sequence and confirmed fully stationary before the area is released.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "press_button belt_speed_decrease_button",
+        "wait 15 seconds",
+        "press_button red_estop_button",
+        "wait 10 seconds",
+        "read_sensor belt_speed_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["conveyor_control_panel", "belt_speed_decrease_button", "red_estop_button", "belt_speed_sensor"]
+    },
+    {
+      "ref": "belt_cleanliness_inspect",
+      "title": "Belt Surface Contamination and Cleanliness Inspection",
+      "condition": "Quality control protocol requires verification that the belt surface is free of oil, grease, metal chips, or other contamination that could transfer onto finished automotive components.",
+      "steps": [
+        "walk_to conveyor_line3_section",
+        "read_sensor belt_speed_sensor",
+        "walk_to head_pulley_area",
+        "read_sensor photo_eye_outfeed",
+        "walk_to belt_midspan_area",
+        "notify line_engineer",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["conveyor_line3_section", "belt_speed_sensor", "head_pulley_area", "photo_eye_outfeed", "belt_midspan_area"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "belt_speed_low_warn",
+      "text": "Line 3 conveyor was dragging this morning early in first shift. Parts were piling up at the infeed because the belt wasn't keeping up with the robot arm. Control panel had a yellow light flashing but nothing was jammed and the motor wasn't tripped."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "belt_speed_low_warn",
+      "text": "The unit over by stamping press 4 was barely moving — like it was struggling. Counted parts backing up on the deck and called it in. No overload trip, motor sounded like it was running, just noticeably slower than it should be."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "belt_speed_low_warn",
+      "text": "Second shift noticed the conveyor wasn't keeping pace with the feeder chute. Throughput dropped maybe 15 percent but the belt was still moving. Something was off and we had a yellow on the panel but nothing hard-faulted."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "belt_speed_high_fault",
+      "text": "Heard a high-pitched whine from the drive end on the loading dock conveyor. Belt was moving way too fast — parts were sliding off the outfeed edge before the takeaway could catch them. Red alarm started flashing on the panel."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "belt_speed_high_fault",
+      "text": "During line startup this morning the belt just took off — way faster than normal, like the VFD lost its reference. Parts couldn't stay seated on the surface. The speed fault came on before anyone could react and hit a stop."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "belt_stopped_jam",
+      "text": "Belt on line 3 just locked up solid mid-shift. Big clunk sound before it stopped and the motor tripped out. Parts stacked all the way back to the robot load station. The overload indicator was lit on the panel."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "belt_stopped_jam",
+      "text": "The conveyor between stamping and assembly stopped hard — no coast-down, just stopped dead. Overload indicator was on. Something was wedged in tight against the belt, wouldn't budge by hand."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "belt_stopped_jam",
+      "text": "Came back from break and the loading dock belt was completely stalled. Motor was buzzing but shaft wasn't turning. Parts were jammed hard against the left sidewall under the midspan section."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "photo_eye_blocked_fault",
+      "text": "Conveyor kept stopping for no reason during first shift — nothing was blocking the path. One of the sensors at the infeed was flashing amber. Might be a metal chip sitting on the lens face."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "photo_eye_blocked_fault",
+      "text": "Belt on line 3 was doing random stops every few minutes through second shift. No jam, no parts out of place. The outfeed eye was acting up — keeps going into fault state even with nothing in the beam."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "belt_mistracking_warn",
+      "text": "Noticed the belt on the stamping line started walking toward the left side during second shift. It wasn't rubbing anything yet but it was visibly off-center. Yellow tracking light came on at the panel but the belt kept running."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "belt_mistracking_warn",
+      "text": "Came in for third shift and the belt on the loading dock unit was drifting — could see daylight between the belt edge and the frame on one side. Alarm was beeping intermittently but nothing had hard-stopped."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "belt_mistracking_severe",
+      "text": "Belt on line 3 jumped completely off track and was grinding against the steel frame. Threw it to e-stop immediately. Could smell rubber burning from across the aisle."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "belt_mistracking_severe",
+      "text": "Came around the corner and the belt was riding hard up against the right side rail and starting to fold over the edge. Loud scraping noise. Hit the nearest pull-cord stop without waiting."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "belt_mistracking_severe",
+      "text": "Full belt derail near the drive end — the whole thing shifted hard right and the conveyor tripped out. Big thump, then silence. Belt was partially on the pulley but folded hard against the frame structure."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "drive_motor_overtemp",
+      "text": "Motor on the line 3 conveyor was too hot to touch on the housing mid-first-shift. Temperature alarm went amber on the panel. Belt was still running but we were watching it."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "drive_motor_overtemp",
+      "text": "The motor over by the loading dock smelled like something was cooking — that hot-winding smell. Temp light on the panel went amber and then started flashing. No shutdown yet but the trend was bad."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "estop_activation",
+      "text": "Someone hit the red mushroom button on the assembly-side end of the conveyor — belt stopped hard. Don't know if it was intentional or someone bumped it walking by with a tote."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "estop_activation",
+      "text": "E-stop on line 3 got knocked during a forklift pass-through on the cross-aisle. Belt stopped, everything downstream backed up fast. Needed to walk the whole conveyor and verify all-clear before anyone touched the reset."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "estop_activation",
+      "text": "Found the loading dock conveyor dead when I came on shift — no alarm, just stopped. Traced it to the pull-cord on the tail end. Someone must have caught it with a cart. Needed root cause confirmed before we could restart."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "belt_tension_check",
+      "text": "Weekly walk-around found the tail pulley section had noticeably more belt sag than last week. Return side was dipping pretty low. Not an alarm condition but it needed to be measured before the shift got going."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "belt_tension_check",
+      "text": "Maintenance was doing rounds before first shift and flagged that the belt looked slack on the return run under the loading dock unit. Asked the robot to gauge it formally before anyone made adjustments."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "pulley_bearing_lube",
+      "text": "Monthly PM was due on the head pulley. Bearings felt dry and gritty when I spun the pulley by hand during the pre-shift walk. Definitely overdue for grease."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "pulley_bearing_lube",
+      "text": "High-pitched squealing from the tail end of the line 3 conveyor when the belt was running — classic dry-bearing sound. Lube interval was a few days overdue per the PM board."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "drive_vbelt_replace",
+      "text": "Drive V-belt on the loading dock unit was glazed and had two visible cracks along the outer edge. Caught it during a pre-shift visual before anyone started up. Needed a swap before we ran production."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "drive_vbelt_replace",
+      "text": "Noticed slipping from the drive end — speed sensor was reading inconsistently, bouncing around. Pulled the guard off and the drive belt looked like it was on its last leg, fraying on one side."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "conveyor_belt_replace",
+      "text": "The belt on line 3 had exposed steel cord poking through the top cover near the center — definitely past end of life. Flagged it for a weekend downtime slot so we could pull the whole belt."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "conveyor_belt_replace",
+      "text": "Found a six-inch longitudinal tear through the top cover on the loading dock unit. Belt was still running but it was going to blow out any shift. Full belt-out job, not a patch situation."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "photo_eye_clean",
+      "text": "Bi-weekly PM check on the stamping line conveyor — both lenses at the infeed were caked with metal dust and coolant mist. Getting close to the trip threshold just from the buildup."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "photo_eye_clean",
+      "text": "Maintenance rounds flagged a dirty outfeed eye on the loading dock unit. You could see the film on the lens face. Scheduled the cleaning before it caused a nuisance shutdown during production."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "motor_filter_replace",
+      "text": "Motor on the loading dock conveyor has been running warmer than usual over the past week — nothing alarming yet but the trend was climbing. Filter interval was past due and the screen looked completely clogged with lint and chips."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "motor_filter_replace",
+      "text": "PM schedule showed the motor vent filter on line 3 was overdue. Temperature was slowly trending up over recent shifts — no fault, but the direction was wrong. Classic restricted-airflow signature."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "belt_surface_inspect",
+      "text": "Monthly walk flagged deep scoring on the belt surface near the tail end of line 3 — looked like a part had been dragged sideways at some point. Needed a close structural look before the next production run."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "belt_surface_inspect",
+      "text": "Top cover of the loading dock belt was showing fraying at both edges in two separate spots. Rubber was lifting but not torn through. Logged for a formal walk-down inspection during the next PM window."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "scraper_blade_replace",
+      "text": "Head pulley area on the loading dock unit had material building up under the return run — the scraper wasn't doing anything. Pulled the guard and the blade was worn completely flat with no contact angle left."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "scraper_blade_replace",
+      "text": "Material was carry-backing on the underside of the belt and dropping on the floor under the line 3 conveyor. Checked the scraper and the blade was almost gone — just the mount bracket left with a sliver of rubber."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "conveyor_lockout",
+      "text": "Tech needed to swap a tail pulley bearing on line 3. Had to confirm full energy isolation before anyone got their hands into the conveyor structure — no exceptions on that one."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "conveyor_lockout",
+      "text": "Planned job to adjust the belt tracking hardware on the loading dock unit required getting inside the frame. Standard drill — isolate the drive motor completely before any wrench work starts."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "parts_spill_response",
+      "text": "Bracket housings came off the belt near the midspan on line 3 and scattered across the floor. Some were caught up in the conveyor frame itself. Stopped the belt right away — slip hazard and potential jam risk."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "parts_spill_response",
+      "text": "Second shift found camshaft blanks piled up along the side of the loading dock conveyor — the containment guide had worked loose and failed. Parts were underneath the belt edge and on the floor around it."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "parts_spill_response",
+      "text": "Valve bodies were falling off the side of the belt near the tail end — maybe 20 pieces on the floor before anyone noticed. Belt was still running when I came around the corner."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "conveyor_fire_response",
+      "text": "Saw smoke rising from around the drive motor housing on line 3 mid-afternoon. Strong smell of burning insulation. Hit the nearest stop and yelled for people to clear the aisle."
+      },
+    {
+      "id": "INC-043",
+      "sop_ref": "conveyor_fire_response",
+      "text": "Belt near the head pulley was smoldering — looked like a seized idler created enough friction heat to start something going. Small amount of flame visible. Needed the extinguisher before it spread."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "conveyor_startup",
+      "text": "Starting up line 3 at the top of first shift — belt didn't come to speed right away when we hit the start button. Wanted to verify readings before releasing it to production instead of just assuming it was fine."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "conveyor_startup",
+      "text": "Monday morning startup on the loading dock unit after the weekend — motor temps were still at ambient after sitting cold all weekend. Ran through the standard bring-up sequence to confirm everything was reading normal before we started running parts."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "conveyor_shutdown",
+      "text": "End of second shift on line 3 — needed to bring the belt down controlled before housekeeping could do their floor sweep under the conveyor. Couldn't just kill it hard with parts still on the deck."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "conveyor_shutdown",
+      "text": "Planned partial shutdown for a cross-aisle part move. The loading dock belt had to be stopped and confirmed not moving before the forklift came through with the wide load."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "belt_cleanliness_inspect",
+      "text": "QC flagged an oil smear on the underside of a transmission housing coming off line 3. Suspected it was picking something up from contact with the belt surface. Needed a contamination walk before we could keep running."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "belt_cleanliness_inspect",
+      "text": "Found metal chips embedded in the belt surface on the assembly-side conveyor — the kind that could transfer right onto a finished housing bore. Quality walk triggered before the next batch of parts went down the line."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "belt_cleanliness_inspect",
+      "text": "Line engineer spotted a grease streak running down the middle of the loading dock belt during a product audit. Parts going over it were picking up marks on the underside. QC put a hold on the last hour of production and called for a belt inspection."
+    }
+  ]
+}

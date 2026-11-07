@@ -1,0 +1,741 @@
+{
+  "family": "Mechanical Stamping Press",
+  "sops": [
+    {
+      "ref": "low_flywheel_speed",
+      "title": "Flywheel Speed Below Minimum",
+      "condition": "Flywheel tachometer reads below 150 RPM during an active production cycle.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button cycle_stop_button",
+        "wait 5 seconds",
+        "read_sensor flywheel_tachometer",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "cycle_stop_button",
+        "flywheel_tachometer",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "flywheel_overspeed",
+      "title": "Flywheel Overspeed Alarm",
+      "condition": "Flywheel tachometer exceeds 180 RPM, triggering the overspeed alarm relay.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button emergency_stop_button",
+        "wait 10 seconds",
+        "read_sensor flywheel_tachometer",
+        "notify maintenance_supervisor",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "emergency_stop_button",
+        "flywheel_tachometer",
+        "maintenance_supervisor",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "clutch_slip_alarm",
+      "title": "Clutch Slip Fault Alarm",
+      "condition": "Clutch engagement sensor detects greater than 5 percent speed differential slip between the flywheel and the crankshaft.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button cycle_stop_button",
+        "wait 30 seconds",
+        "read_sensor clutch_slip_sensor",
+        "read_sensor flywheel_tachometer",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "cycle_stop_button",
+        "clutch_slip_sensor",
+        "flywheel_tachometer",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "brake_drag_fault",
+      "title": "Brake Drag After Clutch Engagement",
+      "condition": "Crankshaft position encoder confirms the crank is moving but the brake torque sensor shows the brake pad is still partially applied, indicating the brake has not fully released.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button cycle_stop_button",
+        "wait 15 seconds",
+        "read_sensor brake_torque_sensor",
+        "read_sensor crank_position_encoder",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "cycle_stop_button",
+        "brake_torque_sensor",
+        "crank_position_encoder",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "die_jam",
+      "title": "Workpiece Jam in Die Cavity",
+      "condition": "Die area proximity sensor detects an obstruction remaining inside the die cavity at the end of the press stroke.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button emergency_stop_button",
+        "wait 5 seconds",
+        "walk_to press_die_area",
+        "read_sensor die_proximity_sensor",
+        "notify maintenance_supervisor",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "emergency_stop_button",
+        "press_die_area",
+        "die_proximity_sensor",
+        "maintenance_supervisor",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "lube_pressure_low",
+      "title": "Lubrication System Pressure Low",
+      "condition": "Central lubrication system pressure gauge reads below 40 PSI during active production.",
+      "steps": [
+        "walk_to lube_pump_station",
+        "read_sensor lube_pressure_gauge",
+        "press_button lube_pump_manual_prime_button",
+        "wait 20 seconds",
+        "read_sensor lube_pressure_gauge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "lube_pump_station",
+        "lube_pressure_gauge",
+        "lube_pump_manual_prime_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "lube_pressure_high",
+      "title": "Lubrication System Pressure High",
+      "condition": "Central lubrication system pressure gauge reads above 120 PSI, indicating a blocked distribution line downstream of the pump.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to lube_pump_station",
+        "read_sensor lube_pressure_gauge",
+        "press_button lube_pump_shutoff_button",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "cycle_stop_button",
+        "lube_pump_station",
+        "lube_pressure_gauge",
+        "lube_pump_shutoff_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "tonnage_overload",
+      "title": "Press Tonnage Overload Trip",
+      "condition": "Tonnage monitor reading exceeds the rated press capacity of 600 tons, triggering the overload relay and halting the press mid-cycle.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "read_sensor tonnage_monitor",
+        "press_button overload_reset_button",
+        "wait 10 seconds",
+        "read_sensor tonnage_monitor",
+        "notify line_supervisor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "tonnage_monitor",
+        "overload_reset_button",
+        "line_supervisor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "tonnage_undershoot",
+      "title": "Forming Tonnage Below Expected Range",
+      "condition": "Tonnage monitor shows production force below 80 percent of the part-specific forming load setpoint with no overload trip and the press continuing to cycle normally.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "read_sensor tonnage_monitor",
+        "walk_to press_die_area",
+        "read_sensor die_proximity_sensor",
+        "walk_to part_inspection_table",
+        "pick last_formed_part",
+        "notify quality_technician"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "tonnage_monitor",
+        "press_die_area",
+        "die_proximity_sensor",
+        "part_inspection_table",
+        "last_formed_part",
+        "quality_technician"
+      ]
+    },
+    {
+      "ref": "crank_position_fault",
+      "title": "Crankshaft Position Encoder Fault",
+      "condition": "Crankshaft position encoder signal is lost or reports an invalid angle reading during a production stroke.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button emergency_stop_button",
+        "wait 5 seconds",
+        "read_sensor crank_position_encoder",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "emergency_stop_button",
+        "crank_position_encoder",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "die_coolant_minor_leak",
+      "title": "Die Cooling Circuit Minor Leak",
+      "condition": "Coolant level sensor shows a gradual drop of less than 2 percent per hour and a drip is visually confirmed at a die cooling line fitting.",
+      "steps": [
+        "walk_to press_die_area",
+        "read_sensor coolant_level_sensor",
+        "walk_to coolant_supply_panel",
+        "press_button coolant_circuit_isolate_button",
+        "pick drip_tray",
+        "place drip_tray at_leaking_fitting",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_die_area",
+        "coolant_level_sensor",
+        "coolant_supply_panel",
+        "coolant_circuit_isolate_button",
+        "drip_tray",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "die_coolant_rupture",
+      "title": "Die Cooling Line Rupture Emergency",
+      "condition": "Coolant flow sensor detects a sudden loss of more than 50 percent of coolant flow within 10 seconds, indicating a catastrophic line rupture.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button emergency_stop_button",
+        "walk_to coolant_supply_panel",
+        "press_button coolant_emergency_shutoff_button",
+        "walk_to spill_kit_cabinet",
+        "pick spill_kit",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "emergency_stop_button",
+        "coolant_supply_panel",
+        "coolant_emergency_shutoff_button",
+        "spill_kit_cabinet",
+        "spill_kit",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "die_lube_fluid_change",
+      "title": "Scheduled Die Lubrication Fluid Change",
+      "condition": "Die lubrication stroke counter reaches the 500-stroke scheduled replacement interval.",
+      "steps": [
+        "walk_to press_die_area",
+        "read_sensor die_lube_stroke_counter",
+        "pick empty_lube_fluid_drum",
+        "place empty_lube_fluid_drum at_drum_disposal_rack",
+        "pick full_lube_fluid_drum",
+        "place full_lube_fluid_drum at_die_lube_reservoir",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "press_die_area",
+        "die_lube_stroke_counter",
+        "empty_lube_fluid_drum",
+        "drum_disposal_rack",
+        "full_lube_fluid_drum",
+        "die_lube_reservoir",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "clutch_pad_inspect",
+      "title": "Clutch and Brake Friction Pad Inspection",
+      "condition": "Press cycle counter reaches the 2,000-cycle scheduled inspection interval for clutch and brake friction pad wear.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to clutch_brake_access_panel",
+        "read_sensor clutch_pad_wear_indicator",
+        "read_sensor brake_pad_wear_indicator",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "cycle_stop_button",
+        "clutch_brake_access_panel",
+        "clutch_pad_wear_indicator",
+        "brake_pad_wear_indicator",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "flywheel_belt_replace",
+      "title": "Flywheel V-Belt Inspection and Replacement",
+      "condition": "Quarterly scheduled maintenance interval for the flywheel drive V-belt inspection and replacement is reached.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button lockout_key_switch",
+        "walk_to belt_drive_guard_panel",
+        "pick worn_vbelt",
+        "place worn_vbelt at_parts_disposal_bin",
+        "pick new_vbelt",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "lockout_key_switch",
+        "belt_drive_guard_panel",
+        "worn_vbelt",
+        "parts_disposal_bin",
+        "new_vbelt",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "lube_filter_change",
+      "title": "Lubrication System Filter Replacement",
+      "condition": "Lubrication filter differential pressure gauge enters the red zone, indicating the filter element is saturated and restricting flow.",
+      "steps": [
+        "walk_to lube_pump_station",
+        "read_sensor lube_filter_differential_pressure_gauge",
+        "press_button lube_pump_shutoff_button",
+        "pick saturated_lube_filter",
+        "place saturated_lube_filter at_parts_disposal_bin",
+        "pick new_lube_filter",
+        "place new_lube_filter at_lube_filter_housing"
+      ],
+      "equipment": [
+        "lube_pump_station",
+        "lube_filter_differential_pressure_gauge",
+        "lube_pump_shutoff_button",
+        "saturated_lube_filter",
+        "parts_disposal_bin",
+        "new_lube_filter",
+        "lube_filter_housing"
+      ]
+    },
+    {
+      "ref": "crank_bearing_grease",
+      "title": "Crankshaft Bearing Re-Greasing",
+      "condition": "Accumulated production hours reach the 250-hour scheduled re-greasing interval for crankshaft main bearing grease points.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to crank_bearing_access_panel",
+        "pick grease_gun",
+        "place grease_gun at_crank_bearing_grease_nipple",
+        "wait 15 seconds",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "cycle_stop_button",
+        "crank_bearing_access_panel",
+        "grease_gun",
+        "crank_bearing_grease_nipple",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "slide_calibration",
+      "title": "Press Slide Shut Height Calibration",
+      "condition": "Quality measurement data shows part thickness variation exceeding plus or minus 0.15 mm across 50 consecutive parts, indicating slide shut height drift.",
+      "steps": [
+        "walk_to part_inspection_table",
+        "read_sensor part_thickness_gauge",
+        "walk_to press_slide_adjustment_panel",
+        "read_sensor slide_position_encoder",
+        "press_button slide_adjust_down_button",
+        "wait 5 seconds",
+        "notify quality_technician"
+      ],
+      "equipment": [
+        "part_inspection_table",
+        "part_thickness_gauge",
+        "press_slide_adjustment_panel",
+        "slide_position_encoder",
+        "slide_adjust_down_button",
+        "quality_technician"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Press Lockout-Tagout for Die Change",
+      "condition": "A die change work order is issued requiring full energy isolation of the press before personnel access the tooling area.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button emergency_stop_button",
+        "press_button lockout_key_switch",
+        "pick lockout_hasp",
+        "place lockout_hasp on_main_disconnect_handle",
+        "pick lockout_tag",
+        "place lockout_tag on_lockout_hasp"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "emergency_stop_button",
+        "lockout_key_switch",
+        "lockout_hasp",
+        "main_disconnect_handle",
+        "lockout_tag"
+      ]
+    },
+    {
+      "ref": "hydraulic_spill_response",
+      "title": "Hydraulic Counterbalance Fluid Spill Response",
+      "condition": "Hydraulic fluid from the counterbalance cylinder circuit is detected pooling on the press floor area.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to spill_kit_cabinet",
+        "pick spill_kit",
+        "place spill_kit at_spill_location",
+        "walk_to hydraulic_shutoff_panel",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "cycle_stop_button",
+        "spill_kit_cabinet",
+        "spill_kit",
+        "spill_location",
+        "hydraulic_shutoff_panel",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "fire_estop_response",
+      "title": "Fire Alarm or Emergency Stop Chain Response",
+      "condition": "Plant fire alarm activates or the press emergency stop safety chain is broken during active production.",
+      "steps": [
+        "walk_to press_main_control_panel",
+        "press_button emergency_stop_button",
+        "walk_to press_main_power_panel",
+        "press_button main_power_disconnect_button",
+        "walk_to plant_exit_muster_point",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "press_main_control_panel",
+        "emergency_stop_button",
+        "press_main_power_panel",
+        "main_power_disconnect_button",
+        "plant_exit_muster_point",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "press_startup",
+      "title": "Press Cold Start Startup Procedure",
+      "condition": "Beginning-of-shift startup is required for a press that has been fully de-energized for more than four hours.",
+      "steps": [
+        "walk_to press_main_power_panel",
+        "press_button main_power_on_button",
+        "wait 30 seconds",
+        "walk_to press_main_control_panel",
+        "read_sensor lube_pressure_gauge",
+        "read_sensor flywheel_tachometer",
+        "notify line_supervisor"
+      ],
+      "equipment": [
+        "press_main_power_panel",
+        "main_power_on_button",
+        "press_main_control_panel",
+        "lube_pressure_gauge",
+        "flywheel_tachometer",
+        "line_supervisor"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "low_flywheel_speed",
+      "text": "Line 3 press started dragging bad around 9am on first shift. You could hear it slowing down before it even finished the stroke - felt like it was running out of steam. I hit stop before it stalled out completely. Never tripped, just kept getting slower."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "low_flywheel_speed",
+      "text": "Second shift, about halfway through the bracket run, that big wheel on the side of press 4 was barely turning. Thing was crawling compared to how it sounds at normal speed. We shut it down before it started scrapping parts."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "low_flywheel_speed",
+      "text": "Unit by the loading dock lost its momentum during a stamping cycle around 2pm. RPMs kept creeping down over maybe 10 minutes - nothing tripped, it just got slower and slower until we pulled the stop. Maintenance said the drive belt was slipping under load."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "flywheel_overspeed",
+      "text": "Press 2 went haywire on first shift - that spinning mass started screaming louder than normal. The speed alarm on the panel lit up and I could see the number climbing on the display, way past where it should be. Hit the big red button."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "flywheel_overspeed",
+      "text": "Line 2, mid-morning: the flywheel was absolutely running away on us. Operator hit e-stop because the RPM gauge pegged out at the top of the scale. Never seen it go that fast. Could hear the pitch change from across the cell."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "flywheel_overspeed",
+      "text": "The drive on press 5 fed too much power somehow during a run of door brackets - you could hear the pitch change and then a relay clicked on the panel. Display showed it well above the red line before the alarm went off. Had to call safety."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "clutch_slip_alarm",
+      "text": "Press 5 punch timing felt off all morning on line 1. The crank wasn't keeping up with the wheel - you could hear a faint chirp every time it tried to engage. Alarm light came on the panel around 10. Not a stall, just not grabbing right."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "clutch_slip_alarm",
+      "text": "Line 1, third shift: every time the operator hit the foot pedal the press would kind of hesitate before the stroke started. Like power was slipping somewhere in the engagement. The crank was turning but not in sync with the flywheel speed."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "clutch_slip_alarm",
+      "text": "Had a recurring thing on the corner press where the stroke count and the cycle sound didn't match up. Maintenance came out and said the friction disc was glazed over - wasn't grabbing. The crank was definitely moving but it was losing power through the engagement."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "brake_drag_fault",
+      "text": "Press 3 was running real hot on the left side today - caught a burning smell around the brake housing. The machine was completing strokes but it felt like something was fighting the drivetrain. Cycle time was stretched out and the area near the brake got warm to the touch."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "brake_drag_fault",
+      "text": "Line 4, first shift: the press would complete a stroke but then take way longer to come back around for the next one. Felt like something was dragging on the crank. Strong scorched smell from the drive side of the machine. Nothing stopped it, just slowed it down."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "brake_drag_fault",
+      "text": "On the big press near dock 2, the ram was moving fine but the cycle time was off by almost half a second per stroke. Like running with the parking brake on, is the best way to describe it. Maintenance found the friction material wasn't fully releasing after the clutch engaged."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "die_jam",
+      "text": "Part didn't eject cleanly off the lower die on press 6 and the feed system kicked the next blank in before anyone could react. Material folded over in the tool and locked everything up tight. Had to mash the big red button. Die area was completely stuck."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "die_jam",
+      "text": "Line 2, afternoon: a slug got pushed sideways in the cavity and the area sensor went off before the next cycle could start. Press stopped itself but the tooling was locked up solid and wouldn't jog free. Whole line went down."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "die_jam",
+      "text": "The blank fed crooked right at shift change and ended up wedged between the upper and lower tool. Couldn't get the slide to move by hand at all. Whole line 3 stopped and we had to wait for maintenance to extract it with a pry bar."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "lube_pressure_low",
+      "text": "Lube light came on around 10am and the pressure gauge on the pump box was sitting way down in the yellow zone. Press kept running but the gauge never recovered. Looked like the pump was starving for oil."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "lube_pressure_low",
+      "text": "Second shift noticed the automatic oiler wasn't distributing - checked the gauge near the pump and it had dropped into the low range. We tried to let it run but couldn't get the reading back up. System wasn't building any pressure at all."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "lube_pressure_low",
+      "text": "Line 3, third shift: thought maybe the reservoir was empty but it was fine - the pump just wasn't pushing anything. Gauge barely registered. The points on the machine weren't getting any oil even with the pump running the whole time."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "lube_pressure_high",
+      "text": "The lube pump on line 1 was working but going nowhere - pressure reading was way up in the red and nothing was coming out at the lubrication points on the machine. Pump motor was straining and the gauge kept climbing. Clearly something was blocked downstream."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "lube_pressure_high",
+      "text": "Line 4 press, startup this morning: pressure on the oil distribution system just spiked and sat there. Gauge maxed out almost right away and I could hear the pump motor bog down under the load. System wouldn't prime down no matter what we tried."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "lube_pressure_high",
+      "text": "Had a weird one on press 6 - lube pump was hammering against something. Tech found a fitting had collapsed inside one of the header lines and nothing could get through. Pressure built up almost to the relief valve. Points were completely dry even with the pump maxed out."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "tonnage_overload",
+      "text": "The press tripped out on line 4 mid-run today. The counter on the tonnage screen had gone way past the green zone and the machine just shut off on its own. Overload relay kicked. Turned out a small piece of scrap had gotten back into the die."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "tonnage_overload",
+      "text": "Running a bracket job on press 3 and about 200 parts in, the alarm panel lit up and everything stopped. Tonnage readout was showing 680 - way over what the job calls for. The machine just killed itself. Had to reset before we could jog it."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "tonnage_overload",
+      "text": "Second shift, the press stopped dead after a real nasty-sounding hit on line 2. Tonnage gauge was pegged way over the normal range when we looked at it. Something definitely wasn't right about how the blank was sitting going in."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "tonnage_undershoot",
+      "text": "Ran 75 parts before quality caught it - the brackets were coming out thin on one flange, not fully formed. Press never actually tripped or alarmed, just kept running. Went back and checked the tonnage screen and it was reading way lower than the setup sheet calls for all shift."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "tonnage_undershoot",
+      "text": "Line 2, morning: the formed radius on the parts wasn't closing up right. Die setup guy said the slide might have crept up. No alarm went off but when we looked at the tonnage display it was under the normal range - machine never noticed anything was wrong."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "tonnage_undershoot",
+      "text": "Quality pulled a sample from press 5 and found inconsistent coining depth on about 60 pieces. Nothing stopped the machine - it ran the whole batch. When we reviewed the tonnage numbers afterward they were soft all shift, well below spec but no trip at all."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "crank_position_fault",
+      "text": "Press 2 quit mid-stroke this morning for no obvious reason. Control screen popped up a position sensor error and the machine locked in place. Couldn't jog it out manually and the control wouldn't let us do anything until maintenance came and reset it."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "crank_position_fault",
+      "text": "Line 3 crank stopped in a funny spot partway through a cycle - not at top dead center, not at bottom, just kind of stuck in the middle. The control box was showing a fault about not knowing where the ram was. Took maintenance about 20 minutes to sort it out."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "die_coolant_minor_leak",
+      "text": "There was a small drip coming from a hose fitting on the tool cooling loop, right side of the die on line 5. Not a lot - maybe a drop every few seconds. Left a small puddle on the bolster plate. Machine was still running fine, nothing alarmed."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "die_coolant_minor_leak",
+      "text": "Line 5, second shift: coolant level on the reservoir was going down slowly but nothing looked obviously broken. Finally found a weeping connection near the back of the die - slow seep, not spraying. Marked it with a rag for maintenance to address on the next break."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "die_coolant_rupture",
+      "text": "We had a coolant blowout on press 1 this afternoon on line 3. A hose just let go and sprayed fluid everywhere - all over the die, the bolster, the floor around it. Killed the machine immediately. The whole area was soaked in seconds. Nothing gradual about it."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "die_coolant_rupture",
+      "text": "Line 4, first shift: the whole cooling circuit dropped pressure in about two seconds. There was a loud pop and water started pouring out from under the slide - not dripping, pouring. Floor was slick immediately. We hit e-stop and got out of the area."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "die_lube_fluid_change",
+      "text": "The stroke counter hit the service mark on line 3 around noon so we stopped to swap the oil drum out. Old drum was reading empty on the sight glass. Pulled it off the reservoir port and rolled in the fresh one during the break window."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "die_lube_fluid_change",
+      "text": "Second shift on press 4, the die lube tank needed a change-out. The usage indicator was showing depleted, not just a low level - the fluid had hit its service interval. Routine drum swap during the meal break, no issues."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "clutch_pad_inspect",
+      "text": "Press 4 hit its two-thousand-cycle mark during first shift on line 2 so we stopped it for the scheduled check. Pulled the access cover and looked at the wear tabs on both the clutch disc and the brake lining."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "clutch_pad_inspect",
+      "text": "Maintenance flagged me on line 1 during the morning - the PM clock said it was time to eyeball the engagement pads on press 7. Ran through the inspection on both sides of the unit during the scheduled window."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "flywheel_belt_replace",
+      "text": "Three-month service was due on the flywheel drive on line 4. Tech came out to do the belt swap and good thing - one of them already had a visible crack running along the inner surface. Would have let go on its own soon."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "flywheel_belt_replace",
+      "text": "Line 1, quarterly scheduled downtime for the drive belt change on press 3. Old belts were glazed and one had a chunk missing from the edge. Did the swap and got back into production about 40 minutes later."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "lube_filter_change",
+      "text": "Filter gauge on the pump station went into the red during first shift on line 5. Oil was pretty dirty by that point - the element was overdue. Took the pump offline and swapped the cartridge out. Flow came right back up after."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "lube_filter_change",
+      "text": "Line 3 lube system: the differential indicator across the filter housing was pinned in the red all morning. Flow was clearly being restricted. Dropped the pump, pulled the cartridge, and it was solid black - completely plugged."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "crank_bearing_grease",
+      "text": "Hit the 250-hour mark on press 2 during second shift so maintenance tagged it for bearing service. Stopped the machine during the lunch break and worked through the grease fittings on the main shaft journal. Quick job."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "crank_bearing_grease",
+      "text": "Line 5, time-based PM came due on the crank bearing lube interval. Brought the grease gun over and hit the nipples on both sides. Took maybe 15 minutes total during the scheduled stop window."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "slide_calibration",
+      "text": "Quality called us out on line 4 this afternoon - the bracket heights were varying too much part to part, all running a bit on the thick side. Die setup had probably drifted up over the course of the shift. Press never flagged anything, just needed the bottom of stroke adjusted."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "slide_calibration",
+      "text": "First shift on press 3, quality tech found about 60 pieces out of tolerance on the wall thickness measurement. The slide must have crept over a few hours of running. Had to stop and look at the shut height position before clearing the parts."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "lockout_tagout",
+      "text": "Die change on press 3 after the morning run on line 2. Followed full energy isolation before anyone reached into the tooling area - hasp and personal lock on the main disconnect, tag filled out and signed. Standard process."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "lockout_tagout",
+      "text": "Toolmaker needed access to the die on line 5 for a shim adjustment during the break. We stopped the machine, went through full energy isolation before she reached in, personal lock on the disconnect handle. No issues, routine."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "hydraulic_spill_response",
+      "text": "There was slippery fluid on the floor on the back side of press 6 right where the counterbalance cylinders are. Oily smell, kind of a yellowish tint - different from cutting fluid. Stopped the machine and got the spill kit before anyone walked through it."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "hydraulic_spill_response",
+      "text": "Line 1, second shift: operator almost slipped near the base of press 4. Turned out it was that oily hydraulic fluid leaking from the big cylinder on the rear side of the frame. Puddle was maybe two feet across already."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "fire_estop_response",
+      "text": "The plant evacuation alarm pulled at 2pm and everyone cleared out. I hit the e-stop on press 5 and killed the main power before leaving the press area. Turned out it was a false pull from the warehouse side but we treated it as real."
+    },
+    {
+      "id": "INC-051",
+      "sop_ref": "fire_estop_response",
+      "text": "Line 3 e-stop cable got snagged by a parts bin being moved and pulled loose - whole press tripped out immediately. We treated it like a real emergency, killed the main power, then cleared the area and found the loose cable a few minutes later."
+    },
+    {
+      "id": "INC-052",
+      "sop_ref": "press_startup",
+      "text": "Monday morning startup on press 4 - machine had been sitting since Friday third shift. Brought the power up slow and let the lube system build before anyone tried to cycle it. Let the flywheel come up to speed on its own before calling it ready."
+    },
+    {
+      "id": "INC-053",
+      "sop_ref": "press_startup",
+      "text": "Line 2, came in for third shift and the press had been idle all day during a planned downtime. Ran through the morning checks - looked at the pressure readings and confirmed the flywheel was running at normal speed before giving the go-ahead for production."
+    }
+  ]
+}

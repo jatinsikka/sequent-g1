@@ -8,13 +8,14 @@ pose and PRESSES the yellow button — one continuous sim, no reset/cut. The rea
 Usage: python end_to_end_demo.py [checkpoint.zip]
 """
 import sys, os
-PROJ = r"C:\Users\sikka\Documents\Academic\Grad_Research\HCR_Research\Sequent-robotics"
+from demo_paths import PROJ, require
 sys.path.insert(0, PROJ); os.chdir(PROJ)
 import numpy as np, torch, mujoco, imageio
 from stable_baselines3 import PPO
 from env_wrapper_button import ButtonPressEnv, GRIP_CLOSED
 
 ckpt = sys.argv[1] if len(sys.argv) > 1 else "checkpoints_button/curr_v2_latest.zip"
+require(ckpt)
 model = PPO.load(ckpt, device="cpu")
 env = ButtonPressEnv(button_name="button_yellow", unified=True, reset_in_contact=False, curriculum=True, headless=True)
 env.set_curriculum_frac(0.0)   # frac 0 -> NOMINAL stance (stance noise scales with frac) for the reference

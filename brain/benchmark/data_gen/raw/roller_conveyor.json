@@ -1,0 +1,746 @@
+{
+  "family": "Powered Roller Conveyor",
+  "sops": [
+    {
+      "ref": "zone_motor_overcurrent",
+      "title": "Zone Motor Overcurrent Fault Response",
+      "condition": "A zone motor current sensor reads above the rated amperage threshold for more than 3 seconds, triggering a drive fault alarm on the control panel.",
+      "steps": [
+        "Walk to zone_1_control_panel to reach the faulted drive.",
+        "Read zone_1_current_sensor to confirm the overcurrent fault code is active and record the displayed amperage.",
+        "Press zone_1_stop_button to halt the zone motor immediately.",
+        "Wait 60 seconds for the motor winding to cool and the drive fault register to reset.",
+        "Read zone_1_current_sensor again to verify amperage has returned to within the rated normal range.",
+        "Notify maintenance_supervisor of the overcurrent event, zone shutdown, and sensor reading.",
+        "Press zone_1_start_button to restart the zone only after maintenance_supervisor grants clearance."
+      ],
+      "equipment": [
+        "zone_1_control_panel",
+        "zone_1_current_sensor",
+        "zone_1_stop_button",
+        "zone_1_start_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "photo_eye_blocked_no_product",
+      "title": "Photo-Eye Blocked Alarm With No Product Present",
+      "condition": "A zone photo-eye sensor reports a sustained beam interruption while no product is scheduled or present in that zone, indicating a foreign object, debris, or sensor contamination rather than a legitimate detection.",
+      "steps": [
+        "Walk to photo_eye_zone_2_location to inspect the sensor and its field of view.",
+        "Read photo_eye_zone_2_sensor to confirm the blocked status is active with no product in the zone.",
+        "Notify line_supervisor of the spurious blockage alarm and zone location.",
+        "Pick lens_cleaning_cloth from maintenance_kit.",
+        "Place lens_cleaning_cloth on photo_eye_zone_2_lens to wipe debris from both emitter and receiver faces.",
+        "Wait 10 seconds for the sensor electronics to re-initialize after cleaning.",
+        "Read photo_eye_zone_2_sensor to confirm the beam is restored and the alarm has cleared."
+      ],
+      "equipment": [
+        "photo_eye_zone_2_location",
+        "photo_eye_zone_2_sensor",
+        "photo_eye_zone_2_lens",
+        "lens_cleaning_cloth",
+        "maintenance_kit",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "product_jam_detected",
+      "title": "Product Jam Detected in Conveyor Zone",
+      "condition": "A product carrier physically stalls in a conveyor zone, causing the zone motor to continue running against a stationary load for more than 5 seconds with zero downstream movement registered by the exit sensor.",
+      "steps": [
+        "Walk to jam_location_zone_3 to reach the stalled carrier.",
+        "Read zone_3_jam_sensor to confirm product movement has stopped and the motor is still energized.",
+        "Press zone_3_stop_button to shut down the zone motor and prevent further drive strain.",
+        "Pick jammed_carrier from conveyor_rollers to free the obstruction.",
+        "Place jammed_carrier on staging_table adjacent to the conveyor for damage inspection.",
+        "Notify quality_technician to inspect the carrier and its product for damage before recirculation.",
+        "Press zone_3_start_button to resume zone operation after the jam site is confirmed clear."
+      ],
+      "equipment": [
+        "jam_location_zone_3",
+        "zone_3_jam_sensor",
+        "zone_3_stop_button",
+        "zone_3_start_button",
+        "jammed_carrier",
+        "conveyor_rollers",
+        "staging_table",
+        "quality_technician"
+      ]
+    },
+    {
+      "ref": "product_gap_too_small",
+      "title": "Product Gap Below Minimum Separation Threshold",
+      "condition": "The inter-zone gap sensor reads a carrier-to-carrier spacing less than the 150 mm minimum safety margin, meaning products are running dangerously close together and risk contact-induced shifting or damage.",
+      "steps": [
+        "Walk to gap_sensor_zone_2_location to access the speed control for the affected zone.",
+        "Read gap_sensor_zone_2 to confirm the current spacing reading is below the 150 mm minimum threshold.",
+        "Press zone_2_speed_decrease_button to reduce zone 2 conveyor speed by one programmed increment.",
+        "Wait 20 seconds for the carrier spacing to stabilize at the new speed.",
+        "Read gap_sensor_zone_2 to verify the gap has increased to within the acceptable 150–600 mm range.",
+        "Notify line_supervisor if the gap reading remains below threshold after two successive speed adjustments."
+      ],
+      "equipment": [
+        "gap_sensor_zone_2_location",
+        "gap_sensor_zone_2",
+        "zone_2_speed_decrease_button",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "product_gap_too_large",
+      "title": "Product Gap Above Maximum Separation Threshold",
+      "condition": "The inter-zone gap sensor reads a carrier-to-carrier spacing greater than the 600 mm target ceiling, indicating that products are spaced too far apart and the line throughput rate has fallen below the production target.",
+      "steps": [
+        "Walk to gap_sensor_zone_2_location to access the speed control for the affected zone.",
+        "Read gap_sensor_zone_2 to confirm the current spacing reading exceeds the 600 mm maximum threshold.",
+        "Press zone_2_speed_increase_button to raise zone 2 conveyor speed by one programmed increment.",
+        "Wait 20 seconds for the carrier spacing to stabilize at the new speed.",
+        "Read gap_sensor_zone_2 to verify the gap has decreased to within the acceptable 150–600 mm range.",
+        "Notify line_supervisor if the gap remains above threshold after two successive speed adjustments."
+      ],
+      "equipment": [
+        "gap_sensor_zone_2_location",
+        "gap_sensor_zone_2",
+        "zone_2_speed_increase_button",
+        "line_supervisor"
+      ]
+    },
+    {
+      "ref": "zone_over_accumulation",
+      "title": "Zone Accumulation Count Exceeds Maximum Buffer Limit",
+      "condition": "The accumulation counter for a downstream buffer zone exceeds the configured maximum buffer count, meaning the zone is full and continued upstream feeding will cause a backpressure jam.",
+      "steps": [
+        "Walk to accumulation_zone_4_control_panel to view the current buffer count.",
+        "Read accumulation_counter_zone_4 to confirm the count exceeds the maximum configured buffer limit.",
+        "Press zone_3_feed_stop_button to halt upstream product feeding into the full zone.",
+        "Wait 30 seconds for zone 4 to discharge accumulated product to the downstream process.",
+        "Read accumulation_counter_zone_4 to verify the count has dropped below the high-buffer threshold.",
+        "Press zone_3_feed_start_button to resume upstream feeding now that buffer space is available.",
+        "Notify production_supervisor if the accumulation count reaches maximum more than twice within a single hour."
+      ],
+      "equipment": [
+        "accumulation_zone_4_control_panel",
+        "accumulation_counter_zone_4",
+        "zone_3_feed_stop_button",
+        "zone_3_feed_start_button",
+        "production_supervisor"
+      ]
+    },
+    {
+      "ref": "zone_under_accumulation",
+      "title": "Zone Accumulation Count Below Minimum Buffer Level",
+      "condition": "The accumulation counter for a buffer zone falls below the minimum configured threshold, signaling that the downstream workstation or robot cell is at imminent risk of starving for product.",
+      "steps": [
+        "Walk to accumulation_zone_4_control_panel to view the current buffer count.",
+        "Read accumulation_counter_zone_4 to confirm the count is below the minimum buffer threshold.",
+        "Press zone_3_feed_boost_button to temporarily increase the upstream feed rate and replenish the buffer.",
+        "Wait 45 seconds for the buffer zone to accumulate additional product.",
+        "Read accumulation_counter_zone_4 to confirm the count has risen above the minimum threshold.",
+        "Notify production_supervisor if the buffer cannot recover to the minimum level within two feed cycles."
+      ],
+      "equipment": [
+        "accumulation_zone_4_control_panel",
+        "accumulation_counter_zone_4",
+        "zone_3_feed_boost_button",
+        "production_supervisor"
+      ]
+    },
+    {
+      "ref": "zone_speed_below_setpoint",
+      "title": "Zone Motor Running Slow – Speed Below Programmed Setpoint",
+      "condition": "The zone speed encoder reports a conveyor belt speed that is 15% or more below the programmed setpoint for longer than 10 seconds, while the zone motor remains energized and continues to run.",
+      "steps": [
+        "Walk to zone_2_drive_panel to access speed and current readouts.",
+        "Read zone_2_speed_encoder to confirm the measured speed is below the setpoint by 15% or more.",
+        "Read zone_2_current_sensor to check whether elevated motor current indicates an increased mechanical load.",
+        "Notify maintenance_technician of the under-speed condition, providing both the speed reading and current draw.",
+        "Press zone_2_stop_button to shut down the zone in a controlled manner.",
+        "Wait 30 seconds for the motor to fully decelerate and the drive to clear.",
+        "Press zone_2_start_button to restart the zone and verify that speed recovers to setpoint."
+      ],
+      "equipment": [
+        "zone_2_drive_panel",
+        "zone_2_speed_encoder",
+        "zone_2_current_sensor",
+        "zone_2_stop_button",
+        "zone_2_start_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "zone_speed_above_setpoint",
+      "title": "Zone Motor Running Fast – Speed Exceeds Programmed Setpoint",
+      "condition": "The zone speed encoder reports a conveyor belt speed that is 10% or more above the programmed setpoint, indicating a drive control fault, encoder miscalibration, or runaway condition.",
+      "steps": [
+        "Walk to zone_2_drive_panel to access drive readouts.",
+        "Read zone_2_speed_encoder to confirm the measured speed exceeds the setpoint by 10% or more.",
+        "Press zone_2_stop_button immediately to halt the overspeed zone and prevent product damage.",
+        "Notify maintenance_technician of the overspeed fault, providing the encoder reading and time of occurrence.",
+        "Wait 60 seconds for the drive electronics to fully depower and discharge.",
+        "Read zone_2_speed_encoder to verify the output reads zero before any restart attempt.",
+        "Notify production_supervisor before attempting to resume zone operation."
+      ],
+      "equipment": [
+        "zone_2_drive_panel",
+        "zone_2_speed_encoder",
+        "zone_2_stop_button",
+        "maintenance_technician",
+        "production_supervisor"
+      ]
+    },
+    {
+      "ref": "zone_stopped_unexpected",
+      "title": "Zone Stopped Unexpectedly Without E-Stop or Fault Code",
+      "condition": "A conveyor zone motor ceases operation and the speed encoder reads zero, but no emergency stop button is depressed, no drive fault code is displayed, and no scheduled shutdown was initiated.",
+      "steps": [
+        "Walk to zone_1_drive_panel to inspect the drive status with no E-stop active.",
+        "Read zone_1_speed_encoder to confirm zero speed and the absence of any active E-stop signal.",
+        "Read zone_1_current_sensor to check for zero-current indicating an open circuit or failed contactor.",
+        "Notify maintenance_technician of the unexplained stoppage and provide both sensor readings.",
+        "Press zone_1_stop_button to place the zone in a confirmed controlled-stop state before investigation.",
+        "Wait 15 seconds to allow any transient fault to resolve.",
+        "Press zone_1_start_button to attempt a controlled restart and observe whether the zone responds."
+      ],
+      "equipment": [
+        "zone_1_drive_panel",
+        "zone_1_speed_encoder",
+        "zone_1_current_sensor",
+        "zone_1_stop_button",
+        "zone_1_start_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "photo_eye_calibration_drift",
+      "title": "Photo-Eye Sensor Intermittent Misread – Calibration Drift",
+      "condition": "A zone photo-eye sensor produces intermittent false-clear or false-blocked outputs during normal product flow without sustaining a blocked alarm, suggesting lens contamination or gradual alignment drift rather than a hard fault.",
+      "steps": [
+        "Walk to photo_eye_zone_1_location to access the sensor during live production.",
+        "Read photo_eye_zone_1_sensor to log the current output signal level during a product pass.",
+        "Pick lens_cleaning_cloth from maintenance_kit.",
+        "Place lens_cleaning_cloth on photo_eye_zone_1_lens to clean both the emitter and receiver faces of residue and film.",
+        "Wait 15 seconds for the sensor electronics to stabilize after cleaning.",
+        "Read photo_eye_zone_1_sensor to verify the output signal is consistent and stable during subsequent product passes.",
+        "Notify maintenance_technician if intermittent misreads persist after cleaning, as alignment realignment may be required."
+      ],
+      "equipment": [
+        "photo_eye_zone_1_location",
+        "photo_eye_zone_1_sensor",
+        "photo_eye_zone_1_lens",
+        "lens_cleaning_cloth",
+        "maintenance_kit",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Emergency Stop Button Activation Response",
+      "condition": "An emergency stop button on the conveyor line has been pressed, halting all powered roller zones simultaneously and requiring a safe area inspection before the line can be restored.",
+      "steps": [
+        "Walk to estop_north_button_location to identify which E-stop station is engaged.",
+        "Read estop_status_sensor to confirm which zone or station triggered the stop and verify all zones have ceased motion.",
+        "Notify line_supervisor and safety_officer of the E-stop activation, station location, and current line status.",
+        "Walk to hazard_location adjacent to the engaged E-stop to visually verify the area is clear of personnel and obstructions.",
+        "Read zone_1_speed_encoder to confirm all conveyor motion has fully ceased before reset.",
+        "Press estop_north_reset_button to release the E-stop latch only after the area is confirmed safe by safety_officer.",
+        "Press conveyor_master_start_button to restore conveyor operation in sequence."
+      ],
+      "equipment": [
+        "estop_north_button_location",
+        "estop_status_sensor",
+        "line_supervisor",
+        "safety_officer",
+        "hazard_location",
+        "zone_1_speed_encoder",
+        "estop_north_reset_button",
+        "conveyor_master_start_button"
+      ]
+    },
+    {
+      "ref": "drive_chain_lubrication",
+      "title": "Scheduled Drive Chain Lubrication",
+      "condition": "The planned maintenance interval for drive chain lubrication has been reached per the PM schedule (every 500 operating hours) or the chain produces audible dry running noise before the interval.",
+      "steps": [
+        "Walk to maintenance_station to retrieve lubrication supplies.",
+        "Pick chain_lube_cartridge from lube_supply_shelf.",
+        "Walk to zone_1_drive_chain_access_panel to reach the drive chain.",
+        "Place chain_lube_cartridge nozzle onto zone_1_drive_chain to apply lubricant along the full chain length.",
+        "Wait 5 seconds for the lubricant to distribute across the chain links.",
+        "Read chain_tension_indicator_zone_1 to confirm the chain tension reading is within the specified range.",
+        "Notify maintenance_supervisor that the PM lubrication task is complete and ready to log."
+      ],
+      "equipment": [
+        "maintenance_station",
+        "chain_lube_cartridge",
+        "lube_supply_shelf",
+        "zone_1_drive_chain_access_panel",
+        "zone_1_drive_chain",
+        "chain_tension_indicator_zone_1",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "roller_bearing_replacement",
+      "title": "Worn Conveyor Roller Bearing Replacement",
+      "condition": "A conveyor roller bearing emits sustained squealing or the vibration sensor on that roller reads above the allowable threshold, indicating bearing wear that requires immediate replacement to prevent roller seizure.",
+      "steps": [
+        "Walk to tool_crib to retrieve bearing replacement tooling.",
+        "Pick replacement_bearing from bearing_parts_bin.",
+        "Walk to faulty_roller_location on the conveyor frame.",
+        "Pick worn_bearing from roller_shaft to remove the failed bearing.",
+        "Place replacement_bearing onto roller_shaft to install the new bearing.",
+        "Read vibration_sensor_roller to confirm the vibration level has returned to within the normal operating range.",
+        "Notify maintenance_supervisor that the bearing replacement is complete and record the roller position."
+      ],
+      "equipment": [
+        "tool_crib",
+        "replacement_bearing",
+        "bearing_parts_bin",
+        "faulty_roller_location",
+        "worn_bearing",
+        "roller_shaft",
+        "vibration_sensor_roller",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "photo_eye_lens_cleaning_pm",
+      "title": "Routine Photo-Eye Lens Cleaning – Preventive Maintenance",
+      "condition": "The scheduled preventive maintenance interval for photo-eye lens cleaning has been reached (every 250 operating hours) to maintain reliable beam strength and detection accuracy.",
+      "steps": [
+        "Walk to maintenance_station to retrieve scheduled cleaning supplies.",
+        "Pick lens_cleaning_cloth from cleaning_supply_bin.",
+        "Walk to photo_eye_zone_3_location to access the scheduled sensor.",
+        "Place lens_cleaning_cloth on photo_eye_zone_3_emitter_lens to clean the emitter face.",
+        "Place lens_cleaning_cloth on photo_eye_zone_3_receiver_lens to clean the receiver face.",
+        "Wait 10 seconds for the sensor to stabilize after cleaning.",
+        "Read photo_eye_zone_3_sensor to confirm beam signal strength is within the calibration acceptance range."
+      ],
+      "equipment": [
+        "maintenance_station",
+        "lens_cleaning_cloth",
+        "cleaning_supply_bin",
+        "photo_eye_zone_3_location",
+        "photo_eye_zone_3_emitter_lens",
+        "photo_eye_zone_3_receiver_lens",
+        "photo_eye_zone_3_sensor"
+      ]
+    },
+    {
+      "ref": "speed_encoder_calibration",
+      "title": "Zone Speed Encoder Calibration Verification",
+      "condition": "The scheduled calibration verification for the zone speed encoder is due per the PM calendar, or post-maintenance verification is required after a drive belt or motor component has been replaced.",
+      "steps": [
+        "Walk to zone_2_drive_panel to access the speed encoder coupling.",
+        "Pick encoder_calibration_tool from calibration_kit.",
+        "Place encoder_calibration_tool on zone_2_speed_encoder coupling to establish the reference measurement.",
+        "Read zone_2_speed_encoder to record the current output at the known reference speed.",
+        "Wait 30 seconds for a stable, settled reading.",
+        "Read zone_2_speed_encoder a second time to compare against the calibration standard tolerance.",
+        "Notify maintenance_supervisor of the calibration result and whether adjustment or replacement is needed."
+      ],
+      "equipment": [
+        "zone_2_drive_panel",
+        "encoder_calibration_tool",
+        "calibration_kit",
+        "zone_2_speed_encoder",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "zone_motor_filter_replacement",
+      "title": "Zone Motor Cooling Filter Replacement",
+      "condition": "The zone motor cooling filter differential pressure sensor reads above the high-pressure warning threshold or the replacement interval of 1000 operating hours has been reached, indicating the filter is clogged and restricting motor cooling airflow.",
+      "steps": [
+        "Walk to zone_motor_filter_access_zone_1 to reach the motor cooling filter housing.",
+        "Read filter_pressure_sensor_zone_1 to confirm the differential pressure exceeds the replacement threshold.",
+        "Press zone_1_stop_button to shut down the zone motor before opening the filter housing.",
+        "Pick dirty_filter_zone_1 from motor_filter_housing to remove the clogged filter.",
+        "Place dirty_filter_zone_1 in waste_container for proper disposal.",
+        "Pick replacement_filter_zone_1 from filter_parts_bin.",
+        "Place replacement_filter_zone_1 into motor_filter_housing and notify maintenance_supervisor that the replacement is complete."
+      ],
+      "equipment": [
+        "zone_motor_filter_access_zone_1",
+        "filter_pressure_sensor_zone_1",
+        "zone_1_stop_button",
+        "dirty_filter_zone_1",
+        "motor_filter_housing",
+        "waste_container",
+        "replacement_filter_zone_1",
+        "filter_parts_bin",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Conveyor Lockout/Tagout Before Maintenance Work",
+      "condition": "Maintenance work requiring physical access to any powered roller conveyor component has been authorized and all conveyor energy sources must be isolated before any personnel enter the equipment envelope.",
+      "steps": [
+        "Walk to conveyor_master_control_panel to initiate the isolation sequence.",
+        "Press conveyor_master_stop_button to halt all zones and confirm the line is at rest.",
+        "Pick lockout_padlock from lockout_kit at safety_station.",
+        "Place lockout_padlock on conveyor_master_disconnect_switch to lock the disconnect in the OFF position.",
+        "Wait 30 seconds for all stored mechanical and electrical energy to dissipate.",
+        "Read estop_status_sensor to confirm a zero-energy state across all zones.",
+        "Notify maintenance_supervisor and safety_officer that lockout is fully established and maintenance work may begin."
+      ],
+      "equipment": [
+        "conveyor_master_control_panel",
+        "conveyor_master_stop_button",
+        "lockout_padlock",
+        "lockout_kit",
+        "safety_station",
+        "conveyor_master_disconnect_switch",
+        "estop_status_sensor",
+        "maintenance_supervisor",
+        "safety_officer"
+      ]
+    },
+    {
+      "ref": "oil_spill_response",
+      "title": "Oil or Grease Spill Response Near Conveyor",
+      "condition": "Lubricant or gear oil is detected on or adjacent to the conveyor structure, creating a slip hazard for floor personnel and a contamination risk for product carriers passing through the affected zone.",
+      "steps": [
+        "Walk to oil_spill_location identified by the reporting operator.",
+        "Read spill_detection_sensor to confirm the spill extent and verify no product carriers are entering the contaminated area.",
+        "Notify safety_officer and line_supervisor of the spill location and estimated size immediately.",
+        "Pick oil_absorbent_pad from spill_kit_cabinet.",
+        "Place oil_absorbent_pad over the spill area to begin absorbing the lubricant.",
+        "Wait 120 seconds for full absorption, then pick used_absorbent_pad from the spill area.",
+        "Place used_absorbent_pad in hazmat_waste_bin and notify safety_officer that the area is clear and safe to re-enter."
+      ],
+      "equipment": [
+        "oil_spill_location",
+        "spill_detection_sensor",
+        "safety_officer",
+        "line_supervisor",
+        "oil_absorbent_pad",
+        "spill_kit_cabinet",
+        "used_absorbent_pad",
+        "hazmat_waste_bin"
+      ]
+    },
+    {
+      "ref": "conveyor_startup",
+      "title": "Beginning-of-Shift Conveyor System Startup",
+      "condition": "The conveyor system is offline at the start of a production shift and must be energized, inspected, and ramped to operating speed before the first product can be loaded onto the line.",
+      "steps": [
+        "Walk to conveyor_master_control_panel to begin the startup sequence.",
+        "Read estop_status_sensor to confirm no emergency stop buttons are engaged before energizing.",
+        "Press conveyor_master_start_button to energize all zones in the programmed sequential startup order.",
+        "Wait 45 seconds for all zone motors to reach operating speed.",
+        "Read zone_1_speed_encoder to verify the infeed zone is running at the target speed.",
+        "Read zone_3_speed_encoder to verify the mid-line zone is running at the target speed.",
+        "Notify production_supervisor that the conveyor system is operational and ready for production loading."
+      ],
+      "equipment": [
+        "conveyor_master_control_panel",
+        "estop_status_sensor",
+        "conveyor_master_start_button",
+        "zone_1_speed_encoder",
+        "zone_3_speed_encoder",
+        "production_supervisor"
+      ]
+    },
+    {
+      "ref": "conveyor_shutdown",
+      "title": "End-of-Shift Conveyor System Shutdown",
+      "condition": "The production shift has ended and the powered roller conveyor must be shut down in a controlled downstream-to-upstream sequence after all product carriers have been cleared from every zone.",
+      "steps": [
+        "Walk to accumulation_zone_4_control_panel to verify all zones are clear before shutdown.",
+        "Read accumulation_counter_zone_4 to confirm the buffer zone shows zero carriers and all zones are empty.",
+        "Walk to conveyor_master_control_panel to initiate the shutdown sequence.",
+        "Press zone_3_stop_button to halt the exit zone first.",
+        "Press zone_1_stop_button to halt the infeed zone and complete the upstream shutdown.",
+        "Wait 30 seconds for all rollers to decelerate fully to zero.",
+        "Notify production_supervisor that the conveyor shutdown sequence is complete and the line is safe."
+      ],
+      "equipment": [
+        "accumulation_zone_4_control_panel",
+        "accumulation_counter_zone_4",
+        "conveyor_master_control_panel",
+        "zone_3_stop_button",
+        "zone_1_stop_button",
+        "production_supervisor"
+      ]
+    },
+    {
+      "ref": "routine_inspection_walkthrough",
+      "title": "Scheduled Conveyor Inspection Walkthrough",
+      "condition": "A scheduled daily or weekly inspection is due to assess roller, sensor, drive chain, and structural integrity across all conveyor zones before or during production.",
+      "steps": [
+        "Walk to zone_1_inspection_point at the infeed end of the conveyor line.",
+        "Read vibration_sensor_roller to check roller bearing vibration levels against the baseline specification.",
+        "Walk to zone_3_inspection_point at the mid-line inspection station.",
+        "Read photo_eye_zone_3_sensor to verify beam alignment and signal strength are within calibration limits.",
+        "Read chain_tension_indicator_zone_1 to confirm drive chain tension is within the specified range.",
+        "Notify maintenance_supervisor of any sensor readings or observations that fall outside the acceptable range.",
+        "Walk to conveyor_master_control_panel and notify production_supervisor that the inspection walkthrough is complete."
+      ],
+      "equipment": [
+        "zone_1_inspection_point",
+        "vibration_sensor_roller",
+        "zone_3_inspection_point",
+        "photo_eye_zone_3_sensor",
+        "chain_tension_indicator_zone_1",
+        "maintenance_supervisor",
+        "conveyor_master_control_panel",
+        "production_supervisor"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "zone_motor_overcurrent",
+      "text": "Line 2, mid-morning. The drive on zone 1 started flashing a fault light and the panel was showing an error code I didn't recognize. Motor felt warm when I got close and it tripped off hard. Third time this week it's done that."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "zone_motor_overcurrent",
+      "text": "Zone 3 by the exit chute – thing killed itself right in the middle of a run. The number on the VFD readout was way up, like it was fighting something heavy. Heard a deep hum right before it cut out and the panel went red."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "zone_motor_overcurrent",
+      "text": "Second shift, line 4. The accumulation zone motor went offline with a trip code showing on the drive display. Checked the panel and the amp readout was pegged past the red line. Had to call maintenance to get it reset before we could run again."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "photo_eye_blocked_no_product",
+      "text": "Zone 2, near the loading dock. Alarm started beeping but there wasn't a pallet anywhere near that sensor. No product was even in that area – we had just cleared the whole line for a changeover and it started throwing a fit."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "photo_eye_blocked_no_product",
+      "text": "The light stack on zone 1 went red even though the conveyor was running completely empty between cycles. Looked at the sensor tower and the indicator LED was showing blocked. Walked over and saw nothing there – maybe a big dust clump or a piece of cardboard."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "photo_eye_blocked_no_product",
+      "text": "Third shift. Zone 4 photo eye went off about an hour in. We'd just done a product run and cleared it all out. The beam was reading interrupted on the HMI but I could literally see straight through the zone with my own eyes – nothing there."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "product_jam_detected",
+      "text": "Zone 3 went into a growl – motor was clearly straining against something that wasn't moving. Found a part carrier wedged sideways between two rollers. Had to get it out and set it on the side table."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "product_jam_detected",
+      "text": "Line 1, first shift. The box we run on zone 2 tipped over on its side and got stuck crossways between the guides. Zone motor kept trying to shove it but nothing moved downstream. Big grinding noise and the whole line backed up."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "product_jam_detected",
+      "text": "End of zone 1 near the right-angle transfer. A tray caught a roller edge and wedged in hard. Motor was still running full tilt but the tray wasn't going anywhere. Whole upstream line stacked up before we caught it."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "product_gap_too_small",
+      "text": "Parts are practically touching each other coming off zone 2 before they hit zone 3. QC flagged it because two carriers bumped and the part shifted inside one of the trays. No actual blockage but the spacing looks dangerously tight."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "product_gap_too_small",
+      "text": "Second shift on line 3. The spacing looks all wrong – trays are way too close together, like the zone is running too tight. We taped a measurement and got barely 80mm between carriers coming through. No jam yet but it's a matter of time."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "product_gap_too_small",
+      "text": "Zone 2, near the press station. Product is bunching up – you can see the front carrier barely clearing the trailing one before the next one is already on top of it. Nobody stopped it yet but someone's going to get a ding on a part soon."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "product_gap_too_large",
+      "text": "Throughput is tanking on line 2. The carriers are way spread out coming through zone 2 – you could practically park a golf cart between them. PM said we're running at maybe 60% of our target cycle rate."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "product_gap_too_large",
+      "text": "Third shift, the accumulation buffer is draining because parts are trickling in too slowly from zone 2. Looked at the spacing between pallets and it's huge – way more than normal. No alarm went off but the count keeps dropping."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "zone_over_accumulation",
+      "text": "Zone 4 is completely stacked – parts backed all the way up into zone 3. The HMI counter is maxed out and blinking red. Upstream just keeps feeding but there's nowhere for it to go. Going to go on the floor if nobody stops it."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "zone_over_accumulation",
+      "text": "Loading dock side, the downstream buffer zone is rammed full. The counter on the panel hit the top of the scale and the feeder zone never shut off. Parts are about three carriers away from going off the end of the conveyor."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "zone_over_accumulation",
+      "text": "End of second shift. The accumulation zone at the exit end was at 100% capacity and still getting product pushed into it from upstream. I had to manually go hit the upstream stop myself because the system wasn't doing it automatically."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "zone_under_accumulation",
+      "text": "The robot cell downstream is going into starvation mode – there's almost nothing left in the buffer zone. Count on the panel is down to two trays and falling. The feed zone doesn't seem to be catching up on its own."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "zone_under_accumulation",
+      "text": "Line 3, first shift. Downstream assembly keeps stopping every few cycles because the buffer is too thin. The count dropped below 5 trays and the feed zone never kicked into boost mode automatically. We're bleeding time."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "zone_speed_below_setpoint",
+      "text": "Zone 2 is dragging – it's definitely running slower than normal but it hasn't stopped. Motor sounds labored, like it's pulling against something. Line rate is noticeably off on the production board and the shift supervisor is asking questions."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "zone_speed_below_setpoint",
+      "text": "Second shift, line 4. The timer between zones is all messed up – our cycle time is longer because zone 2 is sluggish. The drive panel shows a lower speed number than it should but there's no fault light, just running behind."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "zone_speed_above_setpoint",
+      "text": "Zone 2 is moving way too fast – carriers are flying through and getting to the end of the zone way ahead of schedule. Nothing has jammed yet but QC is worried about part impact damage when they hit the stop at the far end."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "zone_speed_above_setpoint",
+      "text": "Line 1, night shift. Something's wrong with zone 2 – it's running hot and the parts are blowing past the photo eye way faster than expected. Motor sounds like it's whining at a higher pitch than any other zone on the line."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "zone_stopped_unexpected",
+      "text": "Zone 1 just quit in the middle of a run. Nobody hit a red button, no alarm on the panel, nothing. It just stopped dead. Everything upstream backed up and we had absolutely no idea why – no codes, no warnings."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "zone_stopped_unexpected",
+      "text": "First shift, line 3 by the entry station. The infeed zone went completely dead – rollers stopped turning. I checked every E-stop I could find and none of them are pulled out. The drive panel looks totally normal. Still no clue what killed it."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "photo_eye_calibration_drift",
+      "text": "Zone 1 sensor is acting flaky – sometimes it sees the part going by, sometimes it misses it completely. But there's never a hard alarm, and it clears on its own within a second. Been doing it randomly all morning shift and it's messing with our cycle count."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "photo_eye_calibration_drift",
+      "text": "The detection point on zone 1 near the paint booth side keeps flickering on the HMI. Product goes past and the signal toggles between present and absent two or three times per carrier. No sustained error – just jittery as heck."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "estop_activation",
+      "text": "Someone hit the red mushroom button at the north end of line 2. Whole conveyor died instantly. Don't know if it was intentional or someone bumped it walking by. Area looks completely fine but everything is down and we can't restart without someone coming out."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "estop_activation",
+      "text": "An operator caught his sleeve near the chain guard on zone 3 and slapped the nearest emergency button on the way down. Line went completely silent. Safety came over, the area was clear, but we need the button reset and someone to walk the line back up."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "drive_chain_lubrication",
+      "text": "Zone 1 drive chain started chirping – you can hear it over the normal conveyor noise from two stations away. PM card says we're about 50 hours past the lubrication interval. Nothing broken yet but it's getting louder every hour."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "drive_chain_lubrication",
+      "text": "Maintenance flagged zone 1 during the morning walk-around: chain looks bone dry and there's shiny wear pattern on the links. We're past the 500-hour mark on the PM board and nobody got to it last week during the shutdown."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "roller_bearing_replacement",
+      "text": "One of the rollers on line 2, about two-thirds of the way down the zone, started squealing – high-pitched and constant. You can actually feel it vibrating through the frame if you put your hand on the guard rail near it. Been getting worse since this morning."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "roller_bearing_replacement",
+      "text": "Zone 2, third shift. A roller was grinding loud enough that the operator two lines over came to look. Put a hand on the safety cage and you could feel the shudder through your palm. That thing needs to come out before it seizes."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "photo_eye_lens_cleaning_pm",
+      "text": "PM ticket came up for zone 3 sensor cleaning. Haven't done it since last month and there's definitely a film of dust on the lens face – you can see it with a flashlight. No false alarms yet but the signal strength readout on the HMI is lower than it was 30 days ago."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "photo_eye_lens_cleaning_pm",
+      "text": "Zone 3 photo eye is on this week's PM list. The lens looks foggy when you get close – there's an oily residue on both emitter and receiver from the coolant mist that drifts from the machining cell nearby. It's due for its 250-hour scheduled clean."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "speed_encoder_calibration",
+      "text": "After we swapped the drive belt on zone 2 last Thursday, nobody ran the calibration check on the speed sensor. Production wants the encoder verified as accurate before we start the new tight-tolerance model run on Monday."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "speed_encoder_calibration",
+      "text": "Zone 2 speed display on the panel doesn't quite match what we're seeing with the hand tach. Difference is small – maybe 5% – but QC wants the encoder formally verified before we commit the next batch to the critical tolerance spec."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "zone_motor_filter_replacement",
+      "text": "Zone 1 motor is running noticeably hotter than the others – touched the housing and it was way warmer. Looked at the filter on the back of the motor enclosure and it's completely black, totally clogged. Doesn't even look like a filter anymore."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "zone_motor_filter_replacement",
+      "text": "PM board shows zone 1 motor filter is well past its replacement interval. Filter looks plugged solid from the outside – can't see any light through it at all. Motor temperature has been trending up on the line dashboard for the last two weeks."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needs to get inside the drive housing on zone 2 to check the gearbox for a noise complaint. Before anyone opens that panel, we need the whole conveyor section locked out. Nobody's started the isolation process yet and the work order is waiting."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "lockout_tagout",
+      "text": "Scheduled bearing swap on zone 1 is on for this afternoon. Work order says full energy isolation is required before the tech can reach in past the guard. Need someone to walk the LOTO procedure before the crew goes anywhere near the equipment."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "oil_spill_response",
+      "text": "There's a puddle of something oily underneath zone 2 – looks like it came from the chain lube job done this morning. It's sitting on the floor right where operators walk to reach the control panel. Real slip risk, puddle is maybe 30 cm across."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "oil_spill_response",
+      "text": "Zone 1, near the gear housing bracket. Oil is dripping down the frame leg onto the floor tile. Small amount but it's directly under where people step when they reach over to the start button. Somebody's going down if we don't deal with it."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "conveyor_startup",
+      "text": "Start of first shift, line 2. Conveyor is still sitting dark from the overnight planned shutdown and we need to get it running before production starts at 6am. Nobody's touched it yet and the shift lead wants it verified before we load parts."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "conveyor_startup",
+      "text": "Morning shift coming onto line 4. Conveyor was left down after last night's maintenance window – somebody did a bearing swap and never brought it back up. Need to run the whole startup check before we can start loading carriers."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "conveyor_shutdown",
+      "text": "End of second shift on line 3. Last pallet cleared zone 4 about 10 minutes ago. Shift ends in 20 minutes and we need to do the proper power-down run before the crew heads out. Supervisor wants it done right, not just yanking the master switch."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "conveyor_shutdown",
+      "text": "Line 1, Friday end-of-week. All product is off and it's time to close out the line. Last shift apparently just hit the master disconnect without clearing zones first – we want to make sure this time we follow the right sequence so nothing's sitting on the rollers over the weekend."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "routine_inspection_walkthrough",
+      "text": "Weekly walkthrough is on the schedule for this morning before first shift runs. Need to go through the whole line and check everything – rollers, sensors, chain tension – and write it up on the PM sheet. Haven't formally walked it in about a week."
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "routine_inspection_walkthrough",
+      "text": "Maintenance supervisor wants a full visual and sensor check done on line 2 before the new product launch Monday. It's been a few weeks since anyone formally walked the whole conveyor line and logged readings. She wants it done today."
+    },
+    {
+      "id": "inc_050",
+      "sop_ref": "routine_inspection_walkthrough",
+      "text": "QA audit is coming next week and the checklist includes verified inspection records for all conveyor lines. Line 2 doesn't have a completed walkthrough log from this month. Need to run the inspection loop today and get the data recorded."
+    }
+  ]
+}

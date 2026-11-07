@@ -1,0 +1,580 @@
+{
+  "family": "Print-and-Apply Labeler",
+  "sops": [
+    {
+      "ref": "label_web_jam",
+      "title": "Label Web Jam Clearance",
+      "condition": "The label web has stopped feeding through the print-and-apply unit, triggering a web-jam alarm on the control panel.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to label_supply_station",
+        "pick jammed_label_web",
+        "place waste_bin",
+        "walk_to control_panel",
+        "press_button reset_button"
+      ],
+      "equipment": ["control_panel", "pause_button", "label_supply_station", "jammed_label_web", "waste_bin", "reset_button"]
+    },
+    {
+      "ref": "print_head_overheat",
+      "title": "Print Head Overtemperature Emergency",
+      "condition": "The print head temperature sensor reads above the maximum rated threshold, triggering an overtemperature alarm and requiring immediate machine halt.",
+      "steps": [
+        "walk_to emergency_stop_panel",
+        "press_button red_estop_button",
+        "walk_to print_head_station",
+        "read_sensor print_head_temp_sensor",
+        "notify maintenance_tech",
+        "wait 300"
+      ],
+      "equipment": ["emergency_stop_panel", "red_estop_button", "print_head_station", "print_head_temp_sensor", "maintenance_tech"]
+    },
+    {
+      "ref": "print_head_underheat",
+      "title": "Print Head Below Operating Temperature",
+      "condition": "The print head temperature is reading below the minimum operating setpoint with no active alarm, resulting in faint or incomplete thermal transfer on labels.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor print_head_temp_sensor",
+        "press_button pause_button",
+        "notify maintenance_tech",
+        "wait 120",
+        "read_sensor print_head_temp_sensor"
+      ],
+      "equipment": ["control_panel", "print_head_temp_sensor", "pause_button", "maintenance_tech"]
+    },
+    {
+      "ref": "applicator_pad_miss",
+      "title": "Applicator Pad Miss Alarm",
+      "condition": "The applicator pad sensor has detected a consecutive series of label placement failures, tripping the miss-count alarm on the control panel.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to applicator_station",
+        "read_sensor applicator_pad_sensor",
+        "notify maintenance_tech",
+        "walk_to control_panel",
+        "press_button reset_button"
+      ],
+      "equipment": ["control_panel", "pause_button", "applicator_station", "applicator_pad_sensor", "maintenance_tech", "reset_button"]
+    },
+    {
+      "ref": "low_label_stock_warning",
+      "title": "Low Label Stock Warning",
+      "condition": "The label stock sensor has reached the low-stock warning threshold; the machine continues running but a roll change is needed within the current shift.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor label_stock_sensor",
+        "notify shift_supervisor",
+        "walk_to label_supply_station",
+        "pick replacement_label_roll",
+        "place label_supply_station"
+      ],
+      "equipment": ["control_panel", "label_stock_sensor", "shift_supervisor", "label_supply_station", "replacement_label_roll"]
+    },
+    {
+      "ref": "label_stock_empty",
+      "title": "Label Stock Exhausted — Line Halted",
+      "condition": "The label stock is completely depleted and the labeler has halted production with an out-of-stock fault alarm active on the control panel.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to label_supply_station",
+        "pick replacement_label_roll",
+        "place label_supply_station",
+        "walk_to control_panel",
+        "press_button reset_button"
+      ],
+      "equipment": ["control_panel", "pause_button", "label_supply_station", "replacement_label_roll", "reset_button"]
+    },
+    {
+      "ref": "ribbon_snap",
+      "title": "Thermal Transfer Ribbon Break",
+      "condition": "The thermal transfer ribbon has snapped during active production, causing completely blank labels and triggering a ribbon-break fault alarm.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to ribbon_supply_station",
+        "pick broken_ribbon_segment",
+        "place waste_bin",
+        "pick replacement_ribbon_roll",
+        "place ribbon_supply_station"
+      ],
+      "equipment": ["control_panel", "pause_button", "ribbon_supply_station", "broken_ribbon_segment", "waste_bin", "replacement_ribbon_roll"]
+    },
+    {
+      "ref": "low_ribbon_warning",
+      "title": "Low Ribbon Stock Warning",
+      "condition": "The ribbon stock sensor indicates the ribbon spool is approaching end-of-roll; print quality remains acceptable but a ribbon change is needed before the next scheduled break.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor ribbon_stock_sensor",
+        "notify shift_supervisor",
+        "walk_to ribbon_supply_station",
+        "pick replacement_ribbon_roll",
+        "place operator_workstation"
+      ],
+      "equipment": ["control_panel", "ribbon_stock_sensor", "shift_supervisor", "ribbon_supply_station", "replacement_ribbon_roll", "operator_workstation"]
+    },
+    {
+      "ref": "air_pressure_low_warning",
+      "title": "Pneumatic Air Pressure Low Warning",
+      "condition": "The air pressure sensor reads below the minimum operating setpoint, triggering a low-pressure warning indicator; the applicator continues cycling but with noticeably reduced stroke force.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor air_pressure_sensor",
+        "notify maintenance_tech",
+        "walk_to air_filter_panel",
+        "read_sensor air_pressure_sensor",
+        "wait 60"
+      ],
+      "equipment": ["control_panel", "air_pressure_sensor", "maintenance_tech", "air_filter_panel"]
+    },
+    {
+      "ref": "air_pressure_sudden_collapse",
+      "title": "Sudden Pneumatic Pressure Loss — Applicator Stalled",
+      "condition": "Air pressure has dropped instantaneously from normal operating level to near-zero, stalling the applicator arm mid-stroke and triggering an emergency pressure-loss fault.",
+      "steps": [
+        "walk_to emergency_stop_panel",
+        "press_button red_estop_button",
+        "walk_to air_filter_panel",
+        "read_sensor air_pressure_sensor",
+        "notify maintenance_tech",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["emergency_stop_panel", "red_estop_button", "air_filter_panel", "air_pressure_sensor", "maintenance_tech", "shift_supervisor"]
+    },
+    {
+      "ref": "print_head_cleaning_routine",
+      "title": "Routine Print Head Cleaning",
+      "condition": "The scheduled print head cleaning interval has been reached, or print quality has degraded due to ink residue or dust buildup on the print head surface.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to print_head_station",
+        "pick cleaning_brush",
+        "place print_head_station",
+        "pick solvent_wipe",
+        "place print_head_station"
+      ],
+      "equipment": ["control_panel", "pause_button", "print_head_station", "cleaning_brush", "solvent_wipe"]
+    },
+    {
+      "ref": "applicator_pad_replacement",
+      "title": "Applicator Pad Replacement",
+      "condition": "The applicator pad is worn, torn, or adhesive-contaminated and requires replacement per the maintenance calendar or following persistent miss-count events.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to applicator_station",
+        "pick worn_applicator_pad",
+        "place waste_bin",
+        "pick replacement_applicator_pad",
+        "place applicator_station"
+      ],
+      "equipment": ["control_panel", "pause_button", "applicator_station", "worn_applicator_pad", "waste_bin", "replacement_applicator_pad"]
+    },
+    {
+      "ref": "label_sensor_calibration",
+      "title": "Label Registration Sensor Calibration",
+      "condition": "The label registration sensor requires calibration due to label-gap detection errors or because the machine has been loaded with a different label stock format.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to label_supply_station",
+        "read_sensor label_registration_sensor",
+        "walk_to control_panel",
+        "press_button reset_button",
+        "read_sensor label_registration_sensor"
+      ],
+      "equipment": ["control_panel", "pause_button", "label_supply_station", "label_registration_sensor", "reset_button"]
+    },
+    {
+      "ref": "ribbon_roll_change",
+      "title": "Planned Ribbon Roll Replacement",
+      "condition": "The ribbon roll has reached scheduled end-of-life during a planned changeover window; the machine is paused and awaiting a fresh ribbon roll before resuming production.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to ribbon_supply_station",
+        "pick spent_ribbon_roll",
+        "place waste_bin",
+        "pick replacement_ribbon_roll",
+        "place ribbon_supply_station"
+      ],
+      "equipment": ["control_panel", "pause_button", "ribbon_supply_station", "spent_ribbon_roll", "waste_bin", "replacement_ribbon_roll"]
+    },
+    {
+      "ref": "label_roll_change",
+      "title": "Planned Label Roll Changeover",
+      "condition": "A scheduled product or batch changeover requires swapping the current label roll for a different stock format while stock remains on the current roll.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to label_supply_station",
+        "pick current_label_roll",
+        "place label_storage_shelf",
+        "pick replacement_label_roll",
+        "place label_supply_station"
+      ],
+      "equipment": ["control_panel", "pause_button", "label_supply_station", "current_label_roll", "label_storage_shelf", "replacement_label_roll"]
+    },
+    {
+      "ref": "air_filter_replacement",
+      "title": "Pneumatic Air Filter Element Replacement",
+      "condition": "The pneumatic air filter maintenance interval has elapsed, or the filter differential pressure indicator shows a clogged element requiring replacement.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "walk_to air_filter_panel",
+        "pick clogged_air_filter",
+        "place waste_bin",
+        "pick replacement_air_filter",
+        "place air_filter_panel"
+      ],
+      "equipment": ["control_panel", "pause_button", "air_filter_panel", "clogged_air_filter", "waste_bin", "replacement_air_filter"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout / Tagout Before Maintenance",
+      "condition": "Maintenance or repair work is about to begin on the labeler, requiring all energy sources to be isolated and physically locked out before any technician enters the machine.",
+      "steps": [
+        "walk_to emergency_stop_panel",
+        "press_button red_estop_button",
+        "walk_to lockout_station",
+        "pick lockout_hasp",
+        "place emergency_stop_panel",
+        "pick lockout_tag",
+        "place emergency_stop_panel"
+      ],
+      "equipment": ["emergency_stop_panel", "red_estop_button", "lockout_station", "lockout_hasp", "lockout_tag"]
+    },
+    {
+      "ref": "adhesive_solvent_spill",
+      "title": "Label Adhesive or Solvent Spill Response",
+      "condition": "Label adhesive or cleaning solvent has spilled on or around the labeler, creating a slip hazard and risk of contamination to nearby parts or equipment.",
+      "steps": [
+        "walk_to emergency_stop_panel",
+        "press_button red_estop_button",
+        "notify safety_officer",
+        "walk_to spill_kit_cabinet",
+        "pick spill_kit",
+        "place spill_location",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["emergency_stop_panel", "red_estop_button", "safety_officer", "spill_kit_cabinet", "spill_kit", "spill_location", "shift_supervisor"]
+    },
+    {
+      "ref": "emergency_estop",
+      "title": "Emergency Stop Activation",
+      "condition": "A personnel safety hazard, uncontrolled mechanical failure, or fire has been detected in the labeler work area, requiring immediate full machine shutdown.",
+      "steps": [
+        "walk_to emergency_stop_panel",
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "notify safety_officer",
+        "wait 30",
+        "read_sensor air_pressure_sensor"
+      ],
+      "equipment": ["emergency_stop_panel", "red_estop_button", "shift_supervisor", "safety_officer", "air_pressure_sensor"]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Shift Startup Sequence",
+      "condition": "The start of a production shift or a machine restart after extended downtime requires a systematic pre-run check before label application begins.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor print_head_temp_sensor",
+        "read_sensor air_pressure_sensor",
+        "read_sensor label_stock_sensor",
+        "read_sensor ribbon_stock_sensor",
+        "press_button start_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["control_panel", "print_head_temp_sensor", "air_pressure_sensor", "label_stock_sensor", "ribbon_stock_sensor", "start_button", "shift_supervisor"]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "End-of-Shift Shutdown Sequence",
+      "condition": "The production shift has ended and the labeler must be powered down in the correct sequence to prevent damage and prepare the machine for the next shift.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button pause_button",
+        "read_sensor print_head_temp_sensor",
+        "wait 60",
+        "walk_to print_head_station",
+        "pick solvent_wipe",
+        "place print_head_station"
+      ],
+      "equipment": ["control_panel", "pause_button", "print_head_temp_sensor", "print_head_station", "solvent_wipe"]
+    },
+    {
+      "ref": "print_quality_inspection",
+      "title": "Print Quality and Barcode Verification",
+      "condition": "A scheduled quality check interval has been reached, or a new batch start requires confirming that print quality and barcode readability meet specification before full-rate production.",
+      "steps": [
+        "walk_to quality_inspection_station",
+        "read_sensor print_quality_sensor",
+        "pick sample_label",
+        "place quality_inspection_station",
+        "read_sensor label_placement_sensor",
+        "notify quality_inspector",
+        "walk_to control_panel"
+      ],
+      "equipment": ["quality_inspection_station", "print_quality_sensor", "sample_label", "label_placement_sensor", "quality_inspector", "control_panel"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "label_web_jam",
+      "text": "Was running line 4 this morning on the 6am shift and the whole unit just stopped pulling the web through — labels were bunching up right past the feed roller, looked like a folded wad jammed in there. Had to stop the conveyor before parts piled up."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "label_web_jam",
+      "text": "Third shift, unit near bay 2 — the machine started making a grinding noise and I looked over and the strip had folded back on itself and was stuck between the guide plates. Nothing was coming out the other end at all."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "label_web_jam",
+      "text": "Around 2pm on the day shift, labels were stacking up on the deck plate instead of feeding through. You could see the web had kinked and wasn't tracking straight in the channel anymore. Line 3 had to come down."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "print_head_overheat",
+      "text": "Line 2, second shift — the unit threw an alarm I'd never seen before, solid red on the panel. The print head housing was burning hot to the touch, way hotter than normal warm. I backed away and called maintenance."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "print_head_overheat",
+      "text": "First shift on the north end labeler — machine shut itself down mid-run with a red fault light. Head felt like it had been running all day with zero airflow. Maintenance had to come out before we could do anything."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "print_head_overheat",
+      "text": "Late afternoon shift, line 3 — I went to check on the unit and caught a smell like hot plastic coming off the print area. The number on the screen was way above the green zone. We stopped everything immediately."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "print_head_underheat",
+      "text": "Day shift, line 1 — labels coming off the unit were barely readable. The barcode scanner at the end of the line was rejecting almost every single one. No alarm anywhere, just garbage output for about 15 minutes."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "print_head_underheat",
+      "text": "Second shift, the unit by the south loading dock — prints were coming out super faint, like the ink barely transferred. No red lights or anything on the panel, just bad output for 20 minutes before someone caught it and flagged it."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "print_head_underheat",
+      "text": "Was doing a routine walk on third shift and noticed the labels off the line 5 machine looked washed out and patchy. Nothing alarming on the screen, but the head clearly hadn't come up to where it needed to be — took forever after the overnight cold soak."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "applicator_pad_miss",
+      "text": "Parts were coming down line 3 with no labels on them — the arm was swinging but nothing was sticking. The counter was ticking up like crazy. About 1 in 5 was making it on, if that."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "applicator_pad_miss",
+      "text": "End of first shift, unit near station 7 — saw the pad slam down on the part and bounce right off without leaving a label. Happened several times in a row before the alarm finally went off on the panel."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "applicator_pad_miss",
+      "text": "Third shift, line 6 — the applicator arm was cycling perfectly fine but labels just weren't transferring to parts. Bare parts going down the line. The miss counter tripped the alarm after about 8 consecutive failures."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "low_label_stock_warning",
+      "text": "Around mid-shift on line 2, the panel started flashing a yellow indicator I don't usually see until closer to end of roll. Machine was still printing fine, the spool just looked thin. Still had plenty of time but wanted to get ahead of it."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "low_label_stock_warning",
+      "text": "First shift, line 4 — got a caution notification on the screen about the roll getting low. Still running, no issues, maybe 20 minutes of stock left. Enough time to grab a replacement before it got critical."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "low_label_stock_warning",
+      "text": "Third shift, bay 3 unit — screen showed a yellow caution while the machine kept going. Not stopped, just a heads-up that we'd need to swap before the next break. Labels were applying fine, just the indicator giving us warning."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "label_stock_empty",
+      "text": "Line 3, second shift — the machine just stopped dead. Bare core on the spindle, nothing left. Conveyor was still moving but parts were rolling by completely unlabeled. Had to stop the whole line."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "label_stock_empty",
+      "text": "First shift, unit at the end of bay 1 — the roll ran out mid-production and the whole labeler seized up with an alarm going. Parts moving through with nothing on them, had to halt the conveyor and pull everything that got past."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "label_stock_empty",
+      "text": "Third shift, line 5 — came back from break and the machine had stopped itself. Spindle was empty, alarm was screaming, and a batch of parts had gotten by unlabeled. Had to pull them all for QC inspection before we could restart."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "ribbon_snap",
+      "text": "Line 2, morning shift — heard a snap and then the output went completely white. Looked inside and the ribbon had broken in two, one end still wrapped on the takeup, the other just hanging loose. No print at all after that."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "ribbon_snap",
+      "text": "Third shift on the bay 4 unit — labels were coming off completely blank, not even a smear of ink. Pulled the cover and found the ribbon had torn right in the middle of the roll. Fault alarm was already going when I got there."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "low_ribbon_warning",
+      "text": "Mid-shift on line 1 — panel threw a yellow indicator about the ribbon. Still printing, looked fine quality-wise, but the gauge showed maybe 15 to 20 percent left on the spool. No issue yet, just heads-up time."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "low_ribbon_warning",
+      "text": "Second shift, south end machine — got a caution indicator on the screen that the ribbon was getting close to end. Nothing wrong with the prints at all, everything scanning fine, just a signal that a change was coming up soon."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "air_pressure_low_warning",
+      "text": "Line 3, first shift — the applicator was still cycling but felt sluggish, like it was not hitting the parts with its normal force. Panel showed a yellow indicator and a number sitting below the green band. Still moving, just weak."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "air_pressure_low_warning",
+      "text": "Second shift, bay 2 unit — labels were not applying as firmly as usual, a few had loose corners. Checked the panel and the pressure readout was below where it should be, still showing a number but in the yellow zone."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "air_pressure_sudden_collapse",
+      "text": "Line 4, first shift — the applicator arm froze mid-stroke, stuck halfway down. Then I heard air bleeding out fast. Pressure display went from normal to basically zero in about two seconds. Arm didn't move after that."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "air_pressure_sudden_collapse",
+      "text": "Third shift on the north labeler — the whole pneumatic system just died. Arm stopped where it was, zero pressure on the gauge, not low, just nothing. Sounded like a line or fitting had let go somewhere behind the panel."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "print_head_cleaning_routine",
+      "text": "Day shift, line 2 — print quality was getting streaky, like there was a film or residue coating the head element. Maintenance said it was due for a scheduled clean anyway. We took it down at the break and wiped it out."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "print_head_cleaning_routine",
+      "text": "First shift, bay 3 unit — the head was leaving a consistent vertical smear on every label, same spot every time. Not a mechanical failure, just dirty from a few days of buildup. Maintenance took it down during the planned cleaning window."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "applicator_pad_replacement",
+      "text": "Line 5, second shift — the pad looked like it had been chewed up. One edge was peeling back and a corner was completely flattened. It was on the PM calendar to swap it out this week anyway, so we did it at the lunch break."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "applicator_pad_replacement",
+      "text": "Third shift, unit by bay 6 — the foam pad had a visible tear running across it and was leaving adhesive streaks on a few parts where it was making contact. Maintenance pulled it for a swap."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "label_sensor_calibration",
+      "text": "First shift, line 3 — after we switched to the new smaller label format, the machine kept triggering gap faults even when the labels were feeding perfectly. It was seeing gaps where there weren't any."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "label_sensor_calibration",
+      "text": "Second shift, bay 1 unit — the machine was skipping every other label position, like it was double-counting the gaps between labels. We had switched to a different stock run earlier that shift and it never got dialed in."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "ribbon_roll_change",
+      "text": "Line 2, scheduled changeover during the lunch window — old ribbon was at end of life, empty core on the spindle, right on schedule per the PM sheet. Machine was already paused for the changeover."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "ribbon_roll_change",
+      "text": "First shift, bay 5 unit — PM calendar showed it was time for the ribbon change this morning. Machine was paused for the planned window and we swapped the core out as scheduled."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "label_roll_change",
+      "text": "Line 4, product changeover at 10am — we still had a solid partial roll from the previous run but had to swap over to the new label format for the next batch before we could start. Pulled the current roll and saved it."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "label_roll_change",
+      "text": "Second shift, unit at bay 3 — changing to a different part number meant pulling the current roll with about 30 percent still on it and loading the correct stock for the new job. The old roll went back to the shelf."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "air_filter_replacement",
+      "text": "First shift, bay 2 unit — maintenance calendar showed the filter was past its service interval. The differential pressure indicator on the side of the filter housing was sitting in the red zone."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "air_filter_replacement",
+      "text": "Third shift, line 5 — the filter indicator had been in the caution zone for a couple of days. Finally got scheduled for replacement during the overnight downtime window. Nothing failing yet, just due."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "lockout_tagout",
+      "text": "Line 3, before the applicator pad swap — maintenance needed to get inside the mechanism to access the pad mount. Had to lock the machine out completely before anyone would reach their hands in there."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "lockout_tagout",
+      "text": "First shift, bay 4 unit — print head cleaning required opening the protective cover and getting hands near the heating element. Maintenance wouldn't touch it until the energy was locked out and tagged. Standard procedure before going inside."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "adhesive_solvent_spill",
+      "text": "Line 1, second shift — a container of cleaning solvent got knocked off the shelf next to the labeler. Puddle on the floor right around the base of the unit, right in the walking path. Slip risk for anyone nearby."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "adhesive_solvent_spill",
+      "text": "Third shift, bay 6 — noticed a sticky mess spreading on the floor under the label supply side of the machine. Looked like adhesive had been dripping off the web and pooling on the deck over several hours."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "emergency_estop",
+      "text": "Second shift, line 2 — a technician's sleeve got caught near the applicator arm when it cycled. Hit the big red button immediately, didn't wait."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "emergency_estop",
+      "text": "First shift, bay 3 — saw smoke starting to come from behind the control panel enclosure. Did not wait to figure out what it was, just slapped the button and got everyone stepped back from the machine."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "startup_procedure",
+      "text": "Start of first shift, line 4 — ran through all the pre-run checks before giving it the green light. Had to confirm the head was at temperature and the air was holding steady before calling the supervisor to approve the run."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "startup_procedure",
+      "text": "Monday morning on the north labeler — machine had been cold and sitting all weekend. Went through the full checklist to confirm head temp was up, pressure was stable, and stock levels were good before we kicked it off."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of second shift, line 3 — ran through the shutdown sequence after the last batch, let the head cool for a minute, then gave it a quick wipe so third shift would be starting with a clean head."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of first shift, bay 5 unit — finished the last run, paused the machine, confirmed the head had cooled a bit, wiped it down, and left it ready for the next shift. Standard wrap-up before walking off the floor."
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "print_quality_inspection",
+      "text": "Start of the day shift, line 2 — new batch of parts meant we had to pull a sample label and run it through the scanner to confirm the barcode was good before ramping up to full speed. QC needed sign-off."
+    },
+    {
+      "id": "inc_050",
+      "sop_ref": "print_quality_inspection",
+      "text": "Second shift, bay 4 unit — QC called for an inspection check mid-run per the batch audit schedule. Had to grab a label, check the scan result at the verification station, and confirm placement was within spec before we could keep going."
+    }
+  ]
+}

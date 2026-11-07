@@ -1,0 +1,747 @@
+{
+  "family": "Pallet Stretch Wrapper",
+  "sops": [
+    {
+      "ref": "film_tension_low",
+      "title": "Film Tension Below Minimum Setpoint",
+      "condition": "The film_tension_sensor reads below 120 N while the turntable is actively rotating, indicating the stretch film is applying insufficient holding force to the pallet load.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Read film_tension_sensor to confirm the reading is below 120 N",
+        "Press cycle_stop_button to halt the active wrap cycle",
+        "Read pre_stretch_ratio_sensor to check the current pre-stretch percentage",
+        "Notify maintenance_tech with the current film_tension_sensor and pre_stretch_ratio_sensor readings",
+        "Wait 300 seconds for maintenance_tech to arrive and adjust the pre-stretch roller gap",
+        "Press green_start_button only after maintenance_tech confirms tension is within the 120-280 N specification"
+      ],
+      "equipment": [
+        "film_tension_sensor",
+        "pre_stretch_ratio_sensor",
+        "cycle_stop_button",
+        "green_start_button",
+        "stretch_wrapper_station",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "film_tension_high",
+      "title": "Film Tension Above Maximum Setpoint",
+      "condition": "The film_tension_sensor reads above 280 N during active wrapping, indicating the film is over-stretched and at immediate risk of tearing.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Press cycle_stop_button immediately to prevent film tear",
+        "Read film_tension_sensor to log the peak over-tension value",
+        "Read pre_stretch_ratio_sensor to determine if the roller ratio is set too high",
+        "Notify maintenance_tech with both sensor readings and the current pallet ID",
+        "Wait 180 seconds for maintenance_tech to reduce the pre-stretch roller gap",
+        "Press yellow_reset_button to clear the tension fault alarm before restarting"
+      ],
+      "equipment": [
+        "film_tension_sensor",
+        "pre_stretch_ratio_sensor",
+        "cycle_stop_button",
+        "yellow_reset_button",
+        "stretch_wrapper_station",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "film_break_mid_wrap",
+      "title": "Film Break During Active Wrap Cycle",
+      "condition": "The film_break_detector activates mid-cycle indicating the stretch film has physically ruptured and is no longer attached to the pallet load.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Press cycle_stop_button to stop turntable rotation immediately",
+        "Pick film_tail_end from the pallet load surface at the break point",
+        "Place film_tail_end into the film_waste_bin",
+        "Walk to film_carriage_control_panel",
+        "Press film_carriage_down_button to lower the carriage to the base position",
+        "Notify shift_supervisor that the wrap cycle must be restarted from the beginning"
+      ],
+      "equipment": [
+        "film_break_detector",
+        "cycle_stop_button",
+        "film_tail_end",
+        "film_waste_bin",
+        "film_carriage_control_panel",
+        "film_carriage_down_button",
+        "stretch_wrapper_station",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "film_runout",
+      "title": "Film Roll Depleted Mid-Cycle",
+      "condition": "The film_roll_sensor detects that the active film roll diameter has dropped below the minimum threshold of 50 mm, signaling the roll is exhausted.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Press cycle_stop_button to pause the wrap cycle",
+        "Read film_roll_sensor to confirm roll diameter is below 50 mm",
+        "Pick film_roll_depleted from the film carriage mandrel",
+        "Place film_roll_depleted into the film_waste_bin",
+        "Walk to film_storage_rack and pick film_roll_new",
+        "Place film_roll_new onto the film carriage mandrel and thread the film tail through the pre-stretch rollers"
+      ],
+      "equipment": [
+        "film_roll_sensor",
+        "cycle_stop_button",
+        "film_roll_depleted",
+        "film_roll_new",
+        "film_waste_bin",
+        "film_storage_rack",
+        "stretch_wrapper_station"
+      ]
+    },
+    {
+      "ref": "turntable_slow",
+      "title": "Turntable Speed Below Target RPM",
+      "condition": "The turntable_speed_sensor reads below 4 RPM for more than 10 consecutive seconds while a wrap cycle is active, indicating a partial drive loss but with the turntable still rotating.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Read turntable_speed_sensor to confirm the sustained under-speed condition",
+        "Press cycle_stop_button to prevent an under-wrapped pallet from leaving the station",
+        "Read motor_temp_sensor to check for drive motor thermal stress",
+        "Notify maintenance_tech with the turntable_speed_sensor and motor_temp_sensor readings",
+        "Wait 240 seconds for maintenance_tech to inspect the turntable drive belt and VFD settings"
+      ],
+      "equipment": [
+        "turntable_speed_sensor",
+        "motor_temp_sensor",
+        "cycle_stop_button",
+        "stretch_wrapper_station",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "turntable_stopped",
+      "title": "Turntable Fully Stopped During Active Cycle",
+      "condition": "The turntable_speed_sensor reads exactly zero RPM while the PLC reports the wrap cycle is in an active running state and no operator stop command has been issued.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Read turntable_speed_sensor to confirm the zero-speed fault reading",
+        "Press red_estop_button to place the machine in a safe state",
+        "Read turntable_load_sensor to determine whether an overweight pallet caused the stall",
+        "Notify maintenance_tech with turntable_speed_sensor and turntable_load_sensor values and the stall timestamp",
+        "Wait 600 seconds for maintenance_tech to clear the drive fault before releasing the e-stop"
+      ],
+      "equipment": [
+        "turntable_speed_sensor",
+        "turntable_load_sensor",
+        "red_estop_button",
+        "wrapper_main_panel",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "turntable_overload",
+      "title": "Turntable Drive Motor Overload Trip",
+      "condition": "The turntable_load_sensor triggers an overcurrent trip on the drive motor controller, shutting down turntable motion entirely and illuminating the motor overload fault indicator on the main panel.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Read turntable_load_sensor to record the overcurrent value at the moment of trip",
+        "Press red_estop_button to lock out further drive restart attempts",
+        "Notify maintenance_tech and shift_supervisor that a motor overload trip has occurred",
+        "Wait 900 seconds for the overload relay to thermally reset and for maintenance_tech to inspect the motor",
+        "Press yellow_reset_button only after maintenance_tech clears the motor overload relay and authorizes restart"
+      ],
+      "equipment": [
+        "turntable_load_sensor",
+        "red_estop_button",
+        "yellow_reset_button",
+        "wrapper_main_panel",
+        "maintenance_tech",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "film_carriage_jam",
+      "title": "Film Carriage Vertical Travel Jam",
+      "condition": "The film_carriage_position_sensor reports that the carriage has not moved more than 2 mm in 8 seconds despite an active vertical travel command from the PLC.",
+      "steps": [
+        "Walk to film_carriage_control_panel",
+        "Read film_carriage_position_sensor to record the stuck carriage height",
+        "Press cycle_stop_button to halt all carriage and turntable motion",
+        "Press film_carriage_up_button and hold for 3 seconds to attempt to free minor mechanical binding",
+        "Read film_carriage_position_sensor again to determine whether the carriage has moved",
+        "Notify maintenance_tech if the carriage position reading has not changed after the manual bump attempt"
+      ],
+      "equipment": [
+        "film_carriage_position_sensor",
+        "film_carriage_control_panel",
+        "cycle_stop_button",
+        "film_carriage_up_button",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "cutter_jam",
+      "title": "Cutter Blade Failed to Actuate at Cycle End",
+      "condition": "The cutter_position_sensor does not confirm a cut-complete signal within 5 seconds of the cycle-end command being issued by the PLC, indicating the cutter mechanism did not fire.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Read cutter_position_sensor to confirm the cutter did not reach its full-cut position",
+        "Press cutter_manual_actuate_button once to attempt a manual cut",
+        "Read cutter_position_sensor to verify whether the manual actuation succeeded",
+        "Pick film_tail_end manually from the pallet surface if the cutter still did not fire",
+        "Place film_tail_end into the film_waste_bin",
+        "Notify maintenance_tech to inspect the cutter solenoid and blade assembly"
+      ],
+      "equipment": [
+        "cutter_position_sensor",
+        "cutter_manual_actuate_button",
+        "film_tail_end",
+        "film_waste_bin",
+        "stretch_wrapper_station",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "load_height_over",
+      "title": "Pallet Load Height Exceeds Maximum Sensor Limit",
+      "condition": "The load_height_sensor detects an inbound pallet load taller than 2200 mm, which exceeds the wrapper safe operating height and must be rejected before any wrapping begins.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Read load_height_sensor to confirm the over-height measurement",
+        "Press cycle_stop_button to prevent the wrap cycle from initiating",
+        "Notify shift_supervisor with the load_height_sensor reading and the pallet ID",
+        "Wait 120 seconds for shift_supervisor to arrange pallet re-staging or load reduction",
+        "Read load_height_sensor after correction to confirm the load is within the 2200 mm limit before pressing green_start_button"
+      ],
+      "equipment": [
+        "load_height_sensor",
+        "cycle_stop_button",
+        "green_start_button",
+        "stretch_wrapper_station",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "load_height_under",
+      "title": "Pallet Load Below Minimum Height Threshold",
+      "condition": "The load_height_sensor reads below 300 mm, indicating the pallet load is too short for the film carriage to engage properly and the wrapping pattern will miss the load entirely.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Read load_height_sensor to confirm the under-height measurement",
+        "Press cycle_stop_button to prevent a wasteful and ineffective wrap cycle",
+        "Notify quality_inspector with the load_height_sensor reading and the pallet ID",
+        "Wait 180 seconds for quality_inspector to assess whether additional product can be staged onto the pallet",
+        "Read load_height_sensor after correction to verify the load exceeds the 300 mm minimum before restarting"
+      ],
+      "equipment": [
+        "load_height_sensor",
+        "cycle_stop_button",
+        "stretch_wrapper_station",
+        "quality_inspector"
+      ]
+    },
+    {
+      "ref": "photoeye_fault",
+      "title": "Safety Photoeye Sensor Fault or Blocked Beam",
+      "condition": "The photoeye_sensor_A or photoeye_sensor_B reports a blocked or degraded beam signal while the wrapper turntable is idle, indicating either a safety zone intrusion or a dirty sensor lens.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Read photoeye_sensor_A to identify whether the A-channel beam is faulted",
+        "Read photoeye_sensor_B to check whether the B-channel beam is also affected",
+        "Press cycle_stop_button to prevent any inadvertent cycle start while the safety zone status is uncertain",
+        "Pick cleaning_cloth from the maintenance_supply_cart",
+        "Place cleaning_cloth against each photoeye lens in turn and wipe to remove film dust and residue",
+        "Notify maintenance_tech if the fault persists after lens cleaning"
+      ],
+      "equipment": [
+        "photoeye_sensor_A",
+        "photoeye_sensor_B",
+        "cycle_stop_button",
+        "cleaning_cloth",
+        "maintenance_supply_cart",
+        "stretch_wrapper_station",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "loto_procedure",
+      "title": "Lockout Tagout Before Wrapper Maintenance",
+      "condition": "Any planned maintenance task including blade replacement, carriage servicing, or belt inspection requires the stretch wrapper to be fully de-energized under lockout-tagout before work begins.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Press red_estop_button to halt all machine motion",
+        "Press main_disconnect_switch to remove power from the stretch wrapper",
+        "Pick loto_padlock from the loto_lockbox",
+        "Place loto_padlock onto the main_disconnect_switch hasp to lock it in the off position",
+        "Pick safety_tag from the loto_lockbox",
+        "Place safety_tag onto the loto_padlock to identify the authorized worker",
+        "Notify maintenance_tech that lockout is complete and maintenance work may begin"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "main_disconnect_switch",
+        "loto_padlock",
+        "loto_lockbox",
+        "safety_tag",
+        "wrapper_main_panel",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "film_carriage_lubrication",
+      "title": "Film Carriage Vertical Mast Rail Lubrication",
+      "condition": "The preventive maintenance schedule indicates the film carriage vertical mast rails are due for lubrication every 500 wrap cycles or weekly, whichever comes first.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Press red_estop_button to secure the wrapper before lubrication work",
+        "Walk to film_carriage_control_panel",
+        "Press film_carriage_up_button to raise the carriage to the top of the mast for full-rail access",
+        "Pick lubricant_bottle from the maintenance_supply_cart",
+        "Place lubricant_bottle applicator tip against each mast rail bearing channel in turn and apply two full strokes per rail",
+        "Press film_carriage_down_button to cycle the carriage fully down and verify smooth travel after lubrication"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "wrapper_main_panel",
+        "film_carriage_control_panel",
+        "film_carriage_up_button",
+        "film_carriage_down_button",
+        "lubricant_bottle",
+        "maintenance_supply_cart"
+      ]
+    },
+    {
+      "ref": "prestretch_roller_cleaning",
+      "title": "Pre-Stretch Roller Film Buildup Cleaning",
+      "condition": "A sustained drop in pre_stretch_ratio_sensor readings or visible film residue buildup on the pre-stretch rollers indicates reduced effective stretch ratio requiring roller cleaning.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Press red_estop_button to stop the machine before roller access",
+        "Read pre_stretch_ratio_sensor to record the baseline ratio before cleaning",
+        "Pick cleaning_cloth from the maintenance_supply_cart",
+        "Place cleaning_cloth against the upper pre-stretch roller surface and scrub to remove film residue, then repeat for the lower pre-stretch roller",
+        "Read pre_stretch_ratio_sensor after cleaning to confirm the ratio has returned to the 250 percent setpoint",
+        "Notify maintenance_tech if the ratio remains low after cleaning, indicating roller surface wear"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "pre_stretch_ratio_sensor",
+        "cleaning_cloth",
+        "maintenance_supply_cart",
+        "wrapper_main_panel",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "cutter_blade_replacement",
+      "title": "Cutter Blade Scheduled Replacement",
+      "condition": "The cutter blade replacement interval of 10,000 cut cycles has been reached, or the cutter_position_sensor shows extended actuation time per cycle indicating blade dullness.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Press red_estop_button and confirm lockout per loto_procedure before touching the cutter",
+        "Walk to stretch_wrapper_station",
+        "Pick cutter_blade_assembly from the cutter housing using the blade removal handle",
+        "Place cutter_blade_assembly into the blade_disposal_container",
+        "Pick cutter_blade_new from the maintenance_supply_cart",
+        "Place cutter_blade_new into the cutter housing and secure the retaining clip",
+        "Notify maintenance_tech to verify blade seating and authorize lockout release"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "wrapper_main_panel",
+        "cutter_blade_assembly",
+        "cutter_housing",
+        "blade_disposal_container",
+        "cutter_blade_new",
+        "maintenance_supply_cart",
+        "stretch_wrapper_station",
+        "maintenance_tech"
+      ]
+    },
+    {
+      "ref": "turntable_belt_inspection",
+      "title": "Turntable Drive Belt Inspection and Replacement",
+      "condition": "The preventive maintenance schedule requires turntable drive belt inspection every 1,000 operating hours, or immediately when turntable_speed_sensor readings vary more than 0.5 RPM at constant load.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Press red_estop_button and confirm lockout per loto_procedure before opening the drive housing",
+        "Walk to stretch_wrapper_station",
+        "Read turntable_speed_sensor to log the current variance reading before belt access",
+        "Pick turntable_belt_worn from the drive belt housing after removing the access panel",
+        "Place turntable_belt_worn into the parts_return_bin",
+        "Pick turntable_belt_new from the maintenance_supply_cart",
+        "Place turntable_belt_new onto the drive pulleys and verify tension with belt_tension_gauge"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "wrapper_main_panel",
+        "turntable_speed_sensor",
+        "turntable_belt_worn",
+        "drive_belt_housing",
+        "turntable_belt_new",
+        "parts_return_bin",
+        "maintenance_supply_cart",
+        "belt_tension_gauge",
+        "stretch_wrapper_station"
+      ]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Emergency Stop Activation During Operation",
+      "condition": "An operator observes any unsafe condition during wrapping including a person entering the safety zone, film wrapping around a non-load object, or any uncontrolled machine motion.",
+      "steps": [
+        "Press red_estop_button at the nearest panel without delay",
+        "Walk to stretch_wrapper_station to visually confirm all machine motion has ceased",
+        "Read turntable_speed_sensor to verify zero-speed state",
+        "Read film_carriage_position_sensor to verify the carriage has stopped moving",
+        "Notify shift_supervisor immediately with the reason for e-stop activation and the approximate time",
+        "Wait 60 seconds for shift_supervisor to inspect the safety zone and authorize restart"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "turntable_speed_sensor",
+        "film_carriage_position_sensor",
+        "stretch_wrapper_station",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "film_debris_cleanup",
+      "title": "Stretch Film Debris Accumulation Cleanup",
+      "condition": "Stretch film scraps, cut tails, or loose wrap fragments have accumulated on the floor within 1 meter of the wrapper base, creating a slip and entanglement hazard for personnel and equipment.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Press cycle_stop_button to halt any active or pending wrap cycle before entering the floor zone",
+        "Pick film_debris from the floor around the wrapper base",
+        "Place film_debris into the film_waste_bin",
+        "Read photoeye_sensor_A to confirm no debris remains in the safety beam path",
+        "Notify shift_supervisor that the cleanup is complete and the area is safe to resume operations"
+      ],
+      "equipment": [
+        "cycle_stop_button",
+        "film_debris",
+        "film_waste_bin",
+        "photoeye_sensor_A",
+        "stretch_wrapper_station",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Daily Startup Sequence Before First Production Run",
+      "condition": "The stretch wrapper is cold-started at the beginning of each production shift and requires a systematic readiness check before the first pallet is placed on the turntable.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Press green_start_button to power up the control panel and initialize the PLC",
+        "Read film_tension_sensor to confirm tension reads within the 120 to 280 N window",
+        "Read turntable_speed_sensor during the jog test to verify the turntable reaches 6 RPM within 5 seconds",
+        "Read load_height_sensor to confirm the height sensor self-test returns a valid non-fault reading",
+        "Read photoeye_sensor_A and photoeye_sensor_B to confirm both safety beams are unobstructed",
+        "Notify shift_supervisor that the wrapper has passed the startup checklist and is cleared for production"
+      ],
+      "equipment": [
+        "wrapper_main_panel",
+        "green_start_button",
+        "film_tension_sensor",
+        "turntable_speed_sensor",
+        "load_height_sensor",
+        "photoeye_sensor_A",
+        "photoeye_sensor_B",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "shift_shutdown",
+      "title": "End-of-Shift Shutdown Sequence",
+      "condition": "Production has concluded for the current shift and the stretch wrapper must be safely shut down with film secured and the area cleared before handoff or overnight.",
+      "steps": [
+        "Walk to stretch_wrapper_station",
+        "Press cycle_stop_button to ensure no wrap cycle is pending or mid-queue",
+        "Pick film_tail_end from the film carriage to prevent unraveling",
+        "Place film_tail_end onto the film roll surface and press to adhere with a tape tab",
+        "Walk to wrapper_main_panel",
+        "Press red_estop_button to cut control power for the duration of the shutdown period",
+        "Notify shift_supervisor that the wrapper is shut down and the area is clear for the next shift"
+      ],
+      "equipment": [
+        "cycle_stop_button",
+        "film_tail_end",
+        "wrapper_main_panel",
+        "red_estop_button",
+        "stretch_wrapper_station",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "tension_calibration",
+      "title": "Film Pre-Stretch Tension System Calibration",
+      "condition": "Following any pre-stretch roller replacement, or when the pre_stretch_ratio_sensor drifts more than 5 percent from the 250 percent target stretch ratio, a full tension calibration procedure is required.",
+      "steps": [
+        "Walk to wrapper_main_panel",
+        "Press red_estop_button to secure the machine before calibration setup",
+        "Pick calibration_weight_set from the maintenance_supply_cart",
+        "Place calibration_weight_set onto the film carriage load cell bracket",
+        "Read film_tension_sensor to record the measured tension against the known calibration weight value",
+        "Read pre_stretch_ratio_sensor to verify the displayed ratio matches the reference value within 2 percent",
+        "Notify maintenance_tech if deviation exceeds 2 percent so the sensor zero-point can be adjusted",
+        "Press yellow_reset_button to accept calibration and return the wrapper to run mode"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "wrapper_main_panel",
+        "calibration_weight_set",
+        "film_tension_sensor",
+        "pre_stretch_ratio_sensor",
+        "maintenance_supply_cart",
+        "yellow_reset_button",
+        "maintenance_tech"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-SW-001",
+      "sop_ref": "film_tension_low",
+      "text": "Second shift on line 3, pallets coming off the conveyor had film just hanging loose around them like it was not even stretched. Grabbed the next one and same thing - the whole load was basically draped in film with zero grip. Pallets were wobbling on the forks when we tried to move them to staging."
+    },
+    {
+      "id": "INC-SW-002",
+      "sop_ref": "film_tension_low",
+      "text": "The unit near the loading dock was putting out pallets where you could push the wrap sideways with one finger. Not breaking at all, just completely slack. Must have started a couple cycles before anyone noticed because we had three loose pallets already on the outbound lane."
+    },
+    {
+      "id": "INC-SW-003",
+      "sop_ref": "film_tension_high",
+      "text": "Wrapper on line 2 was threatening to snap the film every cycle - you could actually hear it creaking under load. Film was pulled almost translucent across the corners of the boxes. Stopped it before it tore but a few more rotations and it would have gone."
+    },
+    {
+      "id": "INC-SW-004",
+      "sop_ref": "film_tension_high",
+      "text": "Had a pallet on third shift where the top tier of cartons was getting crushed inward - film was so overtightened it was collapsing the flaps. Never seen it compress the product like that. The film itself was still intact but the load inside was getting damaged."
+    },
+    {
+      "id": "INC-SW-005",
+      "sop_ref": "film_break_mid_wrap",
+      "text": "Film snapped clean on the dock wrapper in the middle of a run. Heard a loud crack and then film was flapping all over the place with the turntable still spinning. Pallet only got about half wrapped before everything went sideways."
+    },
+    {
+      "id": "INC-SW-006",
+      "sop_ref": "film_break_mid_wrap",
+      "text": "Came around the corner on line 3 and saw film trailing off the back of the carriage dragging on the floor, turntable still going with a bare pallet sitting on it. No idea when it happened - could have been running bare for two or three rotations before I spotted it."
+    },
+    {
+      "id": "INC-SW-007",
+      "sop_ref": "film_break_mid_wrap",
+      "text": "Film let go halfway through on Friday night and because the alarm was not very loud, the operator on the far side of the bay did not notice for a couple minutes. Had to strip the partial wrap off the pallet and restart the whole cycle from scratch."
+    },
+    {
+      "id": "INC-SW-008",
+      "sop_ref": "film_runout",
+      "text": "Pallet came out of the line 4 wrapper with wrap only on the bottom half and the top completely bare. Found the roll had gone empty and the tail tucked itself under the pallet skid. Nobody caught it until the pallet was already on the outbound conveyor headed to dock."
+    },
+    {
+      "id": "INC-SW-009",
+      "sop_ref": "film_runout",
+      "text": "Roll on the dock wrapper ran out right in the middle of a cycle. Machine kept going through the motions - carriage traveling up and down, turntable spinning - but nothing was actually coming off the carriage. Basically wrapping air for the last several rotations."
+    },
+    {
+      "id": "INC-SW-010",
+      "sop_ref": "turntable_slow",
+      "text": "Turntable on the dock unit was creeping around like it was dragging through mud. Still moving but at maybe half normal speed. Film was going on way too loose and the spiral pitch was all off because the table was going slow while the carriage kept cycling at normal rate."
+    },
+    {
+      "id": "INC-SW-011",
+      "sop_ref": "turntable_slow",
+      "text": "Pallets coming off line 3 were spiral-wrapped too dense vertically - too many layers stacked tight together near the base. Took a minute to figure out that the turntable was running slow so the carriage kept covering the same lower section repeatedly. No alarm went off, just the output looked wrong."
+    },
+    {
+      "id": "INC-SW-012",
+      "sop_ref": "turntable_slow",
+      "text": "Second shift the wrapper was clearly laboring - could hear the motor straining and rotation was noticeably sluggish. It was hunting too, going a bit faster then slowing down then faster again in a rhythm. Still turning but definitely not right."
+    },
+    {
+      "id": "INC-SW-013",
+      "sop_ref": "turntable_stopped",
+      "text": "Dead stop in the middle of a cycle with no warning - turntable just froze. Alarm did not come on for about ten seconds after. Pallet was sitting there half wrapped with the carriage up in the air still trying to travel down. Film was piling up at the stuck position."
+    },
+    {
+      "id": "INC-SW-014",
+      "sop_ref": "turntable_stopped",
+      "text": "Table just quit with about three rotations left in the cycle. Carriage was at the top on its way back down. No movement at all on the turntable but the fault light was not lit initially so I thought it was done with the cycle. It was not - machine was in a hung state."
+    },
+    {
+      "id": "INC-SW-015",
+      "sop_ref": "turntable_overload",
+      "text": "Motor tripped out hard and the whole wrapper shut itself down on line 3. We had a triple-stacked pallet of brake rotors on the table - probably way overweight. OL indicator lit up on the drive panel and the reset was not taking. Had to wait a long time for the relay to cool down."
+    },
+    {
+      "id": "INC-SW-016",
+      "sop_ref": "turntable_overload",
+      "text": "Second shift got a hard shutdown on the dock wrapper with the overload light blinking on the main panel. Pallet was only standard weight but the turntable had been making a grinding noise off and on for a couple days. Looks like the motor finally gave up."
+    },
+    {
+      "id": "INC-SW-017",
+      "sop_ref": "film_carriage_jam",
+      "text": "Carriage on line 3 wrapper froze about four feet off the ground and just sat there humming. Turntable kept going for a moment before stopping. Film wrapped around the stuck carriage position and built up a thick band instead of spiraling up the pallet."
+    },
+    {
+      "id": "INC-SW-018",
+      "sop_ref": "film_carriage_jam",
+      "text": "The carriage on the dock wrapper stopped climbing mid-cycle. Wrap was just piling up at the same height on the pallet making a thick ridge. I actually thought it was a different wrap pattern at first but then realized the carriage had not moved in a while."
+    },
+    {
+      "id": "INC-SW-019",
+      "sop_ref": "film_carriage_jam",
+      "text": "Halfway through a cycle on line 4, the carriage quit moving on the return pass down. Stayed at the top of the mast. Turntable was still going so the film just spiraled loose off the top of the pallet. Had to manually bring the carriage down after killing the cycle."
+    },
+    {
+      "id": "INC-SW-020",
+      "sop_ref": "cutter_jam",
+      "text": "Wrap cycle finished and the turntable stopped but the film just stayed connected to the machine - cutter never fired. Pallet started moving off on the conveyor with film still attached and pulled about six feet of wrap off the roll before it finally snapped. Made a real mess."
+    },
+    {
+      "id": "INC-SW-021",
+      "sop_ref": "cutter_jam",
+      "text": "Cutter did not cut again on the line 3 wrapper. Third time this week. Film just keeps tailing out behind every finished pallet and we have been hand-tearing it each time. Not a sustainable workaround."
+    },
+    {
+      "id": "INC-SW-022",
+      "sop_ref": "load_height_over",
+      "text": "Somebody double-stacked a pallet on line 2 and sent it straight to the wrapper without checking clearance. Load was nearly to the ceiling of the safety cage. Machine tried to initiate but the carriage could not even reach the top of the load to complete the wrap pattern."
+    },
+    {
+      "id": "INC-SW-023",
+      "sop_ref": "load_height_over",
+      "text": "Had a bundle of standing axle shafts come in on first shift that were way too tall. The wrapper started its cycle and the carriage almost clipped the top of the bundle before faulting out. Height fault on the panel. Sent the pallet back to the line to be restacked."
+    },
+    {
+      "id": "INC-SW-024",
+      "sop_ref": "load_height_under",
+      "text": "Some partial pallets from line 4 with only a few boxes on them keep getting queued to the wrapper. There is barely four or five inches of product on the deck. Machine runs a full cycle but the film just wraps the pallet boards, not the product. Completely useless output."
+    },
+    {
+      "id": "INC-SW-025",
+      "sop_ref": "load_height_under",
+      "text": "Empty pallet got queued by mistake on the line 2 conveyor and rolled right into the wrapper. Machine ran the whole cycle on basically nothing. Film just pooled and layered around the base and stringers of the empty pallet deck."
+    },
+    {
+      "id": "INC-SW-026",
+      "sop_ref": "photoeye_fault",
+      "text": "Dock wrapper would not let us start any cycles today. Panel was showing a zone fault but there was absolutely nothing in the safety area. Wiped off the sensor lenses and it cleared right up - film dust had basically caked on them overnight."
+    },
+    {
+      "id": "INC-SW-027",
+      "sop_ref": "photoeye_fault",
+      "text": "The line 3 wrapper has been throwing zone faults intermittently for the past two days even with the area clear. Checked the eyes and both lenses were coated with that milky film residue. Been happening more since we switched to the tackier film grade last month."
+    },
+    {
+      "id": "INC-SW-028",
+      "sop_ref": "loto_procedure",
+      "text": "Maintenance was called in to look at the carriage guide and I walked up to find them already in there working with the machine just sitting on e-stop, no lock on the disconnect. Escalated straight to the shift supervisor."
+    },
+    {
+      "id": "INC-SW-029",
+      "sop_ref": "loto_procedure",
+      "text": "Near miss on third shift - tech was reaching into the cutter area while the machine was only on cycle stop, not locked and tagged. Film carriage could have dropped on him. Written up and a full LOTO refresher is being scheduled for the whole maintenance team."
+    },
+    {
+      "id": "INC-SW-030",
+      "sop_ref": "film_carriage_lubrication",
+      "text": "Carriage on the line 2 wrapper has been squeaking and stuttering when it travels up the mast. Does not stop completely, just sounds dry and you can feel it hesitate on the up-stroke. Gets a little worse each day."
+    },
+    {
+      "id": "INC-SW-031",
+      "sop_ref": "film_carriage_lubrication",
+      "text": "Wrapper by the dock is leaving uneven film distribution on the upper third of the pallets - the wrap pitch changes because the carriage slows noticeably on the upward pass. Looks like the rails are binding from being run dry too long."
+    },
+    {
+      "id": "INC-SW-032",
+      "sop_ref": "prestretch_roller_cleaning",
+      "text": "Film coming off the line 3 wrapper has been looking rough and pebbly on one side for about a week. Not breaking but the stretch looks lower than it should be. The rollers are definitely coated with something - looks like accumulated film skin baked onto the surface."
+    },
+    {
+      "id": "INC-SW-033",
+      "sop_ref": "prestretch_roller_cleaning",
+      "text": "Quality flagged that the pre-stretch on the dock wrapper was running way under target. Physical mark test showed we were getting around 180 percent when we should be at 250. Checked the rollers and they were basically glazed over with debris. Had not been cleaned in a while."
+    },
+    {
+      "id": "INC-SW-034",
+      "sop_ref": "cutter_blade_replacement",
+      "text": "Cutter on line 4 is taking two or three actuations to get through the film at the end of each cycle. It eventually cuts but leaves a ragged chewed-up edge and sometimes a long tail hangs down. We are way past the replacement interval for that blade."
+    },
+    {
+      "id": "INC-SW-035",
+      "sop_ref": "cutter_blade_replacement",
+      "text": "The cutter on the dock wrapper has been smashing the film instead of slicing it - you can see the cut edge is partly melted and torn rather than clean. Blade must be completely blunted. Also taking noticeably longer to complete each cut than it used to."
+    },
+    {
+      "id": "INC-SW-036",
+      "sop_ref": "turntable_belt_inspection",
+      "text": "Turntable speed on the dock wrapper has been hunting all week - goes fast then slows down then speeds back up in a repeating pattern. Sounds like a belt that is slipping or jumping a tooth. Getting worse each shift."
+    },
+    {
+      "id": "INC-SW-037",
+      "sop_ref": "turntable_belt_inspection",
+      "text": "Did the thousand-hour PM on the line 4 wrapper and found the belt had a crack almost all the way through on one side. Would have snapped in service within a few days for sure. Good thing the interval caught it."
+    },
+    {
+      "id": "INC-SW-038",
+      "sop_ref": "estop_activation",
+      "text": "A plant visitor walked into the wrap zone on line 3 while a cycle was running - I hit the e-stop at the end of the panel before they got anywhere near the spinning turntable. Everything stopped clean. Visitor did not seem to realize how close that was."
+    },
+    {
+      "id": "INC-SW-039",
+      "sop_ref": "estop_activation",
+      "text": "Film started wrapping around the corner post of the safety cage on the dock wrapper - a loose piece had slipped off the pallet edge. Slapped the e-stop before it could tighten any further and peeled the film off the post by hand."
+    },
+    {
+      "id": "INC-SW-040",
+      "sop_ref": "estop_activation",
+      "text": "Machine started making a loud banging noise mid-cycle on line 2, something loose in the turntable area. Hit the nearest e-stop immediately without thinking twice. Turned out someone had left a wrench on the turntable deck that was getting flung around inside."
+    },
+    {
+      "id": "INC-SW-041",
+      "sop_ref": "film_debris_cleanup",
+      "text": "Floor around the line 3 wrapper was buried in film scraps and cut tails by the end of second shift. Somebody almost went down in the middle of it during shift lineup. We need to be clearing this stuff out way more often."
+    },
+    {
+      "id": "INC-SW-042",
+      "sop_ref": "film_debris_cleanup",
+      "text": "Film bits were piling up under the turntable skirt on the dock wrapper and started getting pulled into the drive area. Wrapper started putting off a hot-plastic smell. Cleaned it out before anything got worse."
+    },
+    {
+      "id": "INC-SW-043",
+      "sop_ref": "daily_startup",
+      "text": "Came in for first shift and the line 4 wrapper was throwing a tension fault on startup. Film had unrolled itself off the roll overnight and was dragging on the frame, messing with the feed. Took about ten minutes to sort out before we could clear the fault and start running."
+    },
+    {
+      "id": "INC-SW-044",
+      "sop_ref": "daily_startup",
+      "text": "Height sensor on the dock wrapper came up with a no-target fault at startup this morning. Best guess is someone bumped it during the overnight cleaning sweep with the floor scrubber. Had to call maintenance to realign it before we could start the first pallet."
+    },
+    {
+      "id": "INC-SW-045",
+      "sop_ref": "shift_shutdown",
+      "text": "Left for handoff at shift end and the outgoing operator had not shut down the wrapper - left it idling on standby all afternoon with nobody watching it. Film tail was flopping against the mast the whole time and put a kink in the film that caused breaks on the next shift."
+    },
+    {
+      "id": "INC-SW-046",
+      "sop_ref": "shift_shutdown",
+      "text": "Second shift forgot to tape down the film tail on the dock wrapper before clocking out. Came in next morning and the roll had unwound itself onto the floor all around the machine. Had to rethread the entire carriage and lost about half a roll of film."
+    },
+    {
+      "id": "INC-SW-047",
+      "sop_ref": "tension_calibration",
+      "text": "After maintenance swapped the pre-stretch rollers on line 3 the wrapper was running at close to 300 percent stretch when spec is 250. Film was getting dangerously close to tearing on every pallet. Could not use the machine until someone ran the full calibration routine."
+    },
+    {
+      "id": "INC-SW-048",
+      "sop_ref": "tension_calibration",
+      "text": "Sensor check on the dock wrapper came back way off - panel was showing 220 percent but a mark test on the film measured about 260 percent actual stretch. Must have drifted after the last roller cleaning job rattled something loose in the sensor bracket."
+    },
+    {
+      "id": "INC-SW-049",
+      "sop_ref": "film_tension_low",
+      "text": "Quality caught three pallets on line 4 during audit that had passed through the wrapper but the loads were shifting inside the film wrap. Film was there but had basically zero grip on the boxes. Traced it back to the wrapper running with low tension for at least one full hour during third shift."
+    },
+    {
+      "id": "INC-SW-050",
+      "sop_ref": "film_break_mid_wrap",
+      "text": "On line 2 during first shift the film tore about two thirds of the way through a wrap cycle. Operator on the adjacent machine heard the snap and came over. Pallet had partial coverage on the lower two thirds but the top was completely open. Had to decide whether to rewrap or hand-wrap the top section."
+    }
+  ]
+}

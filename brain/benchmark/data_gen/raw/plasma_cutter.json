@@ -1,0 +1,581 @@
+{
+  "family": "CNC Plasma Cutter",
+  "sops": [
+    {
+      "ref": "low_plasma_pressure",
+      "title": "Plasma Gas Pressure Below Setpoint",
+      "condition": "The plasma supply gas pressure sensor reads below the minimum operating setpoint of 85 PSI, triggering a low-pressure warning alarm.",
+      "steps": [
+        "walk_to plasma_gas_panel",
+        "read_sensor plasma_pressure_sensor",
+        "walk_to plasma_gas_supply_valve",
+        "press_button pressure_increase_button",
+        "wait 30 seconds",
+        "read_sensor plasma_pressure_sensor",
+        "notify shift_supervisor if pressure remains below 85 PSI"
+      ],
+      "equipment": ["plasma_pressure_sensor", "plasma_gas_panel", "pressure_increase_button", "plasma_gas_supply_valve"]
+    },
+    {
+      "ref": "high_plasma_pressure",
+      "title": "Plasma Gas Pressure Above Ceiling",
+      "condition": "The plasma supply gas pressure sensor reads above the maximum safe limit of 120 PSI, triggering an over-pressure alarm requiring immediate gas supply isolation.",
+      "steps": [
+        "walk_to plasma_gas_panel",
+        "read_sensor plasma_pressure_sensor",
+        "press_button plasma_gas_shutoff_button",
+        "wait 10 seconds",
+        "walk_to pressure_relief_valve",
+        "pick pressure_relief_handle",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["plasma_pressure_sensor", "plasma_gas_panel", "plasma_gas_shutoff_button", "pressure_relief_valve", "pressure_relief_handle"]
+    },
+    {
+      "ref": "pressure_collapse",
+      "title": "Sudden Plasma Gas Pressure Collapse",
+      "condition": "The plasma supply gas pressure sensor drops from operating range to below 20 PSI within 5 seconds, indicating a catastrophic supply failure or line rupture requiring immediate machine stop.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to plasma_gas_panel",
+        "read_sensor plasma_pressure_sensor",
+        "press_button plasma_gas_shutoff_button",
+        "notify maintenance_tech",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["red_estop_button", "plasma_pressure_sensor", "plasma_gas_panel", "plasma_gas_shutoff_button"]
+    },
+    {
+      "ref": "torch_height_low",
+      "title": "Torch Height Below Minimum Pierce Distance",
+      "condition": "The torch height controller sensor reads a standoff distance below 0.06 inches during piercing, indicating the torch is dangerously close to the workpiece and at risk of contact.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to thc_control_panel",
+        "read_sensor torch_height_sensor",
+        "press_button thc_up_jog_button",
+        "wait 5 seconds",
+        "read_sensor torch_height_sensor",
+        "notify operator if standoff height is not restored to specification"
+      ],
+      "equipment": ["pause_cycle_button", "thc_control_panel", "torch_height_sensor", "thc_up_jog_button"]
+    },
+    {
+      "ref": "torch_height_high",
+      "title": "Torch Height Above Maximum Cutting Distance",
+      "condition": "The torch height controller sensor reads a standoff distance above 0.25 inches during cutting, causing the arc to stretch, degrade cut edge quality, and increase dross formation.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to thc_control_panel",
+        "read_sensor torch_height_sensor",
+        "press_button thc_down_jog_button",
+        "wait 5 seconds",
+        "read_sensor torch_height_sensor",
+        "notify operator if standoff height is not corrected to specification"
+      ],
+      "equipment": ["pause_cycle_button", "thc_control_panel", "torch_height_sensor", "thc_down_jog_button"]
+    },
+    {
+      "ref": "coolant_temp_high",
+      "title": "Plasma Torch Coolant Temperature High",
+      "condition": "The coolant temperature sensor on the plasma power supply reads above 45 degrees C, triggering a thermal warning that may cause the unit to derate output or shut down to prevent damage.",
+      "steps": [
+        "walk_to plasma_power_supply",
+        "read_sensor coolant_temp_sensor",
+        "press_button pause_cycle_button",
+        "walk_to coolant_reservoir",
+        "read_sensor coolant_level_sensor",
+        "wait 120 seconds",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["plasma_power_supply", "coolant_temp_sensor", "pause_cycle_button", "coolant_reservoir", "coolant_level_sensor"]
+    },
+    {
+      "ref": "arc_fault",
+      "title": "Arc Transfer Failure Fault",
+      "condition": "The plasma cutter displays an arc transfer fault after three consecutive failed pilot arc ignition attempts, halting the cut program due to failure to establish a transferred arc on the workpiece.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to torch_body",
+        "read_sensor arc_voltage_sensor",
+        "pick torch_consumable_inspection_tool",
+        "place torch_consumable_inspection_tool at torch_body",
+        "wait 5 seconds",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["pause_cycle_button", "torch_body", "arc_voltage_sensor", "torch_consumable_inspection_tool"]
+    },
+    {
+      "ref": "drive_motor_fault",
+      "title": "Gantry Drive Motor Fault",
+      "condition": "The X- or Y-axis servo drive controller reports a motor stall or encoder fault, stopping all gantry motion mid-cut and requiring a drive fault reset before motion can resume.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to servo_drive_cabinet",
+        "read_sensor x_axis_encoder_sensor",
+        "read_sensor y_axis_encoder_sensor",
+        "press_button drive_fault_reset_button",
+        "wait 10 seconds",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["red_estop_button", "servo_drive_cabinet", "x_axis_encoder_sensor", "y_axis_encoder_sensor", "drive_fault_reset_button"]
+    },
+    {
+      "ref": "consumable_change",
+      "title": "Plasma Torch Consumable Replacement",
+      "condition": "The arc-on hours counter reaches the consumable replacement threshold of 3 hours, or post-cut inspection shows excessive dross and irregular kerf indicating worn electrode or nozzle.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to torch_body",
+        "pick worn_electrode",
+        "place worn_electrode at consumable_waste_bin",
+        "pick replacement_electrode",
+        "place replacement_electrode at torch_body",
+        "notify operator when consumable exchange is complete"
+      ],
+      "equipment": ["pause_cycle_button", "torch_body", "worn_electrode", "replacement_electrode", "consumable_waste_bin"]
+    },
+    {
+      "ref": "filter_change",
+      "title": "Downdraft Filter Cartridge Replacement",
+      "condition": "The downdraft pressure differential sensor reads a drop greater than 1.5 inches WC above baseline, indicating a clogged filter cartridge that is reducing fume extraction capacity.",
+      "steps": [
+        "press_button downdraft_fan_shutoff_button",
+        "wait 30 seconds",
+        "walk_to filter_access_panel",
+        "pick spent_filter_cartridge",
+        "place spent_filter_cartridge at filter_disposal_bin",
+        "pick replacement_filter_cartridge",
+        "place replacement_filter_cartridge at filter_housing"
+      ],
+      "equipment": ["downdraft_fan_shutoff_button", "filter_access_panel", "spent_filter_cartridge", "replacement_filter_cartridge", "filter_housing", "filter_disposal_bin"]
+    },
+    {
+      "ref": "lubrication_cycle",
+      "title": "Linear Rail and Rack Lubrication",
+      "condition": "The scheduled maintenance counter reaches 40 cutting hours, requiring lubrication of the X- and Y-axis linear rails and rack-and-pinion drive to prevent wear and binding.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to lubrication_station",
+        "pick grease_gun",
+        "walk_to x_axis_rail_fitting",
+        "place grease_gun at x_axis_rail_fitting",
+        "walk_to y_axis_rail_fitting",
+        "place grease_gun at y_axis_rail_fitting"
+      ],
+      "equipment": ["pause_cycle_button", "lubrication_station", "grease_gun", "x_axis_rail_fitting", "y_axis_rail_fitting"]
+    },
+    {
+      "ref": "calibration_thc",
+      "title": "Torch Height Controller Calibration",
+      "condition": "The torch height controller reports a calibration drift alarm, or post-cut inspection shows inconsistent standoff height across the cutting envelope requiring a full THC recalibration.",
+      "steps": [
+        "walk_to thc_control_panel",
+        "press_button thc_calibration_mode_button",
+        "walk_to torch_body",
+        "pick thc_calibration_gauge",
+        "place thc_calibration_gauge at cutting_table_surface",
+        "read_sensor torch_height_sensor",
+        "notify operator when calibration sequence is complete"
+      ],
+      "equipment": ["thc_control_panel", "thc_calibration_mode_button", "torch_body", "thc_calibration_gauge", "cutting_table_surface", "torch_height_sensor"]
+    },
+    {
+      "ref": "water_table_drain",
+      "title": "Water Table Drain and Clean",
+      "condition": "The water table level sensor indicates accumulated slag and debris exceeding the 2-inch threshold above the slat surface, or the scheduled 80-hour maintenance interval is reached.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to water_table_drain_valve",
+        "press_button drain_open_button",
+        "wait 300 seconds",
+        "pick debris_scraper",
+        "place debris_scraper at water_table_surface",
+        "notify operator when table drain and clean is complete"
+      ],
+      "equipment": ["pause_cycle_button", "water_table_drain_valve", "drain_open_button", "debris_scraper", "water_table_surface"]
+    },
+    {
+      "ref": "gas_line_inspection",
+      "title": "Plasma Gas Supply Line Inspection",
+      "condition": "The routine 30-day inspection interval is reached, or a low-level gas odor is detected near the plasma cutting table requiring a physical leak check of all supply line fittings.",
+      "steps": [
+        "walk_to plasma_gas_panel",
+        "read_sensor gas_leak_sensor",
+        "walk_to plasma_gas_supply_line",
+        "pick gas_leak_detection_wand",
+        "place gas_leak_detection_wand at plasma_gas_supply_line",
+        "read_sensor gas_leak_sensor",
+        "notify maintenance_tech with inspection results"
+      ],
+      "equipment": ["plasma_gas_panel", "gas_leak_sensor", "plasma_gas_supply_line", "gas_leak_detection_wand"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout Energy Isolation",
+      "condition": "A maintenance task requiring physical access to the plasma torch, gantry, power supply, or any energized component is initiated, requiring full energy isolation before work begins.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to main_disconnect_switch",
+        "press_button main_power_off_button",
+        "pick lockout_hasp",
+        "place lockout_hasp at main_disconnect_switch",
+        "pick lockout_tag",
+        "place lockout_tag at lockout_hasp"
+      ],
+      "equipment": ["red_estop_button", "main_disconnect_switch", "main_power_off_button", "lockout_hasp", "lockout_tag"]
+    },
+    {
+      "ref": "fire_response",
+      "title": "Fire or Smoke on Cutting Table Response",
+      "condition": "The smoke detector activates or an operator observes active flame or heavy smoke rising from the cutting table, slat bed, or downdraft system during or after a cut cycle.",
+      "steps": [
+        "press_button red_estop_button",
+        "press_button downdraft_fan_shutoff_button",
+        "walk_to fire_extinguisher_station",
+        "pick fire_extinguisher",
+        "notify shift_supervisor",
+        "notify emergency_response_team",
+        "place fire_extinguisher at cutting_table_area"
+      ],
+      "equipment": ["red_estop_button", "downdraft_fan_shutoff_button", "fire_extinguisher_station", "fire_extinguisher", "cutting_table_area"]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Emergency Stop Activation and Reset",
+      "condition": "An emergency stop button is pressed due to a personnel hazard or unexpected machine motion requiring immediate halt of all gantry motion and plasma arc, followed by a controlled reset after the hazard is cleared.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to plasma_power_supply",
+        "read_sensor arc_voltage_sensor",
+        "notify shift_supervisor",
+        "wait 30 seconds",
+        "press_button estop_reset_button",
+        "notify operator when machine is cleared to resume"
+      ],
+      "equipment": ["red_estop_button", "plasma_power_supply", "arc_voltage_sensor", "estop_reset_button"]
+    },
+    {
+      "ref": "spill_response",
+      "title": "Coolant or Water Spill Response",
+      "condition": "Coolant or water is observed pooling on the floor near the plasma cutting table, creating a slip hazard and potential electrical risk to floor-level cables and conduit.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "notify shift_supervisor",
+        "walk_to spill_kit_station",
+        "pick absorbent_pad",
+        "place absorbent_pad at spill_location",
+        "pick wet_floor_sign",
+        "place wet_floor_sign at spill_location"
+      ],
+      "equipment": ["pause_cycle_button", "spill_kit_station", "absorbent_pad", "spill_location", "wet_floor_sign"]
+    },
+    {
+      "ref": "startup_sequence",
+      "title": "Daily Machine Startup Sequence",
+      "condition": "Beginning of production shift requiring the plasma cutter to be brought from de-energized state to fully operational ready-to-cut status with all systems verified.",
+      "steps": [
+        "walk_to main_disconnect_switch",
+        "press_button main_power_on_button",
+        "walk_to plasma_power_supply",
+        "press_button plasma_power_on_button",
+        "wait 60 seconds",
+        "read_sensor plasma_pressure_sensor",
+        "notify operator when system is ready for production"
+      ],
+      "equipment": ["main_disconnect_switch", "main_power_on_button", "plasma_power_supply", "plasma_power_on_button", "plasma_pressure_sensor"]
+    },
+    {
+      "ref": "shutdown_sequence",
+      "title": "End of Shift Shutdown Sequence",
+      "condition": "End of production shift requiring the plasma cutter to be brought from operational state to safely de-energized and gas-isolated state before personnel leave the area.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to plasma_power_supply",
+        "press_button plasma_power_off_button",
+        "walk_to plasma_gas_panel",
+        "press_button plasma_gas_shutoff_button",
+        "walk_to main_disconnect_switch",
+        "press_button main_power_off_button"
+      ],
+      "equipment": ["pause_cycle_button", "plasma_power_supply", "plasma_power_off_button", "plasma_gas_panel", "plasma_gas_shutoff_button", "main_disconnect_switch", "main_power_off_button"]
+    },
+    {
+      "ref": "cut_quality_check",
+      "title": "Post-Cut Quality Inspection",
+      "condition": "A completed cut nest requires inspection for dross adhesion, kerf width deviation, and edge angularity before parts are released to the next downstream operation.",
+      "steps": [
+        "press_button pause_cycle_button",
+        "walk_to cutting_table_surface",
+        "pick cut_quality_gauge",
+        "place cut_quality_gauge at cut_part_edge",
+        "read_sensor kerf_width_sensor",
+        "pick dross_inspection_mirror",
+        "notify quality_inspector with measurement results"
+      ],
+      "equipment": ["pause_cycle_button", "cutting_table_surface", "cut_quality_gauge", "cut_part_edge", "kerf_width_sensor", "dross_inspection_mirror"]
+    },
+    {
+      "ref": "torch_alignment_check",
+      "title": "Torch Perpendicularity and Alignment Verification",
+      "condition": "Post-maintenance inspection or a torch crash event requires verification that the torch body is perpendicular to the cutting table and correctly aligned to the machine datum point before production resumes.",
+      "steps": [
+        "walk_to thc_control_panel",
+        "press_button torch_home_button",
+        "walk_to torch_body",
+        "pick squareness_gauge",
+        "place squareness_gauge at torch_body",
+        "read_sensor torch_height_sensor",
+        "notify operator with alignment verification result"
+      ],
+      "equipment": ["thc_control_panel", "torch_home_button", "torch_body", "squareness_gauge", "torch_height_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "low_plasma_pressure",
+      "text": "Line 3 plasma table threw a warning about ten minutes into the cut program on first shift. Gauge on the supply panel was reading low, somewhere around 75 PSI when it should be up in the 90s. Cut stopped itself. We jogged the supply valve up a bit and checked the reading again before restarting. Didn't call it in but noted it in the log."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "low_plasma_pressure",
+      "text": "Unit by the east wall started lagging during long cuts — you could hear the arc sputtering and the cut surface looked rougher than normal. Checked the panel and the supply was starved down, had maybe 78 PSI showing. Wasn't a blowout or anything dramatic, just crept down over the shift. Second shift had to address it before restart."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "high_plasma_pressure",
+      "text": "The plasma table near bay 4 tripped an alarm mid-shift. Display was showing an over-pressure warning, and the supply line gauge was way up past 125 PSI. Hit the shutoff on the gas panel and backed off the supply. Didn't see any line damage but called maintenance to inspect the regulator before we touched it again."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "high_plasma_pressure",
+      "text": "First shift, the big plasma cutter by the loading dock kept alarming out every time we tried to run. Checked the gas panel and everything was pushed way high — over 120 on the supply gauge. Had to shut down the gas feed entirely and vent the line before maintenance could get in. They found the regulator was stuck open."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "pressure_collapse",
+      "text": "The cutter on line 2 just died mid-cut — not a slow fade, it literally dropped out instantly. Checked the gas panel right after and the supply was at nothing, maybe 8 PSI. Hit the E-stop and shut the gas line down hard. Something in the supply ruptured — called maintenance and the supervisor right away, didn't try to restart."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "pressure_collapse",
+      "text": "Second shift, the plasma table over by the press line went offline with zero warning. One second it was cutting fine, next second the arc killed and the supply gauge was flatlined. Couldn't smell anything but the numbers said the line collapsed in seconds, not minutes. Locked it out and got maintenance on the radio."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "pressure_collapse",
+      "text": "Near end of shift on line 5 the cutter dropped pressure in seconds — I was watching the HMI and the PSI just fell off a cliff, not a gradual creep. Had to slam the estop and close the supply valve at the panel. Whole section smelled a little off afterward. Supervisor was on-site within two minutes and we locked it out."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "torch_height_low",
+      "text": "Running the morning job on the line 1 table and heard a clunk — torch grazed the sheet on a pierce. The THC screen was showing the standoff way below where it should be, around 0.04 inches or so. Had to pause the program and jog the torch up manually before continuing. Left a small gouge on one part; inspector flagged it."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "torch_height_low",
+      "text": "Torch was physically dragging on the material during lead-in on thick plate — you could see it making contact. Standoff reading on the controller was basically zero. Operator paused the cycle and nudged the height back up incrementally. First two parts from that nest got flagged by QC because of the drag marks."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "torch_height_high",
+      "text": "Parts from the afternoon run on line 3 had terrible bevel on the cut edges — way more than spec allows on any of them. Looked at the THC log and the torch was riding too high the whole time, standoff around 0.30 inches. Arc was clearly stretching. Had to jog it down and rerun a test piece before releasing the next nest."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "torch_height_high",
+      "text": "The plasma table near the east dock started producing parts with heavy dross on the top face and a rounded top edge on every cut. Ran a standoff check and the reading was over 0.28 inches — torch sitting too far off the plate. Looks like the THC wasn't tracking the plate surface properly. Paused the run and pulled the height back in before continuing."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "coolant_temp_high",
+      "text": "The plasma supply unit over on line 4 started flashing a yellow indicator about halfway through the shift. Checked the readout on the power supply box and the coolant temp was sitting at 48 degrees C. Paused the cut, let it sit, checked the reservoir — level looked okay but temperature was still climbing. Brought in maintenance to check the cooling loop."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "coolant_temp_high",
+      "text": "Plasma cutter was cutting sluggish and derated itself to lower power on second shift without throwing an arc fault. Display was showing a thermal warning — the coolant temp readout on the power supply was past the 45 mark. Operator paused and maintenance checked the coolant loop. No leak, just ran hot from a long continuous job without break time."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "arc_fault",
+      "text": "Line 2 plasma table kept failing to start this morning. Tried to resume the job three times and each time it just clicked repeatedly — no arc transfer to the plate. Machine locked itself out after the third attempt. Called maintenance to pull the consumables and check. Electrode looked completely eroded down to nothing."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "arc_fault",
+      "text": "During the material changeover on second shift, the torch wouldn't establish an arc on the new nest at all. Machine threw a fault code after several attempts. Maintenance opened the torch cap and found the nozzle was blown out — orifice completely deformed. Gas supply was fine, power was fine, it was strictly a consumable issue."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "arc_fault",
+      "text": "Third shift on line 5 — pilot arc kept cycling three times each attempt but never transferred to the workpiece. Could hear it trying to fire and failing. Checked the arc voltage readout and it wasn't reaching transfer threshold. Maintenance swapped the electrode and nozzle and the machine fired up on the first try after that."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "drive_motor_fault",
+      "text": "The gantry on the big table in bay 3 stopped dead in the middle of a long cut. Y-axis just froze mid-traverse. Drive cabinet was showing a fault light, servo drive had tripped. Hit the E-stop and called maintenance — they reset the drive fault and verified the encoder wiring before we could get back to running."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "drive_motor_fault",
+      "text": "On line 1, the cutter started tracing a curve where the program called for a straight line — X-axis was hunting and oscillating. Then it stopped altogether with a fault code on the servo panel. Encoder must have lost signal partway through the cut. Maintenance had to clear the fault and verify both axes tracked correctly before sign-off."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "consumable_change",
+      "text": "Parts coming off the line 3 plasma table have been looking rough all morning — heavy slag buildup on the bottom edge of every cut and the kerf looks ragged instead of clean. Maintenance checked the arc-on timer and it was over 3 hours on these consumables. Time to swap electrode and nozzle before the next nest."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "consumable_change",
+      "text": "Cut quality dropped off hard in the last hour of first shift on the east-side table. Bottom dross was thick enough you could see it from across the floor without bending over. Confirmed the electrode was burned down to the stub. Pulled and flagged the affected parts, then swapped the consumables before resuming production."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "consumable_change",
+      "text": "Inspector bounced back a whole tray of parts from line 2 — unacceptable edge angle on all of them, not just a few. Maintenance traced it back to worn consumables, the nozzle orifice was visibly deformed when they pulled it. Nobody had tracked the arc-on hours since the last changeover. Consumables replaced and an hour log started before resuming."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "filter_change",
+      "text": "The downdraft on the line 4 table has been struggling all day — fumes aren't clearing fast enough and you can smell the smoke hanging around the cutter. Checked the differential pressure gauge on the dust collector and it was reading well above the normal range. Filter has to be swapped before this shift ends."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "filter_change",
+      "text": "Second shift noticed the exhaust from the downdraft unit near bay 2 smelled unusually heavy — way more fume than usual making it past the hood. Maintenance checked the filter housing and the pressure differential was over 2 inches WC above baseline. Pulled the cartridge and put a fresh one in. Extraction improved immediately."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "lubrication_cycle",
+      "text": "Gantry on the line 1 table has been making a low grinding noise on the Y-axis for the last couple of hours. Not a fault, not stopping the machine, just noise that wasn't there yesterday. Maintenance checked the rails and they were bone dry — over 40 hours since the last grease cycle. Worked the lube gun down both axes."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "lubrication_cycle",
+      "text": "Periodic PM came up on the east-wall plasma table. Cut quality wasn't the issue and no alarms, but the maintenance log showed the rails and rack hadn't been greased since the counter hit 38 hours. Greased the rack and linear rails on both X and Y before any wear started showing up in the cuts."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "calibration_thc",
+      "text": "Parts from the morning run on line 5 are showing inconsistent standoff across the sheet — leading edge of the cut looks fine but by the time the torch gets to the far side, the kerf angle changes noticeably. THC controller also threw a drift warning overnight. Called for a recalibration before loading the next nest."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "calibration_thc",
+      "text": "After the torch assembly was replaced on line 2 last night, the standoff has been inconsistent across the table. Reads differently at the front versus the back of the cutting envelope — same program, same material, different results by position. Ran the calibration routine on the controller to re-establish the baseline across the full travel."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "water_table_drain",
+      "text": "The water table on the line 3 plasma cutter is packed with slag — buildup is past the slat height and parts were sitting in sludge when I pulled them this morning. Dross sticking to the bottom of the plate more than usual. Need to drain and scrape before the next shift can run good parts."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "water_table_drain",
+      "text": "Maintenance log flagged the 80-hour service interval on the east-side table this afternoon. Water level was high and the debris layer was thick — looked like slag had been accumulating since before the last weekend. Drained the table during the lunch window and cleared out the buildup from the slat bed."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "gas_line_inspection",
+      "text": "Operator on second shift reported a faint smell near the back of the line 4 table — not strong, could be nothing, but it was definitely there when you stood close to the gas panel area. Maintenance walked the supply lines with a sniffer wand and checked all the fittings. Found a loose compression fitting at one junction near the regulator."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "gas_line_inspection",
+      "text": "Thirty-day inspection came due on the plasma table by the loading dock. No issues reported from operators all month, but we walked the supply lines with the detector wand anyway per the schedule. One section near the secondary regulator showed a faint positive reading. Tightened the fittings and re-checked before logging clear."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance was scheduled to replace the torch lifter mechanism on line 2 before first shift. Before anyone touched any hardware, we ran through the energy isolation: hit the estop, threw the main disconnect, hung the hasp and danger tag per procedure. Three people on the job and all three added personal locks to the hasp."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "lockout_tagout",
+      "text": "Power supply on the east-side plasma table needed the internal capacitor bank inspected — full energy isolation required before anyone opened the enclosure. LOTO applied at the main breaker with hasp and danger tag before the maintenance tech went in. Verified zero energy state with a meter before proceeding with the inspection."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "fire_response",
+      "text": "Small fire broke out on the cutting table on line 3 during a thick plate run — a scrap piece trapped under the slats caught from a large dross ball that landed on it. Smoke detector went off. Operator hit the estop and killed the downdraft fan immediately to stop feeding air to it, then grabbed the extinguisher from the wall. Supervisor called right away."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "fire_response",
+      "text": "Second shift on the east-side table — operator noticed smoke coming up from the filter housing, not from the table itself. Something inside the downdraft system must have caught from accumulated fines. Hit both the machine stop and the fan shutoff right away, grabbed the CO2 extinguisher from the wall station. Emergency team notified immediately."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "fire_response",
+      "text": "During a long cut on thick stainless on line 1, the slag pile under the table ignited — you could see the orange glow through the grating before the smoke alarm triggered. Operator hit the estop first, then the downdraft shutoff to avoid drawing more air to the fire. Extinguisher deployed at the table. Area cleared out and emergency team radioed in."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "estop_activation",
+      "text": "A forklift came too close to the plasma table on line 4 while it was actively cutting — operator hit the red estop on the panel as a precaution. Not a machine fault, strictly a personnel clearance issue. Arc dropped and the gantry stopped where it was. Supervisor came over and cleared the area, then they reset and resumed once the forklift was clear."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "estop_activation",
+      "text": "A new trainee walked into the restricted zone on line 2 while the cutter was running — floor operator hit the nearest estop button immediately without hesitation. Machine halted, arc off, gantry stopped mid-path. After the trainee was escorted out, supervisor assessed the situation, confirmed the reset, and verified machine status before restarting."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "spill_response",
+      "text": "There's a puddle of coolant working its way out from under the plasma unit on line 5 — probably a couple of gallons on the concrete between the machine and the operator panel. Flagged the area and called the supervisor before it could spread into the main aisle between the machines."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "spill_response",
+      "text": "Second shift, someone noticed standing water near the east-side plasma table — probably an overflow from the water table or a loose hose fitting somewhere. Slip hazard right in the main walkway next to the machine. Paused the job, put down absorbent pads, and set out the wet floor sign while maintenance tracked down the source."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "startup_sequence",
+      "text": "Came in first shift and the plasma table on line 1 was fully powered down from the previous night's shutdown. Had to walk through the full power-up in order: main disconnect, then the plasma supply, wait for it to initialize, verify the gas pressure was in range before calling it ready. Took about three minutes before the system was stable enough to run a test cut."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "startup_sequence",
+      "text": "Monday morning after a full weekend shutdown — the line 3 plasma cutter was cold and completely de-energized. Maintenance walked through the startup: threw the main power, brought up the plasma supply unit, waited for the ready indicator, and verified the gas pressure was in spec before the operator loaded the first nest of the week."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "shutdown_sequence",
+      "text": "End of second shift on the line 4 plasma table — ran through the shutdown steps before leaving. Paused the cut program, powered down the plasma supply, closed the gas feed at the panel, then opened the main disconnect and left it open. Left a note in the log confirming the shutdown was clean before clocking out."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "shutdown_sequence",
+      "text": "Friday afternoon before a long weekend, the team shut down the east-side plasma cutter for an extended outage. Power supply off, gas supply isolated at the panel valve, main disconnect thrown. Operator confirmed everything was down and secured before facilities locked the bay for the holiday."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "cut_quality_check",
+      "text": "Inspector pulled a sample from the line 2 plasma table nest after the morning run and found heavy bottom dross on roughly half the parts. Kerf width was also measuring wider than the spec tolerance on the thin-gauge sections. Quality hold placed on the whole batch until the root cause is identified and corrected."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "cut_quality_check",
+      "text": "Parts from the afternoon run on line 5 had edge angularity outside tolerance — the bevel was tilting the wrong direction on every part and the top edge was rounded instead of sharp. Inspector put the gauge on them and confirmed kerf deviation across the nest. Parts quarantined and root cause investigation started before the next run."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "cut_quality_check",
+      "text": "First shift line 3 — inspection after the first nest showed dross only on one side of all the parts, not across the board. Bottom edge looked clean on the left side but loaded up heavily on the right side of every part. Measured the kerf width and it wasn't consistent across the table. Quality called for a full inspection before releasing any parts from the next run."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "torch_alignment_check",
+      "text": "After maintenance replaced the torch assembly on line 2 last night, the first test cut this morning showed a consistent angular bevel that shouldn't be in the program. Looks like the torch isn't sitting square in the mount. Going to verify the perpendicularity with a gauge and re-datum to the table surface before running any production parts."
+    },
+    {
+      "id": "inc_049",
+      "sop_ref": "torch_alignment_check",
+      "text": "The torch on line 4 got bumped by a part shift during a heavy plate job — heard a solid bang and the next cut was noticeably off angle. Cut angles were deviating from spec. Homed the torch and ran the squareness check against the table surface. Torch was slightly cocked in the holder. Readjusted and confirmed the height sensor reading was stable before resuming."
+    }
+  ]
+}

@@ -1,0 +1,587 @@
+{
+  "family": "Robotic Screwdriving Station",
+  "sops": [
+    {
+      "ref": "torque_under",
+      "title": "Torque Reading Below Minimum Setpoint",
+      "condition": "During a fastening cycle the torque sensor reads a value below the programmed minimum threshold, indicating a potential undertorqued fastener without triggering an automatic cell stop.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor torque_sensor",
+        "press_button cycle_hold_button",
+        "pick suspect_assembly",
+        "place quarantine_bin",
+        "notify quality_technician",
+        "press_button cycle_reset_button"
+      ],
+      "equipment": ["screwdriving_station", "torque_sensor", "cycle_hold_button", "suspect_assembly", "quarantine_bin", "cycle_reset_button"]
+    },
+    {
+      "ref": "torque_over",
+      "title": "Torque Reading Above Maximum Ceiling",
+      "condition": "During a fastening cycle the torque sensor reads a value exceeding the programmed upper ceiling, indicating overtorque risk, cross-threading, or interference with the joint.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor torque_sensor",
+        "press_button cycle_hold_button",
+        "pick suspect_assembly",
+        "place quarantine_bin",
+        "notify maintenance_technician",
+        "notify quality_technician"
+      ],
+      "equipment": ["screwdriving_station", "torque_sensor", "cycle_hold_button", "suspect_assembly", "quarantine_bin"]
+    },
+    {
+      "ref": "torque_collapse",
+      "title": "Abrupt Torque Signal Collapse During Active Fastening",
+      "condition": "The torque signal rises normally during the fastening stroke then drops abruptly to near-zero mid-cycle, indicating sudden bit fracture or catastrophic thread strip-out rather than a gradual under- or over-reading.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "press_button emergency_stop_button",
+        "read_sensor torque_sensor",
+        "pick suspect_assembly",
+        "place quarantine_bin",
+        "notify maintenance_technician",
+        "notify quality_technician"
+      ],
+      "equipment": ["screwdriving_station", "emergency_stop_button", "torque_sensor", "suspect_assembly", "quarantine_bin"]
+    },
+    {
+      "ref": "feeder_jam",
+      "title": "Screw Feeder Bowl Mechanical Jam",
+      "condition": "The vibratory bowl feeder halts mid-operation with its drive motor still energized, and the screw-at-escapement sensor shows no part present for more than ten consecutive seconds, indicating a physical obstruction in the feed track.",
+      "steps": [
+        "walk_to feeder_station",
+        "press_button feeder_pause_button",
+        "read_sensor screw_at_escapement_sensor",
+        "pick jammed_screw",
+        "place scrap_bin",
+        "press_button feeder_start_button",
+        "read_sensor screw_at_escapement_sensor"
+      ],
+      "equipment": ["feeder_station", "feeder_pause_button", "screw_at_escapement_sensor", "jammed_screw", "scrap_bin", "feeder_start_button"]
+    },
+    {
+      "ref": "feeder_empty",
+      "title": "Screw Feeder Hopper Supply Exhausted",
+      "condition": "The hopper level sensor triggers an empty alarm while the vibratory bowl continues to operate normally with no physical jam, indicating the bulk fastener supply has been fully depleted.",
+      "steps": [
+        "walk_to feeder_station",
+        "read_sensor hopper_level_sensor",
+        "walk_to parts_storage_rack",
+        "pick screw_bulk_bag",
+        "place feeder_hopper",
+        "wait 15",
+        "read_sensor screw_at_escapement_sensor"
+      ],
+      "equipment": ["feeder_station", "hopper_level_sensor", "parts_storage_rack", "screw_bulk_bag", "feeder_hopper", "screw_at_escapement_sensor"]
+    },
+    {
+      "ref": "bit_wear_warning",
+      "title": "Screwdriver Bit Approaching End-of-Life Threshold",
+      "condition": "The bit life counter reaches 80 percent of the programmed service interval, generating a scheduled advisory warning without stopping production or triggering any cycle fault.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor bit_life_counter_display",
+        "walk_to tool_storage_cabinet",
+        "pick replacement_bit",
+        "place parts_staging_area",
+        "notify maintenance_technician",
+        "wait 30"
+      ],
+      "equipment": ["screwdriving_station", "bit_life_counter_display", "tool_storage_cabinet", "replacement_bit", "parts_staging_area"]
+    },
+    {
+      "ref": "bit_breakage",
+      "title": "Screwdriver Bit Fracture Emergency",
+      "condition": "The bit breakage sensor detects a fractured or missing bit during an active cycle, triggering an immediate critical fault that halts the spindle and requires fragment recovery before any restart.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "press_button emergency_stop_button",
+        "read_sensor bit_breakage_sensor",
+        "pick broken_bit_fragments",
+        "place hazardous_waste_bin",
+        "notify maintenance_technician",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["screwdriving_station", "emergency_stop_button", "bit_breakage_sensor", "broken_bit_fragments", "hazardous_waste_bin"]
+    },
+    {
+      "ref": "motor_temp_warning",
+      "title": "Spindle Motor Overtemperature Advisory Warning",
+      "condition": "The spindle drive motor temperature sensor reads above the 80 degrees Celsius advisory threshold but below the 100 degrees Celsius automatic shutdown limit, generating a caution alarm while production continues.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor motor_temperature_sensor",
+        "press_button cycle_hold_button",
+        "wait 120",
+        "read_sensor motor_temperature_sensor",
+        "notify maintenance_technician",
+        "press_button cycle_reset_button"
+      ],
+      "equipment": ["screwdriving_station", "motor_temperature_sensor", "cycle_hold_button", "cycle_reset_button"]
+    },
+    {
+      "ref": "motor_temp_shutdown",
+      "title": "Spindle Motor Thermal Shutdown Trip",
+      "condition": "The spindle drive motor temperature sensor reaches or exceeds the 100 degrees Celsius emergency threshold, triggering an automatic thermal shutdown that locks the drive and prevents any restart attempt.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "press_button emergency_stop_button",
+        "read_sensor motor_temperature_sensor",
+        "notify maintenance_technician",
+        "wait 300",
+        "read_sensor motor_temperature_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["screwdriving_station", "emergency_stop_button", "motor_temperature_sensor"]
+    },
+    {
+      "ref": "no_screw_detect",
+      "title": "Screw Presence Sensor No-Detect Fault at Driver Tip",
+      "condition": "The screw presence sensor at the driver nose fails to confirm a fastener is loaded at the tip before cycle start, aborting the cycle due to a feed miss or sensor occlusion rather than any torque or depth deviation.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor screw_presence_sensor",
+        "press_button feeder_advance_button",
+        "wait 5",
+        "read_sensor screw_presence_sensor",
+        "notify maintenance_technician",
+        "press_button cycle_reset_button"
+      ],
+      "equipment": ["screwdriving_station", "screw_presence_sensor", "feeder_advance_button", "cycle_reset_button"]
+    },
+    {
+      "ref": "depth_over",
+      "title": "Fastener Driven Beyond Maximum Seating Depth",
+      "condition": "The seating depth sensor reads a value exceeding the programmed maximum allowable depth, indicating the fastener has been driven past the specified flush limit into the workpiece.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor seating_depth_sensor",
+        "press_button cycle_hold_button",
+        "pick over_driven_assembly",
+        "place quarantine_bin",
+        "notify quality_technician",
+        "press_button cycle_reset_button"
+      ],
+      "equipment": ["screwdriving_station", "seating_depth_sensor", "cycle_hold_button", "over_driven_assembly", "quarantine_bin", "cycle_reset_button"]
+    },
+    {
+      "ref": "depth_under",
+      "title": "Fastener Not Driven to Minimum Seating Depth",
+      "condition": "The seating depth sensor reads a value below the programmed minimum allowable depth, indicating the fastener head remains proud of the workpiece surface and has not reached the specified flush depth.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor seating_depth_sensor",
+        "press_button cycle_hold_button",
+        "pick underdriven_assembly",
+        "place quarantine_bin",
+        "notify quality_technician",
+        "press_button cycle_reset_button"
+      ],
+      "equipment": ["screwdriving_station", "seating_depth_sensor", "cycle_hold_button", "underdriven_assembly", "quarantine_bin", "cycle_reset_button"]
+    },
+    {
+      "ref": "cabinet_temp",
+      "title": "Electrical Control Cabinet Overtemperature Fault",
+      "condition": "The control cabinet internal temperature sensor exceeds 55 degrees Celsius, triggering a thermal fault alarm that risks damage to drive electronics and control boards inside the enclosure.",
+      "steps": [
+        "walk_to electrical_cabinet",
+        "read_sensor cabinet_temperature_sensor",
+        "press_button cabinet_fan_override_button",
+        "wait 60",
+        "read_sensor cabinet_temperature_sensor",
+        "notify maintenance_technician",
+        "press_button alarm_acknowledge_button"
+      ],
+      "equipment": ["electrical_cabinet", "cabinet_temperature_sensor", "cabinet_fan_override_button", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "spindle_drive_fault",
+      "title": "Spindle Variable-Frequency Drive Internal E-Fault",
+      "condition": "The spindle variable-frequency drive displays an E-fault error code on its local panel, indicating an internal drive protection trip due to overcurrent, undervoltage, or phase imbalance that is distinct from a motor thermal or torque alarm.",
+      "steps": [
+        "walk_to electrical_cabinet",
+        "read_sensor spindle_drive_fault_display",
+        "press_button drive_fault_reset_button",
+        "wait 10",
+        "read_sensor spindle_drive_fault_display",
+        "notify maintenance_technician",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["electrical_cabinet", "spindle_drive_fault_display", "drive_fault_reset_button"]
+    },
+    {
+      "ref": "bit_replacement",
+      "title": "Mandatory Screwdriver Bit Replacement at Service Limit",
+      "condition": "The bit life counter reaches 100 percent of the programmed service interval, locking out further production cycles until the worn bit is physically removed and a new bit is installed.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "press_button bit_release_button",
+        "pick worn_bit",
+        "place tool_disposal_bin",
+        "walk_to tool_storage_cabinet",
+        "pick replacement_bit",
+        "place screwdriver_chuck"
+      ],
+      "equipment": ["screwdriving_station", "bit_release_button", "worn_bit", "tool_disposal_bin", "tool_storage_cabinet", "replacement_bit", "screwdriver_chuck"]
+    },
+    {
+      "ref": "feeder_cleaning",
+      "title": "Vibratory Bowl Feeder Scheduled Cleaning",
+      "condition": "The weekly cleaning interval has elapsed or the feeder bowl shows visible accumulation of metal chips, coolant mist residue, or debris that disrupts screw orientation without causing a hard jam.",
+      "steps": [
+        "walk_to feeder_station",
+        "press_button feeder_stop_button",
+        "pick feeder_bowl_debris",
+        "place waste_container",
+        "pick cleaning_brush",
+        "place feeder_bowl",
+        "press_button feeder_start_button"
+      ],
+      "equipment": ["feeder_station", "feeder_stop_button", "feeder_bowl_debris", "waste_container", "cleaning_brush", "feeder_bowl", "feeder_start_button"]
+    },
+    {
+      "ref": "torque_calibration",
+      "title": "Scheduled Torque Tool Output Calibration Verification",
+      "condition": "The calibration interval counter has elapsed, requiring a verification run of torque output against a calibrated reference transducer before production continues.",
+      "steps": [
+        "walk_to calibration_station",
+        "pick calibration_transducer",
+        "place screwdriver_chuck",
+        "press_button run_calibration_button",
+        "wait 30",
+        "read_sensor calibration_result_display",
+        "notify quality_technician"
+      ],
+      "equipment": ["calibration_station", "calibration_transducer", "screwdriver_chuck", "run_calibration_button", "calibration_result_display"]
+    },
+    {
+      "ref": "air_filter_replace",
+      "title": "Controller Cabinet Air Intake Filter Replacement",
+      "condition": "The differential pressure switch across the cabinet intake filter triggers an airflow restriction alarm, indicating the filter is loaded to the point of reducing cabinet cooling below the minimum airflow threshold.",
+      "steps": [
+        "walk_to electrical_cabinet",
+        "read_sensor filter_pressure_switch",
+        "press_button cabinet_power_standby_button",
+        "pick clogged_air_filter",
+        "place filter_disposal_bin",
+        "pick replacement_air_filter",
+        "place cabinet_filter_housing"
+      ],
+      "equipment": ["electrical_cabinet", "filter_pressure_switch", "cabinet_power_standby_button", "clogged_air_filter", "filter_disposal_bin", "replacement_air_filter", "cabinet_filter_housing"]
+    },
+    {
+      "ref": "rail_lubrication",
+      "title": "Linear Slide Rail Scheduled Lubrication",
+      "condition": "The weekly lubrication interval has elapsed or the slide axis position error sensor reports a deviation exceeding 0.5 mm, indicating dry rail friction is degrading positioning accuracy.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor slide_position_error_sensor",
+        "pick grease_cartridge",
+        "place rail_grease_fitting",
+        "wait 10",
+        "press_button slide_jog_button",
+        "read_sensor slide_position_error_sensor"
+      ],
+      "equipment": ["screwdriving_station", "slide_position_error_sensor", "grease_cartridge", "rail_grease_fitting", "slide_jog_button"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Cell Lockout-Tagout for Maintenance Entry",
+      "condition": "Any maintenance activity requires personnel to enter the screwdriving cell guarded area or contact energized or moving components, necessitating full energy isolation before work begins.",
+      "steps": [
+        "walk_to electrical_cabinet",
+        "press_button main_disconnect_button",
+        "pick lockout_hasp",
+        "place main_disconnect_handle",
+        "pick lockout_tag",
+        "place lockout_hasp",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["electrical_cabinet", "main_disconnect_button", "lockout_hasp", "main_disconnect_handle", "lockout_tag"]
+    },
+    {
+      "ref": "estop_reset",
+      "title": "Emergency Stop Activation Response and Reset",
+      "condition": "An emergency stop button has been activated on the screwdriving cell, halting all motion; the triggering hazard must be formally assessed and cleared before the cell can be returned to production.",
+      "steps": [
+        "walk_to screwdriving_station",
+        "read_sensor estop_status_sensor",
+        "notify shift_supervisor",
+        "wait 30",
+        "press_button estop_reset_button",
+        "read_sensor estop_status_sensor",
+        "press_button cycle_start_button"
+      ],
+      "equipment": ["screwdriving_station", "estop_status_sensor", "estop_reset_button", "cycle_start_button"]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Daily Production Shift Startup Sequence",
+      "condition": "At the beginning of each production shift the screwdriving cell has been powered down and requires a systematic bring-up and pre-production verification before the first fastening cycle.",
+      "steps": [
+        "walk_to electrical_cabinet",
+        "press_button main_power_on_button",
+        "walk_to screwdriving_station",
+        "read_sensor torque_sensor",
+        "read_sensor bit_life_counter_display",
+        "press_button cycle_start_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["electrical_cabinet", "main_power_on_button", "screwdriving_station", "torque_sensor", "bit_life_counter_display", "cycle_start_button"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "torque_under",
+      "text": "Station 4 on line 3 kept cycling this afternoon but the driver panel was flashing amber the whole time. Pulled up the cycle logs and every fastener was logging around 2.1 Nm when we're spec'd at 3.8 minimum. Machine never stopped itself, just kept making parts. Pulled the last twelve assemblies off and held them."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "torque_under",
+      "text": "Second shift on the east cell — the screwdriver by the loading dock was putting out weak numbers all night long. Panel showed green status lights the whole time but the logged values were consistently under the floor spec. Found roughly 30 parts that need re-check before we can ship."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "torque_under",
+      "text": "Coming on at 6 AM line 2's driver was slipping on every cycle. The readouts were all under where they should be, no alarms, nothing crashed, machine was happily churning out bad parts. Readings were consistently soft the whole overnight run."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "torque_over",
+      "text": "Driver cell in bay 7 threw a red light this morning — the spindle was cranking way too hard on every cycle. Numbers on the screen were coming in at 6.5 Nm and our upper limit is 4.2. Last few parts feel gritty when you hand-turn the fastener, worried about stripped threads."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "torque_over",
+      "text": "Line 1 screwdriving station locked up mid-run. Controller was logging peak torques of nearly 7 Nm — almost double the top of the spec band. The last three assemblies feel rough, fasteners are tight in a bad way, not in a good way."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "torque_over",
+      "text": "Coming into the afternoon shift the unit near the east door had the amber-to-red light sequence going on the status column. Every cycle the torque was spiking above the ceiling. Stopped it before more joint damage. This isn't a wear thing — values were just way too high."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "torque_collapse",
+      "text": "Station 2 was running perfect all morning, torque curve on the HMI looked textbook normal, then all of a sudden it flatlined right in the middle of a drive cycle. Zero reading, instantaneous, mid-stroke. Machine shut itself off. Bit might have snapped — need to look."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "torque_collapse",
+      "text": "On the afternoon shift line 4's driver dropped out on us — the graph on the control screen showed torque climbing normally like always, then it just went straight to nothing. Not a low reading, not a high reading, completely gone mid-cycle. Part was still sitting in the fixture when it stopped."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "torque_collapse",
+      "text": "Third shift reported the north cell went from a normal-looking torque trace to a completely flat line instantly. Operator said he heard a faint click a split second before everything went quiet. Suspect thread strip-out on that last housing — the fastener just let go."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "feeder_jam",
+      "text": "Feeder bowl on line 3's driver stopped moving parts around noon. Could hear a rattling noise then it just quit advancing. The escapement sensor is still showing no-go even with the bowl drive running. Looks like two screws crossed up sideways in the exit chute."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "feeder_jam",
+      "text": "The vibratory unit by the south wall jammed up on second shift. Bowl drive sounds like it's still running but nothing's coming through to the pick point. Reached around the guard and could see a fastener wedged sideways right at the escapement gate."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "feeder_jam",
+      "text": "Line 1 feeder started cycling but parts stopped advancing about an hour into the run. Could hear the motor humming like normal but the bowl wasn't moving anything. Found a clump of three fasteners jammed together at the escapement — they bridged across the track."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "feeder_empty",
+      "text": "Line 2 robot kept trying to cycle but the feeder bowl was just spinning clean — totally empty at the driver tip. Checked the hopper and it's bone dry. Nobody refilled it between shifts. Bowl looks fine, no jam, just nothing in it."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "feeder_empty",
+      "text": "Came in this morning and station 3's bowl was vibrating perfectly, nice and smooth, not a sound out of the ordinary — but there's nothing in it. Hopper alarm was blinking. The bowl mechanism itself is fine, just needs a bag of M5 loaded up."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "feeder_empty",
+      "text": "North cell driver went into wait mode overnight. Checked the feeder — bowl is running smooth and quiet, no rattling, nothing stuck, zero noise — completely empty. Last bag must have run out sometime on third shift and nobody caught it."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "bit_wear_warning",
+      "text": "Controller screen on line 4's driver is showing a yellow service icon this morning — says the bit is at 83 percent of its rated life. Machine is still running fine, no faults, no cycle aborts, just the advisory indicator telling us to start thinking about a change."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "bit_wear_warning",
+      "text": "The HMI on station 2 near the press is showing a caution flag on the bit usage counter. Everything feels completely normal when it's running — no torque issues, no part rejects — but the system is saying we're approaching the scheduled change point. No alarm, no stop."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "bit_breakage",
+      "text": "Station 3 hard-stopped in the middle of a cycle — full stop, red fault across the board. Looked at the driver head and the bit is gone. There's just a stub sticking out of the chuck and the rest of it is somewhere in the fixture area. Need to find every piece."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "bit_breakage",
+      "text": "Line 2 driver threw a critical fault mid-production on second shift. Operator heard a sharp snap and the machine stopped dead immediately. Bit sheared off clean. This isn't gradual wear — it just broke outright. Need to recover all the fragments before anything else."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "motor_temp_warning",
+      "text": "Line 3 screwdriver is still running and making parts but the yellow thermal light on the status column is lit. Motor temperature gauge on the panel is reading above normal. Think we've been running back-to-back cycles too long without a dwell. No shutdown, just the advisory."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "motor_temp_warning",
+      "text": "Station 1 near the main entrance is giving us a thermal caution on the screen. Operator says it's been running solid for three hours straight without any natural break cycles. Still making parts fine, no shutdown at all, just the yellow warning indicator."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "motor_temp_shutdown",
+      "text": "Station 4 shut itself down hard mid-shift — spindle completely stopped, nothing coming out. Thermal fault code is on the drive screen and the motor housing is too hot to keep your hand on. This isn't a warning light situation, the whole drive tripped out and locked."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "motor_temp_shutdown",
+      "text": "Line 1 east driver stopped dead mid-cycle and now won't restart at all. Controller shows a thermal shutdown code on the main fault screen. Motor is hot, drive is completely locked out — we can't jog it, can't reset it. It ran all night and finally cooked."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "no_screw_detect",
+      "text": "The driver on line 3 keeps aborting right before the cycle even starts — the nose sensor isn't seeing a screw at the tip after the feeder supposedly advances one. The bowl has plenty of parts, the hopper is full, but nothing is registering at the bit. Faulting every cycle."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "no_screw_detect",
+      "text": "Station 2 keeps stopping before it drives anything. Pre-cycle check fails every time — says no fastener detected at driver tip. I manually triggered the feeder advance and a screw did come out onto the table, so the feed track itself isn't jammed. Something's off with the detection."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "depth_over",
+      "text": "Quality pulled three parts off line 2 at the end of the shift because the fastener heads were sitting noticeably below flush — driven in too far. Depth gauge at the inspection stand flagged them all. The machine never faulted, just kept over-driving every one."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "depth_over",
+      "text": "Inspector flagged a batch from station 1 by the loading bay — screws are countersunk too deep, you can feel the recess with your fingernail when it should be flush. Pulled the controller log and depth readings on those parts are all over the upper limit."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "depth_under",
+      "text": "Parts coming off station 3 have screw heads that are proud of the surface — visibly sticking up above flush. Depth sensor readings on those assemblies are all shallow, nothing hitting the minimum. Nothing alarmed on the machine, just failing the flush check at the gauge station downstream."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "depth_under",
+      "text": "Line 1 driver is leaving fasteners partially in — they're not flush, you can see and feel the head raised above the part surface. Checked the controller and all the seating depth values from that run are under the minimum mark. Torque looked fine, feeder looked fine, just not going in all the way."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "depth_under",
+      "text": "Second shift: a whole tray from the north driver had raised screw heads across the board. The depth readings on those parts were consistently below the floor spec. Everything else — feeder, torque numbers — looked totally normal. Just not seating."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "cabinet_temp",
+      "text": "The electrical box on station 4 tripped a thermal alarm this afternoon. The enclosure itself is hot on the outside — not the motor, not the spindle, the actual control box. Cabinet fan sounds like it's laboring."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "cabinet_temp",
+      "text": "Maintenance got called to the line 3 screwdriving cell because the electronics enclosure was reading over-temp. Inside of the cabinet door was warm to the touch. This is the control box thermal alarm, not anything to do with the spindle or the torque system."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "spindle_drive_fault",
+      "text": "VFD on station 2's driver is showing an E-fault on its own little display panel — the inverter itself has tripped out. It's not a motor temperature thing, not a torque alarm on the main HMI, the drive box itself has an error code on its local screen."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "spindle_drive_fault",
+      "text": "East bay driver faulted on the spindle inverter overnight — fault code is showing on the drive's local display, not the main controller screen. Looks like an overcurrent trip on the variable-frequency drive itself. Reset button on the inverter panel is blinking."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "bit_replacement",
+      "text": "The bit counter hit 100 percent this morning on line 3 — machine locked itself out and won't start a cycle. Service interval is fully used up. No fault, no alarm sound, just a mandatory change lockout. Need to pull the old bit and put a fresh one in before it releases."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "bit_replacement",
+      "text": "Line 2 came up at the start of the shift already at the mandatory replacement point. Bit life counter is maxed out, system won't allow any more production cycles. This is a scheduled changeover, nothing broke — just hit the end of its life limit."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "feeder_cleaning",
+      "text": "The vibratory bowl on station 3 has a bunch of metal fines and oil residue built up inside — screws are tumbling and misorienting instead of feeding cleanly. It's not a hard jam, the bowl is running, but the gunk is causing misfeeds every few cycles."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "feeder_cleaning",
+      "text": "Weekly walkdown found the south cell feeder bowl coated in coolant mist overspray and shavings from the machining cells nearby. Parts were still feeding but barely orienting correctly. Looks well overdue for a wipe-down. No jam, no alarm, just filthy."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "torque_calibration",
+      "text": "Start of shift on line 2 the calibration reminder came up on the HMI — 500 cycles have elapsed since the last verification. Not a fault, not an alarm, just the system telling us we need to run the output check against the reference before continuing production."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "torque_calibration",
+      "text": "Beginning of the morning shift, the system flagged a calibration check due on line 3's driver. The cycle counter hit the verification interval overnight. Everything else looks normal — this is just the scheduled audit prompt, not a real problem."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "air_filter_replace",
+      "text": "The pressure switch on the control cabinet for the line 2 driver tripped — airflow restriction alarm is on. The filter on the cabinet intake is obviously clogged, you can barely feel air moving at the vent. Cabinet fan is straining."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "air_filter_replace",
+      "text": "Maintenance got a ticket for station 1's electrical box — the intake filter indicator is red on the panel. Differential pressure alarm means the filter is loaded up and blocking the cooling airflow into the electronics enclosure. Not a temperature alarm yet, but will be soon."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "rail_lubrication",
+      "text": "The Z-axis slide on line 3's driver is making a faint squeaking on every stroke and the positioning is drifting slightly. The slide looks dry when you shine a light on the rail — no visible lube left. Position error is just creeping past what we can accept."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "rail_lubrication",
+      "text": "Maintenance flagged that the slide rails on line 1's screwdriving unit haven't been greased since before the holiday shutdown. Axis is still moving but the position error is starting to drift. No alarm yet but it's trending the wrong direction."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needs to get inside the screwdriving cell on line 4 to swap out a proximity sensor on the fixture clamp. They can't go in until we get the cell properly de-energized and locked off at the disconnect. Standard isolation before hands-in work."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "lockout_tagout",
+      "text": "Engineer needs to do a mechanical adjustment on the feeder track of line 2's driver. Before they can reach inside the guarded area we need the power physically locked off. LOTO required before anyone puts their hands near the equipment."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "estop_reset",
+      "text": "Somebody hit the big red button on station 1 during the shift — operator bumped it by accident while reaching past the panel. Cell is completely down, everything stopped. Nothing was wrong, just need to clear it and get production going again."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "estop_reset",
+      "text": "The E-stop on line 3 got tripped when a parts tray fell against the cell boundary on second shift. Nobody got hurt, nothing is damaged. Cell is stopped and won't restart. Need to go through the formal clearance and reset before we run again."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "daily_startup",
+      "text": "Beginning of first shift and the screwdriving cells are still cold from overnight power-down. Need to bring line 3's station up from scratch and verify all the readings before we put any parts through. Nothing wrong, just the regular morning bring-up."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "daily_startup",
+      "text": "Monday morning on line 1 — weekend power-down means the station is dark. Need to go through the full startup checklist before first cycle. All the pre-shift checks, make sure torque is reading right and the bit counter is where we left it Friday."
+    }
+  ]
+}

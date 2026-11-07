@@ -1,0 +1,704 @@
+{
+  "family": "Robotic Paint Booth",
+  "sops": [
+    {
+      "ref": "low_booth_pressure",
+      "title": "Booth Differential Pressure Below Setpoint",
+      "condition": "The booth differential pressure sensor reads below the 0.05 inch WC lower setpoint during an active spray cycle, indicating insufficient negative-pressure draw.",
+      "steps": [
+        "walk_to booth_pressure_display_panel",
+        "read_sensor booth_differential_pressure_sensor",
+        "press_button damper_increase_button",
+        "wait 30",
+        "read_sensor booth_differential_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "booth_pressure_display_panel",
+        "booth_differential_pressure_sensor",
+        "damper_increase_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "pressure_collapse",
+      "title": "Sudden Booth Pressure Collapse",
+      "condition": "The booth differential pressure drops from a normal reading to zero or negative within ten seconds, indicating exhaust fan failure or a major duct breach rather than a gradual drift.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to exhaust_fan_control_panel",
+        "read_sensor exhaust_fan_status_sensor",
+        "notify maintenance_supervisor",
+        "notify plant_manager"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "exhaust_fan_control_panel",
+        "exhaust_fan_status_sensor",
+        "maintenance_supervisor",
+        "plant_manager"
+      ]
+    },
+    {
+      "ref": "high_booth_pressure",
+      "title": "Booth Differential Pressure Above Upper Ceiling",
+      "condition": "The booth differential pressure sensor reads above the 0.15 inch WC upper ceiling, indicating a partially obstructed exhaust path or over-pressurized makeup air supply.",
+      "steps": [
+        "walk_to exhaust_damper_control_panel",
+        "read_sensor booth_differential_pressure_sensor",
+        "press_button exhaust_damper_open_button",
+        "wait 20",
+        "read_sensor booth_differential_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "exhaust_damper_control_panel",
+        "booth_differential_pressure_sensor",
+        "exhaust_damper_open_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "atomizer_air_low",
+      "title": "Atomizer Air Supply Pressure Below Minimum",
+      "condition": "The atomizer air pressure sensor reads below 60 PSI during an active spray cycle, risking poor droplet atomization and coat defects on the workpiece.",
+      "steps": [
+        "walk_to compressed_air_supply_panel",
+        "read_sensor atomizer_air_pressure_sensor",
+        "press_button air_regulator_increase_button",
+        "wait 15",
+        "read_sensor atomizer_air_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "compressed_air_supply_panel",
+        "atomizer_air_pressure_sensor",
+        "air_regulator_increase_button",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "solvent_leak_minor",
+      "title": "Minor Solvent Seep at Tank Fitting",
+      "condition": "A slow drip or seep of solvent is observed at a tank fitting or hose connection with estimated volume below 0.5 gallons and no vapor alarm activation, requiring containment without emergency evacuation.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "walk_to solvent_tank_area",
+        "pick absorbent_pad",
+        "place absorbent_pad",
+        "read_sensor solvent_vapor_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "solvent_tank_area",
+        "absorbent_pad",
+        "solvent_vapor_sensor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "solvent_spill_major",
+      "title": "Major Solvent Release — Fire and Vapor Hazard",
+      "condition": "A large uncontrolled solvent release exceeding 0.5 gallons is detected with the vapor alarm active, presenting an immediate fire and inhalation hazard that requires emergency response and evacuation.",
+      "steps": [
+        "press_button red_estop_button",
+        "press_button fire_suppression_activation_button",
+        "notify fire_response_team",
+        "notify plant_manager",
+        "walk_to booth_exit_door",
+        "press_button booth_exhaust_emergency_button"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "fire_suppression_activation_button",
+        "fire_response_team",
+        "plant_manager",
+        "booth_exit_door",
+        "booth_exhaust_emergency_button"
+      ]
+    },
+    {
+      "ref": "spray_tip_partial_clog",
+      "title": "Partial Spray Tip Blockage — Reduced Fan Pattern",
+      "condition": "The spray pattern sensor detects a narrowed or asymmetric fan pattern consistent with a partially obstructed spray tip orifice, while the flow meter still shows non-zero paint delivery.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "walk_to spray_robot_station",
+        "pick clog_clearing_needle",
+        "place clog_clearing_needle",
+        "wait 10",
+        "press_button paint_pump_start_button",
+        "read_sensor spray_pattern_sensor"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "spray_robot_station",
+        "clog_clearing_needle",
+        "paint_pump_start_button",
+        "spray_pattern_sensor"
+      ]
+    },
+    {
+      "ref": "spray_tip_full_block",
+      "title": "Complete Spray Tip Blockage — Zero Flow Output",
+      "condition": "The flow meter reads zero output at the spray applicator tip while pump pressure remains nominal, indicating the tip orifice is fully blocked and the tip must be replaced rather than cleared.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "walk_to spray_robot_station",
+        "pick spray_tip_wrench",
+        "place spray_tip_wrench",
+        "pick replacement_spray_tip",
+        "place replacement_spray_tip",
+        "read_sensor flow_meter_sensor"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "spray_robot_station",
+        "spray_tip_wrench",
+        "replacement_spray_tip",
+        "flow_meter_sensor"
+      ]
+    },
+    {
+      "ref": "exhaust_filter_warning",
+      "title": "Exhaust Filter Differential Pressure — First-Stage Warning",
+      "condition": "The exhaust filter differential pressure sensor reads between 0.80 and 0.95 inch WC, entering the first-stage warning band that signals a planned filter change is needed within the next shift; production may continue.",
+      "steps": [
+        "walk_to exhaust_filter_status_panel",
+        "read_sensor exhaust_filter_differential_pressure_sensor",
+        "pick filter_inspection_tag",
+        "place filter_inspection_tag",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "exhaust_filter_status_panel",
+        "exhaust_filter_differential_pressure_sensor",
+        "filter_inspection_tag",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "exhaust_filter_alarm",
+      "title": "Exhaust Filter Differential Pressure — Emergency Alarm Level",
+      "condition": "The exhaust filter differential pressure exceeds the 0.95 inch WC emergency threshold, causing critically restricted airflow that requires immediate production stop and fan shutdown rather than a scheduled change.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "walk_to exhaust_filter_status_panel",
+        "read_sensor exhaust_filter_differential_pressure_sensor",
+        "press_button booth_exhaust_fan_stop_button",
+        "notify maintenance_supervisor",
+        "notify plant_manager"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "exhaust_filter_status_panel",
+        "exhaust_filter_differential_pressure_sensor",
+        "booth_exhaust_fan_stop_button",
+        "maintenance_supervisor",
+        "plant_manager"
+      ]
+    },
+    {
+      "ref": "exhaust_filter_change",
+      "title": "Scheduled Exhaust Filter Replacement",
+      "condition": "The maintenance schedule or a prior first-stage warning alert requires replacement of the exhaust particulate filter during a planned downtime window.",
+      "steps": [
+        "press_button booth_exhaust_fan_stop_button",
+        "walk_to exhaust_filter_housing",
+        "pick spent_exhaust_filter",
+        "place spent_exhaust_filter",
+        "pick replacement_exhaust_filter",
+        "place replacement_exhaust_filter",
+        "read_sensor exhaust_filter_differential_pressure_sensor"
+      ],
+      "equipment": [
+        "booth_exhaust_fan_stop_button",
+        "exhaust_filter_housing",
+        "spent_exhaust_filter",
+        "replacement_exhaust_filter",
+        "exhaust_filter_differential_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "intake_filter_change",
+      "title": "Scheduled Intake Air Filter Replacement",
+      "condition": "The maintenance schedule requires replacement of the makeup-air intake filter to maintain clean particle-free air supply to the booth interior.",
+      "steps": [
+        "press_button booth_air_supply_shutoff_button",
+        "walk_to intake_filter_housing",
+        "pick spent_intake_filter",
+        "place spent_intake_filter",
+        "pick replacement_intake_filter",
+        "place replacement_intake_filter",
+        "read_sensor booth_differential_pressure_sensor"
+      ],
+      "equipment": [
+        "booth_air_supply_shutoff_button",
+        "intake_filter_housing",
+        "spent_intake_filter",
+        "replacement_intake_filter",
+        "booth_differential_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "atomizer_cleaning",
+      "title": "Scheduled Spray Atomizer Bell Cup Cleaning",
+      "condition": "The scheduled atomizer cleaning interval has been reached, or a quality inspection identifies dried paint buildup on the bell cup surface that could cause defects on subsequent parts.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "walk_to atomizer_cleaning_station",
+        "pick atomizer_cleaning_solvent_bottle",
+        "place atomizer_cleaning_solvent_bottle",
+        "wait 120",
+        "pick lint_free_wipe",
+        "place lint_free_wipe"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "atomizer_cleaning_station",
+        "atomizer_cleaning_solvent_bottle",
+        "lint_free_wipe"
+      ]
+    },
+    {
+      "ref": "pump_lubrication",
+      "title": "Scheduled Paint Pump Lubrication",
+      "condition": "The preventive maintenance schedule indicates the paint supply pump is due for lubrication of its piston seals and bearing races.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "walk_to paint_pump_station",
+        "pick grease_gun",
+        "place grease_gun",
+        "wait 30",
+        "press_button paint_pump_start_button",
+        "read_sensor pump_pressure_sensor"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "paint_pump_station",
+        "grease_gun",
+        "paint_pump_start_button",
+        "pump_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "spray_tip_calibration",
+      "title": "Spray Pattern Calibration Verification",
+      "condition": "The scheduled calibration interval for spray tip fan angle and flow rate has been reached, or film thickness readings show deviation across the width of the target surface indicating pattern drift.",
+      "steps": [
+        "walk_to spray_robot_station",
+        "pick calibration_target_panel",
+        "place calibration_target_panel",
+        "press_button spray_test_fire_button",
+        "read_sensor spray_pattern_sensor",
+        "pick calibration_target_panel",
+        "notify quality_engineer"
+      ],
+      "equipment": [
+        "spray_robot_station",
+        "calibration_target_panel",
+        "spray_test_fire_button",
+        "spray_pattern_sensor",
+        "quality_engineer"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout-Tagout Before Booth Maintenance Entry",
+      "condition": "Planned or corrective maintenance requires a technician to physically enter the booth enclosure; all electrical, pneumatic, and paint-supply energy sources must be isolated, locked, and tagged before entry.",
+      "steps": [
+        "press_button red_estop_button",
+        "press_button main_power_disconnect_button",
+        "press_button paint_supply_shutoff_button",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "pick danger_tag",
+        "place danger_tag"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "main_power_disconnect_button",
+        "paint_supply_shutoff_button",
+        "lockout_hasp",
+        "danger_tag"
+      ]
+    },
+    {
+      "ref": "fire_estop",
+      "title": "Fire Alarm or Emergency Stop During Spray Operation",
+      "condition": "A fire alarm activates within the booth enclosure or an operator manually triggers the emergency stop while paint is actively being sprayed, requiring immediate suppression and evacuation.",
+      "steps": [
+        "press_button red_estop_button",
+        "press_button fire_suppression_activation_button",
+        "notify fire_response_team",
+        "walk_to booth_exit_door",
+        "notify plant_manager"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "fire_suppression_activation_button",
+        "fire_response_team",
+        "booth_exit_door",
+        "plant_manager"
+      ]
+    },
+    {
+      "ref": "paint_spill_cleanup",
+      "title": "Paint Pooling on Booth Floor During Coating Operation",
+      "condition": "Liquid paint is observed accumulating on the booth floor during an active coating cycle without evidence of a tank rupture, indicating a drip-line disconnection or overspray accumulation that requires containment without emergency evacuation.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "walk_to spill_kit_cabinet",
+        "pick absorbent_pad",
+        "place absorbent_pad",
+        "pick paint_waste_container",
+        "place paint_waste_container",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "spill_kit_cabinet",
+        "absorbent_pad",
+        "paint_waste_container",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "booth_startup",
+      "title": "Beginning-of-Shift Paint Booth Startup",
+      "condition": "The paint booth is in a fully shut-down state at the start of a production shift and must be brought to operational readiness through a sequenced energization and verification routine.",
+      "steps": [
+        "walk_to main_power_panel",
+        "press_button main_power_on_button",
+        "press_button booth_exhaust_fan_start_button",
+        "wait 60",
+        "read_sensor booth_differential_pressure_sensor",
+        "press_button paint_pump_start_button",
+        "read_sensor atomizer_air_pressure_sensor"
+      ],
+      "equipment": [
+        "main_power_panel",
+        "main_power_on_button",
+        "booth_exhaust_fan_start_button",
+        "booth_differential_pressure_sensor",
+        "paint_pump_start_button",
+        "atomizer_air_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "booth_shutdown",
+      "title": "End-of-Shift Paint Booth Shutdown",
+      "condition": "The production shift has ended and the paint booth must be safely brought to a fully de-energized state before personnel leave the area.",
+      "steps": [
+        "press_button paint_pump_stop_button",
+        "wait 30",
+        "press_button booth_exhaust_fan_stop_button",
+        "walk_to main_power_panel",
+        "press_button main_power_off_button",
+        "read_sensor solvent_vapor_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "paint_pump_stop_button",
+        "booth_exhaust_fan_stop_button",
+        "main_power_panel",
+        "main_power_off_button",
+        "solvent_vapor_sensor",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "film_thickness_low",
+      "title": "Paint Film Thickness Below Minimum Specification",
+      "condition": "The film thickness gauge reads below the 60-micron minimum specification on one or more measurement spots of a coated part, indicating insufficient paint deposition that will fail corrosion protection requirements.",
+      "steps": [
+        "walk_to quality_inspection_station",
+        "pick film_thickness_gauge",
+        "place film_thickness_gauge",
+        "read_sensor film_thickness_sensor",
+        "notify quality_engineer",
+        "press_button paint_pump_stop_button"
+      ],
+      "equipment": [
+        "quality_inspection_station",
+        "film_thickness_gauge",
+        "film_thickness_sensor",
+        "quality_engineer",
+        "paint_pump_stop_button"
+      ]
+    },
+    {
+      "ref": "viscosity_out_of_spec",
+      "title": "Pre-Shift Paint Viscosity Out of Specification",
+      "condition": "The pre-shift viscosity check shows paint outside the 18-22 second Ford Cup No. 4 specification range, indicating incorrect solvent ratio or temperature that will cause spray defects if the run proceeds.",
+      "steps": [
+        "walk_to paint_mixing_station",
+        "pick viscosity_cup",
+        "place viscosity_cup",
+        "read_sensor viscosity_sensor",
+        "notify paint_technician",
+        "press_button paint_pump_stop_button"
+      ],
+      "equipment": [
+        "paint_mixing_station",
+        "viscosity_cup",
+        "viscosity_sensor",
+        "paint_technician",
+        "paint_pump_stop_button"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": 1,
+      "sop_ref": "low_booth_pressure",
+      "text": "First shift on line 2, about 0830. The gauge by the booth door was reading low — not by much, just hovering below the lower mark. Airflow felt a little weak when I stood near the intake. Tweaked the damper and watched it creep back up. No parts were scrapped."
+    },
+    {
+      "id": 2,
+      "sop_ref": "low_booth_pressure",
+      "text": "Second shift, booth 3 near the east wall. Something was off with the draw in there all afternoon. The readout was nudging below the bottom of the range but hadn't tripped anything. Bumped the damper adjustment and it settled back within a minute. Happened twice before lunch Tuesday too."
+    },
+    {
+      "id": 3,
+      "sop_ref": "low_booth_pressure",
+      "text": "Caught this during afternoon rounds on the unit by the loading dock. The reading was running a little under where it's supposed to sit — gradual kind of thing, not like anything crashed. Adjusted and it came back up in about thirty seconds. Flagged it for the supervisor to keep an eye on."
+    },
+    {
+      "id": 4,
+      "sop_ref": "pressure_collapse",
+      "text": "Line 1, third shift. Everything was normal and then the draw just died — went to basically nothing in maybe five seconds flat. Fan noise stopped too. Pulled the e-stop right away because we still had mist in the air. Maintenance found the exhaust fan had thrown its belt."
+    },
+    {
+      "id": 5,
+      "sop_ref": "pressure_collapse",
+      "text": "Booth 2, mid-morning first shift. Operators heard a loud thump and the whole booth went quiet — the suction was completely gone, gauge buried at zero almost instantly. Not a slow drift, it just fell off a cliff. Maintenance found a duct connection had blown out on the back side."
+    },
+    {
+      "id": 6,
+      "sop_ref": "high_booth_pressure",
+      "text": "Line 3, first shift. The gauge was running high all morning — well above where it's supposed to sit. The exhaust damper felt like it was stuck partially closed. Opened it up and the reading came back down after maybe twenty seconds. Parts near the end of the run had some overspray blow-back."
+    },
+    {
+      "id": 7,
+      "sop_ref": "high_booth_pressure",
+      "text": "Second shift over at booth 4. The supply air must have been cranked up too much by the morning crew. Reading was above the top mark. We were seeing light haze inside the enclosure from the restricted exhaust. Opened the damper and it sorted out."
+    },
+    {
+      "id": 8,
+      "sop_ref": "high_booth_pressure",
+      "text": "Caught it on the unit by the paint mix room — the booth was running over-pressured, not dangerously but definitely above the top of where it needs to be. No fan failure or alarm, just excessive. Fixed the damper position and monitored for the rest of the shift."
+    },
+    {
+      "id": 9,
+      "sop_ref": "atomizer_air_low",
+      "text": "Third shift, line 2. Operator flagged that door panels were coming out with orange-peel texture on the upper third. Checked the atomizer feed line and the air supply was running weak — below where it needs to be. Adjusted the regulator and the texture cleaned up on the next piece."
+    },
+    {
+      "id": 10,
+      "sop_ref": "atomizer_air_low",
+      "text": "Booth 1, first shift around noon. The bell cup was spinning but the mist looked chunky to me — not the fine cloud you want. Checked the feed air and it was down. Got it back up with the regulator knob and ran a test piece. Came out clean."
+    },
+    {
+      "id": 11,
+      "sop_ref": "solvent_leak_minor",
+      "text": "First shift, booth 3. Noticed a slow drip coming off one of the hose fittings on the solvent tank — maybe a few drops per minute onto the floor. No smell in the air and the vapor monitor was quiet. Stopped the pump, threw an absorbent pad under it, and called the maintenance guy over."
+    },
+    {
+      "id": 12,
+      "sop_ref": "solvent_leak_minor",
+      "text": "Second shift on line 1. Small wet spot on the floor under the fitting near the back of the solvent tank. Traced it to a weeping connection — not gushing, just seeping. Contained it with a pad and flagged maintenance. Vapor monitor never went off the whole time."
+    },
+    {
+      "id": 13,
+      "sop_ref": "solvent_spill_major",
+      "text": "Line 2, second shift. A hose on the solvent tank let go all at once — solvent everywhere in seconds. The vapor alarm went off immediately and the smell was strong. We hit the e-stop and fire suppression and got everyone out. Maintenance supervisor called it a complete hose failure at the crimp."
+    },
+    {
+      "id": 14,
+      "sop_ref": "solvent_spill_major",
+      "text": "Booth 4, third shift. Heard a pop from inside the booth and then saw a big puddle forming fast under the tank — solvent pouring out. The vapor sensor was screaming within seconds. Hit the big red button, activated suppression, and got out. Fire team came in and cleared the area."
+    },
+    {
+      "id": 15,
+      "sop_ref": "spray_tip_partial_clog",
+      "text": "Line 3, first shift. Robot was spraying but the fan looked wrong — narrow on one side, kind of tailing off to the left. Parts on the left edge of the fixture were thin. Paint was definitely still coming out, just not spreading right. Poked it with the clearing needle and it opened back up."
+    },
+    {
+      "id": 16,
+      "sop_ref": "spray_tip_partial_clog",
+      "text": "Second shift, booth 2. Quality pulled a fender skin that had a streak of thin coverage down one side. Gun was still flowing — meter showed it — but the spray shape was lopsided. Stopped the pump, cleared the tip, restarted. Pattern looked normal on the next piece."
+    },
+    {
+      "id": 17,
+      "sop_ref": "spray_tip_partial_clog",
+      "text": "Caught it on the mid-shift check on line 1. The fan was distorted — not gone, but definitely not a clean symmetrical spread. Flow meter was registering non-zero. Clearing needle fixed it in a minute or so and the next test part came out even."
+    },
+    {
+      "id": 18,
+      "sop_ref": "spray_tip_full_block",
+      "text": "Line 2, third shift. Robot ran its whole spray path but nothing came out of the gun at all. Pump was running fine, pressure was good on the gauge, just zero at the nozzle. Had to pull the tip off and swap it out before we could run again. Old tip was completely packed solid."
+    },
+    {
+      "id": 19,
+      "sop_ref": "spray_tip_full_block",
+      "text": "Second shift, booth 3. Operator noticed parts coming out of the booth bone dry — not just thin, completely uncoated. Gun wasn't delivering anything. Flow meter read flat zero. Pump pressure was nominal. Replaced the tip and it came right back."
+    },
+    {
+      "id": 20,
+      "sop_ref": "exhaust_filter_warning",
+      "text": "Line 1, first shift Tuesday. The filter panel lit up the yellow indicator — not the red one, just the first level. Nothing stopped running and the parts still looked fine. Noted it in the log and told maintenance to plan a swap during the Thursday downtime window."
+    },
+    {
+      "id": 21,
+      "sop_ref": "exhaust_filter_warning",
+      "text": "Booth 2, second shift. Saw the first indicator come on for the exhaust side. Airflow still felt normal and quality checks were passing. Hung an inspection tag on the housing and let the supervisor know to get it scheduled before it becomes a bigger issue."
+    },
+    {
+      "id": 22,
+      "sop_ref": "exhaust_filter_alarm",
+      "text": "Line 3, first shift. The red alarm went off on the exhaust filter — not the yellow, the full alarm. Airflow dropped noticeably and parts were starting to get a haze on them. Had to stop the pump and kill the fan right away. Called the supervisor and plant manager. Emergency change."
+    },
+    {
+      "id": 23,
+      "sop_ref": "exhaust_filter_alarm",
+      "text": "Second shift, booth 4. Full alarm on the exhaust filter — completely overwhelmed. You could feel the airflow was gone. Spraying had to stop immediately and the fan went off. When maintenance pulled it the thing looked like a solid mat of overspray. They called it critical."
+    },
+    {
+      "id": 24,
+      "sop_ref": "exhaust_filter_change",
+      "text": "Maintenance window Thursday morning, line 2. Swapped out the exhaust filter during planned downtime. Old one was dark gray and fully loaded — not in alarm yet but right behind it. New filter in, fan restarted, and the gauge reading dropped back to where it should be."
+    },
+    {
+      "id": 25,
+      "sop_ref": "exhaust_filter_change",
+      "text": "Booth 1, Friday morning downtime. Came in to do the scheduled exhaust-side filter replacement. The old one was getting up there — not critical but due per the PM sheet. Swapped it out, brought the fan back up, and verified the reading before we started the shift."
+    },
+    {
+      "id": 26,
+      "sop_ref": "intake_filter_change",
+      "text": "Line 3, Tuesday maintenance. Replaced the supply-air filter on the intake side during the downtime window — the makeup-air one, not the exhaust. Old one had a lot of dust on the incoming face. Got the new one in, supply back on, booth reading looked better than it had in a while."
+    },
+    {
+      "id": 27,
+      "sop_ref": "intake_filter_change",
+      "text": "Booth 3, second shift maintenance window. Did the intake filter swap on the fresh-air supply side. Shut the air supply down, pulled the old filter, installed the new one. Booth pressure gauge showed a cleaner reading once we brought supply back up."
+    },
+    {
+      "id": 28,
+      "sop_ref": "atomizer_cleaning",
+      "text": "Line 2, midweek scheduled clean. Bell cup on booth 1 had visible dried paint around the outer edge — crusty buildup from the previous shift. Stopped the pump, brought it to the cleaning station, soaked it in the cleaning solution, wiped it down. Came off clean and the next test spray looked good."
+    },
+    {
+      "id": 29,
+      "sop_ref": "atomizer_cleaning",
+      "text": "Booth 4, quality flagged a pattern irregularity that turned out to be dried paint on the spinning cup. Took it through the cleaning routine — soak then wipe. The coating came right off. Pattern was back to normal on the test piece after reinstall."
+    },
+    {
+      "id": 30,
+      "sop_ref": "pump_lubrication",
+      "text": "Line 1, Thursday PM maintenance. PM sheet said the paint pump was due for lube. Stopped it, greased the fittings on the piston side, let it sit, then started it back up. Pump pressure sensor read normal. No issues."
+    },
+    {
+      "id": 31,
+      "sop_ref": "pump_lubrication",
+      "text": "Booth 2, first shift maintenance window. Did the scheduled lube on the paint supply pump. Applied grease to the bearing race per the PM card. Pump restarted fine, pressure reading was right where it should be. Logged it and moved on."
+    },
+    {
+      "id": 32,
+      "sop_ref": "spray_tip_calibration",
+      "text": "Line 3, quality audit Monday morning. Calibration on the spray tip was overdue. Set up the target panel, did a test fire, and the pattern sensor showed the fan angle was drifting off to one side. Quality engineer reviewed the result and we adjusted before the production shift started."
+    },
+    {
+      "id": 33,
+      "sop_ref": "spray_tip_calibration",
+      "text": "Booth 1, second shift. Film thickness was coming out with a gradient across parts — heavy on the left, thin on the right. Quality engineer ordered a pattern check. Fired at the calibration panel and the sensor confirmed the fan was skewed. Calibration corrected it."
+    },
+    {
+      "id": 34,
+      "sop_ref": "lockout_tagout",
+      "text": "Line 2, planned maintenance Monday. Before the tech went into the booth to replace a spray arm fitting, we ran the full energy isolation routine — estop first, then main power off, paint supply closed, hasp on, danger tag hung. Tech confirmed zero energy before he stepped inside."
+    },
+    {
+      "id": 35,
+      "sop_ref": "lockout_tagout",
+      "text": "Booth 3, third shift corrective work. Robot needed to go in to access a leaking fitting inside the enclosure. Full LOTO done — estop, main disconnect off, paint supply closed, hasp and tag applied. Supervisor signed off before the tech entered."
+    },
+    {
+      "id": 36,
+      "sop_ref": "fire_estop",
+      "text": "Line 1, second shift. Fire alarm went off inside the booth while we were mid-spray on a door panel batch. Hit the estop, activated suppression, called the fire team, and cleared out. Turned out to be a false alarm from overspray hitting the detector, but we followed the full procedure regardless."
+    },
+    {
+      "id": 37,
+      "sop_ref": "fire_estop",
+      "text": "Booth 4, first shift. Operator hit the emergency stop — she saw a flash near the spray arm while it was mid-cycle. Suppression activated and everyone got out. Maintenance found a static discharge had ignited a small vapor pocket. Fire team cleared it before we restarted."
+    },
+    {
+      "id": 38,
+      "sop_ref": "paint_spill_cleanup",
+      "text": "Line 3, second shift. Paint was pooling at the base of the booth during the run — not a huge amount but it was growing. Tank looked intact. Traced it to a drip line that had worked loose at a fitting. Stopped the pump, laid down absorbent pads, got it contained, and called maintenance."
+    },
+    {
+      "id": 39,
+      "sop_ref": "paint_spill_cleanup",
+      "text": "Booth 2, first shift. Tech spotted a puddle of paint under the spray arm during a mid-shift walkthrough. The tank was fine — it was the delivery hose dripping directly onto the floor. Stopped flow, grabbed the spill kit from the cabinet, cleaned it up, and notified maintenance."
+    },
+    {
+      "id": 40,
+      "sop_ref": "booth_startup",
+      "text": "First shift Monday morning, line 2. Robot brought the booth up for the week — main power on, kicked the exhaust fan, waited for everything to settle, checked the pressure reading, then started the pump. Atomizer air read good. Ready to run in about ninety seconds."
+    },
+    {
+      "id": 41,
+      "sop_ref": "booth_startup",
+      "text": "Booth 1, start of day shift Wednesday. Tech ran the startup sequence — power on, fan up, waited the full minute, checked pressure. The reading was still a bit low after the fan came on so we waited another thirty seconds before starting the pump. Came up fine."
+    },
+    {
+      "id": 42,
+      "sop_ref": "booth_startup",
+      "text": "Line 3, Tuesday morning startup. Smooth one — power on, fan running, pressure came up clean after the wait, pump on, air pressure good. One of those mornings where everything just works. Logged start time and handed off to production."
+    },
+    {
+      "id": 43,
+      "sop_ref": "booth_shutdown",
+      "text": "End of day shift, line 1. Stopped the pump first, let the booth purge for thirty seconds, then killed the fan and hit the main disconnect. Checked the vapor sensor on the way out — read clean. Let maintenance supervisor know everything was shut down."
+    },
+    {
+      "id": 44,
+      "sop_ref": "booth_shutdown",
+      "text": "Booth 3, end of third shift. Robot ran the shutdown sequence — pump off, purge wait, fan off, main power killed, vapor check. Everything came back clean. Maintenance supervisor confirmed all clear before the shift handed off."
+    },
+    {
+      "id": 45,
+      "sop_ref": "film_thickness_low",
+      "text": "Line 2, second shift. Quality pulled two door skins from the batch and they measured thin — well under the floor spec. The color looked a little translucent, you could almost tell just by looking. Stopped the run, called the quality engineer, and held the parts pending investigation."
+    },
+    {
+      "id": 46,
+      "sop_ref": "film_thickness_low",
+      "text": "Booth 4, first shift. Inspector caught a hood panel that was obviously under-coated — looked washed out compared to the reference card. Gauge confirmed it was below minimum across most of the panel. Pump stopped and quality engineer was on the floor within ten minutes."
+    },
+    {
+      "id": 47,
+      "sop_ref": "film_thickness_low",
+      "text": "Line 1, third shift. Ran the gauge on a random sample and readings were coming in low across the board — not one bad spot, the whole part was under spec. QE came and looked at the spray parameters. Pump stopped pending a full review of settings and flow rate."
+    },
+    {
+      "id": 48,
+      "sop_ref": "viscosity_out_of_spec",
+      "text": "Line 3, start of first shift. Did the pre-run cup check and the number was off — drained too fast, paint was thin and watery. Called the paint tech and held the pump before we ran anything. She came and corrected the solvent ratio and re-checked before we went."
+    },
+    {
+      "id": 49,
+      "sop_ref": "viscosity_out_of_spec",
+      "text": "Booth 1, Monday morning. Cup check before startup was running slow — paint was heavy and barely draining. Cold overnight probably thickened the batch. Called the paint tech, she adjusted the temperature and mix ratio, re-checked, and cleared us to run."
+    },
+    {
+      "id": 50,
+      "sop_ref": "viscosity_out_of_spec",
+      "text": "Booth 3, first shift. Pre-spray cup check came back too slow — took longer than the upper end of the acceptable window to drain. Paint tech was called to the mixing station. She added solvent, stirred, re-checked, and we were back in range before the shift got going."
+    }
+  ]
+}

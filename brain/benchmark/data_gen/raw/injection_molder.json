@@ -1,0 +1,729 @@
+{
+  "family": "Injection Molding Machine",
+  "sops": [
+    {
+      "ref": "barrel_temp_low",
+      "title": "Barrel Zone Temperature Below Setpoint",
+      "condition": "Any barrel zone temperature controller reads more than 10 degrees C below its configured setpoint for longer than 5 continuous minutes during production.",
+      "steps": [
+        "walk_to barrel_zone_controller_panel",
+        "read_sensor barrel_zone1_temp_sensor",
+        "read_sensor barrel_zone2_temp_sensor",
+        "read_sensor barrel_zone3_temp_sensor",
+        "press_button heater_enable_button to confirm heater bands are energized",
+        "wait 300 seconds for zones to recover toward setpoint",
+        "notify process_engineer if any zone fails to recover within setpoint tolerance"
+      ],
+      "equipment": [
+        "barrel_zone_controller_panel",
+        "barrel_zone1_temp_sensor",
+        "barrel_zone2_temp_sensor",
+        "barrel_zone3_temp_sensor",
+        "heater_enable_button"
+      ]
+    },
+    {
+      "ref": "barrel_temp_spike",
+      "title": "Barrel Zone Temperature Sudden Spike Above Safety Ceiling",
+      "condition": "Any barrel zone temperature exceeds the programmed safety ceiling by more than 15 degrees C as a rapid rise occurring within a single 30-second controller scan cycle.",
+      "steps": [
+        "press_button red_estop_button to halt injection cycle immediately",
+        "walk_to barrel_zone_controller_panel",
+        "read_sensor barrel_zone1_temp_sensor",
+        "read_sensor barrel_zone2_temp_sensor",
+        "read_sensor barrel_zone3_temp_sensor",
+        "notify process_engineer and maintenance_tech with all zone sensor readings",
+        "wait 600 seconds before any restart attempt pending engineer written clearance"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "barrel_zone_controller_panel",
+        "barrel_zone1_temp_sensor",
+        "barrel_zone2_temp_sensor",
+        "barrel_zone3_temp_sensor"
+      ]
+    },
+    {
+      "ref": "barrel_temp_drift",
+      "title": "Barrel Zone Temperature Gradual Drift Above Setpoint",
+      "condition": "Any barrel zone temperature climbs more than 8 degrees C above its setpoint over a period exceeding 20 minutes without a rapid spike event and without a recipe change.",
+      "steps": [
+        "walk_to barrel_zone_controller_panel",
+        "read_sensor barrel_zone1_temp_sensor",
+        "read_sensor barrel_zone2_temp_sensor",
+        "read_sensor barrel_zone3_temp_sensor",
+        "press_button alarm_acknowledge_button to log the drift event timestamp",
+        "notify process_engineer with affected zone readings and elapsed drift duration",
+        "wait 120 seconds and read_sensor barrel_zone1_temp_sensor to confirm whether trend is continuing upward"
+      ],
+      "equipment": [
+        "barrel_zone_controller_panel",
+        "barrel_zone1_temp_sensor",
+        "barrel_zone2_temp_sensor",
+        "barrel_zone3_temp_sensor",
+        "alarm_acknowledge_button"
+      ]
+    },
+    {
+      "ref": "injection_pressure_low",
+      "title": "Injection Pressure Below Fill Setpoint",
+      "condition": "Injection cavity pressure falls more than 200 psi below the programmed fill setpoint during the injection phase of a shot cycle.",
+      "steps": [
+        "press_button cycle_stop_button to pause production after current shot completes",
+        "walk_to hydraulic_unit",
+        "read_sensor injection_pressure_sensor",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify process_engineer with both pressure readings and number of affected shots",
+        "wait 60 seconds for engineer assessment before resuming cycle"
+      ],
+      "equipment": [
+        "cycle_stop_button",
+        "hydraulic_unit",
+        "injection_pressure_sensor",
+        "hydraulic_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "injection_pressure_high",
+      "title": "Injection Pressure Exceeding Safety Limit",
+      "condition": "Injection pressure sensor reads above the programmed safety ceiling during any phase of the injection or pack portion of the shot cycle.",
+      "steps": [
+        "press_button red_estop_button immediately",
+        "walk_to hydraulic_unit",
+        "read_sensor injection_pressure_sensor",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_tech and process_engineer with both sensor readings",
+        "wait 300 seconds for system pressure to bleed down before any close approach",
+        "notify shift_supervisor that production is halted pending fault investigation"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "hydraulic_unit",
+        "injection_pressure_sensor",
+        "hydraulic_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "clamp_pressure_drop",
+      "title": "Hydraulic Clamp Pressure Slow Drop Warning",
+      "condition": "Hydraulic clamp pressure decreases by more than 150 psi below the holding setpoint over a period of 10 or more minutes while the mold remains clamped between shots.",
+      "steps": [
+        "walk_to hydraulic_unit",
+        "read_sensor hydraulic_pressure_sensor",
+        "read_sensor clamp_force_sensor",
+        "press_button alarm_acknowledge_button to log the event",
+        "notify maintenance_tech with current pressure readings and measured drop duration",
+        "wait 300 seconds and read_sensor hydraulic_pressure_sensor again to assess whether drop is continuing"
+      ],
+      "equipment": [
+        "hydraulic_unit",
+        "hydraulic_pressure_sensor",
+        "clamp_force_sensor",
+        "alarm_acknowledge_button"
+      ]
+    },
+    {
+      "ref": "clamp_pressure_collapse",
+      "title": "Sudden Hydraulic Clamp Pressure Collapse Emergency",
+      "condition": "Hydraulic clamp pressure drops more than 500 psi within a single 10-second window while the mold is fully clamped and an active injection shot is in progress.",
+      "steps": [
+        "press_button red_estop_button immediately",
+        "walk_to hydraulic_unit",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_tech and shift_supervisor immediately with sensor reading",
+        "walk_to mold_area",
+        "read_sensor clamp_force_sensor",
+        "notify process_engineer that mold clamp integrity is suspect and await clearance before any approach"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "hydraulic_unit",
+        "hydraulic_pressure_sensor",
+        "mold_area",
+        "clamp_force_sensor"
+      ]
+    },
+    {
+      "ref": "hopper_jam",
+      "title": "Material Jam in Hopper Throat",
+      "condition": "Hopper throat bridging sensor triggers or screw recovery time exceeds the programmed threshold, indicating that pellets are bridging and not flowing from the hopper into the barrel.",
+      "steps": [
+        "press_button cycle_stop_button to halt screw rotation after current shot completes",
+        "walk_to hopper_assembly",
+        "read_sensor hopper_level_sensor to confirm material is present but not flowing",
+        "pick hopper_agitator_rod from maintenance_bench",
+        "place hopper_agitator_rod into hopper_throat to mechanically break the material bridge",
+        "wait 30 seconds",
+        "notify process_engineer if material flow does not resume and recovery time normalizes"
+      ],
+      "equipment": [
+        "cycle_stop_button",
+        "hopper_assembly",
+        "hopper_level_sensor",
+        "hopper_agitator_rod",
+        "maintenance_bench"
+      ]
+    },
+    {
+      "ref": "heater_band_replace",
+      "title": "Barrel Heater Band Replacement",
+      "condition": "A barrel zone temperature controller shows a persistent open-circuit fault code or the zone cannot heat to within 20 degrees C of setpoint after 15 minutes of energized soak time.",
+      "steps": [
+        "notify maintenance_tech to confirm LOTO is applied before starting this procedure",
+        "walk_to barrel_zone_controller_panel",
+        "read_sensor barrel_zone1_temp_sensor to identify which zone is faulted",
+        "pick replacement_heater_band from maintenance_bench",
+        "place replacement_heater_band onto failed_barrel_zone position",
+        "walk_to barrel_zone_controller_panel",
+        "read_sensor barrel_zone1_temp_sensor to verify replacement band is heating correctly"
+      ],
+      "equipment": [
+        "barrel_zone_controller_panel",
+        "barrel_zone1_temp_sensor",
+        "replacement_heater_band",
+        "maintenance_bench",
+        "failed_barrel_zone"
+      ]
+    },
+    {
+      "ref": "hydraulic_filter_change",
+      "title": "Hydraulic Oil Filter Cartridge Replacement",
+      "condition": "Hydraulic filter differential pressure indicator reaches the red bypass zone, or the scheduled 500-hour filter replacement interval is reached per the preventive maintenance calendar.",
+      "steps": [
+        "walk_to hydraulic_unit",
+        "read_sensor hydraulic_filter_dp_sensor to confirm bypass indicator state",
+        "press_button hydraulic_pump_stop_button",
+        "wait 120 seconds for system pressure to fully bleed down",
+        "pick replacement_hydraulic_filter from maintenance_bench",
+        "place replacement_hydraulic_filter into hydraulic_filter_housing",
+        "press_button hydraulic_pump_start_button and read_sensor hydraulic_filter_dp_sensor to verify normal differential pressure"
+      ],
+      "equipment": [
+        "hydraulic_unit",
+        "hydraulic_filter_dp_sensor",
+        "hydraulic_pump_stop_button",
+        "hydraulic_pump_start_button",
+        "replacement_hydraulic_filter",
+        "hydraulic_filter_housing",
+        "maintenance_bench"
+      ]
+    },
+    {
+      "ref": "screw_lubrication",
+      "title": "Injection Screw Thrust Bearing Lubrication",
+      "condition": "The scheduled 250-hour lubrication interval for the injection screw thrust bearing is due per the preventive maintenance calendar.",
+      "steps": [
+        "notify maintenance_tech that screw thrust bearing PM lubrication is starting",
+        "walk_to injection_drive_unit",
+        "press_button hydraulic_pump_stop_button",
+        "wait 60 seconds for drive unit to come to a complete stop",
+        "pick grease_gun from maintenance_bench",
+        "place grease_gun onto screw_thrust_bearing_zerk to inject specified grease quantity",
+        "read_sensor injection_pressure_sensor to confirm zero pressure before releasing machine"
+      ],
+      "equipment": [
+        "injection_drive_unit",
+        "hydraulic_pump_stop_button",
+        "grease_gun",
+        "screw_thrust_bearing_zerk",
+        "injection_pressure_sensor",
+        "maintenance_bench"
+      ]
+    },
+    {
+      "ref": "mold_vent_cleaning",
+      "title": "Mold Vent and Parting Line Cleaning",
+      "condition": "Visual inspection reveals carbon or wax deposits on mold vents, or a short-shot trend in quality data indicates vents are partially blocked and degrading part fill at standard injection parameters.",
+      "steps": [
+        "press_button cycle_stop_button after current shot completes",
+        "walk_to mold_area",
+        "press_button mold_open_button to open clamp to full stroke",
+        "pick mold_vent_brush from maintenance_bench",
+        "place mold_vent_brush onto mold_parting_line to scrub vent grooves and parting surface",
+        "wait 30 seconds",
+        "press_button mold_close_button and notify process_engineer that vent cleaning is complete"
+      ],
+      "equipment": [
+        "cycle_stop_button",
+        "mold_area",
+        "mold_open_button",
+        "mold_vent_brush",
+        "mold_parting_line",
+        "mold_close_button",
+        "maintenance_bench"
+      ]
+    },
+    {
+      "ref": "barrel_purge",
+      "title": "Barrel and Nozzle Purge with Purging Compound",
+      "condition": "A material or color changeover is required, or machine downtime has exceeded 30 minutes and degraded or contaminated material must be cleared from the barrel and nozzle before resuming production.",
+      "steps": [
+        "walk_to hopper_assembly",
+        "pick purging_compound_bag from maintenance_bench",
+        "place purging_compound_bag into hopper_assembly",
+        "walk_to control_panel",
+        "press_button purge_button to initiate automatic purge cycle",
+        "wait 120 seconds for purge shots to complete",
+        "notify process_engineer to visually inspect purge shots for contamination clearance before resuming production"
+      ],
+      "equipment": [
+        "hopper_assembly",
+        "purging_compound_bag",
+        "control_panel",
+        "purge_button",
+        "maintenance_bench"
+      ]
+    },
+    {
+      "ref": "temp_controller_calibration",
+      "title": "Barrel Zone Temperature Controller Calibration",
+      "condition": "Quarterly calibration interval for barrel zone thermocouples and PID controllers is due per the calibration schedule, or any zone reads more than 5 degrees C from an independent reference measurement.",
+      "steps": [
+        "notify maintenance_tech that barrel temperature calibration procedure is starting",
+        "walk_to barrel_zone_controller_panel",
+        "pick calibration_probe from maintenance_bench",
+        "place calibration_probe onto barrel_zone1_thermocouple_port",
+        "read_sensor barrel_zone1_temp_sensor and compare displayed value against calibration_probe reference reading",
+        "press_button alarm_acknowledge_button to log each zone calibration result",
+        "notify process_engineer with offset values found for each zone requiring adjustment"
+      ],
+      "equipment": [
+        "barrel_zone_controller_panel",
+        "calibration_probe",
+        "barrel_zone1_thermocouple_port",
+        "barrel_zone1_temp_sensor",
+        "alarm_acknowledge_button",
+        "maintenance_bench"
+      ]
+    },
+    {
+      "ref": "tie_bar_lubrication",
+      "title": "Clamp Unit Tie Bar Lubrication",
+      "condition": "The scheduled 500-hour lubrication interval for the clamp unit tie bars is due per the preventive maintenance calendar.",
+      "steps": [
+        "walk_to clamp_unit",
+        "press_button mold_open_button to open clamp to full stroke exposing tie bar surfaces",
+        "pick tie_bar_grease_gun from maintenance_bench",
+        "place tie_bar_grease_gun onto tie_bar_left_zerk to apply specified grease quantity",
+        "place tie_bar_grease_gun onto tie_bar_right_zerk to apply specified grease quantity",
+        "press_button mold_close_button to cycle clamp and distribute grease",
+        "notify maintenance_tech that lubrication is complete and log service hours"
+      ],
+      "equipment": [
+        "clamp_unit",
+        "mold_open_button",
+        "tie_bar_grease_gun",
+        "tie_bar_left_zerk",
+        "tie_bar_right_zerk",
+        "mold_close_button",
+        "maintenance_bench"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout Procedure for Injection Molder Maintenance",
+      "condition": "Any maintenance task requiring physical access to the mold area, barrel, screw, or hydraulic components must be preceded by full lockout tagout with machine power available on the line.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button red_estop_button to initiate controlled stop",
+        "walk_to loto_station",
+        "pick loto_hasp from loto_station",
+        "place loto_hasp onto main_power_disconnect handle",
+        "pick loto_padlock from loto_station",
+        "place loto_padlock onto loto_hasp to secure lockout and attach assigned tag"
+      ],
+      "equipment": [
+        "control_panel",
+        "red_estop_button",
+        "loto_station",
+        "loto_hasp",
+        "main_power_disconnect",
+        "loto_padlock"
+      ]
+    },
+    {
+      "ref": "minor_oil_spill",
+      "title": "Minor Hydraulic Oil Spill Containment and Cleanup",
+      "condition": "A hydraulic oil leak of less than one liter is observed pooling on the floor near the hydraulic power unit with no active spray or ongoing pressurized release.",
+      "steps": [
+        "walk_to spill_station",
+        "pick oil_absorbent_pad from spill_station",
+        "place oil_absorbent_pad onto spill_area adjacent to hydraulic_unit",
+        "wait 60 seconds for absorbent pad to soak up the pooled oil",
+        "pick soaked_absorbent_pad from spill_area",
+        "place soaked_absorbent_pad into hazmat_waste_bin",
+        "notify shift_supervisor that spill has been contained and cleaned and log the event"
+      ],
+      "equipment": [
+        "spill_station",
+        "oil_absorbent_pad",
+        "spill_area",
+        "hydraulic_unit",
+        "soaked_absorbent_pad",
+        "hazmat_waste_bin"
+      ]
+    },
+    {
+      "ref": "major_oil_spill",
+      "title": "Major Hydraulic Oil Rupture and Spill Emergency Response",
+      "condition": "A hydraulic oil release greater than five liters is actively spraying or rapidly pooling on the floor from a ruptured hose or fitting, presenting immediate slip and fire ignition hazards.",
+      "steps": [
+        "press_button red_estop_button immediately",
+        "walk_to hydraulic_unit",
+        "press_button hydraulic_pump_stop_button to cut hydraulic power and reduce flow",
+        "walk_to spill_station",
+        "pick spill_kit from spill_station",
+        "place spill_kit around spill_perimeter to contain lateral spread toward drains and walkways",
+        "notify shift_supervisor and maintenance_tech immediately for emergency response and area evacuation"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "hydraulic_unit",
+        "hydraulic_pump_stop_button",
+        "spill_station",
+        "spill_kit",
+        "spill_perimeter"
+      ]
+    },
+    {
+      "ref": "emergency_stop",
+      "title": "Emergency Stop Activation and Safe Standby",
+      "condition": "An unsafe condition, personnel hazard, unexpected machine motion, or critical fault requires immediate cessation of all machine motion and injection cycle activity.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to control_panel",
+        "read_sensor injection_pressure_sensor to confirm pressure has reached zero",
+        "read_sensor hydraulic_pressure_sensor to confirm hydraulic pressure has reached zero",
+        "notify shift_supervisor with description of the unsafe condition that triggered the stop",
+        "wait 300 seconds before any personnel approach to machine",
+        "notify maintenance_tech to assess machine state and clear for restart"
+      ],
+      "equipment": [
+        "red_estop_button",
+        "control_panel",
+        "injection_pressure_sensor",
+        "hydraulic_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "cold_startup",
+      "title": "Cold Startup from Overnight or Extended Shutdown",
+      "condition": "Machine has been fully shut down for eight or more hours and must be brought from ambient temperature to full production readiness including barrel soak.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button heater_enable_button to begin barrel zone heating soak",
+        "wait 1800 seconds for all barrel zones to stabilize at setpoint",
+        "read_sensor barrel_zone1_temp_sensor",
+        "read_sensor barrel_zone2_temp_sensor",
+        "read_sensor barrel_zone3_temp_sensor",
+        "press_button hydraulic_pump_start_button and notify process_engineer that machine is at temperature and ready for first shot approval"
+      ],
+      "equipment": [
+        "control_panel",
+        "heater_enable_button",
+        "barrel_zone1_temp_sensor",
+        "barrel_zone2_temp_sensor",
+        "barrel_zone3_temp_sensor",
+        "hydraulic_pump_start_button"
+      ]
+    },
+    {
+      "ref": "end_of_shift_shutdown",
+      "title": "End of Shift Planned Shutdown",
+      "condition": "The production shift is ending and the machine must be safely shut down in a controlled sequence to prevent material degradation in the barrel and to leave equipment in a safe state for the next shift.",
+      "steps": [
+        "press_button cycle_stop_button after the final production shot completes",
+        "walk_to hopper_assembly",
+        "press_button hopper_gate_close_button to stop material feed into barrel",
+        "walk_to control_panel",
+        "press_button purge_button to purge remaining material from barrel and nozzle",
+        "wait 120 seconds for purge cycle to complete",
+        "press_button heater_disable_button and press_button hydraulic_pump_stop_button and notify shift_supervisor that shutdown is complete"
+      ],
+      "equipment": [
+        "cycle_stop_button",
+        "hopper_assembly",
+        "hopper_gate_close_button",
+        "control_panel",
+        "purge_button",
+        "heater_disable_button",
+        "hydraulic_pump_stop_button"
+      ]
+    },
+    {
+      "ref": "shot_weight_inspection",
+      "title": "Shot Weight and Part Weight Quality Inspection",
+      "condition": "The scheduled every-two-hour quality check interval is due, or an SPC chart out-of-control signal requires verification that part weight is within the plus or minus 0.5 gram tolerance band.",
+      "steps": [
+        "walk_to mold_area",
+        "pick molded_part from mold_ejection_zone",
+        "walk_to inspection_station",
+        "place molded_part onto shot_weight_scale",
+        "read_sensor shot_weight_scale",
+        "notify process_engineer if reading falls outside the tolerance band",
+        "place molded_part into approved_parts_bin or reject_bin based on the scale reading"
+      ],
+      "equipment": [
+        "mold_area",
+        "molded_part",
+        "mold_ejection_zone",
+        "inspection_station",
+        "shot_weight_scale",
+        "approved_parts_bin",
+        "reject_bin"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_001",
+      "sop_ref": "barrel_temp_low",
+      "text": "Zone 2 on line 4's press has been sitting about 12 degrees under where it should be for maybe ten minutes now. Heaters seem to still be on but the material coming out looks stringy and underfilled. Second shift noticed it maybe halfway through the run."
+    },
+    {
+      "id": "inc_002",
+      "sop_ref": "barrel_temp_low",
+      "text": "Something's off on the nozzle-end zone — been watching the readout creep down slowly since we started up this morning. Not a big drop, just drifting low and holding there. Parts are starting to show sink marks near the gate area. Been below setpoint for close to 8 minutes."
+    },
+    {
+      "id": "inc_003",
+      "sop_ref": "barrel_temp_spike",
+      "text": "Zone 1 temp jumped like crazy in less than a minute — went from completely normal to way past the red line on the HMI in one scan. Never seen it swing that fast. There's a burning smell near the barrel. Operator backed off immediately."
+    },
+    {
+      "id": "inc_004",
+      "sop_ref": "barrel_temp_spike",
+      "text": "The feed zone on the unit by the loading dock just shot up on the controller screen — it was reading normal one scan and then the alarm lights were everywhere the next. Didn't drift up, just slammed hard over the ceiling in seconds. Operator hit e-stop on reflex."
+    },
+    {
+      "id": "inc_005",
+      "sop_ref": "barrel_temp_drift",
+      "text": "Zone 3 has been climbing real slow for the last 25 minutes or so. Nothing dramatic, just a few degrees every few minutes. We're about 9 degrees over setpoint now and nobody touched the recipe. No hard alarms but it keeps creeping."
+    },
+    {
+      "id": "inc_006",
+      "sop_ref": "barrel_temp_drift",
+      "text": "The rear zone on press 6 keeps wandering high — not throwing a hard fault but it's been over setpoint consistently all morning. Parts are still okay visually so far but the trend on the trend screen is clearly going the wrong direction, slowly."
+    },
+    {
+      "id": "inc_007",
+      "sop_ref": "barrel_temp_drift",
+      "text": "Noticed zone 2 on the unit in bay 3 has drifted past its mark. Been doing it for at least 30 minutes now. No spikes, no fault codes, just a gradual overshooting that won't self-correct. Controller's not in alarm, just persistently too high."
+    },
+    {
+      "id": "inc_008",
+      "sop_ref": "injection_pressure_low",
+      "text": "We're getting short shots on line 2 — the parts look like they're not filling out on the far end of the cavity. Pressure during the fill phase feels soft compared to what we normally run on this job. Nobody changed the setpoints."
+    },
+    {
+      "id": "inc_009",
+      "sop_ref": "injection_pressure_low",
+      "text": "Pack pressure's been reading low all afternoon on the big press in bay 4. No fault has tripped but the numbers are clearly under the recipe spec and we're starting to see sink marks on the B-surface. Been like this for about an hour."
+    },
+    {
+      "id": "inc_009b",
+      "sop_ref": "injection_pressure_low",
+      "text": "The unit on line 7 by the north wall keeps pulling low fill numbers on the cavity pressure graph. Operator said it's been happening every few cycles since after lunch — parts look okay but the process data clearly shows we're not hitting the fill target. No fault, just consistently soft."
+    },
+    {
+      "id": "inc_010",
+      "sop_ref": "injection_pressure_high",
+      "text": "Machine on line 5 just faulted hard — the HMI showed the injection phase pressure way over the limit during the fill. It didn't even complete the shot, just killed the cycle mid-fill and threw an alarm."
+    },
+    {
+      "id": "inc_011",
+      "sop_ref": "injection_pressure_high",
+      "text": "Something spiked during the pack phase on press 3 and it threw a high pressure fault. The operators backed away from the machine. Clamping tonnage display also looks off. Nobody's touched it since the fault and the machine is sitting there in alarm."
+    },
+    {
+      "id": "inc_012",
+      "sop_ref": "clamp_pressure_drop",
+      "text": "Hydraulic hold pressure on line 1 has been bleeding off a bit during the dwell portion of the cycle — nothing drastic, but it's dropped maybe 170 psi from where it normally sits over the last 15 minutes. No alarms have fired yet but it's definitely trending down slowly."
+    },
+    {
+      "id": "inc_013",
+      "sop_ref": "clamp_pressure_drop",
+      "text": "Second shift mentioned the clamp pressure on press 7 has been reading low all night. Never triggered a fault, never dropped fast, just steadily bled off over a long time. The gauge is now noticeably below the holding setpoint after it's been clamped for a while."
+    },
+    {
+      "id": "inc_013b",
+      "sop_ref": "clamp_pressure_drop",
+      "text": "Clamp tonnage readout on the small press in bay 5 has been a bit low all morning compared to what the job spec calls for. Not throwing faults, not a sudden thing, just been slowly bleeding off since we started the run. Took about 12 minutes to notice it was out of range."
+    },
+    {
+      "id": "inc_014",
+      "sop_ref": "clamp_pressure_collapse",
+      "text": "Clamp pressure on the unit in bay 2 just fell off a cliff — dropped maybe 600 psi in about 8 seconds while there was still material in the mold. Operator hammered the mushroom button and walked away. That was not a slow bleed, that was immediate."
+    },
+    {
+      "id": "inc_015",
+      "sop_ref": "clamp_pressure_collapse",
+      "text": "Hydraulic pressure went from normal to basically nothing in under 10 seconds during a live shot on line 6. Heard a loud clunk from the clamp area right before it happened. Mold might not have stayed fully closed when the pressure vanished. Operator stopped the machine."
+    },
+    {
+      "id": "inc_016",
+      "sop_ref": "hopper_jam",
+      "text": "Screw on press 4 is taking way longer to recover than normal — recovery time is way up on the trend graph. Hopper looks completely full but material's just not dropping down through the throat. Classic bridge."
+    },
+    {
+      "id": "inc_017",
+      "sop_ref": "hopper_jam",
+      "text": "We started getting short shots on line 3 and the recovery time graph on the HMI just kept climbing every cycle. Looked down into the hopper and the pellets are just sitting there in an arch over the throat — nothing moving down into the barrel."
+    },
+    {
+      "id": "inc_018",
+      "sop_ref": "heater_band_replace",
+      "text": "Zone 1 on press 8 is completely flatlining — been powered on for over 20 minutes and the temperature readout hasn't moved at all. PLC is showing an open circuit fault code on that zone. Band's probably burned out."
+    },
+    {
+      "id": "inc_019",
+      "sop_ref": "heater_band_replace",
+      "text": "The rear zone on the unit by the dock door won't heat past about 80 degrees even with heaters confirmed energized. Controller is throwing a fault code on that zone and we've been waiting 20 minutes with no progress. We've seen this exact failure before and it's always the band itself."
+    },
+    {
+      "id": "inc_020",
+      "sop_ref": "hydraulic_filter_change",
+      "text": "The differential pressure light on the hydraulic skid on line 4 flipped to red this morning during startup. Oil's looking pretty dark too. We're past 500 hours on that filter for sure — maintenance log hasn't been signed off in a while."
+    },
+    {
+      "id": "inc_021",
+      "sop_ref": "hydraulic_filter_change",
+      "text": "Filter bypass indicator on press 2 went red during the morning startup. Wasn't quite at the scheduled interval yet but the indicator doesn't lie. Probably a high contamination run from the last job pushed it over."
+    },
+    {
+      "id": "inc_022",
+      "sop_ref": "screw_lubrication",
+      "text": "PM calendar on press 5 is showing the 250-hour lubrication mark hit yesterday and nobody's signed it off yet. Maintenance crew flagged it at shift start and asked us to get it on the schedule before running any more parts."
+    },
+    {
+      "id": "inc_023",
+      "sop_ref": "screw_lubrication",
+      "text": "Drive unit on the unit in bay 1 has been making a faint grinding noise during the screw recovery phase. Maintenance thinks it's the thrust bearing running dry — we checked the lube log and we're about 30 hours over the greasing interval."
+    },
+    {
+      "id": "inc_024",
+      "sop_ref": "mold_vent_cleaning",
+      "text": "Parts on line 3 are coming out with a consistent burn mark in the exact same spot every single cycle. Tooling team thinks the vents on that side of the cavity are plugged — we've also been seeing the thin section not fill out fully."
+    },
+    {
+      "id": "inc_025",
+      "sop_ref": "mold_vent_cleaning",
+      "text": "Had three short shots in a row on press 6 even though nothing in the process recipe changed. Looked at the parting line on the cavity half and it's black and waxy. Something's blocking the gas escape. Process said don't touch the setpoints until tooling checks the vents."
+    },
+    {
+      "id": "inc_026",
+      "sop_ref": "mold_vent_cleaning",
+      "text": "Quality flagged a batch off line 1 this morning for incomplete fill on the thin rib section. We tried bumping injection speed and it still didn't fill out. Tooling said we need to check the vent grooves before touching the process any further — probably gassed up."
+    },
+    {
+      "id": "inc_027",
+      "sop_ref": "barrel_purge",
+      "text": "Switching from black ABS to natural PP on press 3 after lunch break. Last color run is done but there is clearly still contaminated dark material in the barrel based on what's coming out on the first few shots. Need to clear it out before we can make good parts."
+    },
+    {
+      "id": "inc_028",
+      "sop_ref": "barrel_purge",
+      "text": "Machine on line 5 has been sitting idle for almost 45 minutes while we waited on the mold to come back from the tool room. Material in the barrel could be cooked — first couple of purge shots already came out yellowed and streaky. Need to run it through properly before going to production."
+    },
+    {
+      "id": "inc_029",
+      "sop_ref": "temp_controller_calibration",
+      "text": "Quarterly calibration is due on press 2 per the PM schedule — it's been marked on the board for a week. Also one of the operators noticed zone 3 seems to read about 6 or 7 degrees different from the handheld reference they hold up next to it. Engineering wants it checked before the next audit."
+    },
+    {
+      "id": "inc_030",
+      "sop_ref": "temp_controller_calibration",
+      "text": "Quality team said the zone readings on line 4 don't match the validation thermocouple they placed against the barrel yesterday for a process study. Controller screen says one thing, the reference probe says something else — about 8 degrees apart on zone 2. Needs calibration before the validation run."
+    },
+    {
+      "id": "inc_031",
+      "sop_ref": "tie_bar_lubrication",
+      "text": "PM board shows the tie bars on press 7 hit their 500-hour mark as of this morning. They were sounding a little sticky and crunchy during the clamp open cycle yesterday — maintenance said get it done before the next production run."
+    },
+    {
+      "id": "inc_032",
+      "sop_ref": "tie_bar_lubrication",
+      "text": "Clamp unit on line 2 has been squeaking on every open and close cycle for two days. Checked the lube log and the tie bars haven't been greased in over 500 hours. Getting worse each cycle — definitely past due."
+    },
+    {
+      "id": "inc_033",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needs to get into the barrel area on press 4 to swap out a heater band. Main power is still up on that press. Nobody goes in there until it's properly locked and tagged — that's a live 480V area."
+    },
+    {
+      "id": "inc_034",
+      "sop_ref": "lockout_tagout",
+      "text": "Tooling crew needs to pull the mold off line 6 for rework on a cracked insert. Hydraulic power is still up and the clamp could cycle. Supervisor said full lockout before anyone puts their hands near the platen."
+    },
+    {
+      "id": "inc_035",
+      "sop_ref": "minor_oil_spill",
+      "text": "There's a small puddle of what looks like hydraulic oil on the floor right next to the power unit on line 3. Maybe half a liter, no spraying going on, no pressure issue on the gauges. Slippery spot right in the walkway though."
+    },
+    {
+      "id": "inc_036",
+      "sop_ref": "minor_oil_spill",
+      "text": "Noticed a slow seep from a hydraulic fitting near the base of press 8 — small drip that's been collecting for a while. Probably less than a liter on the floor total. No pressure drop on the system, just a small weep from that fitting."
+    },
+    {
+      "id": "inc_037",
+      "sop_ref": "major_oil_spill",
+      "text": "A hydraulic hose just let go on press 5 — oil is spraying hard near the clamp end. There's already a huge slick on the floor, way more than 5 liters, and it's still coming. With all the heat in that area it's a real fire risk. People are backing out of the bay."
+    },
+    {
+      "id": "inc_038",
+      "sop_ref": "major_oil_spill",
+      "text": "Line 2's hydraulic system blew a fitting mid-cycle — oil is coming out fast and the floor is already covered. Workers are backing up and the area smells like hot hydraulic fluid. We need the whole bay cleared, this is not a minor thing."
+    },
+    {
+      "id": "inc_039",
+      "sop_ref": "major_oil_spill",
+      "text": "Something gave way on the power unit near the loading dock — there's a massive pool of hydraulic fluid and it's still spreading toward the drain and under the adjacent press. Operator hit the stop and got everyone back. Way too much volume for a normal cleanup, need full emergency response."
+    },
+    {
+      "id": "inc_040",
+      "sop_ref": "emergency_stop",
+      "text": "Operator on line 1 tripped the e-stop because a part got hung up in the open mold and she was worried about the next close cycle catching her hand while she tried to clear it. Machine stopped hard right in the middle of a shot cycle."
+    },
+    {
+      "id": "inc_041",
+      "sop_ref": "emergency_stop",
+      "text": "Second shift on press 3 hit the mushroom button when they spotted smoke coming from somewhere near the barrel mid-cycle. Not sure if it's burning plastic or an electrical issue. Nobody's touching anything near that machine until maintenance gives the all-clear."
+    },
+    {
+      "id": "inc_042",
+      "sop_ref": "cold_startup",
+      "text": "Coming in for first shift Monday after the plant was dark all weekend. The barrel on press 4 is stone cold — ambient in the building was probably 60°F by Saturday night. We need to bring all three zones up slow and hold them before we even think about making parts."
+    },
+    {
+      "id": "inc_043",
+      "sop_ref": "cold_startup",
+      "text": "Line 6 has been completely off since Thursday because the mold change got delayed by the tool room. Need to start it back up this morning for the new job but nobody's touched it in three days and the barrel temps are reading ambient. Full soak required before first shot."
+    },
+    {
+      "id": "inc_044",
+      "sop_ref": "end_of_shift_shutdown",
+      "text": "It's about 10 minutes to end of day shift on line 2. Last good part just came out of the mold. Production order is complete and third shift isn't running this machine. Need to get the barrel cleared and everything powered down the right way before we leave."
+    },
+    {
+      "id": "inc_045",
+      "sop_ref": "end_of_shift_shutdown",
+      "text": "Second shift wrapping up on press 7, run is done for the night and the production order is closed. Day shift supervisor called and said make sure to get the material out of the barrel before shutting down so it doesn't sit overnight and degrade."
+    },
+    {
+      "id": "inc_046",
+      "sop_ref": "shot_weight_inspection",
+      "text": "SPC chart on line 4 is showing the part weight trending low over the past hour — a couple of the last two-hour samples were right at the bottom limit. Quality wants everything weighed before we pass any more parts to the next operation."
+    },
+    {
+      "id": "inc_047",
+      "sop_ref": "shot_weight_inspection",
+      "text": "Two-hour quality check time on press 6. Pulled three parts off the ejection side and they felt noticeably lighter than normal compared to what we've been running. Need to put them on the scale and see where we stand."
+    },
+    {
+      "id": "inc_048",
+      "sop_ref": "shot_weight_inspection",
+      "text": "Quality auditor flagged some parts from line 1 during a walkthrough this morning — said they looked underfilled visually, like the wall sections looked thinner than usual. We need to pull a sample and actually weigh them to figure out if we've got a reject batch or if they're still in spec."
+    }
+  ]
+}

@@ -1,0 +1,586 @@
+{
+  "family": "Adhesive Dispensing Robot",
+  "sops": [
+    {
+      "ref": "low_pump_pressure",
+      "title": "Low Pump Pressure Response",
+      "condition": "Pump outlet pressure has drifted below the 45 PSI minimum setpoint continuously for more than 30 seconds, indicating gradual supply degradation.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor pump_pressure_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to pump_station",
+        "read_sensor flow_rate_sensor",
+        "notify maintenance_technician",
+        "wait 300 seconds"
+      ],
+      "equipment": ["control_panel", "pump_pressure_sensor", "alarm_acknowledge_button", "pump_station", "flow_rate_sensor"]
+    },
+    {
+      "ref": "sudden_pressure_collapse",
+      "title": "Sudden Pressure Collapse Response",
+      "condition": "Pump outlet pressure drops from normal operating range to below 10 PSI within a single PLC scan cycle, indicating catastrophic instantaneous supply failure.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to control_panel",
+        "read_sensor pump_pressure_sensor",
+        "notify shift_supervisor",
+        "walk_to pump_station",
+        "read_sensor leak_detection_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["red_estop_button", "control_panel", "pump_pressure_sensor", "pump_station", "leak_detection_sensor"]
+    },
+    {
+      "ref": "high_pump_pressure",
+      "title": "High Pump Pressure Alarm Response",
+      "condition": "Pump outlet pressure exceeds the 120 PSI upper ceiling limit, creating risk of hose failure or seal damage.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to pump_station",
+        "press_button pressure_relief_button",
+        "wait 15 seconds",
+        "read_sensor pump_pressure_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["red_estop_button", "pump_station", "pressure_relief_button", "pump_pressure_sensor"]
+    },
+    {
+      "ref": "partial_nozzle_clog",
+      "title": "Partial Nozzle Clog Warning",
+      "condition": "Flow rate sensor reads 20 to 50 percent below target output while pump pressure remains within normal range, indicating partial obstruction in the nozzle tip.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button alarm_acknowledge_button",
+        "walk_to nozzle_assembly",
+        "read_sensor flow_rate_sensor",
+        "press_button purge_button",
+        "wait 10 seconds",
+        "read_sensor bead_width_sensor"
+      ],
+      "equipment": ["control_panel", "alarm_acknowledge_button", "nozzle_assembly", "flow_rate_sensor", "purge_button", "bead_width_sensor"]
+    },
+    {
+      "ref": "full_nozzle_blockage",
+      "title": "Full Nozzle Blockage Emergency",
+      "condition": "Flow rate sensor reads zero output while the pump is running and pressure is above setpoint, indicating complete nozzle obstruction with no flow reaching the part.",
+      "steps": [
+        "press_button red_estop_button",
+        "notify shift_supervisor",
+        "walk_to nozzle_assembly",
+        "read_sensor nozzle_pressure_sensor",
+        "pick nozzle_tip",
+        "pick replacement_nozzle_tip",
+        "place replacement_nozzle_tip"
+      ],
+      "equipment": ["red_estop_button", "nozzle_assembly", "nozzle_pressure_sensor", "nozzle_tip", "replacement_nozzle_tip"]
+    },
+    {
+      "ref": "adhesive_tank_low",
+      "title": "Adhesive Tank Low Level Alert",
+      "condition": "Adhesive level sensor reads below 15 percent of tank capacity, requiring material replenishment before dispensing can resume.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor adhesive_level_sensor",
+        "press_button alarm_acknowledge_button",
+        "notify shift_supervisor",
+        "walk_to adhesive_tank",
+        "wait 60 seconds",
+        "read_sensor adhesive_level_sensor"
+      ],
+      "equipment": ["control_panel", "adhesive_level_sensor", "alarm_acknowledge_button", "adhesive_tank"]
+    },
+    {
+      "ref": "bead_width_narrow",
+      "title": "Bead Width Below Specification",
+      "condition": "Bead inspection camera reports applied bead width is consistently below the 4 mm lower control limit across three or more consecutive dispense cycles, indicating chronic under-dispensing.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button alarm_acknowledge_button",
+        "walk_to inspection_station",
+        "read_sensor bead_width_sensor",
+        "read_sensor flow_rate_sensor",
+        "notify quality_engineer",
+        "wait 30 seconds"
+      ],
+      "equipment": ["control_panel", "alarm_acknowledge_button", "inspection_station", "bead_width_sensor", "flow_rate_sensor"]
+    },
+    {
+      "ref": "bead_width_wide",
+      "title": "Bead Width Above Specification",
+      "condition": "Bead inspection camera reports applied bead width exceeds the 8 mm upper control limit, indicating over-dispensing or advanced nozzle wear.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button alarm_acknowledge_button",
+        "walk_to inspection_station",
+        "read_sensor bead_width_sensor",
+        "walk_to nozzle_assembly",
+        "read_sensor nozzle_pressure_sensor",
+        "notify quality_engineer"
+      ],
+      "equipment": ["control_panel", "alarm_acknowledge_button", "inspection_station", "bead_width_sensor", "nozzle_assembly", "nozzle_pressure_sensor"]
+    },
+    {
+      "ref": "minor_adhesive_leak",
+      "title": "Minor Adhesive Leak at Fitting",
+      "condition": "Leak detection sensor at the hose coupling registers slow-drip accumulation below 50 mL total, indicating a weeping seal or loosened fitting connection.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button alarm_acknowledge_button",
+        "walk_to hose_coupling",
+        "read_sensor leak_detection_sensor",
+        "pick drain_pan",
+        "place drain_pan",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["control_panel", "alarm_acknowledge_button", "hose_coupling", "leak_detection_sensor", "drain_pan"]
+    },
+    {
+      "ref": "major_adhesive_spill",
+      "title": "Major Adhesive Hose Rupture Response",
+      "condition": "Leak detection sensor exceeds the 500 mL emergency accumulation threshold or simultaneous hose-pressure drop and high-volume leak signal are active, indicating catastrophic hose or fitting rupture.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to safety_station",
+        "pick absorbent_pad",
+        "place absorbent_pad",
+        "notify safety_officer",
+        "notify shift_supervisor",
+        "read_sensor leak_detection_sensor"
+      ],
+      "equipment": ["red_estop_button", "safety_station", "absorbent_pad", "leak_detection_sensor"]
+    },
+    {
+      "ref": "pump_motor_fault",
+      "title": "Pump Motor Electrical Fault Response",
+      "condition": "Pump motor current sensor reads above the 15 A overload threshold or the motor controller fault code is active, indicating electrical overcurrent or drive failure.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to control_panel",
+        "press_button alarm_acknowledge_button",
+        "walk_to pump_station",
+        "read_sensor pump_motor_current_sensor",
+        "wait 30 seconds",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["red_estop_button", "control_panel", "alarm_acknowledge_button", "pump_station", "pump_motor_current_sensor"]
+    },
+    {
+      "ref": "bead_inspection_camera_fault",
+      "title": "Bead Inspection Camera Fault Recovery",
+      "condition": "Bead inspection camera returns a null frame or loses signal for five or more consecutive dispense cycles, rendering in-process bead verification unavailable.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button alarm_acknowledge_button",
+        "walk_to camera_mount",
+        "read_sensor bead_inspection_camera",
+        "press_button camera_calibrate_button",
+        "wait 20 seconds",
+        "notify quality_engineer"
+      ],
+      "equipment": ["control_panel", "alarm_acknowledge_button", "camera_mount", "bead_inspection_camera", "camera_calibrate_button"]
+    },
+    {
+      "ref": "nozzle_cleaning",
+      "title": "Scheduled Nozzle Purge and Cleaning",
+      "condition": "Scheduled 4-hour nozzle purge interval has elapsed or operator has requested a routine adhesive residue removal cycle to maintain tip cleanliness.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button purge_button",
+        "wait 30 seconds",
+        "walk_to nozzle_assembly",
+        "pick cleaning_brush",
+        "place cleaning_brush",
+        "press_button reset_button"
+      ],
+      "equipment": ["control_panel", "purge_button", "nozzle_assembly", "cleaning_brush", "reset_button"]
+    },
+    {
+      "ref": "adhesive_filter_change",
+      "title": "In-Line Adhesive Filter Replacement",
+      "condition": "Filter differential pressure across the in-line adhesive strainer exceeds 8 PSI or the 200-hour service interval has been reached, requiring filter element replacement.",
+      "steps": [
+        "walk_to pump_station",
+        "pick loto_lock",
+        "place loto_lock",
+        "walk_to filter_housing",
+        "pick replacement_filter",
+        "place replacement_filter",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["pump_station", "loto_lock", "filter_housing", "replacement_filter"]
+    },
+    {
+      "ref": "pump_lubrication",
+      "title": "Pump Drive Gear Lubrication",
+      "condition": "The 500-hour lubrication service interval for the pump drive gear assembly has been reached, requiring grease application to prevent mechanical wear.",
+      "steps": [
+        "walk_to maintenance_bay",
+        "pick lubricant_tube",
+        "walk_to lubrication_port",
+        "place lubricant_tube",
+        "wait 5 seconds",
+        "read_sensor pump_motor_current_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": ["maintenance_bay", "lubricant_tube", "lubrication_port", "pump_motor_current_sensor"]
+    },
+    {
+      "ref": "adhesive_tank_refill",
+      "title": "Adhesive Tank Material Refill",
+      "condition": "Shift supervisor has authorized adhesive material replenishment with a fresh cartridge staged at the machine and the robot holding production pending material availability.",
+      "steps": [
+        "walk_to adhesive_tank",
+        "read_sensor adhesive_level_sensor",
+        "pick adhesive_cartridge",
+        "place adhesive_cartridge",
+        "wait 30 seconds",
+        "read_sensor adhesive_level_sensor",
+        "press_button reset_button"
+      ],
+      "equipment": ["adhesive_tank", "adhesive_level_sensor", "adhesive_cartridge", "reset_button"]
+    },
+    {
+      "ref": "bead_width_calibration",
+      "title": "Bead Width Inspection System Calibration",
+      "condition": "Quality engineer requests calibration verification or bead width sensor readings diverge more than 0.5 mm from manual reference measurements on physical parts.",
+      "steps": [
+        "walk_to inspection_station",
+        "pick calibration_target",
+        "place calibration_target",
+        "press_button camera_calibrate_button",
+        "wait 20 seconds",
+        "read_sensor bead_width_sensor",
+        "notify quality_engineer"
+      ],
+      "equipment": ["inspection_station", "calibration_target", "camera_calibrate_button", "bead_width_sensor"]
+    },
+    {
+      "ref": "hose_replacement",
+      "title": "Adhesive Supply Hose Replacement",
+      "condition": "Adhesive supply hose has exceeded its 1000-hour service life or shows visible cracking, swelling, or has required two or more leak interventions within a single shift.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button red_estop_button",
+        "walk_to hose_coupling",
+        "pick loto_lock",
+        "place loto_lock",
+        "pick hose_assembly",
+        "place hose_assembly"
+      ],
+      "equipment": ["control_panel", "red_estop_button", "hose_coupling", "loto_lock", "hose_assembly"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout-Tagout for Maintenance Access",
+      "condition": "Maintenance technician requires physical access to dispenser internals, requiring full energy isolation and lockout-tagout before any work begins.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button red_estop_button",
+        "walk_to pump_station",
+        "pick loto_lock",
+        "place loto_lock",
+        "pick loto_tag",
+        "place loto_tag"
+      ],
+      "equipment": ["control_panel", "red_estop_button", "pump_station", "loto_lock", "loto_tag"]
+    },
+    {
+      "ref": "adhesive_fire_estop",
+      "title": "Fire or Smoke Emergency Stop",
+      "condition": "Smoke or visible flame is detected at or near the adhesive dispenser unit, requiring immediate power isolation and emergency personnel notification.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to safety_station",
+        "pick fire_extinguisher",
+        "place fire_extinguisher",
+        "notify safety_officer",
+        "notify shift_supervisor",
+        "wait 60 seconds"
+      ],
+      "equipment": ["red_estop_button", "safety_station", "fire_extinguisher"]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Daily Startup Sequence",
+      "condition": "Beginning-of-shift startup is required to bring the adhesive dispenser from cold standby to full production-ready operating status.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button heating_enable_button",
+        "wait 120 seconds",
+        "read_sensor temperature_sensor",
+        "press_button pump_enable_button",
+        "read_sensor pump_pressure_sensor",
+        "press_button green_start_button"
+      ],
+      "equipment": ["control_panel", "heating_enable_button", "temperature_sensor", "pump_enable_button", "pump_pressure_sensor", "green_start_button"]
+    },
+    {
+      "ref": "end_of_shift_shutdown",
+      "title": "End-of-Shift Shutdown and Purge",
+      "condition": "End-of-production-shift requires controlled adhesive purge, pump shutdown, and system de-pressurization before personnel leave the area.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button purge_button",
+        "wait 45 seconds",
+        "press_button pump_enable_button",
+        "walk_to nozzle_assembly",
+        "pick cap_plug",
+        "place cap_plug"
+      ],
+      "equipment": ["control_panel", "purge_button", "pump_enable_button", "nozzle_assembly", "cap_plug"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-ADH-001",
+      "text": "Line 3, second shift. The bead on door seal frames started looking skinny about twenty minutes into the run — not missing, just anemic. The robot never tripped a hard fault, just kept cycling. We only caught it when QC flagged patchy coverage on the B-pillar parts. Nothing dramatic, just slowly losing oomph on the delivery side over the course of about half an hour.",
+      "sop_ref": "low_pump_pressure"
+    },
+    {
+      "id": "INC-ADH-002",
+      "text": "Loading dock unit, end of first shift. Maintenance called me over because a yellow indicator had been sitting on the panel for a while — probably since mid-shift. Ran a quick gauge check and the delivery side was below where it needs to be, not crashed, just slowly sagging. Not an emergency, but definitely heading the wrong direction over time.",
+      "sop_ref": "low_pump_pressure"
+    },
+    {
+      "id": "INC-ADH-003",
+      "text": "Line 1, midday. Robot was mid-seam on a door frame when the whole thing just died in about two seconds — one moment normal, next moment the gauge hit the peg at zero. Heard a thud from the pump cabinet right before it happened. Nothing gradual about it at all, totally different from when we've had drift problems.",
+      "sop_ref": "sudden_pressure_collapse"
+    },
+    {
+      "id": "INC-ADH-004",
+      "text": "Second shift on line 4. The robot was running through its dispensing path on a bumper bracket when everything cut out instantaneously. Checked the delivery gauge and it went from a completely normal reading to basically nothing in a single heartbeat. Way different from the slow-drift issue we had last month — this was a cliff.",
+      "sop_ref": "sudden_pressure_collapse"
+    },
+    {
+      "id": "INC-ADH-005",
+      "text": "Night shift maintenance. Got called to the door panel station because the robot locked itself out. Delivery gauge was flat zero when I got there, but the operator said five minutes earlier everything looked perfectly fine. That's not a creep situation — something in the supply side gave out all at once.",
+      "sop_ref": "sudden_pressure_collapse"
+    },
+    {
+      "id": "INC-ADH-006",
+      "text": "Line 2, night shift. Robot tripped a fault and we heard a loud thump from the hose bundle near the pump. When I looked at the gauge it was pegged way above the normal max. We backed away from the hose area because the fitting near the pump outlet looked like it was under serious stress.",
+      "sop_ref": "high_pump_pressure"
+    },
+    {
+      "id": "INC-ADH-007",
+      "text": "Chassis line dispenser, afternoon shift. The unit kicked a hard fault and stopped mid-path. Panel gauge was reading way above the operational ceiling. The operator mentioned the hose was visibly bulging at the bend coming off the pump outlet just before the fault tripped.",
+      "sop_ref": "high_pump_pressure"
+    },
+    {
+      "id": "INC-ADH-008",
+      "text": "Line 3, morning shift. The robot is still running cycles but the bead looks stringy in spots — like it's fighting to push material through. Got a yellow warning on the panel, not a red stop. There's visible buildup on the track below the tip but the material is still coming out, just not at full volume.",
+      "sop_ref": "partial_nozzle_clog"
+    },
+    {
+      "id": "INC-ADH-009",
+      "text": "Line 1 operator. Getting inconsistent coverage on the roof ditch seam — some sections fine, others starved. The gun arm is still moving and the robot isn't stopping itself, just seems like the tip's got something partially in the way. Material is coming out, just not enough of it in the thin spots.",
+      "sop_ref": "partial_nozzle_clog"
+    },
+    {
+      "id": "INC-ADH-010",
+      "text": "Line 4 dispenser — robot's moving the arm through the full dispensing path but absolutely nothing is coming out the tip. Pump is running, I can hear it humming away, but zero material is reaching the part. It's like the end of the nozzle is completely sealed shut.",
+      "sop_ref": "full_nozzle_blockage"
+    },
+    {
+      "id": "INC-ADH-011",
+      "text": "Maintenance call on the loading dock unit. The robot finished an entire dispense cycle with no material deposited on the part at all — arm moved through the whole path, pump was running, but the seam is completely dry. Back-pressure reading behind the tip was way high when I checked.",
+      "sop_ref": "full_nozzle_blockage"
+    },
+    {
+      "id": "INC-ADH-012",
+      "text": "Second shift, line 2. Quality stopped the line because three panels in a row came through the dispensing station with zero adhesive on them. Robot was going through its normal motions otherwise. Complete dry fire — nothing coming out despite everything appearing to run.",
+      "sop_ref": "full_nozzle_blockage"
+    },
+    {
+      "id": "INC-ADH-013",
+      "text": "Line 1 operator. The dispenser has been getting sluggish over the last few cycles and the sight glass on the tank looks almost empty — you can nearly see the bottom. Robot flagged something on the panel but hasn't shut down production yet. Someone needs to check the material level before we run out mid-cycle.",
+      "sop_ref": "adhesive_tank_low"
+    },
+    {
+      "id": "INC-ADH-014",
+      "text": "Night shift, chassis line. About a half hour before the tank ran dry the robot started pulling air into the feed line — you could actually see bubbles moving through the clear section of the tubing. Nobody had checked the material level since the beginning of the shift.",
+      "sop_ref": "adhesive_tank_low"
+    },
+    {
+      "id": "INC-ADH-015",
+      "text": "QA flagged a batch from line 3 — the seal lines look like threads, way too skinny for spec. Robot was running normal cycle times, no alarms, arm moving fine. But the adhesive traces on the parts are maybe half the width they should be. Nothing screaming from the machine itself.",
+      "sop_ref": "bead_width_narrow"
+    },
+    {
+      "id": "INC-ADH-016",
+      "text": "Second shift quality check, roof seam station on line 2. The vision system started kicking rejects but the robot wasn't stopping itself. Pulled a few parts and the adhesive lines are definitely starved — thin traces barely covering the flange edge. Machine thinks everything is fine.",
+      "sop_ref": "bead_width_narrow"
+    },
+    {
+      "id": "INC-ADH-017",
+      "text": "Line 4, door seal station, afternoon run. The adhesive is squishing out way past the flange on both sides of the seam. Parts coming down the line are a mess — glue everywhere. The seam line is easily twice the width it should be, maybe more.",
+      "sop_ref": "bead_width_wide"
+    },
+    {
+      "id": "INC-ADH-018",
+      "text": "Morning shift, line 1 B-pillar station. QC pulled several parts because the sealant bead was grossly oversized — looks like the tip wore out and now it's flooding the flange instead of laying a proper line. Camera flagged it but the robot kept going through its cycles.",
+      "sop_ref": "bead_width_wide"
+    },
+    {
+      "id": "INC-ADH-019",
+      "text": "Line 2 pump area. Small puddle of adhesive forming under the hose connection near the pump outlet — maybe a shot glass worth accumulated over the last hour or so. Not spraying, just slowly weeping from the fitting. Sticky mess on the floor but not an emergency situation.",
+      "sop_ref": "minor_adhesive_leak"
+    },
+    {
+      "id": "INC-ADH-020",
+      "text": "Maintenance tech here. Came back from break and found a slow drip from the coupling joint under the dispenser arm on line 3. It's been collecting on the drip rail below — not a lot of material, but it's been going long enough to leave a sticky stripe across about two feet of floor tile.",
+      "sop_ref": "minor_adhesive_leak"
+    },
+    {
+      "id": "INC-ADH-021",
+      "text": "Line 4 emergency — the big supply hose under the loading dock dispenser let go and adhesive is spraying everywhere. The floor around the whole unit is already covered. Robot tripped itself but there's a lot of material out there already. Need help over here right now.",
+      "sop_ref": "major_adhesive_spill"
+    },
+    {
+      "id": "INC-ADH-022",
+      "text": "Night shift, chassis line dispenser. Heard a loud pop and then the whole cabinet started dripping adhesive from every seam. The spread covered about ten feet of floor in under thirty seconds. We cleared the area and hit the wall button immediately.",
+      "sop_ref": "major_adhesive_spill"
+    },
+    {
+      "id": "INC-ADH-023",
+      "text": "Safety officer called in from line 2. Massive adhesive release — the feed line connection at the pump head came completely apart. There is a significant slip hazard covering the entire unit footprint. We've got personnel keeping others back while we wait for the response team.",
+      "sop_ref": "major_adhesive_spill"
+    },
+    {
+      "id": "INC-ADH-024",
+      "text": "Line 1 dispenser, second shift. The pump quit with a grinding noise and the breaker on the cabinet popped. Robot arm stopped mid-travel and the whole unit went into fault. Motor cabinet feels warm to the touch and the drive display is showing an error code I haven't seen before.",
+      "sop_ref": "pump_motor_fault"
+    },
+    {
+      "id": "INC-ADH-025",
+      "text": "Maintenance tech on line 3. Motor on the adhesive pump stopped suddenly and the whole dispenser locked up. There's a fault indicator lit on the drive controller — the motor ran rough and erratic for a few seconds before it quit. Amperage indicator on the cabinet door gauge was pegged well above the normal band.",
+      "sop_ref": "pump_motor_fault"
+    },
+    {
+      "id": "INC-ADH-026",
+      "text": "Third shift, line 2 dispenser. The drive fault alarm came on and we heard the pump coast down to a stop. I checked the motor housing and the thermal indicator was sitting in the red zone. Something in the electrical side gave up — drive is showing a persistent fault and it's not self-clearing.",
+      "sop_ref": "pump_motor_fault"
+    },
+    {
+      "id": "INC-ADH-027",
+      "text": "Quality engineer on line 2. The vision system stopped reporting bead data entirely and the monitor just shows a black screen. Robot is still running dispense cycles normally but we have zero visibility on whether the beads are in spec. Camera has completely gone dark.",
+      "sop_ref": "bead_inspection_camera_fault"
+    },
+    {
+      "id": "INC-ADH-028",
+      "text": "Line 4, morning shift. The inspection display above the dispenser has been cycling through error frames for the last ten minutes — sometimes a frozen still image, sometimes just blank. Robot isn't stopping itself but QA can't sign off on parts without a live feed from that system.",
+      "sop_ref": "bead_inspection_camera_fault"
+    },
+    {
+      "id": "INC-ADH-029",
+      "text": "Line 1, afternoon shift. The bead camera on the seam station isn't picking up anything usable. Checked the cable connections and the lens isn't physically blocked, but the output is just static and noise on every frame. Robot's running its cycles but we're flying blind on bead quality.",
+      "sop_ref": "bead_inspection_camera_fault"
+    },
+    {
+      "id": "INC-ADH-030",
+      "text": "Line 3 operator. We're at the four-hour mark and the tip of the gun is getting crusty around the edges — old adhesive building up where it didn't wipe clean from the last run. Not causing problems yet but it's past time for a clean cycle before it starts affecting the bead.",
+      "sop_ref": "nozzle_cleaning"
+    },
+    {
+      "id": "INC-ADH-031",
+      "text": "Second shift, door seal dispenser. Supervisor asked us to run a purge because the previous crew skipped their interval cleaning. There's visible residue on the nozzle face and the last few beads looked ragged at the start of each stroke — like the tip's not clearing itself properly.",
+      "sop_ref": "nozzle_cleaning"
+    },
+    {
+      "id": "INC-ADH-032",
+      "text": "Maintenance tech, line 1. We're at the service interval for the in-line strainer on the pump side. The differential pressure across the filter body has been creeping up on the last few logged readings — not quite at the limit but close. Time to swap the element before it starts restricting flow.",
+      "sop_ref": "adhesive_filter_change"
+    },
+    {
+      "id": "INC-ADH-033",
+      "text": "Line 2 maintenance. The gauge upstream of the strainer housing is running noticeably higher than the outlet side — there's enough restriction built up that flow is starting to suffer. We hit the 200-hour service mark last shift anyway, so this is technically overdue.",
+      "sop_ref": "adhesive_filter_change"
+    },
+    {
+      "id": "INC-ADH-034",
+      "text": "Maintenance call on line 4 dispenser. The gearbox on the pump drive is starting to sound a little dry — faint whine when it ramps up to speed. Checked the PM log and we're past the scheduled grease service interval.",
+      "sop_ref": "pump_lubrication"
+    },
+    {
+      "id": "INC-ADH-035",
+      "text": "Line 1, preventive maintenance. The lube reminder flag came up on the control log for the pump drive assembly. The tech who did the previous PM noted the fitting was already running a bit dry back then, so we want to get grease in there before it starts making noise.",
+      "sop_ref": "pump_lubrication"
+    },
+    {
+      "id": "INC-ADH-036",
+      "text": "Line 3, first shift. Supervisor authorized a material top-up because we're heading into a long production run and the tank is sitting around 15 percent. We've got a drum already staged at the machine and need to run the fill sequence to get back to capacity.",
+      "sop_ref": "adhesive_tank_refill"
+    },
+    {
+      "id": "INC-ADH-037",
+      "text": "Loading dock dispenser. We already got the low-level flag earlier this shift and now we've got a fresh cartridge ready to go in. Supervisor signed off and the robot is sitting in hold mode waiting for us to get material back in the system before production can resume.",
+      "sop_ref": "adhesive_tank_refill"
+    },
+    {
+      "id": "INC-ADH-038",
+      "text": "Quality engineer on line 2. Bead measurements from the vision system have been reading about half a millimeter narrower than what we actually measure on parts with a caliper. Something has drifted in the camera setup — the system and physical reality no longer agree.",
+      "sop_ref": "bead_width_calibration"
+    },
+    {
+      "id": "INC-ADH-039",
+      "text": "Line 4, third shift QA check. The automated measurement system started flagging borderline rejects on parts that look perfectly fine visually. Compared camera output to a hand measurement and the numbers don't match by a noticeable margin — the system needs to be zeroed back to reality.",
+      "sop_ref": "bead_width_calibration"
+    },
+    {
+      "id": "INC-ADH-040",
+      "text": "Maintenance supervisor on line 1. The feed hose on the main dispenser has a blister near the mid-section and the outer jacket is cracking at the bend radius. We've had two minor weeps from that same hose this month already — time to put a new one on before it turns into something bigger.",
+      "sop_ref": "hose_replacement"
+    },
+    {
+      "id": "INC-ADH-041",
+      "text": "Line 3 dispenser. The hose is at or past its service life — pulled the log and it's over a thousand hours. The tech who last inspected it noted swelling at the pump end fitting. We're doing the changeout now rather than waiting for it to fail on us during production.",
+      "sop_ref": "hose_replacement"
+    },
+    {
+      "id": "INC-ADH-042",
+      "text": "Maintenance tech on line 2. We've got a tech going into the pump cabinet to swap the pressure regulator. Before that door opens we need full energy isolation and tagging — there's stored pressure in that cabinet and the material is still at operating temperature.",
+      "sop_ref": "lockout_tagout"
+    },
+    {
+      "id": "INC-ADH-043",
+      "text": "Line 4. Safety coordinator flagged that the last nozzle changeout on the loading dock unit was done without proper isolation. We're redoing the full isolation procedure before the next job — tech needs physical access to the arm assembly and we are not cutting corners on this one.",
+      "sop_ref": "lockout_tagout"
+    },
+    {
+      "id": "INC-ADH-044",
+      "text": "Line 1 emergency — there's smoke coming from underneath the dispenser unit near the pump cabinet. We don't know if it's from the motor or the adhesive lines but there's a strong burning smell and we've already started moving people away from the area.",
+      "sop_ref": "adhesive_fire_estop"
+    },
+    {
+      "id": "INC-ADH-045",
+      "text": "Night shift, chassis line. The operator smelled something burning and then spotted a small flame at the base of the dispenser cabinet. Looks like material near the heat jacket ignited. We cleared the area and someone hit the wall button — need safety personnel here right now.",
+      "sop_ref": "adhesive_fire_estop"
+    },
+    {
+      "id": "INC-ADH-046",
+      "text": "First shift, line 3. Coming in cold this morning — unit has been off all weekend for the holiday shutdown. Everything was locked out Friday afternoon so we're starting completely from scratch for the Monday production run.",
+      "sop_ref": "daily_startup"
+    },
+    {
+      "id": "INC-ADH-047",
+      "text": "Line 1 operator, Monday morning. Robot is in cold standby from the weekend. Material was left capped and purged on Friday so we need to run the full heat-up on the adhesive system before we can take any parts on first shift.",
+      "sop_ref": "daily_startup"
+    },
+    {
+      "id": "INC-ADH-048",
+      "text": "Line 2, wrapping up day shift. Need to clear the gun and get the pump down before the cleaning crew comes in. Last time someone left without capping the nozzle we had material skin over the tip and it took twenty minutes to clear it before first shift could start the next morning.",
+      "sop_ref": "end_of_shift_shutdown"
+    },
+    {
+      "id": "INC-ADH-049",
+      "text": "Line 4, end of night shift. Production is done for the night and we need the dispenser shut down properly. The material in the hose has to be cleared out so it doesn't cure overnight and block the line for first shift tomorrow.",
+      "sop_ref": "end_of_shift_shutdown"
+    },
+    {
+      "id": "INC-ADH-050",
+      "text": "Line 3, closing out second shift. Maintenance asked us to make sure we do a full purge cycle tonight because they're coming in early tomorrow to swap the nozzle tip and they need the line cleared and depressurized before they can start any work.",
+      "sop_ref": "end_of_shift_shutdown"
+    }
+  ]
+}

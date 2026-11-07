@@ -1,0 +1,726 @@
+{
+  "family": "Capping Machine",
+  "sops": [
+    {
+      "ref": "startup_sequence",
+      "title": "Capping Machine Daily Startup",
+      "condition": "Machine is in powered-off state at the start of a production shift and the surrounding area has been verified clear of personnel.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button main_power_switch",
+        "wait 10",
+        "read_sensor torque_head_pressure_sensor",
+        "read_sensor cap_hopper_level_sensor",
+        "press_button cycle_start_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "main_power_switch",
+        "torque_head_pressure_sensor",
+        "cap_hopper_level_sensor",
+        "cycle_start_button"
+      ]
+    },
+    {
+      "ref": "shutdown_sequence",
+      "title": "Capping Machine Daily Shutdown",
+      "condition": "End-of-shift shutdown is required after all bottles have cleared the capping station and no further production is scheduled.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "wait 15",
+        "read_sensor cap_hopper_level_sensor",
+        "press_button main_power_switch",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "cap_hopper_level_sensor",
+        "main_power_switch"
+      ]
+    },
+    {
+      "ref": "cap_chute_jam",
+      "title": "Cap Chute Jam Clearance",
+      "condition": "The cap chute jam sensor has triggered and cap flow to the torque head has stopped with caps visibly stacked or bridged inside the chute.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to cap_chute_access_panel",
+        "pick jammed_cap_assembly",
+        "place scrap_bin",
+        "press_button cycle_start_button",
+        "read_sensor cap_chute_flow_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "cap_chute_access_panel",
+        "jammed_cap_assembly",
+        "scrap_bin",
+        "cycle_start_button",
+        "cap_chute_flow_sensor"
+      ]
+    },
+    {
+      "ref": "torque_head_overtorque",
+      "title": "Torque Head Over-Torque Fault Response",
+      "condition": "The torque monitoring sensor reads ABOVE the maximum torque setpoint for more than two consecutive capping cycles, triggering a persistent overtorque alarm.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor torque_head_torque_sensor",
+        "press_button cycle_stop_button",
+        "walk_to torque_head_station",
+        "read_sensor torque_head_pressure_sensor",
+        "notify maintenance_technician",
+        "press_button fault_reset_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "torque_head_torque_sensor",
+        "cycle_stop_button",
+        "torque_head_station",
+        "torque_head_pressure_sensor",
+        "fault_reset_button"
+      ]
+    },
+    {
+      "ref": "torque_head_undertorque",
+      "title": "Torque Head Chronic Under-Torque Fault Response",
+      "condition": "The torque monitoring sensor reads persistently BELOW the minimum setpoint across multiple consecutive cycles, indicating insufficient capping force rather than any single-cycle spike.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor torque_head_torque_sensor",
+        "press_button cycle_stop_button",
+        "walk_to torque_head_station",
+        "read_sensor torque_head_pressure_sensor",
+        "notify quality_inspector",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "torque_head_torque_sensor",
+        "cycle_stop_button",
+        "torque_head_station",
+        "torque_head_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "torque_sudden_collapse",
+      "title": "Mid-Cycle Torque Sudden Collapse Response",
+      "condition": "The torque sensor detects an abrupt single-cycle drop to near-zero during capping engagement — not a chronic low-torque pattern — indicating a stripped clutch, slipped spindle, or mechanical failure in one instant.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button estop_button",
+        "read_sensor torque_head_torque_sensor",
+        "notify maintenance_technician",
+        "walk_to torque_head_station",
+        "read_sensor torque_head_spindle_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "estop_button",
+        "torque_head_torque_sensor",
+        "torque_head_station",
+        "torque_head_spindle_sensor"
+      ]
+    },
+    {
+      "ref": "reject_gate_fault",
+      "title": "Reject Gate Actuation Failure",
+      "condition": "The reject gate actuator has failed to physically extend or retract on command when a non-conforming bottle is detected, confirmed by the gate position sensor showing an incorrect mechanical state.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to reject_station",
+        "read_sensor reject_gate_position_sensor",
+        "notify maintenance_technician",
+        "wait 30",
+        "press_button fault_reset_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "reject_station",
+        "reject_gate_position_sensor",
+        "fault_reset_button"
+      ]
+    },
+    {
+      "ref": "cap_level_low",
+      "title": "Cap Hopper Low Level Warning Response",
+      "condition": "The cap hopper level sensor reads below the low-level warning threshold but has NOT yet triggered the empty alarm; cap flow is still active and production can continue briefly while caps are replenished.",
+      "steps": [
+        "read_sensor cap_hopper_level_sensor",
+        "notify line_operator",
+        "walk_to cap_storage_area",
+        "pick cap_bag_assembly",
+        "walk_to cap_hopper",
+        "place cap_bag_assembly",
+        "read_sensor cap_hopper_level_sensor"
+      ],
+      "equipment": [
+        "cap_hopper_level_sensor",
+        "cap_storage_area",
+        "cap_bag_assembly",
+        "cap_hopper"
+      ]
+    },
+    {
+      "ref": "cap_hopper_empty",
+      "title": "Cap Hopper Empty Alarm Response",
+      "condition": "The cap hopper level sensor has triggered the empty alarm and cap flow has completely stopped, halting all capping activity until the hopper is reloaded and flow is confirmed.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to cap_storage_area",
+        "pick cap_bag_assembly",
+        "walk_to cap_hopper",
+        "place cap_bag_assembly",
+        "press_button cycle_start_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "cap_storage_area",
+        "cap_bag_assembly",
+        "cap_hopper",
+        "cycle_start_button"
+      ]
+    },
+    {
+      "ref": "lubrication_routine",
+      "title": "Scheduled Torque Head and Drive Chain Lubrication",
+      "condition": "The scheduled lubrication interval has been reached per the preventive maintenance calendar (every 500 operating hours or weekly, whichever comes first).",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to lubrication_cabinet",
+        "pick grease_cartridge",
+        "walk_to torque_head_station",
+        "place grease_cartridge",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "lubrication_cabinet",
+        "grease_cartridge",
+        "torque_head_station"
+      ]
+    },
+    {
+      "ref": "belt_replacement",
+      "title": "Drive Belt Scheduled Replacement",
+      "condition": "Weekly inspection reveals cracks, fraying, or measured elongation in the drive belt beyond the wear limit documented on the inspection card.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to belt_drive_compartment",
+        "pick worn_drive_belt",
+        "place scrap_bin",
+        "pick replacement_drive_belt",
+        "place belt_drive_compartment"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "belt_drive_compartment",
+        "worn_drive_belt",
+        "scrap_bin",
+        "replacement_drive_belt"
+      ]
+    },
+    {
+      "ref": "torque_calibration",
+      "title": "Torque Head Scheduled Calibration",
+      "condition": "The weekly torque calibration task is due on the PM schedule, or quality inspection data shows torque readings drifting more than five percent from verified reference values.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to calibration_tool_cabinet",
+        "pick torque_calibration_tool",
+        "walk_to torque_head_station",
+        "read_sensor torque_head_torque_sensor",
+        "notify quality_inspector"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "calibration_tool_cabinet",
+        "torque_calibration_tool",
+        "torque_head_station",
+        "torque_head_torque_sensor"
+      ]
+    },
+    {
+      "ref": "estop_activation",
+      "title": "Emergency Stop Activation Response",
+      "condition": "The red E-stop button has been pressed by any personnel due to an imminent safety hazard and the machine has halted mid-cycle with the estop indicator lit.",
+      "steps": [
+        "read_sensor machine_status_sensor",
+        "notify shift_supervisor",
+        "walk_to estop_location",
+        "read_sensor area_clear_sensor",
+        "wait 15",
+        "press_button estop_reset_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "machine_status_sensor",
+        "estop_location",
+        "area_clear_sensor",
+        "estop_reset_button"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout Procedure for Maintenance Access",
+      "condition": "Planned maintenance work requiring physical access to machine internals has been scheduled and the capping machine must be fully de-energized and locked out before work begins.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "press_button main_power_switch",
+        "walk_to lockout_station",
+        "pick lockout_hasp_assembly",
+        "place main_power_switch",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "main_power_switch",
+        "lockout_station",
+        "lockout_hasp_assembly"
+      ]
+    },
+    {
+      "ref": "cap_chute_cleaning",
+      "title": "Cap Chute Routine Cleaning",
+      "condition": "Scheduled daily cleaning of the cap chute interior is due, or cap debris and residue are visibly present inside the chute affecting cap alignment before reaching the torque head.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to cleaning_supply_cabinet",
+        "pick cleaning_brush_assembly",
+        "walk_to cap_chute_access_panel",
+        "place cleaning_brush_assembly",
+        "read_sensor cap_chute_flow_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "cleaning_supply_cabinet",
+        "cleaning_brush_assembly",
+        "cap_chute_access_panel",
+        "cap_chute_flow_sensor"
+      ]
+    },
+    {
+      "ref": "reject_sensor_misalignment",
+      "title": "Reject Sensor Misalignment Warning Response",
+      "condition": "The reject lane vision sensor has reported a WARNING-level alignment error with degraded signal strength but the gate is still actuating and no confirmed missed rejects have been detected yet.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor reject_vision_sensor",
+        "walk_to reject_station",
+        "read_sensor reject_vision_sensor",
+        "notify maintenance_technician",
+        "wait 60",
+        "read_sensor reject_vision_sensor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "reject_vision_sensor",
+        "reject_station"
+      ]
+    },
+    {
+      "ref": "conveyor_speed_low",
+      "title": "Bottle Infeed Conveyor Low Speed Warning",
+      "condition": "The conveyor speed sensor reads below the minimum production setpoint but the infeed belt is still moving and bottles are still feeding, generating a low-speed warning rather than a stop alarm.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor infeed_conveyor_speed_sensor",
+        "press_button conveyor_speed_increase_button",
+        "wait 10",
+        "read_sensor infeed_conveyor_speed_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "infeed_conveyor_speed_sensor",
+        "conveyor_speed_increase_button"
+      ]
+    },
+    {
+      "ref": "conveyor_stopped",
+      "title": "Bottle Infeed Conveyor Fully Stopped Alarm",
+      "condition": "The conveyor speed sensor reads zero and the motor overload indicator is active, indicating the infeed conveyor belt has completely stopped rather than merely slowed, requiring a motor fault reset.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "read_sensor infeed_conveyor_speed_sensor",
+        "read_sensor conveyor_motor_overload_sensor",
+        "notify maintenance_technician",
+        "wait 30",
+        "press_button conveyor_motor_reset_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "infeed_conveyor_speed_sensor",
+        "conveyor_motor_overload_sensor",
+        "conveyor_motor_reset_button"
+      ]
+    },
+    {
+      "ref": "electrical_fault_drive",
+      "title": "Drive Inverter Electrical Fault Response",
+      "condition": "The drive inverter fault indicator lamp is illuminated and the inverter fault code sensor is active, indicating a drive-side electrical fault that has caused the machine to stop and requires maintenance intervention before reset.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor drive_inverter_fault_sensor",
+        "press_button cycle_stop_button",
+        "notify maintenance_technician",
+        "walk_to electrical_cabinet",
+        "read_sensor drive_inverter_fault_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "drive_inverter_fault_sensor",
+        "cycle_stop_button",
+        "electrical_cabinet"
+      ]
+    },
+    {
+      "ref": "cap_orientation_error",
+      "title": "Cap Orientation Fault Quality Inspection Response",
+      "condition": "The cap orientation sensor has detected caps arriving at the torque head in an inverted or skewed position, causing quality reject counts to exceed the acceptable threshold.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor cap_orientation_sensor",
+        "press_button cycle_stop_button",
+        "walk_to cap_chute_access_panel",
+        "read_sensor cap_orientation_sensor",
+        "notify quality_inspector",
+        "press_button cycle_start_button"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cap_orientation_sensor",
+        "cycle_stop_button",
+        "cap_chute_access_panel"
+      ]
+    },
+    {
+      "ref": "spill_response",
+      "title": "Lubricant or Fluid Spill Response",
+      "condition": "A lubricant or hydraulic fluid spill has been identified on the floor area surrounding the capping machine base, creating an active slip hazard that must be contained before production resumes.",
+      "steps": [
+        "notify shift_supervisor",
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to spill_kit_cabinet",
+        "pick spill_kit_absorbent",
+        "place spill_area",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "spill_kit_cabinet",
+        "spill_kit_absorbent",
+        "spill_area"
+      ]
+    },
+    {
+      "ref": "pneumatic_filter_change",
+      "title": "Torque Head Pneumatic Filter Scheduled Replacement",
+      "condition": "The scheduled pneumatic filter replacement interval has been reached per the PM log (every 1,000 operating hours), or the filter differential pressure sensor reads above the clog threshold indicating restriction in the torque head air supply.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button cycle_stop_button",
+        "walk_to pneumatic_filter_station",
+        "pick clogged_pneumatic_filter",
+        "place scrap_bin",
+        "pick replacement_pneumatic_filter",
+        "place pneumatic_filter_station"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "cycle_stop_button",
+        "pneumatic_filter_station",
+        "clogged_pneumatic_filter",
+        "scrap_bin",
+        "replacement_pneumatic_filter"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-CAP-001",
+      "sop_ref": "startup_sequence",
+      "text": "First thing this morning on line 3, I hit the main switch and the torque head pressure gauge was sitting at zero. Waited a bit before punching cycle start — the machine had not stabilized yet. Radioed the super we were running late getting up."
+    },
+    {
+      "id": "INC-CAP-002",
+      "sop_ref": "startup_sequence",
+      "text": "Morning bring-up on the unit near bay 4, powered it on but the hopper indicator was showing red right away. Held off on hitting the green button until I got eyes on everything and confirmed readings were good, then let the supervisor know we were up and running."
+    },
+    {
+      "id": "INC-CAP-003",
+      "sop_ref": "shutdown_sequence",
+      "text": "End of third shift on line 2, I punched the stop and waited longer than usual before cutting main power — there were still a few bottles clearing the head. Checked the hopper light before I powered down and gave the super a heads-up we were clear."
+    },
+    {
+      "id": "INC-CAP-004",
+      "sop_ref": "shutdown_sequence",
+      "text": "Shutdown on the capper near the loading dock at end of day. Hit cycle stop and stood there watching it drain through. Made sure the hopper sensor read before cutting the main. Told the super everything was down."
+    },
+    {
+      "id": "INC-CAP-005",
+      "sop_ref": "cap_chute_jam",
+      "text": "Line 4, second shift around 1:30pm — the caps just stopped feeding mid-run out of nowhere. Looked in the chute window and they were all piled up in there, kind of bridged over each other. Had to kill the cycle and dig them out into the scrap bin."
+    },
+    {
+      "id": "INC-CAP-006",
+      "sop_ref": "cap_chute_jam",
+      "text": "The capper on the north side of the floor went silent about two hours in. No caps coming through the chute at all. I could see a solid wedge of plastic pieces wedged in there. Stopped the machine, cleared it, and got things running again."
+    },
+    {
+      "id": "INC-CAP-007",
+      "sop_ref": "cap_chute_jam",
+      "text": "Cap feed died on line 1 about an hour into the first run of the shift. Chute looked like a traffic jam — nothing was moving through it. Stopped the machine, pulled the stuck ones out and dropped them in the scrap bin, then brought it back up and checked the flow sensor."
+    },
+    {
+      "id": "INC-CAP-008",
+      "sop_ref": "torque_head_overtorque",
+      "text": "Line 3 first shift — the alarm panel lit up red and I checked the torque readout, it was way past the upper limit. The head was really fighting those bottles hard. Happened on two cycles in a row, so I knew it was not a fluke. Stopped it and called maintenance to check the air."
+    },
+    {
+      "id": "INC-CAP-009",
+      "sop_ref": "torque_head_overtorque",
+      "text": "The torque display on the capper near dock 2 kept pegging past the red line over and over. You could hear it straining on each cycle. Shut down and had maintenance look at the pressure to the head — something was too high in there."
+    },
+    {
+      "id": "INC-CAP-010",
+      "sop_ref": "torque_head_overtorque",
+      "text": "Something was way too tight on line 4 this afternoon — the digital readout flashed over-range after each cap was set. Not just once, it kept happening back to back every cycle. Stopped it, pulled the fault reset button, and got maintenance in to diagnose."
+    },
+    {
+      "id": "INC-CAP-011",
+      "sop_ref": "torque_head_undertorque",
+      "text": "Line 2, third shift — QC started flagging loose caps coming off the end of the line all the way through the run. I looked at the torque display and it was reading under the green band the whole time, not a spike, just consistently weak all shift. Stopped it, called QA and maintenance both."
+    },
+    {
+      "id": "INC-CAP-012",
+      "sop_ref": "torque_head_undertorque",
+      "text": "QC on line 1 pulled three bottles in a row where the caps spun off easy with almost no force. I looked over at the gauge and it was sitting below the minimum on every single cycle. Not fluctuating at all — just stuck low the entire run."
+    },
+    {
+      "id": "INC-CAP-013",
+      "sop_ref": "torque_head_undertorque",
+      "text": "The capper by the west wall had been running all morning but the numbers on the torque screen never climbed into spec even once. Caps were going on but they were not tight. QC inspector came over and confirmed they were consistently under-torqued across the whole batch."
+    },
+    {
+      "id": "INC-CAP-014",
+      "sop_ref": "torque_sudden_collapse",
+      "text": "Mid-run on line 3, the machine made a weird clunk sound and then the torque readout dropped to basically nothing in one shot. It was not gradual at all — one cycle it was fine, the next cycle the display showed zero. Hit the red button and got maintenance on it right away. Supervisor also came over."
+    },
+    {
+      "id": "INC-CAP-015",
+      "sop_ref": "torque_sudden_collapse",
+      "text": "The capper near the south end of the floor had been running all morning with no issues and then all of a sudden one bottle went through and the head just did not engage. The readout went flat in an instant — not low, just nothing. Had to e-stop it. Both maintenance and the supervisor showed up."
+    },
+    {
+      "id": "INC-CAP-016",
+      "sop_ref": "reject_gate_fault",
+      "text": "Line 4 — the vision system flagged a bad bottle but the reject arm never moved. Watched the bad bottle go right down the line. The gate position light on the panel was showing the wrong state. Stopped the machine immediately and radioed maintenance."
+    },
+    {
+      "id": "INC-CAP-017",
+      "sop_ref": "reject_gate_fault",
+      "text": "Second shift on the capper near dock 1, rejects were supposed to be kicked off the line but two just kept rolling past. Looked at the actuator status — arm never extended. Position indicator on the panel was stuck showing open when it clearly was not. Stopped it and called maintenance."
+    },
+    {
+      "id": "INC-CAP-018",
+      "sop_ref": "reject_gate_fault",
+      "text": "Noticed a crooked-capped bottle making it past the sort point without getting pulled. Watched it happen again before I stopped the line. The gate was not responding at all to the detection signal — position sensor on the panel confirmed it was showing the wrong mechanical state."
+    },
+    {
+      "id": "INC-CAP-019",
+      "sop_ref": "cap_level_low",
+      "text": "Line 2 around mid-morning, the yellow hopper light came on but the machine was still running fine and caps were still dropping normally. Had plenty of time, so I went over to the cap stock rack, grabbed a bag, and topped it off before it ever got to a stop situation."
+    },
+    {
+      "id": "INC-CAP-020",
+      "sop_ref": "cap_level_low",
+      "text": "The hopper warning light flickered on during first shift on the unit near bay 3. Caps were still flowing fine through the chute at that point. I went to storage, grabbed a full bag, and dumped it in. Never had to stop production or even slow down."
+    },
+    {
+      "id": "INC-CAP-021",
+      "sop_ref": "cap_hopper_empty",
+      "text": "Line 3 just stopped capping out of nowhere — no caps hitting the head, machine just silent. Looked at the hopper and it was bone dry. Had to stop the cycle completely, go get a fresh bag from the cage in the back, dump it in, and restart from the panel."
+    },
+    {
+      "id": "INC-CAP-022",
+      "sop_ref": "cap_hopper_empty",
+      "text": "Second shift, the capper near the east exit quit mid-bottle. Hopper was not low — it was completely empty, nothing in it at all. Full stop on the cycle, went and got supply, loaded the hopper, and hit cycle start to bring it back."
+    },
+    {
+      "id": "INC-CAP-023",
+      "sop_ref": "cap_hopper_empty",
+      "text": "The machine on line 1 quit feeding caps around 3pm. Red light on the hopper panel — not yellow, red. Nothing in the hopper whatsoever. Had to do a full cycle stop, restock the hopper from the supply area, then power the cycle back on from the main panel."
+    },
+    {
+      "id": "INC-CAP-024",
+      "sop_ref": "lubrication_routine",
+      "text": "Weekly PM on line 4 today — maintenance calendar said it was grease day for the capper. Stopped the cycle, grabbed the grease cartridge from the maintenance cabinet, and worked it into the fittings on the torque head and drive chain. Called the tech to log it."
+    },
+    {
+      "id": "INC-CAP-025",
+      "sop_ref": "lubrication_routine",
+      "text": "Hit the 500-hour mark on the operating counter for the capper near bay 2 during second shift. PM record said lubrication was due. Stopped the machine, pulled the grease from the cabinet, and got it into the torque head assembly. Notified maintenance to sign off on the PM card."
+    },
+    {
+      "id": "INC-CAP-026",
+      "sop_ref": "belt_replacement",
+      "text": "Weekly walk-down on line 3 Monday morning — the main drive belt had a visible crack running straight across it and it felt stretched and loose when I pressed on it. Pulled it off, dropped the old one in the scrap bin, and put the new one from the parts shelf on."
+    },
+    {
+      "id": "INC-CAP-027",
+      "sop_ref": "belt_replacement",
+      "text": "The capper by the north dock had a drive belt that was visibly fraying at one edge during my Monday inspection. Measured elongation against the reference mark and it was past the line. Stopped production and swapped it out for the spare we keep in the drive compartment."
+    },
+    {
+      "id": "INC-CAP-028",
+      "sop_ref": "torque_calibration",
+      "text": "QC flagged that the torque numbers on line 2 had been drifting around 8 percent over the last couple of days — bottles were coming off with noticeably different pull-off force bottle to bottle. Stopped the machine, ran calibration with the reference kit from the tool cabinet, then had quality sign off."
+    },
+    {
+      "id": "INC-CAP-029",
+      "sop_ref": "torque_calibration",
+      "text": "Weekly cal check on the capper near the south wall. Stopped production, pulled the calibration tool from the cabinet, and cross-checked the readout against the known reference at the head. Drift was right at the edge of the tolerance limit so I had QA come over and verify before restarting."
+    },
+    {
+      "id": "INC-CAP-030",
+      "sop_ref": "estop_activation",
+      "text": "Someone on line 4 hit the red mushroom button — a glove got way too close to the torque head during a bottle change. Machine stopped dead mid-cycle. Radioed the supervisor, checked the area was clear, gave it 15 seconds, then released the button. Let the super know both when it stopped and when we were back."
+    },
+    {
+      "id": "INC-CAP-031",
+      "sop_ref": "estop_activation",
+      "text": "First shift near bay 2 — a bottle tipped over and was about to get pulled into the drive mechanism. Line operator slapped the emergency stop. Machine went hard down mid-cycle. Checked the area was clear before releasing, let the supervisor know on the radio."
+    },
+    {
+      "id": "INC-CAP-032",
+      "sop_ref": "estop_activation",
+      "text": "The big red button near the exit side of the machine got hit by someone on second shift — they saw a cloth fall near the conveyor. We verified the whole area was safe, waited, then twisted and released it. Called the supervisor twice — once right when it happened and once when we were clear to restart."
+    },
+    {
+      "id": "INC-CAP-033",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needed to get inside the capper near bay 4 to replace an internal worn part. Stopped the cycle, cut main power at the panel, walked over to the lockout board, pulled the hasp set, and applied it to the main disconnect. Called the tech to come in and do the work."
+    },
+    {
+      "id": "INC-CAP-034",
+      "sop_ref": "lockout_tagout",
+      "text": "Planned service on the line 3 capper was on the schedule for Tuesday afternoon. Maintenance needed access to the inside. Did the full de-energize sequence — stopped the cycle, hit main power off, walked to the lockout station, applied the lock to the main disconnect, and notified the tech they were clear to open it up."
+    },
+    {
+      "id": "INC-CAP-035",
+      "sop_ref": "cap_chute_cleaning",
+      "text": "End of shift cleaning on line 2 — there was a grey dust buildup inside the chute and a couple of stuck plastic chips from damaged caps coating the walls. Stopped the machine, grabbed the brush from the cleaning supply cabinet, and ran it through the interior. Everything flowing clean after."
+    },
+    {
+      "id": "INC-CAP-036",
+      "sop_ref": "cap_chute_cleaning",
+      "text": "During pre-production check on line 4 this morning I spotted a greasy film coating the inside of the chute left over from the night shift. Stopped before starting the run, got the cleaning brush, worked through the chute, then checked the flow sensor showed clear before starting up."
+    },
+    {
+      "id": "INC-CAP-037",
+      "sop_ref": "reject_sensor_misalignment",
+      "text": "The reject lane camera on line 1 started showing a yellow indicator on the panel — not a full fault, just degraded signal. Nothing had slipped through yet as far as we could tell. Called maintenance to come look at the alignment and read the sensor a few times at both the panel and at the station to confirm it was drifting."
+    },
+    {
+      "id": "INC-CAP-038",
+      "sop_ref": "reject_sensor_misalignment",
+      "text": "The vision unit on the reject side of the capper near the dock was throwing a warning flag all afternoon but everything was still sorting correctly. Walked down and read the sensor twice at the station — signal was definitely degraded, just not failed. Maintenance came and re-aimed it. No missed rejects while we waited."
+    },
+    {
+      "id": "INC-CAP-039",
+      "sop_ref": "conveyor_speed_low",
+      "text": "Line 3 mid-morning — bottles were still feeding but there were bigger and bigger gaps between them, noticeably slower than normal. Speed indicator was under the green zone on the panel but clearly still moving. Hit the speed-up button, waited, and checked again. Called maintenance when it did not fully recover."
+    },
+    {
+      "id": "INC-CAP-040",
+      "sop_ref": "conveyor_speed_low",
+      "text": "The infeed belt on the capper near bay 1 was dragging along slowly — not stopped, just sluggish. You could tell by the widening gaps between each bottle coming in. Bumped the speed up from the panel control and monitored for a bit. Ended up getting maintenance involved since it kept creeping slow."
+    },
+    {
+      "id": "INC-CAP-041",
+      "sop_ref": "conveyor_stopped",
+      "text": "Line 4 second shift — bottles just stopped coming to the capper entirely. Belt was completely dead, not slow at all. The motor overload indicator was lit on the panel. Stopped the capper, read both sensors to confirm, and had maintenance do the motor reset."
+    },
+    {
+      "id": "INC-CAP-042",
+      "sop_ref": "conveyor_stopped",
+      "text": "The infeed on the capper near the north wall went totally dead during first shift. Bottles started backing up at the entrance to the capping zone. Speed sensor read zero and the motor fault lamp was lit. Stopped the capper fully. Maintenance had to clear the motor fault and do the reset before we could restart."
+    },
+    {
+      "id": "INC-CAP-043",
+      "sop_ref": "conveyor_stopped",
+      "text": "First shift line 2, infeed conveyor just froze up completely — not gradual, it quit instantly. Motor fault light came on at the same moment. Stopped the capper cycle first thing, then waited for maintenance to come clear the overload and hit the reset on the motor drive."
+    },
+    {
+      "id": "INC-CAP-044",
+      "sop_ref": "electrical_fault_drive",
+      "text": "Line 3 first shift — the amber fault lamp on the drive section of the panel lit up and the capper slowed down and quit. Pulled up the fault code on the display at the panel — definitely a drive fault code, not anything related to the motor overload. Called maintenance and flagged the supervisor."
+    },
+    {
+      "id": "INC-CAP-045",
+      "sop_ref": "electrical_fault_drive",
+      "text": "The inverter on the capper near dock 2 threw a code in the middle of a run and the whole unit shut itself off. I saw the red fault indicator inside the electrical cabinet when I walked past. Did not touch anything — called maintenance over first and then notified the supervisor."
+    },
+    {
+      "id": "INC-CAP-046",
+      "sop_ref": "electrical_fault_drive",
+      "text": "Second shift on line 1, the drive fault indicator came on and the entire capper unit stopped. Read the code at the main control panel, then walked to the electrical box and read the display in there too. Had both maintenance and the supervisor over before anything was reset."
+    },
+    {
+      "id": "INC-CAP-047",
+      "sop_ref": "cap_orientation_error",
+      "text": "QC started pulling bottles with upside-down caps on line 2 this afternoon — several in a row. The machine was still running and the orientation indicator on the panel was clearly flagging something wrong. Stopped the cycle, opened the chute panel, and called quality before restarting."
+    },
+    {
+      "id": "INC-CAP-048",
+      "sop_ref": "cap_orientation_error",
+      "text": "Line 4 had a run of bad caps going on — tilted at a weird angle when they hit the torque head, you could see it. The orientation sensor panel flag was active. Stopped the cycle, opened up the chute access to inspect, got QA involved, and brought the line back up after checking the sensor read was clean."
+    },
+    {
+      "id": "INC-CAP-049",
+      "sop_ref": "spill_response",
+      "text": "Line 3 around noon — someone spotted grease on the floor right under the capper near the lubrication fitting on the side of the machine. Flagged the shift supervisor right away, stopped the capper, grabbed the absorbent pads from the red spill cabinet, laid them down over the slick, and let the super know when it was contained."
+    },
+    {
+      "id": "INC-CAP-050",
+      "sop_ref": "spill_response",
+      "text": "Second shift near the capper by the south exit, someone almost slipped on a wet patch spreading from under the machine base — looked like hydraulic fluid or gear oil. Radioed the supervisor before anything else, stopped production, grabbed the spill kit from the station by the pillar, and put the absorbent down over the whole area."
+    },
+    {
+      "id": "INC-CAP-051",
+      "sop_ref": "pneumatic_filter_change",
+      "text": "The capper on line 4 hit the 1,000-hour mark on the PM log this week. Stopped the cycle, walked to the filter station, pulled the old filter out — it was noticeably dark brown and clogged-looking — dropped it in the scrap bin, and put the new replacement in from the parts shelf."
+    },
+    {
+      "id": "INC-CAP-052",
+      "sop_ref": "pneumatic_filter_change",
+      "text": "The air supply pressure gauge on the torque head side of the capper near bay 3 was reading higher differential than normal this morning — the needle was past the red hash mark on the filter gauge. Stopped the machine, swapped the filter out for the replacement we had in supply, and disposal into scrap."
+    }
+  ]
+}

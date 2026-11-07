@@ -1,0 +1,582 @@
+{
+  "family": "Welding Fume Extractor",
+  "sops": [
+    {
+      "ref": "low_suction_pressure",
+      "title": "Suction Pressure Below Minimum Setpoint",
+      "condition": "The suction pressure sensor reads below the minimum operating setpoint in a sustained, gradual drift rather than a sudden event.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor suction_pressure_sensor",
+        "press_button fan_speed_up_button",
+        "wait 30",
+        "read_sensor suction_pressure_sensor",
+        "walk_to fan_housing",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "suction_pressure_sensor", "fan_speed_up_button", "fan_housing", "maintenance_supervisor"]
+    },
+    {
+      "ref": "suction_pressure_collapse",
+      "title": "Sudden Suction Pressure Collapse",
+      "condition": "The suction pressure sensor drops to near-zero within a single scan cycle, indicating a catastrophic sudden loss rather than a gradual drift below setpoint.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor suction_pressure_sensor",
+        "press_button estop_button",
+        "press_button alarm_silence_button",
+        "walk_to fan_housing",
+        "read_sensor fan_motor_temp_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "suction_pressure_sensor", "estop_button", "alarm_silence_button", "fan_housing", "fan_motor_temp_sensor", "maintenance_supervisor"]
+    },
+    {
+      "ref": "high_suction_pressure",
+      "title": "Suction Pressure Above Upper Ceiling Setpoint",
+      "condition": "The suction pressure sensor reads above the maximum allowable ceiling setpoint, indicating over-draw or a downstream restriction forcing the fan to pull harder than rated.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor suction_pressure_sensor",
+        "press_button fan_speed_down_button",
+        "wait 30",
+        "read_sensor suction_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "suction_pressure_sensor", "fan_speed_down_button", "maintenance_supervisor"]
+    },
+    {
+      "ref": "filter_clog_warning",
+      "title": "Filter Differential Pressure Advisory Warning",
+      "condition": "The differential pressure sensor across the filter cartridge reaches the yellow advisory threshold, indicating partial clogging that requires scheduled attention but does not mandate immediate shutdown.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor differential_pressure_sensor",
+        "press_button alarm_silence_button",
+        "walk_to filter_access_panel",
+        "read_sensor differential_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "differential_pressure_sensor", "alarm_silence_button", "filter_access_panel", "maintenance_supervisor"]
+    },
+    {
+      "ref": "filter_clog_critical",
+      "title": "Filter Differential Pressure Critical Emergency Stop",
+      "condition": "The differential pressure sensor across the filter cartridge reaches the red critical threshold requiring immediate unit shutdown to prevent motor damage or filter ignition.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor differential_pressure_sensor",
+        "press_button estop_button",
+        "press_button alarm_silence_button",
+        "walk_to filter_access_panel",
+        "notify production_supervisor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "differential_pressure_sensor", "estop_button", "alarm_silence_button", "filter_access_panel", "production_supervisor", "maintenance_supervisor"]
+    },
+    {
+      "ref": "fan_motor_overtemp",
+      "title": "Fan Motor Overtemperature Alarm",
+      "condition": "The fan motor temperature sensor exceeds the maximum rated operating temperature, triggering a thermal protection alarm on the unit.",
+      "steps": [
+        "walk_to fan_housing",
+        "read_sensor fan_motor_temp_sensor",
+        "walk_to control_panel",
+        "press_button estop_button",
+        "wait 300",
+        "read_sensor fan_motor_temp_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["fan_housing", "fan_motor_temp_sensor", "control_panel", "estop_button", "maintenance_supervisor"]
+    },
+    {
+      "ref": "arm_jam_partial",
+      "title": "Extraction Arm Partial Resistance Fault",
+      "condition": "The extraction arm position sensor confirms the arm is still moving but with measurable lag, indicating a sluggish, resistant arm that has not yet fully seized.",
+      "steps": [
+        "walk_to extractor_unit",
+        "read_sensor arm_position_sensor",
+        "walk_to control_panel",
+        "press_button fan_speed_down_button",
+        "wait 15",
+        "read_sensor arm_position_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["extractor_unit", "arm_position_sensor", "control_panel", "fan_speed_down_button", "maintenance_supervisor"]
+    },
+    {
+      "ref": "arm_jam_full",
+      "title": "Extraction Arm Complete Seizure",
+      "condition": "The extraction arm position sensor shows zero movement across consecutive readings and the arm cannot be repositioned, indicating a complete mechanical seizure.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button estop_button",
+        "walk_to arm_pivot",
+        "read_sensor arm_position_sensor",
+        "notify maintenance_supervisor",
+        "notify production_supervisor"
+      ],
+      "equipment": ["control_panel", "estop_button", "arm_pivot", "arm_position_sensor", "maintenance_supervisor", "production_supervisor"]
+    },
+    {
+      "ref": "electrical_fault_vfd",
+      "title": "Variable Frequency Drive Fault Code",
+      "condition": "The variable frequency drive displays an active fault code and the fan motor stops completely, indicating an electrical control failure rather than a mechanical or thermal event.",
+      "steps": [
+        "walk_to vfd_panel",
+        "read_sensor vfd_status_sensor",
+        "press_button alarm_silence_button",
+        "press_button vfd_reset_button",
+        "wait 10",
+        "read_sensor vfd_status_sensor",
+        "notify maintenance_electrician"
+      ],
+      "equipment": ["vfd_panel", "vfd_status_sensor", "alarm_silence_button", "vfd_reset_button", "maintenance_electrician"]
+    },
+    {
+      "ref": "fume_level_high",
+      "title": "Ambient Fume Concentration Above Permissible Exposure Limit",
+      "condition": "The ambient fume sensor at the welding workstation reads above the permissible exposure limit, indicating inadequate fume capture at the source.",
+      "steps": [
+        "walk_to workstation_sensor_display",
+        "read_sensor ambient_fume_sensor",
+        "walk_to control_panel",
+        "press_button fan_speed_up_button",
+        "wait 60",
+        "read_sensor ambient_fume_sensor",
+        "notify safety_officer"
+      ],
+      "equipment": ["workstation_sensor_display", "ambient_fume_sensor", "control_panel", "fan_speed_up_button", "safety_officer"]
+    },
+    {
+      "ref": "filter_replacement",
+      "title": "Primary Filter Cartridge Scheduled Replacement",
+      "condition": "The primary filter cartridge has reached its scheduled replacement interval as tracked by the maintenance management system work order.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button power_off_button",
+        "walk_to filter_access_panel",
+        "pick used_filter_cartridge",
+        "place used_filter_cartridge hazmat_bin",
+        "pick replacement_filter_cartridge",
+        "place replacement_filter_cartridge filter_housing"
+      ],
+      "equipment": ["control_panel", "power_off_button", "filter_access_panel", "used_filter_cartridge", "hazmat_bin", "replacement_filter_cartridge", "filter_housing"]
+    },
+    {
+      "ref": "pre_filter_cleaning",
+      "title": "Pre-Filter Mesh Screen Weekly Cleaning",
+      "condition": "The pre-filter mesh screen requires routine weekly cleaning per the preventive maintenance schedule, with the screen intact and not due for replacement.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button power_off_button",
+        "walk_to filter_access_panel",
+        "pick pre_filter_screen",
+        "place pre_filter_screen cleaning_station",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "power_off_button", "filter_access_panel", "pre_filter_screen", "cleaning_station", "maintenance_supervisor"]
+    },
+    {
+      "ref": "fan_belt_inspection",
+      "title": "Fan Drive Belt Biweekly Inspection",
+      "condition": "The fan drive belt requires visual condition and tension verification per the biweekly preventive maintenance schedule, with no replacement activity planned.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button power_off_button",
+        "walk_to fan_housing",
+        "pick inspection_mirror",
+        "read_sensor belt_tension_indicator",
+        "place inspection_mirror tool_shelf",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "power_off_button", "fan_housing", "inspection_mirror", "belt_tension_indicator", "tool_shelf", "maintenance_supervisor"]
+    },
+    {
+      "ref": "fan_belt_replacement",
+      "title": "Fan Drive Belt Emergency Replacement",
+      "condition": "The fan drive belt has visibly cracked through or snapped, causing the fan to stop rotating and requiring immediate physical replacement of the belt.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button estop_button",
+        "walk_to fan_housing",
+        "pick worn_fan_belt",
+        "place worn_fan_belt scrap_bin",
+        "pick replacement_fan_belt",
+        "place replacement_fan_belt fan_pulley"
+      ],
+      "equipment": ["control_panel", "estop_button", "fan_housing", "worn_fan_belt", "scrap_bin", "replacement_fan_belt", "fan_pulley"]
+    },
+    {
+      "ref": "extraction_arm_lubrication",
+      "title": "Extraction Arm Pivot Joint Scheduled Lubrication",
+      "condition": "The extraction arm pivot joints have reached their scheduled lubrication interval and require grease application to maintain free, low-resistance movement.",
+      "steps": [
+        "walk_to maintenance_bay",
+        "pick grease_cartridge",
+        "walk_to arm_pivot",
+        "place grease_cartridge arm_pivot_port",
+        "wait 10",
+        "read_sensor arm_position_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["maintenance_bay", "grease_cartridge", "arm_pivot", "arm_pivot_port", "arm_position_sensor", "maintenance_supervisor"]
+    },
+    {
+      "ref": "airflow_calibration",
+      "title": "Airflow Velocity Sensor Calibration Verification",
+      "condition": "The airflow velocity sensor calibration certificate has expired or a quality audit has flagged the sensor for recalibration against a traceable reference standard.",
+      "steps": [
+        "walk_to maintenance_bay",
+        "pick calibration_probe",
+        "walk_to airflow_sensor_port",
+        "place calibration_probe airflow_sensor_port",
+        "read_sensor airflow_velocity_sensor",
+        "wait 30",
+        "notify quality_technician"
+      ],
+      "equipment": ["maintenance_bay", "calibration_probe", "airflow_sensor_port", "airflow_velocity_sensor", "quality_technician"]
+    },
+    {
+      "ref": "lockout_tagout_full",
+      "title": "Full Lockout Tagout Before Internal Access",
+      "condition": "Any maintenance activity requiring access inside the unit enclosure or proximity to energized components must be preceded by a full lockout-tagout energy isolation procedure.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button power_off_button",
+        "walk_to electrical_panel",
+        "pick lockout_lock",
+        "place lockout_lock electrical_panel_breaker",
+        "pick lockout_tag",
+        "place lockout_tag electrical_panel_breaker"
+      ],
+      "equipment": ["control_panel", "power_off_button", "electrical_panel", "lockout_lock", "electrical_panel_breaker", "lockout_tag"]
+    },
+    {
+      "ref": "fume_spill_response",
+      "title": "Collected Particulate or Condensate Spill Response",
+      "condition": "Collected fume particulate or condensate has escaped the drain outlet or collection bin and spilled onto the floor, creating a contamination and slip hazard.",
+      "steps": [
+        "walk_to emergency_station",
+        "pick spill_kit",
+        "walk_to collection_bin",
+        "place spill_kit spill_area",
+        "notify safety_officer",
+        "pick used_spill_materials",
+        "place used_spill_materials hazmat_bin"
+      ],
+      "equipment": ["emergency_station", "spill_kit", "collection_bin", "spill_area", "safety_officer", "used_spill_materials", "hazmat_bin"]
+    },
+    {
+      "ref": "fire_estop",
+      "title": "Fire or Smoke Detection Emergency Stop",
+      "condition": "Fire or smoke is detected inside or immediately adjacent to the fume extractor unit, requiring immediate emergency stop and facility alarm activation.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button estop_button",
+        "walk_to emergency_station",
+        "press_button fire_alarm_button",
+        "notify safety_officer",
+        "notify production_supervisor"
+      ],
+      "equipment": ["control_panel", "estop_button", "emergency_station", "fire_alarm_button", "safety_officer", "production_supervisor"]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Standard Unit Startup at Shift Start",
+      "condition": "The fume extractor unit must be brought online and verified operational at the start of a production shift before welding operations begin.",
+      "steps": [
+        "walk_to control_panel",
+        "read_sensor differential_pressure_sensor",
+        "read_sensor suction_pressure_sensor",
+        "press_button power_on_button",
+        "wait 30",
+        "read_sensor ambient_fume_sensor",
+        "notify production_supervisor"
+      ],
+      "equipment": ["control_panel", "differential_pressure_sensor", "suction_pressure_sensor", "power_on_button", "ambient_fume_sensor", "production_supervisor"]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "Standard Unit Shutdown at Shift End",
+      "condition": "The fume extractor unit must be safely ramped down and powered off at the conclusion of a production shift.",
+      "steps": [
+        "walk_to control_panel",
+        "press_button fan_speed_down_button",
+        "wait 60",
+        "press_button power_off_button",
+        "read_sensor suction_pressure_sensor",
+        "read_sensor fan_motor_temp_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["control_panel", "fan_speed_down_button", "power_off_button", "suction_pressure_sensor", "fan_motor_temp_sensor", "maintenance_supervisor"]
+    },
+    {
+      "ref": "daily_inspection",
+      "title": "Daily Pre-Shift Unit Condition Inspection",
+      "condition": "A daily sensor-verified and visual inspection of the fume extractor must be completed and signed off before the start of each production shift.",
+      "steps": [
+        "walk_to extractor_unit",
+        "read_sensor differential_pressure_sensor",
+        "read_sensor suction_pressure_sensor",
+        "read_sensor ambient_fume_sensor",
+        "walk_to arm_pivot",
+        "read_sensor arm_position_sensor",
+        "notify production_supervisor"
+      ],
+      "equipment": ["extractor_unit", "differential_pressure_sensor", "suction_pressure_sensor", "ambient_fume_sensor", "arm_pivot", "arm_position_sensor", "production_supervisor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "low_suction_pressure",
+      "text": "Line 3 extractor by the MIG station — the gauge was reading in the yellow zone but it didn't drop all at once, been creeping down since this morning. Smoke's still getting pulled but the draw feels weak compared to normal."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "low_suction_pressure",
+      "text": "Second shift noticed the wall-mounted pressure dial sitting a couple notches under the green band. Happened slow over about an hour, nothing sudden about it. Air still moves but the pull is lazy."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "low_suction_pressure",
+      "text": "The extractor by the grinding cell has been struggling all afternoon — readout is below where it should be but the arm still tracks fine and nothing is locked up. No alarms, just a slow fade over the whole shift."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "suction_pressure_collapse",
+      "text": "Everything was fine on line 5 then boom — the whole unit went dead quiet mid-weld. The gauge slammed to zero in like two seconds, not a gradual fade. Hit the floor button immediately."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "suction_pressure_collapse",
+      "text": "One second we had full pull on the bay 2 extractor, the next second the extraction arm felt like dead air. Pressure flatlined basically instantly — heard a thud from inside the housing right before it happened."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "suction_pressure_collapse",
+      "text": "Unit near the robotic weld cell just died on third shift — no warning buildup at all, pressure cratered from normal to nothing in one scan. Smoke started hanging in the air almost immediately."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "high_suction_pressure",
+      "text": "The blower on the south bay extractor is screaming — pressure gauge is pegged above the top green mark and the motor sounds like it's over-revving. This isn't a low-pressure problem, it's way too much pull."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "high_suction_pressure",
+      "text": "Line 2 extractor has the readout climbing past the safe zone on the HIGH side. Filters are fresh so it's not a restriction issue — something is pulling way harder than it should be."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "high_suction_pressure",
+      "text": "Vacuum indicator on the loading dock unit is in the red zone — but on the top end, not the bottom. Motor's running noticeably hotter than usual. Definitely too much suction, not too little."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "filter_clog_warning",
+      "text": "Yellow light has been on the flux-core station extractor for a couple hours. The restriction gauge is elevated but not in the danger zone — sitting in the amber advisory range, not the red stop range."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "filter_clog_warning",
+      "text": "Left a note in the maintenance log from first shift: amber indicator lit up on the main extractor around 10 AM. Differential is up but it's the caution level — not the emergency stop level — can schedule it."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "filter_clog_critical",
+      "text": "Red alarm screaming on the big extractor near bay 4. The restriction gauge is buried in the stop zone — not the yellow advisory like last week, the actual red emergency. Had to pull the plug, couldn't keep running."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "filter_clog_critical",
+      "text": "Third shift stopped the fume unit because the blockage alarm went full red. Not the amber warning we'd seen before — this was the critical level that requires immediate shutdown per the posted card on the machine."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "filter_clog_critical",
+      "text": "Pressure drop across the filter hit the absolute ceiling on the line 1 unit this morning. Red light, loud klaxon, operator hit the stop right away. Filter is completely gone — not a warning situation, a hard stop."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "Fan housing on the line 1 extractor is too hot to hold your hand on. The thermal warning light came on and the motor smells like something is cooking inside. Shut it down before anything else happened."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "Second shift: the motor on the main extraction unit threw a heat alarm. Housing temp is way above anything we'd call normal and there's a faint burnt smell. Not a drive box fault — the motor itself is overheating."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "arm_jam_partial",
+      "text": "The flex arm on the extractor by station 7 is stiff — you can move it but it takes real effort to reposition. Doesn't spring back the way it should. Still moves, just fights you the whole time."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "arm_jam_partial",
+      "text": "Operator on line 4 said the articulated arm has been dragging since morning. Swings around okay but feels like something is resisting it. Position sensor still shows movement — it's slow, not stopped."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "arm_jam_partial",
+      "text": "Extraction arm on the south unit is sluggish — takes about twice as long to reposition as usual. Definitely not locked up, you can still move it, just very stiff. Got noticeably worse over the last two hours."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "arm_jam_full",
+      "text": "Suction arm on the bay 2 unit is completely stuck. Cannot budge it at all — tried with both hands and it didn't move a millimeter. Position sensor showing no change whatsoever."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "arm_jam_full",
+      "text": "Arm on the unit near the robotic cell is seized solid. Two of us tried pushing it together, nothing moved at all. Stopped the machine immediately and called maintenance."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "arm_jam_full",
+      "text": "Third shift: extraction arm on the west extractor is completely locked up — not slow, not stiff, totally frozen. Position sensor has shown the same reading for over 20 minutes without any change."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "electrical_fault_vfd",
+      "text": "Fan just cut out on the line 6 extractor. The speed drive box has a fault light blinking and there's an error code on the display panel. Motor isn't turning at all — no mechanical noise, no heat smell, purely electrical."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "electrical_fault_vfd",
+      "text": "Control box on the main extractor is showing a drive fault this morning. Fan stopped completely, no vibration or burning smell from the motor. The fault code is lit on the small display panel next to the main cabinet."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "fume_level_high",
+      "text": "Air quality monitor near the weld booth lit up red — the fume concentration detector above station 3 is in the danger zone. Several operators are coughing and one said visibility was noticeably reduced."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "fume_level_high",
+      "text": "Safety beacon above line 2 went red during the afternoon shift. The weld smoke detector is showing concentration above the limit even though the extractor is running. Area smells bad and a couple guys reached for their respirators."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "filter_replacement",
+      "text": "PM schedule shows the main filter on unit A is due for swap-out this week. Work order came through the system and the replacement cartridge is sitting on the shelf in the maintenance crib ready to go."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "filter_replacement",
+      "text": "Filter change day on the line 2 extractor. Old cartridge has been in service since the last quarterly PM — way past its hour rating. No alarm triggered, purely time-based replacement per the schedule."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "pre_filter_cleaning",
+      "text": "Weekly cleaning time on the bay 3 extractor — the intake mesh is visibly coated with grey dust and weld spatter debris. Just needs a rinse and blow-out, the screen itself is intact, no replacement needed."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "pre_filter_cleaning",
+      "text": "Maintenance card says the pre-filter screen on the south extractor is due for its Monday wash-out. It's gunky but still intact — nobody is swapping it out, just removing it for a cleaning."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "fan_belt_inspection",
+      "text": "Biweekly PM on the extractor fan today — just need to eyeball the drive belt and check the tension. No one is pulling it off or swapping it, just the scheduled look-over to make sure it's not cracking or loose."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "fan_belt_inspection",
+      "text": "Scheduled belt check on the unit near the press line. Belt looked fine two weeks ago. Just an inspection run — no swap planned unless something looks wrong when we open it up."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "fan_belt_replacement",
+      "text": "Fan on the line 3 extractor stopped dead mid-shift. Opened the housing and the belt is snapped clean in two. Unit is completely down with zero airflow — need a new belt right now."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "fan_belt_replacement",
+      "text": "Belt on the south extractor is cracked all the way through in one spot and barely hanging together. Had to swap it out before it let go completely and left us with no extraction during a weld run."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "extraction_arm_lubrication",
+      "text": "PM card says the arm joints on unit B are due for greasing this week. Arm moves fine, no stiffness at all — this is strictly the scheduled lube interval coming up per the maintenance sheet."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "extraction_arm_lubrication",
+      "text": "Lubrication schedule shows the pivot on the line 5 extractor arm hasn't been greased in 30 days. No issues or stiffness noted yet, but the due date is today per the printed PM sheet on the machine."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "airflow_calibration",
+      "text": "Quality audit flagged that the airflow meter on the main extractor hasn't been calibrated in over three months. Cert is expired — needs to be checked against the traceable reference before the next audit visit."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "airflow_calibration",
+      "text": "Cal sticker on the velocity sensor on the line 4 extractor expired last week. No alarm from the sensor itself, no drift noticed, just needs to be verified against the standard to keep the paperwork current."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "lockout_tagout_full",
+      "text": "Going inside the filter housing on the bay 1 extractor for a deep clean this morning. Before anyone reaches in there, we need the whole unit locked out and tagged — supervisor made it clear, no shortcuts on this one."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "lockout_tagout_full",
+      "text": "Maintenance crew is replacing the fan motor on the south unit today. Before they crack open anything on that machine, the lead called for a full energy isolation — locks and tags, not just a power-off."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "fume_spill_response",
+      "text": "Drip tray under the extractor at station 6 overflowed — black sludge all over the concrete floor around the collection bin. Obvious slip hazard, needs to be cleaned up right away before anyone walks through it."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "fume_spill_response",
+      "text": "Second shift found the condensate drain on the unit by the loading dock had plugged up and residue spilled out from underneath. Dark liquid spreading across a couple square feet of floor — sticky and smells bad."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "fire_estop",
+      "text": "Saw smoke pouring out from inside the fume unit housing on line 2 — not weld smoke from the workpiece, this was coming from inside the machine itself and smelled like burning plastic or insulation."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "fire_estop",
+      "text": "Small flame visible near the filter housing on the bay 4 extractor during second shift. Looks like collected weld sparks ignited the filter material inside. Didn't wait around — stopped everything and cleared the area."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "startup_procedure",
+      "text": "Start of day shift — need to get the extractors going before the welders start pulling arc. Going through the morning checklist on the main unit before anyone strikes a weld."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "startup_procedure",
+      "text": "First shift startup on a Monday after the weekend shutdown. Unit hasn't run since Friday afternoon — bringing it up through the full startup sequence before production starts."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of second shift — production is wrapped up and we need to power down the fume extraction units the right way before everyone heads out. Can't just kill the power on these."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "shutdown_procedure",
+      "text": "Last weld on line 3 finished at 11 PM. Time to ramp the extractor down for the night — step it down first, let it coast, then cut it off per the laminated card on the panel."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "daily_inspection",
+      "text": "Start of first shift walk-around — checking all the gauges and indicator lights on the south extractor before the line fires up. No issues were flagged overnight, just the routine morning look-over."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "daily_inspection",
+      "text": "Pre-shift inspection on the bay 3 extractor. No alarms, unit sat idle overnight. Doing the morning sensor sweep to confirm nothing drifted while it was sitting and that the arm is still moving freely."
+    }
+  ]
+}

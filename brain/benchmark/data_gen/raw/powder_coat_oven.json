@@ -1,0 +1,587 @@
+{
+  "family": "Powder Coat Cure Oven",
+  "sops": [
+    {
+      "ref": "zone_temp_low",
+      "title": "Cure Zone Temperature Below Setpoint",
+      "condition": "Zone temperature sensor reads more than 10°F below the cure setpoint for over 5 consecutive minutes with no sudden rate-of-change.",
+      "steps": [
+        "walk_to zone_temperature_controller_panel",
+        "read_sensor zone_1_temp_sensor and note degrees of deviation from setpoint",
+        "walk_to burner_control_cabinet",
+        "read_sensor gas_pressure_sensor to verify adequate fuel supply",
+        "press_button burner_boost_button to increase burner heat output",
+        "wait 120 seconds for temperature to recover",
+        "read_sensor zone_1_temp_sensor and notify shift_supervisor if reading remains below setpoint"
+      ],
+      "equipment": ["zone_1_temp_sensor", "gas_pressure_sensor", "burner_boost_button", "zone_temperature_controller_panel", "burner_control_cabinet"]
+    },
+    {
+      "ref": "zone_temp_collapse",
+      "title": "Sudden Cure Zone Temperature Collapse",
+      "condition": "Zone temperature sensor drops more than 50°F within a 2-minute window, indicating an abrupt burner failure rather than gradual drift.",
+      "steps": [
+        "walk_to burner_control_cabinet",
+        "read_sensor zone_1_temp_sensor to confirm rate-of-drop and rule out sensor glitch",
+        "press_button burner_estop_button to safely shut down the failed burner",
+        "notify maintenance_lead of burner failure and temperature reading",
+        "walk_to conveyor_control_panel",
+        "press_button conveyor_hold_button to halt product flow into the cold zone",
+        "read_sensor zone_1_temp_sensor after 30 seconds to confirm burner is fully off"
+      ],
+      "equipment": ["zone_1_temp_sensor", "burner_estop_button", "conveyor_hold_button", "burner_control_cabinet", "conveyor_control_panel"]
+    },
+    {
+      "ref": "zone_temp_high",
+      "title": "Cure Zone Temperature Above Maximum Ceiling",
+      "condition": "Zone temperature sensor reads above the absolute maximum cure ceiling of 400°F, risking coating over-cure and part damage.",
+      "steps": [
+        "walk_to zone_temperature_controller_panel",
+        "read_sensor zone_1_temp_sensor to confirm over-ceiling reading and record value",
+        "press_button burner_shutoff_button to cut heat immediately",
+        "wait 60 seconds for temperature to begin declining",
+        "read_sensor zone_1_temp_sensor to confirm downward trend",
+        "notify quality_inspector to place hold on all parts currently in-process",
+        "notify shift_supervisor with recorded temperature peak and timestamp"
+      ],
+      "equipment": ["zone_1_temp_sensor", "burner_shutoff_button", "zone_temperature_controller_panel"]
+    },
+    {
+      "ref": "burner_ignition_fail",
+      "title": "Burner Fails to Ignite on Startup",
+      "condition": "The burner ignition sequence completes but the flame sensor reports no flame established after two automatic attempts.",
+      "steps": [
+        "walk_to burner_control_cabinet",
+        "read_sensor flame_sensor to confirm absence of ignition signal",
+        "press_button burner_reset_button to clear the ignition lockout",
+        "wait 15 seconds for safety purge cycle to complete",
+        "press_button burner_ignite_button to initiate a fresh ignition sequence",
+        "read_sensor flame_sensor to verify flame is now established",
+        "notify maintenance_lead if flame_sensor still reads no-flame after retry"
+      ],
+      "equipment": ["flame_sensor", "burner_reset_button", "burner_ignite_button", "burner_control_cabinet"]
+    },
+    {
+      "ref": "conveyor_slow",
+      "title": "Conveyor Running Below Target Speed",
+      "condition": "Conveyor speed sensor reads more than 15% below the programmed cure-time setpoint speed for over 3 minutes while the belt is still moving.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor conveyor_speed_sensor to confirm below-setpoint reading and record value",
+        "press_button speed_increase_button to bump the conveyor drive frequency",
+        "wait 60 seconds for speed to stabilize",
+        "read_sensor conveyor_speed_sensor to verify speed has recovered",
+        "notify shift_supervisor if speed remains below setpoint after adjustment",
+        "notify maintenance_lead to inspect conveyor drive motor and gearbox"
+      ],
+      "equipment": ["conveyor_speed_sensor", "speed_increase_button", "conveyor_control_panel"]
+    },
+    {
+      "ref": "conveyor_stopped",
+      "title": "Conveyor Fully Stopped Mid-Run",
+      "condition": "Conveyor motion sensor reads zero speed while the drive is commanded to run, indicating a hard jam or drive fault with belt completely stationary.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor conveyor_motion_sensor to confirm complete stoppage",
+        "press_button conveyor_estop_button to cut power to the drive motor",
+        "notify maintenance_lead and shift_supervisor of full conveyor stoppage",
+        "walk_to conveyor_jam_inspection_point",
+        "read_sensor jam_sensor to identify obstruction location",
+        "notify line_lead that oven contents are at risk and conveyor is safe to inspect"
+      ],
+      "equipment": ["conveyor_motion_sensor", "conveyor_estop_button", "jam_sensor", "conveyor_control_panel", "conveyor_jam_inspection_point"]
+    },
+    {
+      "ref": "exhaust_pressure_low",
+      "title": "Exhaust Duct Pressure Below Warning Threshold",
+      "condition": "Exhaust duct static pressure reads below the minimum warning threshold, suggesting gradual fan degradation or filter loading, but not yet at alarm level.",
+      "steps": [
+        "walk_to exhaust_fan_control_panel",
+        "read_sensor exhaust_pressure_sensor to confirm below-warning reading and record value",
+        "read_sensor exhaust_filter_indicator to assess filter loading status",
+        "notify maintenance_lead with pressure reading and filter indicator status",
+        "press_button exhaust_fan_boost_button to attempt temporary pressure recovery",
+        "wait 90 seconds for system to respond",
+        "read_sensor exhaust_pressure_sensor to determine if pressure has recovered or continues declining"
+      ],
+      "equipment": ["exhaust_pressure_sensor", "exhaust_filter_indicator", "exhaust_fan_boost_button", "exhaust_fan_control_panel"]
+    },
+    {
+      "ref": "exhaust_pressure_high",
+      "title": "Exhaust Duct Pressure Above High-Pressure Alarm",
+      "condition": "Exhaust duct static pressure exceeds the high-pressure alarm setpoint, indicating downstream duct blockage or damper fault causing back-pressure.",
+      "steps": [
+        "walk_to exhaust_fan_control_panel",
+        "read_sensor exhaust_pressure_sensor to confirm high-pressure alarm reading",
+        "press_button exhaust_fan_shutoff_button to prevent motor overload from back-pressure",
+        "notify maintenance_lead and shift_supervisor of high exhaust pressure alarm",
+        "walk_to exhaust_duct_inspection_port",
+        "read_sensor exhaust_duct_sensor to identify blockage or damper fault location",
+        "notify line_lead to hold production until exhaust is restored"
+      ],
+      "equipment": ["exhaust_pressure_sensor", "exhaust_fan_shutoff_button", "exhaust_duct_sensor", "exhaust_fan_control_panel", "exhaust_duct_inspection_port"]
+    },
+    {
+      "ref": "gas_leak_minor",
+      "title": "Minor Gas Leak or Odor Detected",
+      "condition": "Gas concentration sensor reads above background baseline but below the emergency alarm threshold (under 25% LEL), or an operator reports a faint gas odor.",
+      "steps": [
+        "walk_to gas_detection_panel",
+        "read_sensor gas_concentration_sensor to confirm above-baseline but sub-alarm reading",
+        "press_button ventilation_boost_button to increase area airflow and dilute concentration",
+        "notify maintenance_lead with exact sensor reading",
+        "walk_to gas_supply_manifold",
+        "read_sensor gas_pressure_sensor to check for pressure drop suggesting an active leak",
+        "notify shift_supervisor and await maintenance inspection before resuming production"
+      ],
+      "equipment": ["gas_concentration_sensor", "ventilation_boost_button", "gas_pressure_sensor", "gas_detection_panel", "gas_supply_manifold"]
+    },
+    {
+      "ref": "gas_leak_major",
+      "title": "Major Gas Leak Emergency Alarm",
+      "condition": "Gas concentration sensor triggers the high-level emergency alarm at or above 25% LEL, indicating a large and immediately dangerous gas release.",
+      "steps": [
+        "walk_to main_gas_shutoff_location",
+        "press_button gas_emergency_shutoff_button to cut all gas supply to the oven row",
+        "walk_to main_electrical_panel",
+        "press_button main_estop_button to eliminate all ignition sources",
+        "notify safety_officer and shift_supervisor of high-LEL gas alarm immediately",
+        "notify evacuation_coordinator to begin immediate area evacuation",
+        "wait at_safe_assembly_point for emergency response team arrival"
+      ],
+      "equipment": ["gas_emergency_shutoff_button", "main_estop_button", "gas_concentration_sensor", "main_gas_shutoff_location", "main_electrical_panel"]
+    },
+    {
+      "ref": "filter_change",
+      "title": "Exhaust Filter Media Replacement",
+      "condition": "Exhaust filter differential pressure sensor reaches the established replacement threshold or the scheduled PM interval has been reached.",
+      "steps": [
+        "walk_to exhaust_filter_housing",
+        "read_sensor filter_dp_sensor to confirm differential pressure at or above replacement threshold",
+        "pick used_filter_media from filter_housing",
+        "place used_filter_media in waste_container",
+        "pick new_filter_media from parts_shelf",
+        "place new_filter_media into filter_housing",
+        "read_sensor filter_dp_sensor to confirm restored normal differential pressure"
+      ],
+      "equipment": ["filter_dp_sensor", "used_filter_media", "new_filter_media", "waste_container", "parts_shelf", "exhaust_filter_housing"]
+    },
+    {
+      "ref": "conveyor_belt_inspect",
+      "title": "Conveyor Belt Inspection and Tension Check",
+      "condition": "Scheduled weekly inspection interval has been reached or a belt-tracking alarm has been triggered indicating lateral drift.",
+      "steps": [
+        "walk_to conveyor_tail_section",
+        "read_sensor belt_tension_sensor to record current tension value",
+        "read_sensor belt_tracking_sensor to check for lateral drift off-center",
+        "walk_to conveyor_drive_section",
+        "read_sensor conveyor_speed_sensor to verify drive sprocket engagement and condition",
+        "notify maintenance_lead with tension and tracking readings for evaluation",
+        "notify shift_supervisor if any reading is outside the established specification range"
+      ],
+      "equipment": ["belt_tension_sensor", "belt_tracking_sensor", "conveyor_speed_sensor", "conveyor_tail_section", "conveyor_drive_section"]
+    },
+    {
+      "ref": "burner_nozzle_clean",
+      "title": "Burner Nozzle Cleaning",
+      "condition": "Monthly PM schedule interval has been reached or burner combustion efficiency sensor shows degraded flame quality below target.",
+      "steps": [
+        "walk_to burner_control_cabinet",
+        "press_button burner_shutoff_button to extinguish flame and verify via flame_sensor",
+        "wait 300 seconds for burner assembly to cool to safe handling temperature",
+        "pick nozzle_cleaning_tool from tool_cart",
+        "walk_to burner_nozzle_access_panel",
+        "place nozzle_cleaning_tool at burner_nozzle_location to clean carbon and scale deposits",
+        "notify maintenance_lead that nozzle cleaning is complete and ready for restart"
+      ],
+      "equipment": ["burner_shutoff_button", "flame_sensor", "nozzle_cleaning_tool", "tool_cart", "burner_nozzle_access_panel", "burner_nozzle_location", "burner_control_cabinet"]
+    },
+    {
+      "ref": "thermocouple_calibration",
+      "title": "Zone Thermocouple Calibration Check",
+      "condition": "Quarterly calibration schedule is due or a temperature deviation flag has been raised during a quality audit.",
+      "steps": [
+        "walk_to zone_temperature_controller_panel",
+        "pick calibration_reference_probe from calibration_kit",
+        "place calibration_reference_probe at zone_1_thermocouple_port",
+        "wait 120 seconds for thermal equilibration between probe and environment",
+        "read_sensor zone_1_temp_sensor and compare displayed value to calibration_reference_display",
+        "notify quality_inspector with the measured deviation in degrees",
+        "notify maintenance_lead if deviation exceeds the allowed tolerance of ±2°F"
+      ],
+      "equipment": ["calibration_reference_probe", "calibration_kit", "zone_1_thermocouple_port", "zone_1_temp_sensor", "calibration_reference_display", "zone_temperature_controller_panel"]
+    },
+    {
+      "ref": "conveyor_lube",
+      "title": "Conveyor Chain Lubrication",
+      "condition": "Scheduled weekly lubrication interval has been reached or operator reports chain squealing or dry-running noise from the conveyor.",
+      "steps": [
+        "walk_to conveyor_lube_station",
+        "pick lube_applicator from lube_cart",
+        "walk_to conveyor_chain_access_point",
+        "place lube_applicator at conveyor_chain to apply lubricant along full accessible length",
+        "wait 30 seconds for lubricant to distribute into chain links",
+        "read_sensor conveyor_speed_sensor to confirm smooth chain engagement",
+        "notify maintenance_lead with lubrication service completion record"
+      ],
+      "equipment": ["lube_applicator", "lube_cart", "conveyor_chain", "conveyor_speed_sensor", "conveyor_lube_station", "conveyor_chain_access_point"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Full Oven Lockout Tagout Procedure",
+      "condition": "Maintenance or repair work requiring physical access to energized oven components necessitates complete de-energization of all oven energy sources.",
+      "steps": [
+        "notify shift_supervisor to obtain authorization before beginning LOTO",
+        "walk_to main_electrical_disconnect",
+        "press_button main_power_shutoff_button to de-energize all oven electrical systems",
+        "pick loto_lock from loto_station",
+        "place loto_lock on main_electrical_disconnect_hasp to secure against re-energization",
+        "walk_to gas_supply_shutoff_valve",
+        "place loto_tag on gas_shutoff_valve to identify and block gas energy source"
+      ],
+      "equipment": ["main_power_shutoff_button", "loto_lock", "loto_tag", "main_electrical_disconnect", "main_electrical_disconnect_hasp", "gas_shutoff_valve", "loto_station"]
+    },
+    {
+      "ref": "fire_estop",
+      "title": "Fire or Flame-Outside-Combustion-Zone Emergency Stop",
+      "condition": "A fire alarm activates in the oven area or an operator observes visible flames outside the designated combustion chamber.",
+      "steps": [
+        "walk_to nearest_fire_estop_station",
+        "press_button red_fire_estop_button to simultaneously cut all electrical power and gas supply",
+        "notify safety_officer and shift_supervisor of fire event and location",
+        "walk_to fire_extinguisher_station",
+        "pick fire_extinguisher from mounting_bracket",
+        "notify evacuation_coordinator to initiate immediate area evacuation",
+        "wait at safe_assembly_point for emergency response team arrival"
+      ],
+      "equipment": ["red_fire_estop_button", "fire_extinguisher", "nearest_fire_estop_station", "fire_extinguisher_station", "mounting_bracket"]
+    },
+    {
+      "ref": "spill_response",
+      "title": "Chemical or Oil Spill Near Oven",
+      "condition": "An oil, solvent, or chemical spill is detected on the floor in the oven area, creating a slip and fire hazard near an ignition source.",
+      "steps": [
+        "notify shift_supervisor of spill location and estimated size",
+        "walk_to spill_kit_station",
+        "pick spill_absorbent from spill_kit_cabinet",
+        "place spill_absorbent over spill_area to contain and absorb the liquid",
+        "pick used_absorbent from floor after absorption is complete",
+        "place used_absorbent in hazmat_waste_bin",
+        "notify safety_officer with spill type estimate, quantity, and cleanup status"
+      ],
+      "equipment": ["spill_absorbent", "spill_kit_cabinet", "hazmat_waste_bin", "spill_kit_station", "spill_area"]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Normal Oven Startup from Cold Idle",
+      "condition": "Oven is in cold idle state and production schedule requires bringing the cure oven to full operating temperature for the shift.",
+      "steps": [
+        "walk_to main_electrical_panel",
+        "press_button main_power_on_button to energize all oven systems and controls",
+        "walk_to burner_control_cabinet",
+        "press_button burner_ignite_button to begin the automated ignition sequence",
+        "wait 300 seconds for oven to reach operating temperature",
+        "read_sensor zone_1_temp_sensor to confirm setpoint temperature has been achieved",
+        "notify shift_supervisor that oven is at setpoint and ready for production loading"
+      ],
+      "equipment": ["main_power_on_button", "burner_ignite_button", "zone_1_temp_sensor", "main_electrical_panel", "burner_control_cabinet"]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "Normal Oven Shutdown to Safe Idle",
+      "condition": "Production run is complete and the oven must be taken to a safe cooled-idle or end-of-shift state.",
+      "steps": [
+        "walk_to burner_control_cabinet",
+        "press_button burner_shutoff_button to extinguish all burners",
+        "wait 600 seconds for oven interior to cool below safe access threshold",
+        "read_sensor zone_1_temp_sensor to confirm temperature is below 150°F",
+        "walk_to conveyor_control_panel",
+        "press_button conveyor_off_button to stop conveyor drive",
+        "notify shift_supervisor that oven shutdown is complete and confirmed safe"
+      ],
+      "equipment": ["burner_shutoff_button", "zone_1_temp_sensor", "conveyor_off_button", "burner_control_cabinet", "conveyor_control_panel"]
+    },
+    {
+      "ref": "cure_quality_inspect",
+      "title": "Post-Cure Coating Quality Inspection",
+      "condition": "Parts have exited the cure oven and require quality verification of coating adhesion and uniformity before release to assembly.",
+      "steps": [
+        "walk_to oven_exit_conveyor",
+        "pick inspection_sample from exit_conveyor",
+        "walk_to quality_inspection_station",
+        "place inspection_sample on inspection_table",
+        "read_sensor cure_uniformity_sensor to evaluate coating adhesion and color consistency",
+        "notify quality_inspector with sensor reading and visual observations",
+        "place inspection_sample in approved_parts_bin or reject_parts_bin based on quality_inspector disposition"
+      ],
+      "equipment": ["inspection_sample", "exit_conveyor", "inspection_table", "cure_uniformity_sensor", "approved_parts_bin", "reject_parts_bin", "quality_inspection_station", "oven_exit_conveyor"]
+    },
+    {
+      "ref": "conveyor_speed_calibration",
+      "title": "Conveyor Speed Calibration Verification",
+      "condition": "Monthly calibration interval is due or a quality audit has noted cure time deviations suggesting the speed display does not match actual belt speed.",
+      "steps": [
+        "walk_to conveyor_control_panel",
+        "read_sensor conveyor_speed_sensor to record the currently displayed belt speed",
+        "pick tachometer from calibration_cart",
+        "place tachometer at conveyor_drive_shaft to independently measure actual shaft speed",
+        "wait 30 seconds for tachometer reading to stabilize",
+        "read_sensor tachometer_display and compare measured value to conveyor_speed_sensor displayed value",
+        "notify maintenance_lead with calibration deviation result for correction or logging"
+      ],
+      "equipment": ["conveyor_speed_sensor", "tachometer", "calibration_cart", "conveyor_drive_shaft", "tachometer_display", "conveyor_control_panel"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "zone_temp_low",
+      "text": "Line 2, second shift. The cure zone on the big oven has been running about 15 degrees cold for the past ten minutes or so. Parts coming out look okay so far but I'm not comfortable with that gap sitting there. No alarms tripped, just a steady creep down from where we normally sit all shift."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "zone_temp_low",
+      "text": "Noticed the temp gauge on Zone 1 has been lagging the recipe for a good while now — sitting maybe 18 degrees short of where it needs to be. No bangs, no alarms, no sudden anything, just quietly drifted down from the start of the shift. Checked it twice, same reading both times."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "zone_temp_collapse",
+      "text": "Zone 1 just cratered. Went from 385 down to under 310 in less than two minutes. Nothing gradual about it — whole zone went cold fast. You could watch the number just fall. Burner must have gone out on us."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "zone_temp_collapse",
+      "text": "Was watching the HMI on line 3 and the temperature just fell off a cliff. It was fine one minute and then boom, dropped 65 degrees in less than two minutes flat. Not a slow creep at all — straight down. Nothing was wrong before it happened."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "zone_temp_collapse",
+      "text": "The oven temp on the cure zone took a nosedive right around the 10am break. Product was still in there, too. Went from normal operating range way below setpoint so fast I honestly thought the display was busted at first, but it's real — you can feel the heat difference at the exit."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "zone_temp_high",
+      "text": "Zone 1 went past 410 degrees. We're supposed to be capped at 400. Display read 414 for a couple of minutes before I caught it. Parts were running through there — they might be cooked. Need to flag that batch."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "zone_temp_high",
+      "text": "Oven ran hot this morning on line 4 — Zone 1 hit 408 degrees, which is over our max. Product was in-process when it happened. I pulled what I could off the exit end when I saw the gauge reading but those parts that went through at peak need to be put on hold."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "zone_temp_high",
+      "text": "Saw Zone 1 display showing 406 and still climbing before anyone acted. Ceiling's 400. Parts were in the oven the whole time. Temp kept going up for a bit before it leveled. Could be overcured parts in that run."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "burner_ignition_fail",
+      "text": "Tried to bring the west oven up at the start of first shift this morning and the burner just won't catch. It goes through the whole ignite sequence, you hear the click, and then nothing happens. Tried it twice manually. No flame."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "burner_ignition_fail",
+      "text": "Morning startup on line 3 oven, burner just won't light. Sequence runs like normal, you hear the clicking, but the flame detector is showing nothing. Second attempt same result. Oven is sitting cold and we've got product waiting."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "conveyor_slow",
+      "text": "The conveyor on the powder coat oven seems sluggish today — not stopped, still moving, but parts are taking noticeably longer to come out the other end. Speed looks maybe 20% under where it needs to be when I timed a part through. No alarm, no fault, just dragging."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "conveyor_slow",
+      "text": "Line 4 conveyor belt running noticeably slow — you can stand there and watch it and tell it's not at production pace. No alarm has tripped, no full stop, but it's definitely not running right. Been like this maybe 15-20 minutes since we loaded up the first rack."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "conveyor_slow",
+      "text": "Second shift, line 3. Belt's technically moving so no fault light came on, but it's clearly not keeping up with pace. Parts are dwelling longer in the hot zone than they should. Been going slow for about 20 minutes by my count."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "conveyor_stopped",
+      "text": "Conveyor on the cure oven completely locked up on us. Drive motor is running — you can hear it humming — but the belt isn't moving at all. Got product sitting in the oven right now while this thing is stuck."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "conveyor_stopped",
+      "text": "Belt stopped dead in the middle of a production run. Motor sounds like it's still trying to turn it. Something's jammed it hard because the belt isn't going anywhere. Parts are sitting in the hot zone. Full stop — not slow, just zero movement."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "conveyor_stopped",
+      "text": "Line 2 oven conveyor quit moving entirely during third shift. The control panel shows it's commanded to run, drive says it's on, but nothing is happening. Completely still. Not a slow-down situation — this thing is stopped cold."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "exhaust_pressure_low",
+      "text": "The exhaust system on the cure oven seems weak this week. The pressure gauge is sitting in the yellow band — not red, not alarming — but it's been slowly trending down since yesterday's shift. Fumes are smelling a little stronger in the area around the oven entry."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "exhaust_pressure_low",
+      "text": "Noticed the exhaust pressure reading below the green zone on the panel by the west oven. Fan's still running fine, no fault code, no alarm, just sitting in the caution range. Been there since start of shift as far as I can tell."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "exhaust_pressure_high",
+      "text": "Exhaust pressure alarm went off on the panel by the loading dock oven. Reading is way above normal — not low, way too high. The fan motor sounds like it's straining. Something must be blocking the duct downstream."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "exhaust_pressure_high",
+      "text": "Red alarm came on at the exhaust control panel on the east oven row. Pressure spiked upward — it's reading high, not dropped. Fan motor housing feels hot. Must be a blocked damper or a duct clog somewhere between the oven and the roof stack."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "gas_leak_minor",
+      "text": "Faint smell of gas over by the cure oven on the east side of the plant — not strong, but it's definitely there if you walk close to the burner cabinet. The gas detector panel isn't alarming but it's reading a little above zero. Been like this for about ten minutes now."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "gas_leak_minor",
+      "text": "Just a whiff of gas smell near the burner cabinet on line 1. Nothing that makes you want to run — no alarm, sensor's showing a slight uptick but not in the danger zone. Probably a small one but it's been hanging around long enough that it's worth getting maintenance over here."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "gas_leak_major",
+      "text": "GAS ALARM going off on the cure oven row — high-level alarm, not a caution. Strong smell in the area, detector is in the red zone. This is not a trace whiff, this is the big one. People are already clearing out of the bay."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "gas_leak_major",
+      "text": "The gas concentration alarm is screaming on line 2. Detector reading over the emergency threshold — you can really smell it strong now. We need to get everyone out and shut it all down. This is not a minor thing."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "gas_leak_major",
+      "text": "Emergency gas alarm activated in the cure oven bay on the north side. Detector is pegged at high, full alarm condition flashing. Could smell it before the alarm even went off. Evacuating the floor now — this is serious, way more than just a trace reading."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "filter_change",
+      "text": "The DP gauge on the exhaust filter housing by the east oven has been in the red zone for two days now. Put a work order in but nobody's come to swap it yet. That filter is well past the swap-out mark and the exhaust is starting to run sluggish."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "filter_change",
+      "text": "Exhaust filter on line 3 oven is loaded up — differential pressure indicator is right at the replace-now mark and it's been sitting there since yesterday. Getting close to a week overdue on PM for this one. Need new media in there."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "conveyor_belt_inspect",
+      "text": "Belt on the cure oven conveyor has been drifting to one side — you can clearly see it running off-center when you watch it from the tail end. Weekly inspection is overdue too. Might just be a tension or alignment issue but it needs a look."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "conveyor_belt_inspect",
+      "text": "Conveyor belt on the east oven is wandering to the right side of the track. Not jammed, belt's still moving, just not tracking straight. Can hear it rubbing a little on the frame guide on the right side when it comes around the tail pulley."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "burner_nozzle_clean",
+      "text": "Combustion on the line 1 oven burner is looking off — flame is yellowish and kind of lazy instead of the clean blue we normally see. We're already on the monthly PM schedule for the nozzle this week anyway. Probably fouled up with carbon."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "burner_nozzle_clean",
+      "text": "Burner efficiency has been dropping on the north oven this week. Flame color is not the usual tight blue pattern — it's irregular and dirty-looking. Overdue on the monthly nozzle cleaning too. Running past the PM date on that one."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "thermocouple_calibration",
+      "text": "Quality flagged a batch from Zone 1 on line 2 — parts came out looking under-cured but the controller was showing us right at setpoint the whole run. Makes me think the thermocouple is reading hot and we were actually running cold. Calibration is due this quarter anyway."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "thermocouple_calibration",
+      "text": "Zone 1 temp display keeps telling us we're at setpoint but the parts aren't coming out right — tape test is marginal. Last calibration was over four months ago. I think the thermocouple is drifting and showing us a number that isn't real."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "conveyor_lube",
+      "text": "Chain on the powder coat oven conveyor is making a squealing sound, especially on cold startups in the morning. Been at least a week since anyone put oil on it. It's running dry and you can really hear it on the first run of the day."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "conveyor_lube",
+      "text": "Grinding noise coming from the conveyor chain by the oven entry on line 4. Chain hasn't been oiled in a while — you can hear a squeak every revolution when it goes around the idler sprocket. Definitely dry."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance crew needs to get inside the burner housing on the line 2 oven to swap out the igniter assembly. They can't go in there until the whole oven is taken down and properly locked out. Need to coordinate the outage with the line."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "lockout_tagout",
+      "text": "Scheduled repair coming up on the conveyor drive in the east cure oven — electricians need to replace a coupling on the motor. They're asking for the full energy isolation on the oven before they start. Need to get the oven locked out so they can work safely."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "fire_estop",
+      "text": "Saw actual flames coming from the top vent area on the cure oven — not from inside the combustion chamber where it's supposed to burn, but outside on the housing. Hit the estop and started moving people away from the oven. This is a real fire, not a sensor."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "fire_estop",
+      "text": "Fire alarm went off in the oven bay on line 3. Could see actual flames on the outside of the exhaust duct — not inside the oven, on the exterior of the duct. This is not a false alarm, there's visible fire on the equipment."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "fire_estop",
+      "text": "Visible fire on the outside of the oven housing near the burner area — not inside the cure chamber but on the outer shell. Pulled the estop station right by the oven immediately. Crew is stepping back."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "spill_response",
+      "text": "Oil puddle on the floor right next to the cure oven on line 2 — maybe a two-foot spread. Looks like it dripped from the conveyor drive gearbox up above. It's sitting right near the oven housing which is a fire hazard. Needs cleanup now."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "spill_response",
+      "text": "Chain lube dripped and pooled on the floor right under the oven entry conveyor. Slippery spot and it's sitting near a heat source. Not huge but enough to be a slip risk and a fire risk given how close it is to the oven. Need to get it cleaned up."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "startup_procedure",
+      "text": "First shift coming in this morning to start up the big cure oven on line 1. Cold start from the weekend shutdown — oven has been completely off since Friday close. Need to bring the whole system online before we can run product."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "startup_procedure",
+      "text": "Monday morning and the oven's been off since Friday afternoon. Everything is cold and dark over there. Got parts waiting to go so we need to get the oven lit and up to temp before the crew is ready to load the first rack."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of second shift on line 3. Last part cleared the oven exit about 20 minutes ago and the line is done for the night. Need to put the oven to bed properly before the crew clocks out."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "shutdown_procedure",
+      "text": "Production is done for the day on the east oven. Last rack went through a half hour ago. Need to do the end-of-shift cool-down and get the oven secured before anyone leaves the building tonight."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "cure_quality_inspect",
+      "text": "Parts coming off the oven exit on line 1 look a little patchy — coating color is inconsistent on a couple of pieces in this last rack. Some spots look lighter than the rest. Need to pull a sample and get eyes on it before this batch goes to assembly."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "cure_quality_inspect",
+      "text": "Quality hold was requested on a batch from the cure oven on line 2 this afternoon. Visual check at the exit conveyor shows a few parts with what looks like adhesion issues — coating is lifting at the edge on some of them. Need to sample the batch before we release anything."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "conveyor_speed_calibration",
+      "text": "Parts from this oven are showing variable cure time data in the quality system — same oven, same program, but dwell time seems to vary run to run. I think the speed readout on the panel might not be matching what the belt is actually doing. Needs to be verified against something real."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "conveyor_speed_calibration",
+      "text": "Monthly PM review flagged that parts from the north cure oven are failing the cure tape test at a slightly higher rate than usual. Supervisor thinks the belt speed display might have drifted from actual. If the display says one speed but the belt is running faster, parts aren't getting full dwell time."
+    }
+  ]
+}

@@ -1,0 +1,1474 @@
+{
+  "incident_examples": [
+    {
+      "incident_id": "INC-00002",
+      "text": "Loading dock unit, end of first shift. Maintenance called me over because a yellow indicator had been sitting on the panel for a while \u2014 probably since mid-shift. Ran a quick gauge check and the delivery side was below where it needs to be, not crashed, just slowly sagging. Not an emergency, but definitely heading the wrong direction over time.",
+      "labels": {
+        "sop_id": "SOP-0001"
+      }
+    },
+    {
+      "incident_id": "INC-00011",
+      "text": "Maintenance call on the loading dock unit. The robot finished an entire dispense cycle with no material deposited on the part at all \u2014 arm moved through the whole path, pump was running, but the seam is completely dry. Back-pressure reading behind the tip was way high when I checked.",
+      "labels": {
+        "sop_id": "SOP-0005"
+      }
+    },
+    {
+      "incident_id": "INC-00045",
+      "text": "Night shift, chassis line. The operator smelled something burning and then spotted a small flame at the base of the dispenser cabinet. Looks like material near the heat jacket ignited. We cleared the area and someone hit the wall button \u2014 need safety personnel here right now.",
+      "labels": {
+        "sop_id": "SOP-0020"
+      }
+    },
+    {
+      "incident_id": "INC-00050",
+      "text": "Line 3, closing out second shift. Maintenance asked us to make sure we do a full purge cycle tonight because they're coming in early tomorrow to swap the nozzle tip and they need the line cleared and depressurized before they can start any work.",
+      "labels": {
+        "sop_id": "SOP-0022"
+      }
+    },
+    {
+      "incident_id": "INC-00092",
+      "text": "One of the dock power cables on line 2 looked like it was melting \u2014 the outer jacket was bubbling and giving off an acrid smell. The worker closest to it hit the estop before anyone even told him to. Right call. The whole dock needed to be killed and isolated immediately.",
+      "labels": {
+        "sop_id": "SOP-0040"
+      }
+    },
+    {
+      "incident_id": "INC-00100",
+      "text": "We have been keeping a close eye on dock 1 pads since the last set failed ahead of schedule. Tech went out and measured thickness today \u2014 they are worn but still within spec. Not time to change them yet, just monitoring. Supervisor wanted the measurement on record.",
+      "labels": {
+        "sop_id": "SOP-0044"
+      }
+    },
+    {
+      "incident_id": "INC-00103",
+      "text": "Line 5 assembly called us because their torque wrenches keep timing out early - not enough oomph. Came up to the compressor room and the panel shows 87 PSI. Nothing has faulted, she is loaded and running, just not keeping up. Has been walking down steadily for what looks like half a shift based on the trend screen.",
+      "labels": {
+        "sop_id": "SOP-0045"
+      }
+    },
+    {
+      "incident_id": "INC-00108",
+      "text": "Line 4 fitter called saying his impact guns are hitting too hard - blowing fasteners past spec. Went to check and the receiver gauge reads 130 PSI when it should top out at 125. Compressor is still running full bore. No trip, no fault, it is just building past where it should stop.",
+      "labels": {
+        "sop_id": "SOP-0047"
+      }
+    },
+    {
+      "incident_id": "INC-00118",
+      "text": "Noticed the compressor is running short cycles way more than normal - on and off every couple minutes. Walked around the receiver and felt a faint cold spot near one of the top ports. There is definitely air seeping out somewhere on the tank, slow enough that nothing alarmed but fast enough that the unit is working harder than it should.",
+      "labels": {
+        "sop_id": "SOP-0050"
+      }
+    },
+    {
+      "incident_id": "INC-00128",
+      "text": "500-hour service mark hit on the maintenance log this week. Pulled the intake housing open to take a look and the element is black with gunk - barely any airflow would get through that thing. Long past time to swap it.",
+      "labels": {
+        "sop_id": "SOP-0054"
+      }
+    },
+    {
+      "incident_id": "INC-00130",
+      "text": "Robotics station on line 4 is getting oil residue in the actuators - maintenance has been cleaning fittings all week. Went to the compressor room and the separator delta-P gauge is showing over 10. Element must be completely saturated.",
+      "labels": {
+        "sop_id": "SOP-0055"
+      }
+    },
+    {
+      "incident_id": "INC-00138",
+      "text": "Insurance inspector flagged during the plant audit last month that the safety pop-off valve on the air receiver has gone over 12 months without a verification test. Need to get that done and documented before the follow-up visit.",
+      "labels": {
+        "sop_id": "SOP-0059"
+      }
+    },
+    {
+      "incident_id": "INC-00150",
+      "text": "Line changeover finished and the plant is going to energy-saving mode between shifts. Need to shut the compressor down in a controlled way - no work being done on it, just an operational close-out before the next crew comes in.",
+      "labels": {
+        "sop_id": "SOP-0065"
+      }
+    },
+    {
+      "incident_id": "INC-00155",
+      "text": "Plant engineer flagged it during rounds \u2014 the boiler near the loading dock was sitting 12 PSI below where it should be. No alarms went off because the drop was so gradual, but the steam traps on line 3 were all waterlogged and that was the first symptom we noticed.",
+      "labels": {
+        "sop_id": "SOP-0067"
+      }
+    },
+    {
+      "incident_id": "INC-00163",
+      "text": "Around 7:30 AM we got a call from outside \u2014 a maintenance guy said the safety valve on the main boiler was wide open and screaming. Relief had definitely popped. Came downstairs, panel was pegged past 150. Took emergency steps and held everyone back until pressure dropped to safe range.",
+      "labels": {
+        "sop_id": "SOP-0070"
+      }
+    },
+    {
+      "incident_id": "INC-00182",
+      "text": "Third shift \u2014 loud bang then continuous hissing you could hear from the assembly floor. Operator ran in and saw a section of the condensate return had blown open completely. Water was pooling on the floor fast. Killed power to the burner at the panel, shut both main valves, and pulled the evacuation alarm.",
+      "labels": {
+        "sop_id": "SOP-0078"
+      }
+    },
+    {
+      "incident_id": "INC-00198",
+      "text": "Second shift, one of the techs started feeling a headache near boiler 1 and noticed the wall detector was flashing yellow. Checked the readout and it was at 40 ppm. We didn't wait around \u2014 hit the burner off, turned on the big forced-air fans from the ventilation panel, sounded the room alarm, and got everybody out fast.",
+      "labels": {
+        "sop_id": "SOP-0086"
+      }
+    },
+    {
+      "incident_id": "INC-00212",
+      "text": "Something was way too tight on line 4 this afternoon \u2014 the digital readout flashed over-range after each cap was set. Not just once, it kept happening back to back every cycle. Stopped it, pulled the fault reset button, and got maintenance in to diagnose.",
+      "labels": {
+        "sop_id": "SOP-0092"
+      }
+    },
+    {
+      "incident_id": "INC-00247",
+      "text": "The inverter on the capper near dock 2 threw a code in the middle of a run and the whole unit shut itself off. I saw the red fault indicator inside the electrical cabinet when I walked past. Did not touch anything \u2014 called maintenance over first and then notified the supervisor.",
+      "labels": {
+        "sop_id": "SOP-0107"
+      }
+    },
+    {
+      "incident_id": "INC-00260",
+      "text": "The packer near the press room just died on us during the afternoon run - glue side tanked fast. Maintenance came out and said the heater element had actually failed, which is why it went from fine to completely cold almost instantly. Nothing like the usual slow drift we see when the setpoint is off.",
+      "labels": {
+        "sop_id": "SOP-0113"
+      }
+    },
+    {
+      "incident_id": "INC-00267",
+      "text": "Line 1 packer wouldn't take the next blank in the stack - it went in sideways and clogged the entry chute to the erector. Machine stopped itself. Took a couple minutes to fish the crumpled blank out before the feed would restart.",
+      "labels": {
+        "sop_id": "SOP-0116"
+      }
+    },
+    {
+      "incident_id": "INC-00269",
+      "text": "Second shift found a blockage right past the glue station on the exit belt of the line 2 unit. A sealed case had canted sideways - the glue must have grabbed wrong and torqued it - and stopped everything behind it cold.",
+      "labels": {
+        "sop_id": "SOP-0117"
+      }
+    },
+    {
+      "incident_id": "INC-00270",
+      "text": "The run chute on line 6 was backed up solid at end of shift. A mostly-sealed carton had tipped over on the discharge conveyor and wedged itself diagonally. Nothing to do with the infeed - all the jam was on the output side after the sealing station.",
+      "labels": {
+        "sop_id": "SOP-0117"
+      }
+    },
+    {
+      "incident_id": "INC-00272",
+      "text": "Pusher on the unit at station 7 locked hard during the morning run. Heard a loud clunk and then the machine cut itself out. Drive panel was showing a fault. Maintenance said it was an overcurrent trip, probably from a product piece getting wedged in the pusher path.",
+      "labels": {
+        "sop_id": "SOP-0118"
+      }
+    },
+    {
+      "incident_id": "INC-00274",
+      "text": "Noticed cases erecting crooked during my QC walk on line 2. The former belt was wandering off its guide but hadn't stopped - it was still turning, just not tracking right. Had an occasional skip every 8-10 cycles.",
+      "labels": {
+        "sop_id": "SOP-0119"
+      }
+    },
+    {
+      "incident_id": "INC-00282",
+      "text": "Glue system on line 3 had a catastrophic fitting failure during startup warmup. Half the tank pressure released through a split hose joint. Floor was covered in hot adhesive within seconds - completely different scale from the little drip we had last week.",
+      "labels": {
+        "sop_id": "SOP-0123"
+      }
+    },
+    {
+      "incident_id": "INC-00298",
+      "text": "Line 4 packer had a complaint flag from the warehouse - cases were coming apart in transit. Pulled samples from the discharge and found the glue bead was landing off-center on the seal joint, probably not enough contact area to hold under stack weight.",
+      "labels": {
+        "sop_id": "SOP-0130"
+      }
+    },
+    {
+      "incident_id": "INC-00302",
+      "text": "Line 2 packer had a near-miss - a worker's glove got pulled toward the pusher arm entry zone during a manual clear attempt. Hit the nearest e-stop immediately, everything on the machine stopped within a second. Incident report filed.",
+      "labels": {
+        "sop_id": "SOP-0132"
+      }
+    },
+    {
+      "incident_id": "INC-00303",
+      "text": "A small grease fire started on the floor near the base of the line 3 case packer during second shift - somebody had over-lubed the chain and excess dripped onto the motor housing. E-stop was pulled as a precaution while the fire extinguisher was used.",
+      "labels": {
+        "sop_id": "SOP-0132"
+      }
+    },
+    {
+      "incident_id": "INC-00310",
+      "text": "Chiller panel by dock door 2 is lit red. Went over and looked at the high side gauge and it's pegged up in territory I've never seen it in before. Thing shut off on its own shortly after. We've got a big delivery in today so that whole area has been warm with the doors open \u2014 not sure if that caused it or made it worse.",
+      "labels": {
+        "sop_id": "SOP-0135"
+      }
+    },
+    {
+      "incident_id": "INC-00312",
+      "text": "First shift noticed the coolant headers going to the machine tools on line 2 felt noticeably warmer than usual compared to a typical morning start. Pulled up the HMI and there's a yellow indicator up on the temp display. Chiller is still running fine, no hard stops, but it's been sitting warm for a while and nobody wants to ignore it.",
+      "labels": {
+        "sop_id": "SOP-0136"
+      }
+    },
+    {
+      "incident_id": "INC-00317",
+      "text": "Process temp on the line 3 chiller is sitting well below where we normally run. Thing usually sits around 10 degrees and today it's reading sub-6. Parts aren't getting damaged yet but the mold surfaces are sweating condensation pretty heavily and that's going to cause surface finish issues if we don't sort it out.",
+      "labels": {
+        "sop_id": "SOP-0138"
+      }
+    },
+    {
+      "incident_id": "INC-00338",
+      "text": "Quarterly calibration check is due on all the chiller temperature sensors. Last cycle one of them was reading high by about 1.5 degrees and had to be adjusted. Going through all of them during the weekend window so we have clean baselines for the next quarter.",
+      "labels": {
+        "sop_id": "SOP-0147"
+      }
+    },
+    {
+      "incident_id": "INC-00351",
+      "text": "Weekend shutdown is over and the chiller feeding the grinding cell needs to come back up before the first shift Monday at 6 AM. It's been fully de-energized since Friday evening. Maintenance gave us the green light to restart. Going through the correct sequence so we don't run the compressor dry.",
+      "labels": {
+        "sop_id": "SOP-0153"
+      }
+    },
+    {
+      "incident_id": "INC-00353",
+      "text": "Planned maintenance window starts at midnight and the facility HVAC crew needs all chillers on the south side off before they begin their work. Going to walk through the shutdown sequence on each unit to make sure everything is taken down in the right order and nothing gets left in a bad state overnight.",
+      "labels": {
+        "sop_id": "SOP-0154"
+      }
+    },
+    {
+      "incident_id": "INC-00362",
+      "text": "Third shift called it in \u2014 the pressure has been drifting all night, now at 4.8 bar with the warning indicator on. No events, no bangs, just a slow bleed-off over about four hours.",
+      "labels": {
+        "sop_id": "SOP-0158"
+      }
+    },
+    {
+      "incident_id": "INC-00376",
+      "text": "Someone opened the bay door right next to the measurement room and welding heat flooded in. Temp sensor jumped four degrees in a few minutes and tripped the system. Everything shut down.",
+      "labels": {
+        "sop_id": "SOP-0164"
+      }
+    },
+    {
+      "incident_id": "INC-00407",
+      "text": "Second shift here - the lathe next to the loading dock has been throwing a yellow light on and off for about half an hour. Coolant is still spraying fine but the gauge is drifting low. Machine never faulted, just kept running. Wasn't sure if I should call someone or wait.",
+      "labels": {
+        "sop_id": "SOP-0177"
+      }
+    },
+    {
+      "incident_id": "INC-00410",
+      "text": "Lathe on bay 4 stopped dead in the middle of a roughing pass. Heard what sounded like a pop then coolant at the nozzle just stopped and the whole machine halted. Part is still in the chuck. Coolant gauge reads zero.",
+      "labels": {
+        "sop_id": "SOP-0178"
+      }
+    },
+    {
+      "incident_id": "INC-00417",
+      "text": "New part program has us taking deeper cuts and the lathe is showing a continuous load warning. Spindle is not slowing down, the cycle is completing, but the warning light is on every pass. Asked the lead about it and he said to keep an eye on it.",
+      "labels": {
+        "sop_id": "SOP-0180"
+      }
+    },
+    {
+      "incident_id": "INC-00420",
+      "text": "Line 2 lathe tripped off during a roughing op on the large bearing housings. Load gauge was climbing then boom - everything stopped. Red fault indicator on the operator panel, spindle won't turn at all. Second time this week.",
+      "labels": {
+        "sop_id": "SOP-0181"
+      }
+    },
+    {
+      "incident_id": "INC-00425",
+      "text": "Tool carousel on the lathe in cell 3 tried to swing to the next station during a tool change and made a grinding sound then quit. Alarm came up immediately. Everything else stopped too.",
+      "labels": {
+        "sop_id": "SOP-0183"
+      }
+    },
+    {
+      "incident_id": "INC-00448",
+      "text": "Conveyor on the lathe near the main aisle is struggling - chips are stacking up at the discharge and the belt is slowing down noticeably. Sounds like it's working harder than it should.",
+      "labels": {
+        "sop_id": "SOP-0191"
+      }
+    },
+    {
+      "incident_id": "INC-00451",
+      "text": "Swapped the OD turning toolholder in station 2 - the old one had a cracked shank. New holder is in but offsets are going to be off until we measure it in. Can't run production until that's done.",
+      "labels": {
+        "sop_id": "SOP-0192"
+      }
+    },
+    {
+      "incident_id": "INC-00464",
+      "text": "Parts started drifting on the turned length - third piece in the batch was flagged by the gauge as too long. Need to check it at the bench and dial in the offset before we scrap any more.",
+      "labels": {
+        "sop_id": "SOP-0198"
+      }
+    },
+    {
+      "incident_id": "INC-00489",
+      "text": "Line 2, running cast iron all afternoon. The chip removal belt seized up on us. When I got over there and opened the access panel, there was a huge ball of stringy steel chips wrapped around the take-up end.",
+      "labels": {
+        "sop_id": "SOP-0208"
+      }
+    },
+    {
+      "incident_id": "INC-00494",
+      "text": "X-axis on the machine near dock 2 felt a bit notchy during the first setup of the week. Checked the lube unit and it was well below the min mark. Level indicator had been ignored for a while based on the dust on it.",
+      "labels": {
+        "sop_id": "SOP-0210"
+      }
+    },
+    {
+      "incident_id": "INC-00506",
+      "text": "The material cart bumped into the red button on line 2 on its way past. Program was live and part was mid-cut. Everything just stopped with no warning. Had to figure out what happened before anyone touched anything.",
+      "labels": {
+        "sop_id": "SOP-0216"
+      }
+    },
+    {
+      "incident_id": "INC-00509",
+      "text": "After the noon changeover on line 1, found a small puddle of greenish fluid near the back of the enclosure. Maybe a cup, cup and a half of liquid. Looked like a fitting was just weeping slowly.",
+      "labels": {
+        "sop_id": "SOP-0217"
+      }
+    },
+    {
+      "incident_id": "INC-00511",
+      "text": "Tank seam on line 5 cracked at an old weld - coolant flooded the whole bay around that machine. Had to shut down two adjacent stations just to contain it. Way more than a bucket's worth.",
+      "labels": {
+        "sop_id": "SOP-0218"
+      }
+    },
+    {
+      "incident_id": "INC-00520",
+      "text": "During line startup this morning the belt just took off \u2014 way faster than normal, like the VFD lost its reference. Parts couldn't stay seated on the surface. The speed fault came on before anyone could react and hit a stop.",
+      "labels": {
+        "sop_id": "SOP-0222"
+      }
+    },
+    {
+      "incident_id": "INC-00523",
+      "text": "Came back from break and the loading dock belt was completely stalled. Motor was buzzing but shaft wasn't turning. Parts were jammed hard against the left sidewall under the midspan section.",
+      "labels": {
+        "sop_id": "SOP-0223"
+      }
+    },
+    {
+      "incident_id": "INC-00541",
+      "text": "Noticed slipping from the drive end \u2014 speed sensor was reading inconsistently, bouncing around. Pulled the guard off and the drive belt looked like it was on its last leg, fraying on one side.",
+      "labels": {
+        "sop_id": "SOP-0231"
+      }
+    },
+    {
+      "incident_id": "INC-00547",
+      "text": "PM schedule showed the motor vent filter on line 3 was overdue. Temperature was slowly trending up over recent shifts \u2014 no fault, but the direction was wrong. Classic restricted-airflow signature.",
+      "labels": {
+        "sop_id": "SOP-0234"
+      }
+    },
+    {
+      "incident_id": "INC-00549",
+      "text": "Top cover of the loading dock belt was showing fraying at both edges in two separate spots. Rubber was lifting but not torn through. Logged for a formal walk-down inspection during the next PM window.",
+      "labels": {
+        "sop_id": "SOP-0235"
+      }
+    },
+    {
+      "incident_id": "INC-00560",
+      "text": "Monday morning startup on the loading dock unit after the weekend \u2014 motor temps were still at ambient after sitting cold all weekend. Ran through the standard bring-up sequence to confirm everything was reading normal before we started running parts.",
+      "labels": {
+        "sop_id": "SOP-0240"
+      }
+    },
+    {
+      "incident_id": "INC-00564",
+      "text": "Found metal chips embedded in the belt surface on the assembly-side conveyor \u2014 the kind that could transfer right onto a finished housing bore. Quality walk triggered before the next batch of parts went down the line.",
+      "labels": {
+        "sop_id": "SOP-0242"
+      }
+    },
+    {
+      "incident_id": "INC-00572",
+      "text": "The gauge up at the central manifold is pegged at the high end, been sitting there since the line restarted after the lunch break. No leaks visible, no noise from the hoses, just reading way too high. Nothing's relieving on its own.",
+      "labels": {
+        "sop_id": "SOP-0245"
+      }
+    },
+    {
+      "incident_id": "INC-00574",
+      "text": "Routine walkthrough on line 4 this morning, coolant tank gauge is showing less than a quarter full. Nothing stopped running, system's operating normally, but we're going to need someone to bring the level back up before end of shift.",
+      "labels": {
+        "sop_id": "SOP-0246"
+      }
+    },
+    {
+      "incident_id": "INC-00580",
+      "text": "Operator on line 1 noticed the coolant coming out of the spindle felt warmer than usual during a long facing cut. Checked the control panel and saw the advisory indicator was on \u2014 not the red alarm, just the yellow advisory. Still running but warrants watching.",
+      "labels": {
+        "sop_id": "SOP-0248"
+      }
+    },
+    {
+      "incident_id": "INC-00594",
+      "text": "QC flagged some unusual surface spotting on parts coming off line 2, and when maintenance went to check the bath, the mix was essentially water. No biological smell \u2014 just genuinely too dilute. Whatever protective qualities it's supposed to have, it doesn't right now.",
+      "labels": {
+        "sop_id": "SOP-0254"
+      }
+    },
+    {
+      "incident_id": "INC-00610",
+      "text": "Second shift found coolant smeared across the aisle between bays 3 and 4. Looks like it tracked out from a machine at some point \u2014 no active drip visible right now, just the fluid spread across the floor that needs cleaning up before first shift comes in.",
+      "labels": {
+        "sop_id": "SOP-0262"
+      }
+    },
+    {
+      "incident_id": "INC-00618",
+      "text": "Came in on third shift and found the basin alarm had been going off for who knows how long. Tower near the loading dock, the float ball was sitting way too low - thing looked almost bone dry. Had to kick on makeup water manually before the pumps starved out completely.",
+      "labels": {
+        "sop_id": "SOP-0265"
+      }
+    },
+    {
+      "incident_id": "INC-00635",
+      "text": "Noticed the dosing intervals seemed off on tower 2 this week - treatment program was running almost constantly. Pulled up the panel reading and conductivity was well below the bottom of the target band. Running that dilute makes the whole treatment program almost useless.",
+      "labels": {
+        "sop_id": "SOP-0272"
+      }
+    },
+    {
+      "incident_id": "INC-00671",
+      "text": "Line 2, afternoon run. Pressure went way over on us, hit 1,320 bar. Could feel the machine bang when it peaked. Stopped the run right away.",
+      "labels": {
+        "sop_id": "SOP-0288"
+      }
+    },
+    {
+      "incident_id": "INC-00712",
+      "text": "The safety mat on line 3 triggered the stop when a forklift came too close during an active cycle. Machine halted mid-sequence. Had to figure out what tripped it before resetting.",
+      "labels": {
+        "sop_id": "SOP-0306"
+      }
+    },
+    {
+      "incident_id": "INC-00722",
+      "text": "Something structural gave way in the unit by press line 2. Gauge went from 4 in. WC to nothing in under a minute \u2014 I watched it drop on the panel. The alarm triggered but by the time I walked over the reading was already pegged at zero. Visible dust cloud near the outlet confirmed something blew through the filter media.",
+      "labels": {
+        "sop_id": "SOP-0310"
+      }
+    },
+    {
+      "incident_id": "INC-00739",
+      "text": "Dust was packing into the hopper on line 8's baghouse and finally tripped the full alarm. The level indicator on the panel was maxed out. Rotary valve was operating but barely keeping up \u2014 something was slowing the discharge below what the collection rate needed.",
+      "labels": {
+        "sop_id": "SOP-0317"
+      }
+    },
+    {
+      "incident_id": "INC-00770",
+      "text": "Neighbor plant called us and said our exhaust was putting out visible emissions over the fence line. Went out back and could plainly see dust drifting off the clean-air outlet stack. Had to get inside and figure out which bag had let go and was letting material bypass.",
+      "labels": {
+        "sop_id": "SOP-0330"
+      }
+    },
+    {
+      "incident_id": "INC-00779",
+      "text": "Load indicator on the panel face has been sitting in the yellow zone for a good 25 minutes now. Everything is still running fine, breaker hasn't moved. First shift supervisor noticed it creeping up right after they brought the second body press online.",
+      "labels": {
+        "sop_id": "SOP-0334"
+      }
+    },
+    {
+      "incident_id": "INC-00784",
+      "text": "Strange warning lamp on the panel - it's red and it's not one of the indicators I recognize from the daily checklist. Came on right after the maintenance guys hooked up the new MIG welder on circuit 12. Panel is still on, nothing tripped, but that light is definitely not normal.",
+      "labels": {
+        "sop_id": "SOP-0336"
+      }
+    },
+    {
+      "incident_id": "INC-00789",
+      "text": "Ambient got really hot in that corner of the building today - HVAC must be struggling with the outside temps. Caution light on the panel enclosure came on about an hour ago. It's not at the alarm level yet but the temp display is elevated.",
+      "labels": {
+        "sop_id": "SOP-0338"
+      }
+    },
+    {
+      "incident_id": "INC-00792",
+      "text": "Panel started making a continuous alarm and the big red HIGH TEMP indicator lit up. You could smell something hot even from outside the electrical room door before you even opened it. Got on the radio right away - this needs immediate attention.",
+      "labels": {
+        "sop_id": "SOP-0339"
+      }
+    },
+    {
+      "incident_id": "INC-00802",
+      "text": "Ventilation fan on the electrical panel near the press bay is making more noise than usual - really straining. Pulled the filter cover and the filter mat is dark gray and compacted, barely any airflow getting through. Needs a fresh one today.",
+      "labels": {
+        "sop_id": "SOP-0344"
+      }
+    },
+    {
+      "incident_id": "INC-00841",
+      "text": "Second shift found a whole lane of empties coming off line 4. Went to the nozzle \u2014 absolutely nothing. No output at all. The head right beside it was dosing perfectly. Cycle was still running, just that one head was completely out.",
+      "labels": {
+        "sop_id": "SOP-0359"
+      }
+    },
+    {
+      "incident_id": "INC-00867",
+      "text": "Second shift operator saw someone's hand too close to the nozzle bank while a cycle was active and hit the stop without hesitating. Machine locked up immediately. Had to clear the e-stop and check everything before restarting.",
+      "labels": {
+        "sop_id": "SOP-0371"
+      }
+    },
+    {
+      "incident_id": "INC-00873",
+      "text": "During active production on line 3, a sample was pulled and weighed on the bench scale to confirm accuracy. Routine periodic check \u2014 nothing prompted it, just the scheduled sampling interval coming due.",
+      "labels": {
+        "sop_id": "SOP-0374"
+      }
+    },
+    {
+      "incident_id": "INC-00875",
+      "text": "Second shift noticed the wall-mounted pressure dial sitting a couple notches under the green band. Happened slow over about an hour, nothing sudden about it. Air still moves but the pull is lazy.",
+      "labels": {
+        "sop_id": "SOP-0375"
+      }
+    },
+    {
+      "incident_id": "INC-00881",
+      "text": "Line 2 extractor has the readout climbing past the safe zone on the HIGH side. Filters are fresh so it's not a restriction issue \u2014 something is pulling way harder than it should be.",
+      "labels": {
+        "sop_id": "SOP-0377"
+      }
+    },
+    {
+      "incident_id": "INC-00897",
+      "text": "Control box on the main extractor is showing a drive fault this morning. Fan stopped completely, no vibration or burning smell from the motor. The fault code is lit on the small display panel next to the main cabinet.",
+      "labels": {
+        "sop_id": "SOP-0383"
+      }
+    },
+    {
+      "incident_id": "INC-00913",
+      "text": "Maintenance crew is replacing the fan motor on the south unit today. Before they crack open anything on that machine, the lead called for a full energy isolation \u2014 locks and tags, not just a power-off.",
+      "labels": {
+        "sop_id": "SOP-0391"
+      }
+    },
+    {
+      "incident_id": "INC-00915",
+      "text": "Second shift found the condensate drain on the unit by the loading dock had plugged up and residue spilled out from underneath. Dark liquid spreading across a couple square feet of floor \u2014 sticky and smells bad.",
+      "labels": {
+        "sop_id": "SOP-0392"
+      }
+    },
+    {
+      "incident_id": "INC-00928",
+      "text": "Had a hard, fast drop on line 3 furnace last night \u2014 zone 1 fell about 65 degrees in under 30 seconds. Not the gradual kind of thing, something lost power or blew out completely. Went from sitting at temp to a disaster in one scan cycle. Alarm was blaring.",
+      "labels": {
+        "sop_id": "SOP-0398"
+      }
+    },
+    {
+      "incident_id": "INC-00955",
+      "text": "Six-month PM inspection was due on furnace 3 heating elements. One element in zone 1 looked discolored and swollen on inspection even though it had not faulted yet \u2014 tech flagged it for replacement before it becomes an unplanned failure.",
+      "labels": {
+        "sop_id": "SOP-0409"
+      }
+    },
+    {
+      "incident_id": "INC-00981",
+      "text": "Plant engineer got paged around 3pm. The AHU next to the trim line was blasting hot air and the discharge gauge was buried well past anything we'd consider okay. We cleared the area \u2014 wasn't the yellow caution, this was the full critical indicator screaming at us.",
+      "labels": {
+        "sop_id": "SOP-0422"
+      }
+    },
+    {
+      "incident_id": "INC-00995",
+      "text": "Third shift noticed the ventilation in the assembly area was weak even though the unit sounded like it was running. Went to check the speed readout and it's well below target \u2014 fan is definitely turning, not a full stop, just spinning too slow to move the air we need.",
+      "labels": {
+        "sop_id": "SOP-0428"
+      }
+    },
+    {
+      "incident_id": "INC-01003",
+      "text": "First shift, the display on the variable speed drive for the main supply fan was flashing an error code and the unit went to a full stop. No mechanical noise beforehand, nothing tripped in the MCC. Just the electronic speed controller faulted itself offline and stopped the fan.",
+      "labels": {
+        "sop_id": "SOP-0432"
+      }
+    },
+    {
+      "incident_id": "INC-01006",
+      "text": "Second shift, whole ventilation for sector 4 went down. Went to the MCC room and found a breaker handle tripped out. Drive cabinet and controls looked completely fine, no fault codes. Just the circuit breaker in the motor control panel had tripped on its own.",
+      "labels": {
+        "sop_id": "SOP-0433"
+      }
+    },
+    {
+      "incident_id": "INC-01024",
+      "text": "Second shift here. The HPU by the loading dock started beeping about an hour into the shift. The digital display was showing 172 bar \u2014 everything still running but the system was screaming at us. Called maintenance because it's been drifting low all week and nobody has looked at it.",
+      "labels": {
+        "sop_id": "SOP-0441"
+      }
+    },
+    {
+      "incident_id": "INC-01025",
+      "text": "Line 2 HPU threw an amber light just after lunch break. Oil side looked fine visually, pump was humming along, but the readout showed 158 bar. No trip, no shutdown \u2014 just the steady light telling us something was off. Wrote it up and let the supervisor know before I moved on.",
+      "labels": {
+        "sop_id": "SOP-0441"
+      }
+    },
+    {
+      "incident_id": "INC-01039",
+      "text": "Production stopped on line 1 because the HPU just quit completely. Pump is not running \u2014 complete silence where you'd normally hear it humming away. The HMI shows the start command is active and calling for it, but nothing is moving. All the cylinders have dropped.",
+      "labels": {
+        "sop_id": "SOP-0447"
+      }
+    },
+    {
+      "incident_id": "INC-01069",
+      "text": "Smoke started coming from around the electrical cabinet on the HPU near assembly station 3 during second shift. Smelled like burning plastic. Slapped the e-stop and got everyone back from the area. Turned out to be a wire burning in the terminal block.",
+      "labels": {
+        "sop_id": "SOP-0460"
+      }
+    },
+    {
+      "incident_id": "INC-01071",
+      "text": "After the weekend maintenance window where we had the HPU on line 3 completely powered down and drained for a reservoir clean, first shift needed to walk the full startup sequence. You check fluid, you check temp, you do not just hit go on a cold unit.",
+      "labels": {
+        "sop_id": "SOP-0461"
+      }
+    },
+    {
+      "incident_id": "INC-01079",
+      "text": "Press 7 near the loading dock dropped out completely during a forming cycle. System went from full operating pressure to basically zero while the ram was loaded \u2014 not a slow bleed, a total instant loss. Called it in right away.",
+      "labels": {
+        "sop_id": "SOP-0464"
+      }
+    },
+    {
+      "incident_id": "INC-01106",
+      "text": "Line 1 press reservoir is visibly low in the glass during the daily check. Last topped off two weeks ago. Oil looks fine, just low on volume. Needs maybe a quart or two to bring it back to the mark.",
+      "labels": {
+        "sop_id": "SOP-0476"
+      }
+    },
+    {
+      "incident_id": "INC-01110",
+      "text": "Line 6 PM inspection \u2014 the lube sticker on the pump coupling guard still shows last year's date. Calendar says this month is the interval. No complaint from the machine yet but it's definitely time to grease it.",
+      "labels": {
+        "sop_id": "SOP-0478"
+      }
+    },
+    {
+      "incident_id": "INC-01128",
+      "text": "The feed zone on the unit by the loading dock just shot up on the controller screen \u2014 it was reading normal one scan and then the alarm lights were everywhere the next. Didn't drift up, just slammed hard over the ceiling in seconds. Operator hit e-stop on reflex.",
+      "labels": {
+        "sop_id": "SOP-0486"
+      }
+    },
+    {
+      "incident_id": "INC-01134",
+      "text": "The unit on line 7 by the north wall keeps pulling low fill numbers on the cavity pressure graph. Operator said it's been happening every few cycles since after lunch \u2014 parts look okay but the process data clearly shows we're not hitting the fill target. No fault, just consistently soft.",
+      "labels": {
+        "sop_id": "SOP-0488"
+      }
+    },
+    {
+      "incident_id": "INC-01152",
+      "text": "Quality flagged a batch off line 1 this morning for incomplete fill on the thin rib section. We tried bumping injection speed and it still didn't fill out. Tooling said we need to check the vent grooves before touching the process any further \u2014 probably gassed up.",
+      "labels": {
+        "sop_id": "SOP-0496"
+      }
+    },
+    {
+      "incident_id": "INC-01165",
+      "text": "Something gave way on the power unit near the loading dock \u2014 there's a massive pool of hydraulic fluid and it's still spreading toward the drain and under the adjacent press. Operator hit the stop and got everyone back. Way too much volume for a normal cleanup, need full emergency response.",
+      "labels": {
+        "sop_id": "SOP-0502"
+      }
+    },
+    {
+      "incident_id": "INC-01176",
+      "text": "Third shift, unit near bay 2 \u2014 the machine started making a grinding noise and I looked over and the strip had folded back on itself and was stuck between the guide plates. Nothing was coming out the other end at all.",
+      "labels": {
+        "sop_id": "SOP-0507"
+      }
+    },
+    {
+      "incident_id": "INC-01183",
+      "text": "Was doing a routine walk on third shift and noticed the labels off the line 5 machine looked washed out and patchy. Nothing alarming on the screen, but the head clearly hadn't come up to where it needed to be \u2014 took forever after the overnight cold soak.",
+      "labels": {
+        "sop_id": "SOP-0509"
+      }
+    },
+    {
+      "incident_id": "INC-01224",
+      "text": "Second shift, bay 4 unit \u2014 QC called for an inspection check mid-run per the batch audit schedule. Had to grab a label, check the scan result at the verification station, and confirm placement was within spec before we could keep going.",
+      "labels": {
+        "sop_id": "SOP-0528"
+      }
+    },
+    {
+      "incident_id": "INC-01235",
+      "text": "Line 3, around 2pm. Coolant outlet temp was at 22.5 degrees \u2014 just over the limit. The chiller fan was running but wasn't keeping up with the heat load. Called it in. Machine continued operating but we logged it. That bay always runs hot in the afternoon with the sun on the roof.",
+      "labels": {
+        "sop_id": "SOP-0532"
+      }
+    },
+    {
+      "incident_id": "INC-01244",
+      "text": "Line 3, stainless job. Cut edges had bad striations, worse than usual, but the machine wasn't faulting. Operator panel showed power at about 89% of setpoint \u2014 still firing, just not at full strength. Guessed the lens might be getting dirty. Put in a maintenance request and paused.",
+      "labels": {
+        "sop_id": "SOP-0536"
+      }
+    },
+    {
+      "incident_id": "INC-01247",
+      "text": "The unit on line 5 dropped out completely during a cut on the door reinforcement parts. Head was moving like normal but nothing was being cut. Display showed a module fault \u2014 not just low power, like zero output. Tried to reset from the panel, got the same fault back. Maintenance needed.",
+      "labels": {
+        "sop_id": "SOP-0537"
+      }
+    },
+    {
+      "incident_id": "INC-01250",
+      "text": "Line 6, the ventilation alarm came on about halfway through the shift. Exhaust fan was spinning but the airflow reading was well below minimum. Checked the filter housing and it did look pretty loaded up. Stopped cutting per the posted procedure and reported to maintenance to get it sorted.",
+      "labels": {
+        "sop_id": "SOP-0538"
+      }
+    },
+    {
+      "incident_id": "INC-01264",
+      "text": "Axis motion on line 2 was slightly noisy \u2014 a faint squeak on fast Y moves. Tech said it was just overdue for a lube. PM was scheduled anyway so they did it right then. Rails greased on both axes, machine homed, and the noise was gone on the test run.",
+      "labels": {
+        "sop_id": "SOP-0545"
+      }
+    },
+    {
+      "incident_id": "INC-01266",
+      "text": "Tech was going into the enclosure on line 3 to clean the internal beam path optics \u2014 you can't do that with any live energy on the machine. Full isolation procedure was followed. Power was killed at the wall-mounted disconnect, lockout hasp installed, tag attached with tech's name on it. Worked safely in there for about an hour.",
+      "labels": {
+        "sop_id": "SOP-0546"
+      }
+    },
+    {
+      "incident_id": "INC-01268",
+      "text": "Maintenance was doing a visual check on the chiller by line 4 and bumped a quick-connect fitting \u2014 coolant splashed out onto the floor, maybe a liter. Stopped the machine right away, grabbed absorbent pads from the spill kit station by the bay entrance, and contained it. Logged the spill per safety requirements.",
+      "labels": {
+        "sop_id": "SOP-0547"
+      }
+    },
+    {
+      "incident_id": "INC-01279",
+      "text": "Station 1 by the press room, morning shift. Unit was charging normally, then during stabilization the whole thing tanked in under three seconds. Screen went to near-zero and the alarm lit up. Looked like something let go hard inside the chamber.",
+      "labels": {
+        "sop_id": "SOP-0552"
+      }
+    },
+    {
+      "incident_id": "INC-01283",
+      "text": "Line 3 morning shift. After the charge-up finished, the readout was still barely showing anything useful. Way below where it needs to be for the test to actually run. The whole cycle just stalled out there and wouldn't proceed.",
+      "labels": {
+        "sop_id": "SOP-0554"
+      }
+    },
+    {
+      "incident_id": "INC-01299",
+      "text": "Line 3 morning startup. The interval flag was showing redline on the display before we even loaded the first part of the day. Couldn't proceed without pulling the old set and putting in a fresh kit. Maintenance came in to handle it.",
+      "labels": {
+        "sop_id": "SOP-0561"
+      }
+    },
+    {
+      "incident_id": "INC-01310",
+      "text": "After the pressure event last Tuesday on station 3, maintenance went to check the regulator setting as part of the follow-up. It was sitting off from nominal by more than the allowable amount and needed to be reset.",
+      "labels": {
+        "sop_id": "SOP-0566"
+      }
+    },
+    {
+      "incident_id": "INC-01314",
+      "text": "Line 4 second shift. A fitting on the inlet line let go without any warning \u2014 air was shooting straight across the aisle. Had to get people back and get someone to the supply shutoff. Fitting threads had stripped.",
+      "labels": {
+        "sop_id": "SOP-0568"
+      }
+    },
+    {
+      "incident_id": "INC-01323",
+      "text": "Station 2, morning after the maintenance lockout. PM crew released the isolation and signed off the work order. Had to run through the restart verification before we could put it back into production flow.",
+      "labels": {
+        "sop_id": "SOP-0572"
+      }
+    },
+    {
+      "incident_id": "INC-01327",
+      "text": "Unit by the loading dock lost its momentum during a stamping cycle around 2pm. RPMs kept creeping down over maybe 10 minutes - nothing tripped, it just got slower and slower until we pulled the stop. Maintenance said the drive belt was slipping under load.",
+      "labels": {
+        "sop_id": "SOP-0573"
+      }
+    },
+    {
+      "incident_id": "INC-01361",
+      "text": "Maintenance flagged me on line 1 during the morning - the PM clock said it was time to eyeball the engagement pads on press 7. Ran through the inspection on both sides of the unit during the scheduled window.",
+      "labels": {
+        "sop_id": "SOP-0586"
+      }
+    },
+    {
+      "incident_id": "INC-01373",
+      "text": "Line 1, second shift: operator almost slipped near the base of press 4. Turned out it was that oily hydraulic fluid leaking from the big cylinder on the rear side of the frame. Puddle was maybe two feet across already.",
+      "labels": {
+        "sop_id": "SOP-0592"
+      }
+    },
+    {
+      "incident_id": "INC-01389",
+      "text": "Second shift on line 1. Small wet spot on the floor under the fitting near the back of the solvent tank. Traced it to a weeping connection \u2014 not gushing, just seeping. Contained it with a pad and flagged maintenance. Vapor monitor never went off the whole time.",
+      "labels": {
+        "sop_id": "SOP-0599"
+      }
+    },
+    {
+      "incident_id": "INC-01398",
+      "text": "Booth 2, second shift. Saw the first indicator come on for the exhaust side. Airflow still felt normal and quality checks were passing. Hung an inspection tag on the housing and let the supervisor know to get it scheduled before it becomes a bigger issue.",
+      "labels": {
+        "sop_id": "SOP-0603"
+      }
+    },
+    {
+      "incident_id": "INC-01412",
+      "text": "Booth 3, third shift corrective work. Robot needed to go in to access a leaking fitting inside the enclosure. Full LOTO done \u2014 estop, main disconnect off, paint supply closed, hasp and tag applied. Supervisor signed off before the tech entered.",
+      "labels": {
+        "sop_id": "SOP-0610"
+      }
+    },
+    {
+      "incident_id": "INC-01416",
+      "text": "Booth 2, first shift. Tech spotted a puddle of paint under the spray arm during a mid-shift walkthrough. The tank was fine \u2014 it was the delivery hose dripping directly onto the floor. Stopped flow, grabbed the spill kit from the cabinet, cleaned it up, and notified maintenance.",
+      "labels": {
+        "sop_id": "SOP-0612"
+      }
+    },
+    {
+      "incident_id": "INC-01418",
+      "text": "Booth 1, start of day shift Wednesday. Tech ran the startup sequence \u2014 power on, fan up, waited the full minute, checked pressure. The reading was still a bit low after the fan came on so we waited another thirty seconds before starting the pump. Came up fine.",
+      "labels": {
+        "sop_id": "SOP-0613"
+      }
+    },
+    {
+      "incident_id": "INC-01424",
+      "text": "Line 1, third shift. Ran the gauge on a random sample and readings were coming in low across the board \u2014 not one bad spot, the whole part was under spec. QE came and looked at the spray parameters. Pump stopped pending a full review of settings and flow rate.",
+      "labels": {
+        "sop_id": "SOP-0615"
+      }
+    },
+    {
+      "incident_id": "INC-01429",
+      "text": "Third shift complained the robot kept faulting out every 20 minutes on the unit near the stretch wrapper. Checked it first thing in the morning and the suction feels noticeably weak \u2014 you can barely feel any pull when you hold your hand up to the cups. Gauge on the pendant was down around 40, which I know is below spec.",
+      "labels": {
+        "sop_id": "SOP-0617"
+      }
+    },
+    {
+      "incident_id": "INC-01452",
+      "text": "End of second shift on line 3, the maintenance tech flagged that the vacuum pump felt way hotter than normal during his rounds. The HMI had a temperature caution indicator lit. Unit ran the rest of the current pallet okay but it was clearly running hot \u2014 forced airflow around the pump felt warm.",
+      "labels": {
+        "sop_id": "SOP-0626"
+      }
+    },
+    {
+      "incident_id": "INC-01469",
+      "text": "Maintenance spotted a grease smear on the floor right next to the robot base on line 1 \u2014 looked like it came from the joint that was over-lubed during last week's PM. Not a huge amount but it was shiny and definitely a slip hazard in the walkway between the robot and the pallet staging area.",
+      "labels": {
+        "sop_id": "SOP-0634"
+      }
+    },
+    {
+      "incident_id": "INC-01485",
+      "text": "First shift, unit near the loading dock \u2014 operator said the parts went through completely dry. No gradual drop, just an instant loss of all spray during a cycle. The pump is humming away but the pressure indicator is sitting on zero.",
+      "labels": {
+        "sop_id": "SOP-0641"
+      }
+    },
+    {
+      "incident_id": "INC-01489",
+      "text": "Maintenance was walking by and noticed the high-temp alarm light was solid red on the east washer. Display was reading 188 degrees. Heater must have stuck on. It had apparently been climbing for a while before anyone caught it.",
+      "labels": {
+        "sop_id": "SOP-0643"
+      }
+    },
+    {
+      "incident_id": "INC-01495",
+      "text": "Maintenance ticket from line 4: washer pressure reads fine at 22 PSI but the top nozzle array is not spraying anything. Rest of the nozzles look OK. Parts are only getting cleaned on the bottom half and sides.",
+      "labels": {
+        "sop_id": "SOP-0645"
+      }
+    },
+    {
+      "incident_id": "INC-01502",
+      "text": "PM log shows the nozzles on the east unit are due for their weekly brush-out. Maintenance is pulling the caps to clean them off preventively. No flow loss, no blockage \u2014 strictly following the maintenance calendar.",
+      "labels": {
+        "sop_id": "SOP-0648"
+      }
+    },
+    {
+      "incident_id": "INC-01516",
+      "text": "Maintenance walked in and found the floor wet around the unit near the loading dock. The liquid is coming from somewhere under the machine and crossing the aisle. Not plain water \u2014 it is sudsy and the smell is the wash chemical.",
+      "labels": {
+        "sop_id": "SOP-0654"
+      }
+    },
+    {
+      "incident_id": "INC-01518",
+      "text": "Operator on third shift reported the concentrate tank by the chemical station is flashing a high-level warning. The automated fill system did not shut off when it was supposed to. Tank is dangerously close to the top.",
+      "labels": {
+        "sop_id": "SOP-0655"
+      }
+    },
+    {
+      "incident_id": "INC-01522",
+      "text": "Coming back from the holiday shutdown, the line 3 washer needs to be brought online from cold. Tank was partially drained for the maintenance window so need to go through the full bring-up \u2014 fill to level, heat to temp, verify, then pump on.",
+      "labels": {
+        "sop_id": "SOP-0657"
+      }
+    },
+    {
+      "incident_id": "INC-01550",
+      "text": "Inspector bounced back a whole tray of parts from line 2 \u2014 unacceptable edge angle on all of them, not just a few. Maintenance traced it back to worn consumables, the nozzle orifice was visibly deformed when they pulled it. Nobody had tracked the arc-on hours since the last changeover. Consumables replaced and an hour log started before resuming.",
+      "labels": {
+        "sop_id": "SOP-0669"
+      }
+    },
+    {
+      "incident_id": "INC-01564",
+      "text": "Second shift on the east-side table \u2014 operator noticed smoke coming up from the filter housing, not from the table itself. Something inside the downdraft system must have caught from accumulated fines. Hit both the machine stop and the fan shutoff right away, grabbed the CO2 extinguisher from the wall station. Emergency team notified immediately.",
+      "labels": {
+        "sop_id": "SOP-0676"
+      }
+    },
+    {
+      "incident_id": "INC-01565",
+      "text": "During a long cut on thick stainless on line 1, the slag pile under the table ignited \u2014 you could see the orange glow through the grating before the smoke alarm triggered. Operator hit the estop first, then the downdraft shutoff to avoid drawing more air to the fire. Extinguisher deployed at the table. Area cleared out and emergency team radioed in.",
+      "labels": {
+        "sop_id": "SOP-0676"
+      }
+    },
+    {
+      "incident_id": "INC-01569",
+      "text": "Second shift, someone noticed standing water near the east-side plasma table \u2014 probably an overflow from the water table or a loose hose fitting somewhere. Slip hazard right in the main walkway next to the machine. Paused the job, put down absorbent pads, and set out the wet floor sign while maintenance tracked down the source.",
+      "labels": {
+        "sop_id": "SOP-0678"
+      }
+    },
+    {
+      "incident_id": "INC-01573",
+      "text": "Friday afternoon before a long weekend, the team shut down the east-side plasma cutter for an extended outage. Power supply off, gas supply isolated at the panel valve, main disconnect thrown. Operator confirmed everything was down and secured before facilities locked the bay for the holiday.",
+      "labels": {
+        "sop_id": "SOP-0680"
+      }
+    },
+    {
+      "incident_id": "INC-01575",
+      "text": "Parts from the afternoon run on line 5 had edge angularity outside tolerance \u2014 the bevel was tilting the wrong direction on every part and the top edge was rounded instead of sharp. Inspector put the gauge on them and confirmed kerf deviation across the nest. Parts quarantined and root cause investigation started before the next run.",
+      "labels": {
+        "sop_id": "SOP-0681"
+      }
+    },
+    {
+      "incident_id": "INC-01582",
+      "text": "Was watching the HMI on line 3 and the temperature just fell off a cliff. It was fine one minute and then boom, dropped 65 degrees in less than two minutes flat. Not a slow creep at all \u2014 straight down. Nothing was wrong before it happened.",
+      "labels": {
+        "sop_id": "SOP-0684"
+      }
+    },
+    {
+      "incident_id": "INC-01598",
+      "text": "Red alarm came on at the exhaust control panel on the east oven row. Pressure spiked upward \u2014 it's reading high, not dropped. Fan motor housing feels hot. Must be a blocked damper or a duct clog somewhere between the oven and the roof stack.",
+      "labels": {
+        "sop_id": "SOP-0690"
+      }
+    },
+    {
+      "incident_id": "INC-01630",
+      "text": "Second shift, cell 3. Operator said the ram kept stalling partway through bends, like it didn't have enough force to push through the material. When I got there the hydraulic readout was sitting in the low 170s - usually we're at 190 or above when things are normal. Oil level looked a bit down on the sight glass too.",
+      "labels": {
+        "sop_id": "SOP-0705"
+      }
+    },
+    {
+      "incident_id": "INC-01640",
+      "text": "The big press brake in the back of the plant went into a full lockout during second shift production. Not a pause, not a caution - full red fault across the board and everything was dead. The entire control system locked and the ram was jammed deep into the tooling. Cell was shut down until management cleared it.",
+      "labels": {
+        "sop_id": "SOP-0709"
+      }
+    },
+    {
+      "incident_id": "INC-01645",
+      "text": "Press brake in bay 4, morning shift. Machine faulted hard when we moved to the 8mm bracket job and wouldn't complete the stroke. The force display on the screen was way into the red - higher than I've seen it on any normal job. Ram stopped dead mid-stroke and the machine went into fault.",
+      "labels": {
+        "sop_id": "SOP-0711"
+      }
+    },
+    {
+      "incident_id": "INC-01661",
+      "text": "During the quarterly PM on the bay 8 press I found the cabinet cooling filter hadn't been changed in over a year. It was so clogged you could feel the restricted airflow just by holding your hand near the vent. Cabinet ran hot and the filter was due - should have been caught sooner.",
+      "labels": {
+        "sop_id": "SOP-0719"
+      }
+    },
+    {
+      "incident_id": "INC-01681",
+      "text": "Zone 1 was reading shy of target during the afternoon run on line 2 \u2014 roughly 12 degrees low, gradual drift, belt was still rolling the whole time. Kept checking it every few minutes.",
+      "labels": {
+        "sop_id": "SOP-0727"
+      }
+    },
+    {
+      "incident_id": "INC-01710",
+      "text": "Maintenance schedule flagged the conveyor drive on the line 4 oven for lube \u2014 interval ran out, need to service it before the next production run.",
+      "labels": {
+        "sop_id": "SOP-0739"
+      }
+    },
+    {
+      "incident_id": "INC-01732",
+      "text": "Cell B went down this morning, torch stopped dead mid-pass. Wire won't advance even a millimeter. The feeder panel indicator is on solid, not flashing. Tried jogging it manually and nothing.",
+      "labels": {
+        "sop_id": "SOP-0749"
+      }
+    },
+    {
+      "incident_id": "INC-01734",
+      "text": "Third shift flagged thin, starved-looking beads on cell C. Wire is feeding for sure, not stuck at all, but the rate meter is reading below where it should be. Like it can't keep up with the cycle.",
+      "labels": {
+        "sop_id": "SOP-0750"
+      }
+    },
+    {
+      "incident_id": "INC-01745",
+      "text": "Station 3 lost gas all at once mid-run during first shift. One second the gauge is fine, next second it's floored and the arc just sputtered out. Nothing like the gradual creep we dealt with on cell B last month.",
+      "labels": {
+        "sop_id": "SOP-0755"
+      }
+    },
+    {
+      "incident_id": "INC-01748",
+      "text": "Coolant reservoir on line 2 keeps going down a little every shift. Found a weeping fitting at the torch inlet\u2014wet but not dripping fast. Small seep, no floor puddle, just started showing up this week.",
+      "labels": {
+        "sop_id": "SOP-0756"
+      }
+    },
+    {
+      "incident_id": "INC-01755",
+      "text": "Station 3 keeps aborting right before the torch moves in to the part. Everything looks seated visually but the cycle just stops and waits. Unrelated to the arc or wire\u2014feels like the machine doesn't believe something is held down properly.",
+      "labels": {
+        "sop_id": "SOP-0759"
+      }
+    },
+    {
+      "incident_id": "INC-01765",
+      "text": "Cell B controller is showing the scheduled verification reminder on the main screen. Doing it at end of shift today as planned\u2014not because anything is reading off, just the regular monthly PM check.",
+      "labels": {
+        "sop_id": "SOP-0764"
+      }
+    },
+    {
+      "incident_id": "INC-01780",
+      "text": "Second shift, line 4. The accumulation zone motor went offline with a trip code showing on the drive display. Checked the panel and the amp readout was pegged past the red line. Had to call maintenance to get it reset before we could run again.",
+      "labels": {
+        "sop_id": "SOP-0771"
+      }
+    },
+    {
+      "incident_id": "INC-01796",
+      "text": "Line 3, first shift. Downstream assembly keeps stopping every few cycles because the buffer is too thin. The count dropped below 5 trays and the feed zone never kicked into boost mode automatically. We're bleeding time.",
+      "labels": {
+        "sop_id": "SOP-0777"
+      }
+    },
+    {
+      "incident_id": "INC-01798",
+      "text": "Second shift, line 4. The timer between zones is all messed up \u2013 our cycle time is longer because zone 2 is sluggish. The drive panel shows a lower speed number than it should but there's no fault light, just running behind.",
+      "labels": {
+        "sop_id": "SOP-0778"
+      }
+    },
+    {
+      "incident_id": "INC-01812",
+      "text": "Zone 3 photo eye is on this week's PM list. The lens looks foggy when you get close \u2013 there's an oily residue on both emitter and receiver from the coolant mist that drifts from the machining cell nearby. It's due for its 250-hour scheduled clean.",
+      "labels": {
+        "sop_id": "SOP-0785"
+      }
+    },
+    {
+      "incident_id": "INC-01816",
+      "text": "PM board shows zone 1 motor filter is well past its replacement interval. Filter looks plugged solid from the outside \u2013 can't see any light through it at all. Motor temperature has been trending up on the line dashboard for the last two weeks.",
+      "labels": {
+        "sop_id": "SOP-0787"
+      }
+    },
+    {
+      "incident_id": "INC-01827",
+      "text": "QA audit is coming next week and the checklist includes verified inspection records for all conveyor lines. Line 2 doesn't have a completed walkthrough log from this month. Need to run the inspection loop today and get the data recorded.",
+      "labels": {
+        "sop_id": "SOP-0792"
+      }
+    },
+    {
+      "incident_id": "INC-01829",
+      "text": "Second shift on the east cell \u2014 the screwdriver by the loading dock was putting out weak numbers all night long. Panel showed green status lights the whole time but the logged values were consistently under the floor spec. Found roughly 30 parts that need re-check before we can ship.",
+      "labels": {
+        "sop_id": "SOP-0793"
+      }
+    },
+    {
+      "incident_id": "INC-01835",
+      "text": "On the afternoon shift line 4's driver dropped out on us \u2014 the graph on the control screen showed torque climbing normally like always, then it just went straight to nothing. Not a low reading, not a high reading, completely gone mid-cycle. Part was still sitting in the fixture when it stopped.",
+      "labels": {
+        "sop_id": "SOP-0795"
+      }
+    },
+    {
+      "incident_id": "INC-01848",
+      "text": "Station 1 near the main entrance is giving us a thermal caution on the screen. Operator says it's been running solid for three hours straight without any natural break cycles. Still making parts fine, no shutdown at all, just the yellow warning indicator.",
+      "labels": {
+        "sop_id": "SOP-0800"
+      }
+    },
+    {
+      "incident_id": "INC-01884",
+      "text": "Came around the corner on line 3 and saw film trailing off the back of the carriage dragging on the floor, turntable still going with a bare pallet sitting on it. No idea when it happened - could have been running bare for two or three rotations before I spotted it.",
+      "labels": {
+        "sop_id": "SOP-0817"
+      }
+    },
+    {
+      "incident_id": "INC-01888",
+      "text": "Roll on the dock wrapper ran out right in the middle of a cycle. Machine kept going through the motions - carriage traveling up and down, turntable spinning - but nothing was actually coming off the carriage. Basically wrapping air for the last several rotations.",
+      "labels": {
+        "sop_id": "SOP-0818"
+      }
+    },
+    {
+      "incident_id": "INC-01890",
+      "text": "Pallets coming off line 3 were spiral-wrapped too dense vertically - too many layers stacked tight together near the base. Took a minute to figure out that the turntable was running slow so the carriage kept covering the same lower section repeatedly. No alarm went off, just the output looked wrong.",
+      "labels": {
+        "sop_id": "SOP-0819"
+      }
+    },
+    {
+      "incident_id": "INC-01918",
+      "text": "Film started wrapping around the corner post of the safety cage on the dock wrapper - a loose piece had slipped off the pallet edge. Slapped the e-stop before it could tighten any further and peeled the film off the post by hand.",
+      "labels": {
+        "sop_id": "SOP-0832"
+      }
+    },
+    {
+      "incident_id": "INC-01923",
+      "text": "Height sensor on the dock wrapper came up with a no-target fault at startup this morning. Best guess is someone bumped it during the overnight cleaning sweep with the floor scrubber. Had to call maintenance to realign it before we could start the first pallet.",
+      "labels": {
+        "sop_id": "SOP-0834"
+      }
+    },
+    {
+      "incident_id": "INC-01925",
+      "text": "Second shift forgot to tape down the film tail on the dock wrapper before clocking out. Came in next morning and the roll had unwound itself onto the floor all around the machine. Had to rethread the entire carriage and lost about half a roll of film.",
+      "labels": {
+        "sop_id": "SOP-0835"
+      }
+    },
+    {
+      "incident_id": "INC-01927",
+      "text": "Sensor check on the dock wrapper came back way off - panel was showing 220 percent but a mark test on the film measured about 260 percent actual stretch. Must have drifted after the last roller cleaning job rattled something loose in the sensor bracket.",
+      "labels": {
+        "sop_id": "SOP-0836"
+      }
+    },
+    {
+      "incident_id": "INC-01940",
+      "text": "Second shift came in and found the big surface grinder by the press line sitting in a puddle that extended halfway across the aisle. Looks like a reservoir fitting had blown sometime during the gap between shifts. That's not a mop job \u2014 fluid was way beyond the drip pan and heading toward the press area. We needed containment booms and an immediate machine kill.",
+      "labels": {
+        "sop_id": "SOP-0842"
+      }
+    },
+    {
+      "incident_id": "INC-01945",
+      "text": "Middle of a part run on the line 4 grinder, everything looked fine and then the alarm screamed and the coolant reading hit zero instantly. Not low \u2014 just gone. The pump sound changed at the same time. We shut it down fast because that kind of instant drop means a line failure, not an empty tank.",
+      "labels": {
+        "sop_id": "SOP-0844"
+      }
+    },
+    {
+      "incident_id": "INC-01948",
+      "text": "Second shift noticed the coolant reading was way into the red zone on the panel gauge at the grinder near bay 6. Pump was running normally but the pressure just kept climbing. The relief valve wasn't opening like it should. Definitely an over-pressure situation, not a low-flow problem.",
+      "labels": {
+        "sop_id": "SOP-0845"
+      }
+    },
+    {
+      "incident_id": "INC-01952",
+      "text": "The grinder on line 2 threw a hard fault in the middle of a production run \u2014 red hydraulic alarm, panel screaming. Not a yellow advisory, a full red. We hit the stop without waiting. At that pressure level the workholding isn't reliable and it's a safety call, not a judgment call.",
+      "labels": {
+        "sop_id": "SOP-0847"
+      }
+    },
+    {
+      "incident_id": "INC-01955",
+      "text": "Second shift on grinder 4, the whole machine was shaking more than usual from almost the moment I started the wheel. The vibration alarm tripped before I could even walk over to check the guard. Felt like the wheel wasn't spinning true from the start of the run.",
+      "labels": {
+        "sop_id": "SOP-0848"
+      }
+    },
+    {
+      "incident_id": "INC-01973",
+      "text": "Found a chip and what looked like a hairline crack on the side face of the grinding wheel on bay 5 during pre-shift walkaround. You absolutely cannot grind on a cracked wheel \u2014 that's a projectile waiting to happen. Pulled it and got a replacement out without hesitation.",
+      "labels": {
+        "sop_id": "SOP-0855"
+      }
+    },
+    {
+      "incident_id": "INC-01999",
+      "text": "Line 5, the clamping fixture right by the end stop near the exit conveyor: part drops in, you can hear the pneumatics fire, but the hold-down does not latch. You can wiggle the part in the nest freely after the clamp supposedly closes. Controller blocks the nutrunner from coming down. Started about halfway through second shift.",
+      "labels": {
+        "sop_id": "SOP-0866"
+      }
+    },
+    {
+      "incident_id": "INC-02075",
+      "text": "Heard a loud bang from the cleaner in cell 2, unknown source. Hit the nearest estop as a precaution. Turned out to be a pressure relief on the fill line that popped, but we verified everything was safe before attempting a restart.",
+      "labels": {
+        "sop_id": "SOP-0898"
+      }
+    },
+    {
+      "incident_id": "INC-02087",
+      "text": "Second shift, the big drive unit over by press 4 knocked itself offline with no warning. We heard the contactors clack and everything went quiet. Guys on the floor said it had been struggling to pull load for a few minutes before that.",
+      "labels": {
+        "sop_id": "SOP-0903"
+      }
+    },
+    {
+      "incident_id": "INC-02097",
+      "text": "We had a sudden total loss on the drive unit next to the weld station. No gradual dimming, no warning beeps, no ramp down\u2014literally zero in an eye blink. Something major went wrong inside because normal brownout faults look nothing like this.",
+      "labels": {
+        "sop_id": "SOP-0906"
+      }
+    },
+    {
+      "incident_id": "INC-02099",
+      "text": "Line 4's drive cabinet started flashing a caution indicator during first shift. I checked and it is warm in there but the motor is still moving product. Nothing tripped, drive is online, just the yellow warning light blinking.",
+      "labels": {
+        "sop_id": "SOP-0907"
+      }
+    },
+    {
+      "incident_id": "INC-02104",
+      "text": "Got called to cell 5 because the drive faulted out and the fault indicator was showing something different from the usual trip codes we see. Turns out the ground relay had activated\u2014totally different situation from the overcurrent we had on cell 7 last month. Electrician is on his way.",
+      "labels": {
+        "sop_id": "SOP-0909"
+      }
+    },
+    {
+      "incident_id": "INC-02107",
+      "text": "Maintenance flagged a warning light on the drive unit in bay 2 during their rounds. The fan is definitely still moving but it is sluggish\u2014nothing like the full stop we had on cell 4\u2014and the heatsink temp is creeping up. Line is still running for now.",
+      "labels": {
+        "sop_id": "SOP-0910"
+      }
+    },
+    {
+      "incident_id": "INC-02109",
+      "text": "The cabinet by the paint line stopped producing any airflow\u2014you could tell right away, no air coming from the vents whatsoever, fan completely stopped and the cabinet was getting hot fast. We had to pull the plug before the drive fried itself.",
+      "labels": {
+        "sop_id": "SOP-0911"
+      }
+    },
+    {
+      "incident_id": "INC-02110",
+      "text": "Second shift operator noticed the drive cabinet on cell 4 was dead quiet and getting really hot in a hurry. Fan had seized\u2014nothing moving at all. We had to stop the line before the drive cooked. Was not slow like the warning we saw on bay 2, just instantly gone.",
+      "labels": {
+        "sop_id": "SOP-0911"
+      }
+    },
+    {
+      "incident_id": "INC-02122",
+      "text": "During a routine walkdown on line 1, maintenance noticed the drive heat sink had a lot of fine powder packed into the fins. Drive is not alarming yet but airflow through the fins is clearly reduced. The interior looked clean but the fins themselves are the problem.",
+      "labels": {
+        "sop_id": "SOP-0917"
+      }
+    },
+    {
+      "incident_id": "INC-02140",
+      "text": "Second shift found the feeder at station 6 completely quiet. Couple of small clips had stacked on top of each other crosswise in the slot and created a dead wall. Everything backed up behind the blockage.",
+      "labels": {
+        "sop_id": "SOP-0925"
+      }
+    },
+    {
+      "incident_id": "INC-02160",
+      "text": "Feeder at bay 4 sounds like it's running but it's just spinning air. Checked the bowl \u2014 totally dry. This isn't a slowdown or a weak signal, it's fully stopped because there's nothing to feed. Line is down waiting.",
+      "labels": {
+        "sop_id": "SOP-0933"
+      }
+    },
+    {
+      "incident_id": "INC-02168",
+      "text": "Maintenance log shows the bowl feeder at line 11 is at 220 hours since the last surface clean \u2014 20 hours over the scheduled interval. Doing a walk-down before the next shift and putting in the cleaning work order.",
+      "labels": {
+        "sop_id": "SOP-0937"
+      }
+    },
+    {
+      "incident_id": "INC-02194",
+      "text": "Everything went dark on the camera side right in the middle of a production run. Absolutely no warning, no flicker. Total blackout over the inspection area in an instant. Nothing gradual about it. \u2014 T. Nguyen, 1st shift",
+      "labels": {
+        "sop_id": "SOP-0949"
+      }
+    },
+    {
+      "incident_id": "INC-02199",
+      "text": "The kicker arm actuates fine \u2014 it does eventually swing \u2014 but there's this obvious lag between the alarm and the physical movement. Some rejects are ending up in the good bin because it doesn't get there in time. \u2014 P. Okafor, 2nd shift",
+      "labels": {
+        "sop_id": "SOP-0951"
+      }
+    },
+    {
+      "incident_id": "INC-02201",
+      "text": "Scrap rate spiked to something insane this morning but when we mic'd the parts ourselves they were all in spec. The machine is flagging everything that comes through. Good product getting diverted. \u2014 C. Walsh, 2nd shift",
+      "labels": {
+        "sop_id": "SOP-0952"
+      }
+    },
+    {
+      "incident_id": "INC-02220",
+      "text": "Enclosure has been running noticeably hotter than usual all shift. The vent grille on the side is pulling almost nothing. Filter in there looks like it's never been touched. \u2014 D. McAllister, 1st shift",
+      "labels": {
+        "sop_id": "SOP-0960"
+      }
+    },
+    {
+      "incident_id": "INC-02222",
+      "text": "Slow air bleed on the actuator body on the reject gate \u2014 not a big rupture, just a steady hiss you can hear if you stand close. Gate's working for now but it's been getting worse over the past few days. \u2014 M. Jensen, maintenance",
+      "labels": {
+        "sop_id": "SOP-0961"
+      }
+    },
+    {
+      "incident_id": "INC-02226",
+      "text": "IPA spilled on the floor right at the base of the vision stand during a lens cleaning. Not a huge amount but the floor is slippery and the spill is sitting close to the power strip and the cable tray. \u2014 A. Mehta, 2nd shift",
+      "labels": {
+        "sop_id": "SOP-0963"
+      }
+    },
+    {
+      "incident_id": "INC-02228",
+      "text": "Robot arm on the upstream welding cell swung way too close to the camera enclosure on the traverse. Smacked the e-stop before it could make contact. Everything halted. \u2014 O. Rivera, 2nd shift",
+      "labels": {
+        "sop_id": "SOP-0964"
+      }
+    },
+    {
+      "incident_id": "INC-02235",
+      "text": "Tooling change-over right after lunch. Nobody loaded the new inspection recipe and the system sat there passing parts it wasn't even looking at correctly for those dimensions. Only figured it out when quality walked by. \u2014 C. Dube, process tech",
+      "labels": {
+        "sop_id": "SOP-0967"
+      }
+    },
+    {
+      "incident_id": "INC-02247",
+      "text": "Second shift operator flagged this \u2014 the drive speed on the main pump might have gotten bumped during the cleaning crew's pass because we were pegging 93 PSI on the outlet side. Completely the opposite of the usual complaint about not enough push.",
+      "labels": {
+        "sop_id": "SOP-0971"
+      }
+    },
+    {
+      "incident_id": "INC-02261",
+      "text": "Maintenance noticed a small weep around the rotating part of the pump on line 3's unit. Wasn't there last week during inspection. Rate is slow \u2014 maybe a drop or two per minute tops. Unit is still making normal pressure and flow, just oozing a little at the rear of the pump casing.",
+      "labels": {
+        "sop_id": "SOP-0977"
+      }
+    },
+    {
+      "incident_id": "INC-02263",
+      "text": "Line 1 pump room \u2014 a two-inch line let go at a union joint and water was absolutely gushing onto the floor. We're talking a full-on river within a minute. I could hear the pressure drop across the whole building. This was way beyond a drip \u2014 it was a flood situation.",
+      "labels": {
+        "sop_id": "SOP-0978"
+      }
+    },
+    {
+      "incident_id": "INC-02264",
+      "text": "Third shift emergency \u2014 an elbow at the discharge header blew out and was throwing water hard against the far wall. The pumps were still running and just pumping everything onto the floor. Floor drains couldn't keep up with the volume. Total chaos in the pump room.",
+      "labels": {
+        "sop_id": "SOP-0978"
+      }
+    },
+    {
+      "incident_id": "INC-02276",
+      "text": "Vibration survey day \u2014 both units needed to be logged per the weekly PM. First unit read clean. Second unit by the south wall had a reading the tech wanted to flag to the reliability engineer. Still within acceptable limits but trending up compared to the last two weeks of data.",
+      "labels": {
+        "sop_id": "SOP-0984"
+      }
+    },
+    {
+      "incident_id": "INC-02280",
+      "text": "Second shift walked into the pump station smelling damp and found the floor wet near the main drain. Looked like maybe a connection had sweated or a small amount sloshed over during the earlier filter change. No pipe failure, no spray event \u2014 just pooled water sitting on the concrete.",
+      "labels": {
+        "sop_id": "SOP-0986"
+      }
+    },
+    {
+      "incident_id": "INC-02296",
+      "text": "Got called over to the north wave unit during first shift \u2014 HMI showing 287 on the pot. Setpoint controller must have drifted or someone bumped the trim. Temp was still climbing when I got there. Red alarm active.",
+      "labels": {
+        "sop_id": "SOP-0993"
+      }
+    },
+    {
+      "incident_id": "INC-02307",
+      "text": "Pulled a board off line 5 east unit after solder \u2014 all the through-hole leads on the connector side had what looked like missed wets. Wave must not have been high enough to make proper contact with the pads.",
+      "labels": {
+        "sop_id": "SOP-0998"
+      }
+    },
+    {
+      "incident_id": "INC-02310",
+      "text": "Batch reject on line 6 \u2014 boards coming out with shorts bridging adjacent pads on multiple locations. Wave looked flooded in the inspection glass. Way too much solder contacting the board face.",
+      "labels": {
+        "sop_id": "SOP-0999"
+      }
+    },
+    {
+      "incident_id": "INC-02328",
+      "text": "Line 3 second shift \u2014 visible solder balls and flux char accumulating on the chain fingers. Contamination bad enough to potentially cause board slippage mid-transit. Flagged for immediate cleaning.",
+      "labels": {
+        "sop_id": "SOP-1007"
+      }
+    },
+    {
+      "incident_id": "INC-02330",
+      "text": "Line 7 first shift. Wave was clearly asymmetric \u2014 higher on the left side of the nozzle exit than the right. Nozzle slot must have partial dross buildup causing a restriction. Needs cleaning and wave height check after.",
+      "labels": {
+        "sop_id": "SOP-1008"
+      }
+    },
+    {
+      "incident_id": "INC-02332",
+      "text": "Line 6 QC inspection flagged boards with partial flux coverage across a whole batch. Spray pattern looked wrong when I watched the nozzle \u2014 coverage was mostly on the edges but missing the middle. Due for calibration.",
+      "labels": {
+        "sop_id": "SOP-1009"
+      }
+    }
+  ]
+}

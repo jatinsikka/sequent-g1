@@ -1,0 +1,738 @@
+{
+  "family": "Steam Boiler",
+  "sops": [
+    {
+      "ref": "low_steam_pressure",
+      "title": "Gradual Steam Pressure Below Setpoint",
+      "condition": "Steam header pressure sensor reads below the normal operating setpoint of 90 PSI for more than 2 minutes without a corresponding increase in process load.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor steam_pressure_sensor",
+        "walk_to burner_control_panel",
+        "read_sensor combustion_air_damper_position_sensor",
+        "press_button burner_manual_high_fire_button",
+        "wait 120",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "steam_pressure_sensor",
+        "burner_control_panel",
+        "combustion_air_damper_position_sensor",
+        "burner_manual_high_fire_button",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "pressure_sudden_drop",
+      "title": "Rapid Steam Pressure Collapse",
+      "condition": "Steam pressure sensor registers a drop of more than 20 PSI within 30 seconds, indicating a possible steam line breach or sudden catastrophic load event.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor steam_pressure_sensor",
+        "press_button emergency_feedwater_pump_button",
+        "walk_to steam_header_isolation_valve",
+        "press_button steam_header_shutoff_button",
+        "notify maintenance_supervisor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "steam_pressure_sensor",
+        "emergency_feedwater_pump_button",
+        "steam_header_isolation_valve",
+        "steam_header_shutoff_button",
+        "maintenance_supervisor",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "high_pressure_alarm",
+      "title": "Steam Pressure High Warning",
+      "condition": "Steam pressure sensor reads above the high-pressure warning threshold of 125 PSI but below the pressure relief setpoint of 150 PSI.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor steam_pressure_sensor",
+        "press_button burner_low_fire_button",
+        "wait 60",
+        "read_sensor steam_pressure_sensor",
+        "press_button steam_vent_valve_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "steam_pressure_sensor",
+        "burner_low_fire_button",
+        "steam_vent_valve_button",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "pressure_relief_discharge",
+      "title": "Pressure Relief Valve Active Discharge",
+      "condition": "The pressure relief valve is actively venting steam to atmosphere, confirming that boiler pressure has exceeded the 150 PSI safety ceiling.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "press_button burner_shutoff_button",
+        "press_button emergency_feedwater_shutoff_button",
+        "walk_to pressure_relief_valve_station",
+        "read_sensor steam_pressure_sensor",
+        "wait 300",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "burner_shutoff_button",
+        "emergency_feedwater_shutoff_button",
+        "pressure_relief_valve_station",
+        "steam_pressure_sensor",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "low_water_level",
+      "title": "Boiler Drum Water Level Below Minimum",
+      "condition": "Water level sensor in the boiler drum reads below the minimum safe operating level of 30% for more than 60 seconds during normal operation.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor water_level_sensor",
+        "press_button feedwater_pump_start_button",
+        "wait 90",
+        "read_sensor water_level_sensor",
+        "read_sensor feedwater_flow_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "water_level_sensor",
+        "feedwater_pump_start_button",
+        "feedwater_flow_sensor",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "water_level_sudden_loss",
+      "title": "Sudden Rapid Water Level Collapse",
+      "condition": "Water level sensor drops more than 25 percentage points within 60 seconds, indicating a probable tube failure, ruptured drum fitting, or blowdown valve stuck in the open position.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "press_button burner_shutoff_button",
+        "press_button blowdown_valve_close_button",
+        "walk_to feedwater_valve_station",
+        "press_button manual_feedwater_open_button",
+        "read_sensor water_level_sensor",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "burner_shutoff_button",
+        "blowdown_valve_close_button",
+        "feedwater_valve_station",
+        "manual_feedwater_open_button",
+        "water_level_sensor",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "high_water_level",
+      "title": "Boiler Drum Water Level Above Maximum",
+      "condition": "Water level sensor reads above the maximum safe operating level of 85%, creating risk of water carryover and water hammer in steam distribution lines.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor water_level_sensor",
+        "press_button feedwater_pump_stop_button",
+        "press_button surface_blowdown_valve_button",
+        "wait 120",
+        "read_sensor water_level_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "water_level_sensor",
+        "feedwater_pump_stop_button",
+        "surface_blowdown_valve_button",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "burner_flame_failure",
+      "title": "Burner Flame Loss and Safety Lockout",
+      "condition": "Flame sensor detects loss of burner flame and the burner control module locks out after two consecutive failed ignition attempts.",
+      "steps": [
+        "walk_to burner_control_panel",
+        "read_sensor flame_detector_sensor",
+        "press_button burner_reset_button",
+        "wait 30",
+        "read_sensor flame_detector_sensor",
+        "press_button burner_start_button",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "burner_control_panel",
+        "flame_detector_sensor",
+        "burner_reset_button",
+        "burner_start_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "flue_gas_high_temp",
+      "title": "Flue Gas Temperature Excessive at Stack Outlet",
+      "condition": "Flue gas temperature sensor at the boiler stack outlet reads above 450 degrees F, indicating fouled heat transfer surfaces or an excessively high firing rate.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor flue_gas_temp_sensor",
+        "press_button burner_low_fire_button",
+        "wait 180",
+        "read_sensor flue_gas_temp_sensor",
+        "walk_to flue_vent_access_panel",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "flue_gas_temp_sensor",
+        "burner_low_fire_button",
+        "flue_vent_access_panel",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "feedwater_pump_fault",
+      "title": "Feedwater Pump Stopped or Insufficient Flow",
+      "condition": "Feedwater pump run-status sensor indicates the primary pump has stopped or the feedwater flow sensor reads below the minimum threshold during normal boiler operation.",
+      "steps": [
+        "walk_to feedwater_pump_station",
+        "read_sensor feedwater_pump_status_sensor",
+        "press_button backup_feedwater_pump_start_button",
+        "read_sensor feedwater_flow_sensor",
+        "walk_to boiler_control_panel",
+        "read_sensor water_level_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "feedwater_pump_station",
+        "feedwater_pump_status_sensor",
+        "backup_feedwater_pump_start_button",
+        "feedwater_flow_sensor",
+        "boiler_control_panel",
+        "water_level_sensor",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "minor_water_leak",
+      "title": "Small Continuous Water Leak at Fitting or Packing",
+      "condition": "Floor leak sensor or visual inspection detects a small persistent drip or seep from a boiler fitting, valve packing, or threaded pipe joint with no accompanying pressure deviation.",
+      "steps": [
+        "walk_to boiler_perimeter_station",
+        "read_sensor floor_leak_sensor",
+        "pick drip_containment_pan",
+        "place drip_containment_pan",
+        "press_button non_critical_leak_isolation_valve_button",
+        "wait 60",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "boiler_perimeter_station",
+        "floor_leak_sensor",
+        "drip_containment_pan",
+        "non_critical_leak_isolation_valve_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "major_rupture",
+      "title": "Steam or Water Line Major Rupture",
+      "condition": "A large uncontrolled water or steam release is detected simultaneously by the floor leak sensor and a rapid steam pressure drop, or a pipe, tube, or drum fitting failure with substantial uncontrolled flow is directly observed.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "press_button burner_shutoff_button",
+        "press_button main_steam_isolation_button",
+        "press_button main_feedwater_isolation_button",
+        "walk_to boiler_room_exit",
+        "press_button boiler_room_evacuation_alarm_button",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "burner_shutoff_button",
+        "main_steam_isolation_button",
+        "main_feedwater_isolation_button",
+        "boiler_room_exit",
+        "boiler_room_evacuation_alarm_button",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "water_softener_regen",
+      "title": "Water Softener Regeneration Required",
+      "condition": "Water hardness sensor at the softener outlet reads above the maximum allowable hardness setpoint or the scheduled regeneration interval of 72 hours has elapsed.",
+      "steps": [
+        "walk_to water_treatment_station",
+        "read_sensor water_hardness_sensor",
+        "pick softener_salt_bag",
+        "place softener_salt_hopper",
+        "press_button water_softener_regen_button",
+        "wait 3600",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "water_treatment_station",
+        "water_hardness_sensor",
+        "softener_salt_bag",
+        "softener_salt_hopper",
+        "water_softener_regen_button",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "blowdown_procedure",
+      "title": "Scheduled Bottom Blowdown for Sediment Removal",
+      "condition": "Daily maintenance schedule requires bottom blowdown to purge sediment and scale from the boiler drum, or the TDS sensor reads above 3500 ppm.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor tds_sensor",
+        "walk_to blowdown_valve_station",
+        "press_button bottom_blowdown_valve_open_button",
+        "wait 30",
+        "press_button bottom_blowdown_valve_close_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "tds_sensor",
+        "blowdown_valve_station",
+        "bottom_blowdown_valve_open_button",
+        "bottom_blowdown_valve_close_button",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "gauge_glass_cleaning",
+      "title": "Water Gauge Glass Inspection and Cleaning",
+      "condition": "Weekly maintenance schedule requires inspection and cleaning of the boiler water gauge glass, or the glass is visibly cloudy, stained, or otherwise obscured.",
+      "steps": [
+        "walk_to lockout_tagout_panel",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "walk_to gauge_glass_station",
+        "pick gauge_glass_cleaning_kit",
+        "place gauge_glass_cleaning_kit",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "lockout_tagout_panel",
+        "lockout_hasp",
+        "gauge_glass_station",
+        "gauge_glass_cleaning_kit",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "burner_nozzle_replacement",
+      "title": "Burner Nozzle Scheduled Replacement",
+      "condition": "Accumulated operating hours on the burner nozzle have reached the 2000-hour replacement interval or the combustion efficiency sensor shows CO emissions above 50 ppm.",
+      "steps": [
+        "walk_to burner_control_panel",
+        "press_button burner_shutoff_button",
+        "walk_to burner_access_panel",
+        "pick worn_burner_nozzle",
+        "place worn_burner_nozzle",
+        "pick replacement_burner_nozzle",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "burner_control_panel",
+        "burner_shutoff_button",
+        "burner_access_panel",
+        "worn_burner_nozzle",
+        "replacement_burner_nozzle",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "safety_valve_inspection",
+      "title": "Pressure Safety Relief Valve Monthly Lift Test",
+      "condition": "Monthly preventive maintenance schedule requires a manual lift test of the pressure safety relief valve to verify it opens freely and reseats without leaking.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor steam_pressure_sensor",
+        "walk_to safety_relief_valve_station",
+        "press_button safety_valve_manual_lift_button",
+        "wait 5",
+        "read_sensor steam_pressure_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "steam_pressure_sensor",
+        "safety_relief_valve_station",
+        "safety_valve_manual_lift_button",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "lockout_tagout_boiler",
+      "title": "Boiler Full Lockout Tagout Isolation",
+      "condition": "A maintenance work order requires complete isolation and de-energization of the boiler system before any internal inspection, cleaning, or repair is performed.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "press_button burner_shutoff_button",
+        "press_button main_steam_isolation_button",
+        "walk_to lockout_tagout_panel",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "burner_shutoff_button",
+        "main_steam_isolation_button",
+        "lockout_tagout_panel",
+        "lockout_hasp",
+        "maintenance_supervisor"
+      ]
+    },
+    {
+      "ref": "steam_burn_spill",
+      "title": "Steam Burn or Scalding Injury Response",
+      "condition": "A worker sustains a burn or scalding injury from a steam release or hot condensate contact in the boiler room.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "press_button main_steam_isolation_button",
+        "walk_to first_aid_station",
+        "pick first_aid_kit",
+        "place first_aid_kit",
+        "press_button emergency_call_button",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "main_steam_isolation_button",
+        "first_aid_station",
+        "first_aid_kit",
+        "emergency_call_button",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "co_alarm_boiler_room",
+      "title": "Carbon Monoxide Alarm Activation in Boiler Room",
+      "condition": "Carbon monoxide detector in the boiler room activates with a reading at or above 35 ppm, indicating incomplete combustion or flue gas recirculation into the occupied space.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "press_button burner_shutoff_button",
+        "walk_to boiler_room_ventilation_panel",
+        "press_button forced_ventilation_fan_button",
+        "walk_to boiler_room_exit",
+        "press_button boiler_room_evacuation_alarm_button",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "burner_shutoff_button",
+        "boiler_room_ventilation_panel",
+        "forced_ventilation_fan_button",
+        "boiler_room_exit",
+        "boiler_room_evacuation_alarm_button",
+        "plant_safety_officer"
+      ]
+    },
+    {
+      "ref": "cold_startup",
+      "title": "Boiler Cold Start from De-Pressurized State",
+      "condition": "Boiler has been fully de-pressurized and cooled to ambient temperature following a planned outage and must be returned to normal operating pressure and temperature.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "read_sensor water_level_sensor",
+        "press_button feedwater_pump_start_button",
+        "wait 300",
+        "press_button burner_start_button",
+        "read_sensor steam_pressure_sensor",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "water_level_sensor",
+        "feedwater_pump_start_button",
+        "burner_start_button",
+        "steam_pressure_sensor",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "planned_shutdown",
+      "title": "Controlled Planned Boiler Shutdown",
+      "condition": "A scheduled maintenance window, end-of-production period, or planned outage requires controlled reduction of boiler pressure and safe de-energization of all systems.",
+      "steps": [
+        "walk_to boiler_control_panel",
+        "press_button burner_shutoff_button",
+        "wait 600",
+        "read_sensor steam_pressure_sensor",
+        "press_button main_steam_isolation_button",
+        "press_button feedwater_pump_stop_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "boiler_control_panel",
+        "burner_shutoff_button",
+        "steam_pressure_sensor",
+        "main_steam_isolation_button",
+        "feedwater_pump_stop_button",
+        "shift_supervisor"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "low_steam_pressure",
+      "text": "Second shift, unit by the east wall — the output started feeling weak around 2 AM. Stamping line 4 kept stalling because the headers weren't giving enough oomph. Checked the gauges and the needle was sitting around 78 on the main header, just kind of drifted there over about 20 minutes."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "low_steam_pressure",
+      "text": "Line 2 forming press started throwing fit warnings because the die wasn't seating right — traced it back to the boiler room. The burner had been running at half capacity all morning and nobody noticed the header reading had been creeping down since 6 AM. Nothing dramatic, just slowly losing ground."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "low_steam_pressure",
+      "text": "Plant engineer flagged it during rounds — the boiler near the loading dock was sitting 12 PSI below where it should be. No alarms went off because the drop was so gradual, but the steam traps on line 3 were all waterlogged and that was the first symptom we noticed."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "pressure_sudden_drop",
+      "text": "Everything was fine then boom — the whole boiler room header went from 110 to 85 PSI in less than a minute. You could hear it on line 1, the forming units all stalled simultaneously. Maintenance thought a line had blown somewhere downstream."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "pressure_sudden_drop",
+      "text": "Third shift, around 3 AM, the control room alarm lit up red all at once. Operator said the needle dropped like a rock — wasn't a slow thing at all. Took maybe 30 seconds to lose over 20 pounds. We shut the header valve immediately, couldn't figure out if it was a rupture or a valve failure."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "pressure_sudden_drop",
+      "text": "I was doing rounds near the back of the boiler room when I heard the steam rushing. The gauge on the panel by door B went from normal to basically nothing almost instantly. Nothing gradual about it — the whole system just cratered in seconds. Had to call the supervisor right away."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Yellow caution light came on at the main panel around 10 AM. The gauge was reading 128 PSI — still under the pop-off but definitely over where we're supposed to run. Fired down to low and cracked the vent, got it back under control within a few minutes. Logged it and told the super."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Line 3 operator noticed the steam was hitting the molding press harder than usual and there was a yellow indicator on the panel. Went to check and the header was up at 131. Not dangerous yet but creeping higher than we want. Adjusted firing rate and watched it come back down into the green."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "high_pressure_alarm",
+      "text": "Morning startup on the big boiler near the compressor bay — gauge climbed higher than normal after warmup, sat around 127 PSI and the warning light was on. Relief hasn't popped, just a caution situation. Turned the burner down and vented a bit to bring it in range before the day shift came on."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "pressure_relief_discharge",
+      "text": "Loud hissing from the roof vent near boiler 2 — first shift operator ran out and confirmed steam was shooting out the pop-off. The panel read over 150. Killed the burner immediately and shut the feedwater. Cleared everyone out and called the safety officer, nobody goes back in until it bleeds down."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "pressure_relief_discharge",
+      "text": "Around 7:30 AM we got a call from outside — a maintenance guy said the safety valve on the main boiler was wide open and screaming. Relief had definitely popped. Came downstairs, panel was pegged past 150. Took emergency steps and held everyone back until pressure dropped to safe range."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "low_water_level",
+      "text": "Boiler near the stamping room started alarming around noon. Operator went to check and the sight glass showed barely any water — level was down low, not where it should be at all. Feedwater auto system wasn't keeping up. Hit the pump start and monitored until it came back up to safe range."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "low_water_level",
+      "text": "Second shift maintenance found the drum reading at about 25% on their hourly walk. It had been dropping for a while — the auto makeup wasn't filling fast enough because one of the float valves was gummed up. Started the pump manually and checked flow before calling the supervisor."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "low_water_level",
+      "text": "Tech on line 4 area noticed the boiler by the paint bay wasn't performing right — steam quality looked wet and sluggish. Checked the drum indicator and the level had gradually dropped below the red mark. Nothing sudden, just slowly depleted over a couple of hours without anyone catching it."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "water_level_sudden_loss",
+      "text": "The drum went from half full to nearly empty in about 45 seconds — I've never seen it drop that fast in my four years here. We think the blowdown valve stuck open or a tube let go somewhere inside. Killed the fire instantly and tried to force feed. Safety officer got a call right away."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "water_level_sudden_loss",
+      "text": "Third shift, near the loading area boiler — operator watched the gauge glass go from normal to almost dry in under a minute. Not a slow drift at all, it just disappeared. We hit the burner kill first because that's the instinct. Turned out the bottom blowdown was stuck wide open."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "high_water_level",
+      "text": "Line 2 forming presses were banging and popping — classic water hammer through the headers. Came back to the boiler room and the drum was way too full, up around 90%. The feedwater auto-fill must have stuck on. Stopped the pump and did a surface blowdown to pull the level back down."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "high_water_level",
+      "text": "Steam coming out of the header trap discharge on line 3 looked really wet — droplets everywhere on the floor. Checked the boiler and the glass was showing the drum nearly at the top. Too much water in the system flooding the steam space. Shut off the makeup pump and surface-blew it down."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "high_water_level",
+      "text": "Startup operator on first shift overfilled the drum — flooded the steam space. The header pipe on the south side was knocking and vibrating audibly. Went to the control panel and the level reading was sitting at 88%. Stopped the feedwater pump and opened the surface blowdown until we hit about 60%."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "burner_flame_failure",
+      "text": "Boiler near dock 3 went into lockout around 6 AM — the burner tried twice and couldn't catch. Control box had the fault light on solid. Tech hit the reset button, waited about half a minute, and tried again. Second attempt it lit fine. Noted it in the log for the morning crew."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "burner_flame_failure",
+      "text": "Middle of second shift the big boiler just went quiet — no combustion noise at all, no heat output. Operator checked and the igniter had failed to re-light after a normal cycling event and the safety system went to lockout. Had to get maintenance to reset it and re-fire before pressure got too low."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "flue_gas_high_temp",
+      "text": "Stack thermometer by boiler 1 was reading 480 degrees when we did rounds at 8 AM — way hotter than normal exhaust. Maintenance figured the fire-side tubes were scaled up bad after months of high TDS water. Turned the firing rate way down and got someone to schedule a tube inspection."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "flue_gas_high_temp",
+      "text": "Plant manager flagged that the stack on the north side boiler was putting out visible heat shimmer even at low load — neighbor complained about it. Instruments showed exhaust temps pushing 470 F. Throttled back the burner and called maintenance to schedule a fireside cleaning."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "feedwater_pump_fault",
+      "text": "Primary feedwater pump on the east boiler just stopped mid-shift — tripped on overload. Drum level started trending down toward the caution mark. Kicked the backup pump on from the panel near the pump skid and kept an eye on the flow meter to make sure it was actually moving water into the drum."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "feedwater_pump_fault",
+      "text": "Second shift operator said the drum wasn't climbing even with the pump supposedly running. Went to the pump room and the primary was humming but not actually pumping — impeller probably shot. Switched to the backup and confirmed flow on the meter before we left the area."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "minor_water_leak",
+      "text": "Small puddle forming near the bottom flange on boiler 2 — about a cup's worth of water over several hours. No alarms, all pressure gauges look normal. Put a drip pan under it and cracked the isolation valve closed. Told maintenance to get a new gasket on this one when they have a chance."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "minor_water_leak",
+      "text": "Cleaning crew noticed a slow wet spot on the floor in the boiler room corner early morning — traced it to a valve stem on the condensate return line. Just weeping slowly, not spraying. Nothing abnormal on the pressure gauges at all. We contained it with a pan and called the day-shift plumber."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "minor_water_leak",
+      "text": "Tech doing routine rounds found the packing nut on one of the isolation valves near the feedwater inlet was seeping a steady drip — maybe a teaspoon a minute. Pan was placed underneath, valve was partially isolated at the bypass, and maintenance was pinged. All readings at the control panel stayed within normal range."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "major_rupture",
+      "text": "Massive cloud of steam filled the back half of the boiler room right near shift change. One of the guys near line 4 saw the pipe elbow let go — water and steam just everywhere at once. Hit every shutoff we could reach and got everyone out immediately. Called safety, nobody re-enters until cleared."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "major_rupture",
+      "text": "Third shift — loud bang then continuous hissing you could hear from the assembly floor. Operator ran in and saw a section of the condensate return had blown open completely. Water was pooling on the floor fast. Killed power to the burner at the panel, shut both main valves, and pulled the evacuation alarm."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "water_softener_regen",
+      "text": "Scale buildup in the boiler tubes looked worse than normal during inspection last Tuesday — traced it to the softener skipping its last cycle. The salt hopper was nearly empty too. Loaded two new salt bags and kicked off the regen manually. Told the supervisor it was done and logged the time."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "water_softener_regen",
+      "text": "Lab flagged elevated hardness on a feedwater sample they pulled — well above what we want going into the drum. Maintenance went to the treatment skid on the north side, checked the hopper level, added salt, and ran a full regeneration cycle. Water quality test passed when they checked again after the cycle finished."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "blowdown_procedure",
+      "text": "TDS was reading around 3800 at the start of first shift — definitely time to purge the drum. Opened the bottom drain at the valve station for about 30 seconds, got the sludge moving good, then closed it back up. Checked the reading again and it had come back down into range. Logged it in the PM book."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "blowdown_procedure",
+      "text": "Daily check showed it was past 72 hours since the last drain-off — got pushed because of the production crunch. Maintenance ran down to the valve, opened the bottom for a half minute, then closed it up. The water coming out was dark brown at first, almost black. Definitely needed doing."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "gauge_glass_cleaning",
+      "text": "Operator on first shift couldn't read the water level through the sight glass — there was a heavy brown film on the inside that made the scale impossible to see clearly. Locked it out at the LOTO board, cleaned it with the kit from the cabinet, and confirmed actual water level before signing off the shift."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "gauge_glass_cleaning",
+      "text": "Weekly PM was due on the level glass on boiler 1 per the maintenance calendar. It wasn't terrible but there was noticeable discoloration at the waterline and some mineral staining. Took the cleaning kit out, did the lockout procedure, wiped it down inside and out. Crystal clear afterwards — supervisor signed the PM log."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "burner_nozzle_replacement",
+      "text": "CO monitor near burner 2 started creeping up during steady firing — hit around 60 ppm which is above our threshold. Maintenance pulled the tip and it was noticeably eroded and pitted at the orifice. Grabbed the spare from the parts cabinet, swapped out the old one, and called maintenance to complete the reinstall and relight."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "burner_nozzle_replacement",
+      "text": "Hour counter on the main burner hit 2000 so we pulled the tip for scheduled swap-out. No obvious failure on it — just time-based per the manufacturer spec. Shut the burner down at the panel, accessed the burner head, pulled the old nozzle and staged the replacement, then notified the tech to finish the installation."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "safety_valve_inspection",
+      "text": "Monthly test day on boiler 3 — maintenance tech did the manual pop test while operating pressure was in the normal zone. It lifted cleanly and re-seated without any dribble or chatter. Checked the steam pressure gauge before and after to confirm it came back to normal. Signed off the PM card and told the supervisor."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "safety_valve_inspection",
+      "text": "During scheduled monthly checks on the north boiler, the safety valve lifted fine but was slow to reseat — sat slightly open for a few extra seconds longer than expected before clicking shut. Maintenance noted it for follow-up and informed the shift supervisor after checking that operating pressure had returned fully to normal."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "lockout_tagout_boiler",
+      "text": "Maintenance was coming in Saturday to reline the fireside of boiler 2 — needed full energy isolation before anyone could go inside the shell. Killed the burner, closed the main steam block valve, and locked everything out at the LOTO board. Handed over the keys to the maintenance lead for them to verify before entry."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "lockout_tagout_boiler",
+      "text": "Annual tube inspection was scheduled for the main boiler over the long weekend. Friday evening shift brought it down orderly — shut the fire, closed the steam isolation valve, then walked to the LOTO station and applied the hasps. Supervisor came and confirmed isolation before the weekend inspection crew was allowed in."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "steam_burn_spill",
+      "text": "Operator near the trap manifold on line 3 got hit with flash steam when a union fitting let go unexpectedly — second-degree burn on her forearm. Shut the main steam valve at the panel immediately, grabbed the first aid box from the station by the entry, and hit the emergency call button. Safety officer was on the phone within two minutes."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "steam_burn_spill",
+      "text": "Maintenance tech on the line 2 area burned his hand pretty bad on condensate that came out of a drip leg — temperature was way higher than he expected. Not a catastrophic injury but we still isolated the steam header at the panel, got the first aid kit from the station near boiler room door, and reported it to safety per protocol."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "co_alarm_boiler_room",
+      "text": "CO detector on the east wall of the boiler room started chirping and went to full alarm — reading was around 45 ppm. Figured it was the burner not getting enough combustion air. Killed the burner right away, hit the exhaust fans at the ventilation panel, got everyone out of the room, and called the safety officer to meet us outside."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "co_alarm_boiler_room",
+      "text": "Second shift, one of the techs started feeling a headache near boiler 1 and noticed the wall detector was flashing yellow. Checked the readout and it was at 40 ppm. We didn't wait around — hit the burner off, turned on the big forced-air fans from the ventilation panel, sounded the room alarm, and got everybody out fast."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "cold_startup",
+      "text": "Monday morning after a long holiday weekend shutdown — boiler near the north dock was completely cold and empty from the planned outage. First thing was checking if there was enough water in the drum before doing anything else, then getting the feedwater pump going to fill it up before we even thought about lighting the fire."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "cold_startup",
+      "text": "After the annual inspection, we had to bring the main boiler back from zero — it had been cold for four days. Filled the drum from empty, fired the pilot carefully, and let it build steam slowly. Kept checking the pressure gauge every few minutes until it reached normal operating range before calling the supervisor to confirm startup complete."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "planned_shutdown",
+      "text": "End of the production week Friday — scheduled to bring boiler 1 down for weekend maintenance access. Killed the burner at 3 PM, let the pressure bleed off naturally for about 10 minutes while watching the gauge, then closed the main steam header and stopped the feedwater pump before locking the room and leaving."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "planned_shutdown",
+      "text": "Plant manager ordered a controlled shutdown of boiler 2 for a Thursday afternoon inspection window. Second shift operator walked through the steps per the posted procedure — shut the fire first, waited for the gauge to show pressure coming down, then isolated the steam line and stopped the water pump. Supervisor confirmed all steps done before signing off."
+    }
+  ]
+}

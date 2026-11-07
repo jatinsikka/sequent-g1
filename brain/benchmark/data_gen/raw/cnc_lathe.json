@@ -1,0 +1,778 @@
+{
+  "family": "CNC Lathe",
+  "sops": [
+    {
+      "ref": "coolant_pressure_low",
+      "title": "Coolant Pressure Below Minimum Setpoint",
+      "condition": "The coolant pressure sensor reads below 2.0 bar for more than 30 seconds during a cutting cycle, triggering a P-LOW alarm while the spindle and axes continue operating.",
+      "steps": [
+        "walk_to coolant_pressure_gauge_panel",
+        "read_sensor coolant_pressure_sensor",
+        "walk_to coolant_pump_control_panel",
+        "press_button coolant_pump_prime_button",
+        "wait 15",
+        "read_sensor coolant_pressure_sensor",
+        "notify maintenance_tech if pressure remains below 2.0 bar"
+      ],
+      "equipment": [
+        "coolant_pressure_gauge_panel",
+        "coolant_pressure_sensor",
+        "coolant_pump_control_panel",
+        "coolant_pump_prime_button"
+      ]
+    },
+    {
+      "ref": "coolant_pressure_collapse",
+      "title": "Sudden Coolant Pressure Collapse to Zero",
+      "condition": "Coolant pressure drops from the normal operating range to zero bar within 5 seconds during a cut, indicating a ruptured line or pump seizure, and the controller halts all motion on a P-FAULT alarm.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button feed_hold_button",
+        "walk_to coolant_pressure_gauge_panel",
+        "read_sensor coolant_pressure_sensor",
+        "walk_to coolant_pump_motor_junction",
+        "read_sensor coolant_pump_motor_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "feed_hold_button",
+        "coolant_pressure_gauge_panel",
+        "coolant_pressure_sensor",
+        "coolant_pump_motor_junction",
+        "coolant_pump_motor_sensor"
+      ]
+    },
+    {
+      "ref": "coolant_pressure_high",
+      "title": "Coolant Pressure Above Maximum Ceiling",
+      "condition": "The coolant pressure sensor reads above 6.5 bar, the system maximum, triggering a P-HIGH alarm that risks rupturing nozzle seals and supply fittings if left unaddressed.",
+      "steps": [
+        "walk_to coolant_pressure_gauge_panel",
+        "read_sensor coolant_pressure_sensor",
+        "walk_to coolant_pump_control_panel",
+        "press_button coolant_pump_speed_reduce_button",
+        "wait 10",
+        "read_sensor coolant_pressure_sensor",
+        "notify maintenance_tech if pressure remains above 6.5 bar"
+      ],
+      "equipment": [
+        "coolant_pressure_gauge_panel",
+        "coolant_pressure_sensor",
+        "coolant_pump_control_panel",
+        "coolant_pump_speed_reduce_button"
+      ]
+    },
+    {
+      "ref": "spindle_overload_warning",
+      "title": "Spindle Load at Warning Threshold",
+      "condition": "The spindle load monitor reads between 75% and 99% of rated capacity, illuminating a steady LOAD-WARN indicator while the spindle continues rotating at the programmed speed without faulting.",
+      "steps": [
+        "walk_to cnc_operator_panel",
+        "read_sensor spindle_load_monitor",
+        "press_button feed_rate_override_decrease_button",
+        "wait 5",
+        "read_sensor spindle_load_monitor",
+        "notify operator_lead if load remains above 75%"
+      ],
+      "equipment": [
+        "cnc_operator_panel",
+        "spindle_load_monitor",
+        "feed_rate_override_decrease_button"
+      ]
+    },
+    {
+      "ref": "spindle_overload_fault",
+      "title": "Spindle Overload Fault and Full Stop",
+      "condition": "Spindle load exceeds 100% of rated capacity and the controller trips an OVL-FAULT alarm, cutting power to the spindle motor and halting all axis motion with the workpiece clamped in the chuck.",
+      "steps": [
+        "walk_to cnc_operator_panel",
+        "read_sensor spindle_load_monitor",
+        "press_button fault_reset_button",
+        "wait 5",
+        "read_sensor spindle_load_monitor",
+        "walk_to turret_tool_station",
+        "notify maintenance_tech"
+      ],
+      "equipment": [
+        "cnc_operator_panel",
+        "spindle_load_monitor",
+        "fault_reset_button",
+        "turret_tool_station"
+      ]
+    },
+    {
+      "ref": "chuck_grip_fail",
+      "title": "Chuck Hydraulic Grip Pressure Loss",
+      "condition": "The hydraulic chuck pressure sensor reads below 35 bar, the minimum safe clamping threshold, causing a GRIP-LOW alarm that locks out spindle start to prevent workpiece ejection.",
+      "steps": [
+        "walk_to hydraulic_unit_panel",
+        "read_sensor chuck_hydraulic_pressure_sensor",
+        "press_button hydraulic_pump_prime_button",
+        "wait 10",
+        "read_sensor chuck_hydraulic_pressure_sensor",
+        "notify maintenance_tech if pressure remains below 35 bar"
+      ],
+      "equipment": [
+        "hydraulic_unit_panel",
+        "chuck_hydraulic_pressure_sensor",
+        "hydraulic_pump_prime_button"
+      ]
+    },
+    {
+      "ref": "turret_index_jam",
+      "title": "Turret Indexing Jam Between Tool Stations",
+      "condition": "The turret fails to complete rotation to the commanded tool station within the controller timeout window, triggering a TURR-JAM alarm and halting all axis motion.",
+      "steps": [
+        "walk_to cnc_operator_panel",
+        "press_button feed_hold_button",
+        "walk_to turret_tool_station",
+        "read_sensor turret_index_sensor",
+        "press_button turret_manual_index_button",
+        "wait 10",
+        "notify maintenance_tech if turret does not index to station"
+      ],
+      "equipment": [
+        "cnc_operator_panel",
+        "feed_hold_button",
+        "turret_tool_station",
+        "turret_index_sensor",
+        "turret_manual_index_button"
+      ]
+    },
+    {
+      "ref": "bar_feeder_jam",
+      "title": "Bar Feeder Stock Advance Jam",
+      "condition": "The bar feeder fails to advance the stock bar to the collet stop position within the programmed feed time, triggering a FEED-JAM alarm on the bar feeder display and halting the cycle.",
+      "steps": [
+        "walk_to bar_feeder_control_panel",
+        "press_button bar_feeder_stop_button",
+        "read_sensor bar_feeder_position_sensor",
+        "pick stuck_bar_remnant",
+        "place stuck_bar_remnant on scrap_bin",
+        "press_button bar_feeder_reset_button",
+        "notify operator_lead"
+      ],
+      "equipment": [
+        "bar_feeder_control_panel",
+        "bar_feeder_stop_button",
+        "bar_feeder_position_sensor",
+        "stuck_bar_remnant",
+        "scrap_bin",
+        "bar_feeder_reset_button"
+      ]
+    },
+    {
+      "ref": "axis_position_fault",
+      "title": "Axis Position Encoder Fault",
+      "condition": "The CNC controller raises an ENCODER-FAULT alarm for the X or Z axis, indicating a lost or erratic position signal that prevents safe axis movement until the fault is cleared.",
+      "steps": [
+        "walk_to cnc_operator_panel",
+        "read_sensor x_axis_encoder_sensor",
+        "read_sensor z_axis_encoder_sensor",
+        "press_button fault_reset_button",
+        "wait 10",
+        "read_sensor x_axis_encoder_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": [
+        "cnc_operator_panel",
+        "x_axis_encoder_sensor",
+        "z_axis_encoder_sensor",
+        "fault_reset_button"
+      ]
+    },
+    {
+      "ref": "coolant_leak_minor",
+      "title": "Minor Coolant Drip at Chip Conveyor Seal",
+      "condition": "A slow coolant drip of less than 0.5 liters per minute is observed at the chip conveyor drain seal or fitting, posing a floor slip hazard but not requiring machine stoppage.",
+      "steps": [
+        "walk_to chip_conveyor_area",
+        "read_sensor coolant_leak_detection_sensor",
+        "pick absorbent_drip_pad",
+        "place absorbent_drip_pad under_leak_point",
+        "walk_to safety_station",
+        "pick wet_floor_sign",
+        "place wet_floor_sign near_chip_conveyor_area",
+        "notify maintenance_tech"
+      ],
+      "equipment": [
+        "chip_conveyor_area",
+        "coolant_leak_detection_sensor",
+        "absorbent_drip_pad",
+        "safety_station",
+        "wet_floor_sign"
+      ]
+    },
+    {
+      "ref": "coolant_leak_major",
+      "title": "Major Coolant Line Rupture",
+      "condition": "Coolant is flowing uncontrolled at more than 2 liters per minute from a ruptured line or blown fitting, spreading across the floor and creating an immediate slip and electrical hazard.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "walk_to coolant_pump_control_panel",
+        "press_button coolant_pump_off_button",
+        "walk_to safety_station",
+        "pick spill_containment_boom",
+        "place spill_containment_boom around_leak_zone",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "coolant_pump_control_panel",
+        "coolant_pump_off_button",
+        "safety_station",
+        "spill_containment_boom"
+      ]
+    },
+    {
+      "ref": "filter_coolant_replace",
+      "title": "Coolant Filter Media Replacement",
+      "condition": "The coolant filter differential pressure indicator reaches the red zone or the 250 operating-hour scheduled replacement interval has elapsed, reducing coolant flow and filtration efficiency.",
+      "steps": [
+        "walk_to coolant_pump_control_panel",
+        "press_button coolant_pump_off_button",
+        "walk_to coolant_filter_housing",
+        "pick spent_filter_cartridge",
+        "place spent_filter_cartridge in_waste_container",
+        "pick replacement_filter_cartridge",
+        "place replacement_filter_cartridge in_coolant_filter_housing",
+        "press_button coolant_pump_on_button"
+      ],
+      "equipment": [
+        "coolant_pump_control_panel",
+        "coolant_pump_off_button",
+        "coolant_filter_housing",
+        "spent_filter_cartridge",
+        "waste_container",
+        "replacement_filter_cartridge",
+        "coolant_pump_on_button"
+      ]
+    },
+    {
+      "ref": "lubrication_ways",
+      "title": "Machine Way and Ball Screw Lubrication",
+      "condition": "The centralized lubrication system low-oil indicator illuminates, or the daily lubrication log shows the manual way-oiling interval has elapsed, requiring the reservoir to be topped up and the lube pump primed.",
+      "steps": [
+        "walk_to lube_reservoir_panel",
+        "read_sensor lube_oil_level_sensor",
+        "pick lube_oil_bottle",
+        "place lube_oil_bottle at_lube_reservoir_fill_port",
+        "press_button lube_pump_prime_button",
+        "wait 20",
+        "notify operator_lead"
+      ],
+      "equipment": [
+        "lube_reservoir_panel",
+        "lube_oil_level_sensor",
+        "lube_oil_bottle",
+        "lube_reservoir_fill_port",
+        "lube_pump_prime_button"
+      ]
+    },
+    {
+      "ref": "belt_check_replace",
+      "title": "Spindle Drive Belt Inspection and Replacement",
+      "condition": "The 1000-hour spindle belt inspection interval is due, or audible squealing or measurable belt slippage is detected during spindle acceleration to programmed speed.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "walk_to spindle_drive_cover",
+        "pick worn_spindle_drive_belt",
+        "place worn_spindle_drive_belt in_waste_container",
+        "pick replacement_drive_belt",
+        "place replacement_drive_belt on_spindle_pulley",
+        "notify maintenance_tech"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "spindle_drive_cover",
+        "worn_spindle_drive_belt",
+        "waste_container",
+        "replacement_drive_belt",
+        "spindle_pulley"
+      ]
+    },
+    {
+      "ref": "chip_conveyor_clean",
+      "title": "Chip Conveyor and Collection Bin Cleanout",
+      "condition": "The BIN-FULL sensor activates when the chip collection bin reaches 80% capacity, or visible chip buildup is impeding conveyor belt movement and risking a jam.",
+      "steps": [
+        "walk_to chip_conveyor_control_box",
+        "press_button chip_conveyor_stop_button",
+        "walk_to chip_collection_bin",
+        "pick chip_collection_bin",
+        "place chip_collection_bin at_chip_dump_station",
+        "press_button chip_conveyor_start_button",
+        "notify operator_lead"
+      ],
+      "equipment": [
+        "chip_conveyor_control_box",
+        "chip_conveyor_stop_button",
+        "chip_collection_bin",
+        "chip_dump_station",
+        "chip_conveyor_start_button"
+      ]
+    },
+    {
+      "ref": "tool_offset_calibrate",
+      "title": "Tool Length Offset Calibration After Insert Change",
+      "condition": "A new cutting insert or toolholder has been mounted in a turret station and the corresponding tool offset register must be updated before resuming production to maintain dimensional accuracy.",
+      "steps": [
+        "walk_to turret_tool_station",
+        "pick new_tool_insert",
+        "place new_tool_insert in_turret_pocket",
+        "walk_to cnc_operator_panel",
+        "press_button tool_offset_measure_button",
+        "read_sensor tool_length_probe_sensor",
+        "notify operator_lead"
+      ],
+      "equipment": [
+        "turret_tool_station",
+        "new_tool_insert",
+        "turret_pocket",
+        "cnc_operator_panel",
+        "tool_offset_measure_button",
+        "tool_length_probe_sensor"
+      ]
+    },
+    {
+      "ref": "lockout_tagout_full",
+      "title": "Full Lockout-Tagout for Maintenance Zone Entry",
+      "condition": "Planned maintenance requiring physical entry into the machine work zone or access to guarded mechanical areas mandates isolation of all electrical and hydraulic energy sources before work begins.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "walk_to electrical_disconnect_panel",
+        "press_button main_power_disconnect_button",
+        "pick lockout_hasp",
+        "place lockout_hasp on_main_power_disconnect_button",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "electrical_disconnect_panel",
+        "main_power_disconnect_button",
+        "lockout_hasp"
+      ]
+    },
+    {
+      "ref": "coolant_spill_cleanup",
+      "title": "Coolant Spill Cleanup on Floor",
+      "condition": "A static coolant puddle of less than 5 liters is found on the floor around the lathe base with no active source of flow, posing a slip hazard that must be absorbed and disposed of as chemical waste.",
+      "steps": [
+        "walk_to safety_station",
+        "pick wet_floor_sign",
+        "place wet_floor_sign near_spill_area",
+        "pick absorbent_granules_container",
+        "place absorbent_granules_container over_spill_area",
+        "pick used_absorbent_bag",
+        "place used_absorbent_bag in_hazmat_waste_bin",
+        "notify operator_lead"
+      ],
+      "equipment": [
+        "safety_station",
+        "wet_floor_sign",
+        "absorbent_granules_container",
+        "spill_area",
+        "used_absorbent_bag",
+        "hazmat_waste_bin"
+      ]
+    },
+    {
+      "ref": "fire_estop",
+      "title": "Fire or Smoke Emergency Stop and Evacuation",
+      "condition": "Smoke, visible flame, or a fire alarm activation is detected in or adjacent to the CNC lathe cell, requiring immediate power isolation, alarm pull, and area evacuation.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button red_estop_button",
+        "walk_to electrical_disconnect_panel",
+        "press_button main_power_disconnect_button",
+        "walk_to fire_pull_station",
+        "press_button fire_alarm_pull_station_button",
+        "notify plant_safety_officer"
+      ],
+      "equipment": [
+        "main_control_panel",
+        "red_estop_button",
+        "electrical_disconnect_panel",
+        "main_power_disconnect_button",
+        "fire_pull_station",
+        "fire_alarm_pull_station_button"
+      ]
+    },
+    {
+      "ref": "machine_startup",
+      "title": "Daily Machine Startup Sequence",
+      "condition": "The CNC lathe has been powered down overnight or during a shift break and must be brought to full production-ready status, including axis homing and coolant system priming.",
+      "steps": [
+        "walk_to electrical_disconnect_panel",
+        "press_button main_power_on_button",
+        "walk_to cnc_operator_panel",
+        "press_button control_power_on_button",
+        "wait 30",
+        "read_sensor spindle_load_monitor",
+        "notify operator_lead"
+      ],
+      "equipment": [
+        "electrical_disconnect_panel",
+        "main_power_on_button",
+        "cnc_operator_panel",
+        "control_power_on_button",
+        "spindle_load_monitor"
+      ]
+    },
+    {
+      "ref": "machine_shutdown",
+      "title": "End-of-Shift Machine Shutdown Sequence",
+      "condition": "The production shift is ending and the CNC lathe must be safely shut down, with the cutting cycle stopped, coolant pump secured, chip conveyor halted, and main power removed.",
+      "steps": [
+        "walk_to cnc_operator_panel",
+        "press_button cycle_stop_button",
+        "press_button coolant_pump_off_button",
+        "walk_to chip_conveyor_control_box",
+        "press_button chip_conveyor_stop_button",
+        "walk_to electrical_disconnect_panel",
+        "press_button main_power_disconnect_button",
+        "notify operator_lead"
+      ],
+      "equipment": [
+        "cnc_operator_panel",
+        "cycle_stop_button",
+        "coolant_pump_off_button",
+        "chip_conveyor_control_box",
+        "chip_conveyor_stop_button",
+        "electrical_disconnect_panel",
+        "main_power_disconnect_button"
+      ]
+    },
+    {
+      "ref": "dimension_oor_check",
+      "title": "Part Dimension Out-of-Tolerance Inspection and Offset Adjust",
+      "condition": "In-process gauging or a first-article inspection reveals a turned diameter or faced length is outside the blueprint tolerance band, triggering a GAUGE-OOR alert and requiring a tool offset correction before the next part.",
+      "steps": [
+        "walk_to inspection_station",
+        "pick finished_part",
+        "read_sensor part_diameter_gauge_sensor",
+        "place finished_part on_inspection_table",
+        "walk_to cnc_operator_panel",
+        "press_button tool_offset_adjust_button",
+        "notify quality_inspector"
+      ],
+      "equipment": [
+        "inspection_station",
+        "finished_part",
+        "part_diameter_gauge_sensor",
+        "inspection_table",
+        "cnc_operator_panel",
+        "tool_offset_adjust_button"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "coolant_pressure_low",
+      "text": "Line 3 lathe was running parts fine but about 40 minutes into first shift the coolant gauge by the pump started creeping downward. Hit around 1.7 bar. Machine didn't stop, just kept cycling, but that yellow alarm light was blinking the whole time. Coolant spray looked a little weaker than normal at the nozzle."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "coolant_pressure_low",
+      "text": "Second shift here - the lathe next to the loading dock has been throwing a yellow light on and off for about half an hour. Coolant is still spraying fine but the gauge is drifting low. Machine never faulted, just kept running. Wasn't sure if I should call someone or wait."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "coolant_pressure_low",
+      "text": "Was watching the cutting on the big hub batch and the coolant looked thin - checked the gauge panel and it read 1.5 bar. Machine kept cycling without stopping. The alarm was on but nothing dramatic happened."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "coolant_pressure_collapse",
+      "text": "Was mid-cycle on a batch of steering housings and the machine just killed itself - coolant went from normal to nothing in maybe two seconds then everything stopped. Panel lit up with an alarm I've never seen before. No warning, just instant."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "coolant_pressure_collapse",
+      "text": "Lathe on bay 4 stopped dead in the middle of a roughing pass. Heard what sounded like a pop then coolant at the nozzle just stopped and the whole machine halted. Part is still in the chuck. Coolant gauge reads zero."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "coolant_pressure_collapse",
+      "text": "Wasn't even running a hard cut - just a finish pass on the OD - and the machine went down hard. Coolant pressure dropped off a cliff, zero on the gauge, and the controller locked out everything at once. Definitely not a slow drift."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "coolant_pressure_high",
+      "text": "The pressure gauge on the coolant system is pegged past the red line. Never seen it that high. Machine is still running but the fittings near the nozzle look like they're under a lot of stress. Worried something is going to blow."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "coolant_pressure_high",
+      "text": "Third shift, bay 2 lathe - coolant pump sounds like it's really working hard and the gauge is showing over 7 bar. Never seen it go above 5 before. Machine hasn't stopped but there's a P-HIGH indicator on the panel."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "coolant_pressure_high",
+      "text": "Coming onto days and noticed right away the coolant system is way over where it should be. Gauge is in the red, alarm light is on, and the spray is really aggressive. Other shifts must have left it like this."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "spindle_overload_warning",
+      "text": "Spindle is still turning, feed is moving normally, but there's a steady yellow LOAD-WARN light on the panel. Load meter is sitting at about 82 percent. Machine hasn't stopped or done anything dramatic - just that light won't go away."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "spindle_overload_warning",
+      "text": "Running a harder material batch on line 1 and the load meter has been hovering between 78 and 85 percent for the last several parts. Machine is still running fine, nothing tripped, but that warning indicator has been on solid for a good 20 minutes."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "spindle_overload_warning",
+      "text": "New part program has us taking deeper cuts and the lathe is showing a continuous load warning. Spindle is not slowing down, the cycle is completing, but the warning light is on every pass. Asked the lead about it and he said to keep an eye on it."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "spindle_overload_fault",
+      "text": "Lathe hard-stopped mid-cut - spindle just quit. Panel has a red fault light I haven't seen before. Everything is dead - no axis motion, spindle not turning, workpiece sitting in the chuck. Had to call it in."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "spindle_overload_fault",
+      "text": "Was taking a heavy roughing pass on a thick-walled ring and the machine just died. Spindle froze, axes stopped, alarm went red. Load meter was climbing fast right before it happened. Part is stuck in the machine."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "spindle_overload_fault",
+      "text": "Line 2 lathe tripped off during a roughing op on the large bearing housings. Load gauge was climbing then boom - everything stopped. Red fault indicator on the operator panel, spindle won't turn at all. Second time this week."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "chuck_grip_fail",
+      "text": "Machine won't let me start the spindle. Keeps flashing a clamping alarm and locking out the start button. Hydraulic pump is running and sounds normal but it's like the chuck doesn't know the part is loaded."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "chuck_grip_fail",
+      "text": "Tried to kick off a new cycle and got a GRIP-LOW alarm right away. Chuck jaws are touching the part but the spindle start is locked out. Never happened with this workpiece size before."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "chuck_grip_fail",
+      "text": "Loading a new blank and the machine alarms out before the spindle even tries to start. Chuck seems to be closing on the part but the control panel is showing a clamping fault. Hydraulic unit seems fine from where I'm standing."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "turret_index_jam",
+      "text": "Turret is stuck between positions - it started to rotate for the next tool and just stopped halfway. Machine gave up waiting and alarmed out. Couldn't jog the turret manually from the pendant either."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "turret_index_jam",
+      "text": "Tool carousel on the lathe in cell 3 tried to swing to the next station during a tool change and made a grinding sound then quit. Alarm came up immediately. Everything else stopped too."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "turret_index_jam",
+      "text": "New program called for tool 4 and the turret spun about a quarter of the way and stopped. Never made it to the station. Tried a couple times from the panel - same thing each time. Eventually faulted out."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "bar_feeder_jam",
+      "text": "Bar feeder on the lathe by the north wall is stuck - the stock isn't advancing through the spindle. Display on the feeder is showing an error code I don't recognize. Machine cycle is waiting and not progressing."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "bar_feeder_jam",
+      "text": "Had a bent piece of stock jam up in the feeder guide channel. The pusher rod can't get past it and the machine is just sitting there alarmed out. Looks like the end of the bar got dinged up when we loaded the bundle."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "bar_feeder_jam",
+      "text": "New bundle of stock loaded fine for the first five bars then on the sixth one it just wouldn't advance. Looks like there might be a burr on the end that's catching the guide bushing. Feeder alarm is on."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "axis_position_fault",
+      "text": "CNC panel is showing an encoder fault - pretty sure it's the X axis. Machine won't move at all, can't jog, can't run a cycle. Just sitting there with that alarm flashing. Never seen this one before."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "axis_position_fault",
+      "text": "During a routine tool change the lathe threw an alarm about axis position. Neither the X nor the Z will jog from the pendant now. Machine is basically stuck. Had to stop the whole cell."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "axis_position_fault",
+      "text": "Machine was homing at startup and stopped partway through the home sequence. Got an encoder error on the panel. Z axis moved a little then locked up. X never moved at all."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "coolant_leak_minor",
+      "text": "Noticed a puddle forming at the end of the chip conveyor - slow coolant drip coming from somewhere around the seal area. Not gushing, just a steady drip that's made a small puddle on the floor. Machine is still running the job."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "coolant_leak_minor",
+      "text": "Line 3 lathe - slow coolant drip coming from behind the conveyor guard. Been there maybe an hour, created a small puddle. Couldn't tell exactly where it's coming from without getting in there. Didn't want to touch it without telling someone first."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "coolant_leak_minor",
+      "text": "Operator on days noticed a wet spot forming near the discharge end of the conveyor. Dripping steadily but slowly - maybe every few seconds. Machine kept running, nobody stopped it. Just a floor hazard so far."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "coolant_leak_major",
+      "text": "Coolant everywhere - a line let go on the lathe near bay 5 and fluid is spraying out fast and spreading across the floor. Hit the e-stop but coolant is still coming. Floor is slippery already. Need maintenance here now."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "coolant_leak_major",
+      "text": "Bay 2 lathe has a serious situation - coolant is flowing out fast from somewhere under the machine and spreading toward the main aisle. This is not a drip. Something is genuinely broken and the pump is still running."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "coolant_leak_major",
+      "text": "Fitting blew at the back of the lathe and coolant is running across the floor toward the electrical cabinet. Stopped the machine but the pump kept going. Fluid is moving fast - this is a real mess and a hazard."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "filter_coolant_replace",
+      "text": "The little red indicator on the coolant filter housing has been in the red zone since this morning. We're due for a filter swap - think we're past 250 hours. Coolant flow at the nozzle looks a bit weaker than normal too."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "filter_coolant_replace",
+      "text": "Coolant spray at the tool tip looks thin and the pressure drop gauge on the filter housing is maxed out. Last time this happened it was a plugged filter element. PM schedule also says we're overdue."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "filter_coolant_replace",
+      "text": "End of month PM check on lathe 4 - filter differential indicator is red and the coolant smells a little off. Need to swap the element out before we keep running."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "lubrication_ways",
+      "text": "The lube oil light on the reservoir panel came on during startup this morning. Haven't filled it in a while. Machine is running but I don't want to keep going if the ways aren't getting oil."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "lubrication_ways",
+      "text": "Machine is making more noise than usual during rapid moves - kind of a squeaking from the saddle area. Way lube might be low. The indicator lamp on the lube unit is lit up."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "lubrication_ways",
+      "text": "Daily walkthrough this morning and the lube reservoir on the lathe by the east wall is at the very bottom mark. Need to top it up before first shift runs. It was fine yesterday so it must have pumped through overnight."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "belt_check_replace",
+      "text": "Spindle makes a high-pitched squealing sound every time it ramps up to cutting speed. Started faint two days ago and it's getting worse. Belt maybe?"
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "belt_check_replace",
+      "text": "During startup this morning the spindle took noticeably longer than usual to reach programmed speed and there was a rubbery smell near the drive compartment. Nothing alarmed out but it smelled like something slipping."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "chip_conveyor_clean",
+      "text": "Chip bin on lathe 3 is packed to the top - BIN-FULL light came on and chips are piling up at the discharge end. Conveyor is barely moving. Got to dump it before the belt jams."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "chip_conveyor_clean",
+      "text": "Conveyor on the lathe near the main aisle is struggling - chips are stacking up at the discharge and the belt is slowing down noticeably. Sounds like it's working harder than it should."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "chip_conveyor_clean",
+      "text": "Came in for first shift and the chip bucket on lathe 2 is overflowing. Last shift must have skipped the dump. Conveyor is fighting through a big pile of chips and the motor sounds like it's straining."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "tool_offset_calibrate",
+      "text": "Put a fresh insert in turret station 3 after the old one chipped out mid-run. Need to get the offsets measured before we run any more parts or everything will be oversize."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "tool_offset_calibrate",
+      "text": "Swapped the OD turning toolholder in station 2 - the old one had a cracked shank. New holder is in but offsets are going to be off until we measure it in. Can't run production until that's done."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "lockout_tagout_full",
+      "text": "Maintenance tech needs to get inside the chuck guard to change out the jaws for the next job. Nobody goes in there without the machine fully locked out. Need to get the procedure done before he touches anything."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "lockout_tagout_full",
+      "text": "Scheduled PM today - mechanic needs to get into the spindle drive compartment to check the belt and bearings. We have to pull the main disconnect and put our lock on it before anyone reaches in there."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "lockout_tagout_full",
+      "text": "Chip conveyor inspection requires reaching past the guard into the guarded area. Electrician said we need to lock the whole machine out before doing any of it. Setting that up now."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "coolant_spill_cleanup",
+      "text": "There's a coolant puddle on the operator side of lathe 4 - maybe a gallon sitting on the floor. No drip coming from anywhere active that I can see. Might have splashed out during a part swap. Just sitting there as a slip hazard."
+    },
+    {
+      "id": "INC-051",
+      "sop_ref": "coolant_spill_cleanup",
+      "text": "Second shift found a wet patch on the floor around the base of the machine in cell 2. No active leak visible, coolant is just pooled there. Probably been there a while. Needs to be cleaned up before someone slips."
+    },
+    {
+      "id": "INC-052",
+      "sop_ref": "fire_estop",
+      "text": "Saw smoke coming from behind the electrical cabinet on the lathe in bay 3. Smells like burning insulation. Hit the e-stop right away and moved back. Nobody hurt but there's definitely something burning in there."
+    },
+    {
+      "id": "INC-053",
+      "sop_ref": "fire_estop",
+      "text": "Fire alarm went off in the machining cell. Not sure if it's specifically the lathe but there's a burning smell near bay 3 and I can see a small amount of smoke. Hit the e-stop and backed everyone out."
+    },
+    {
+      "id": "INC-054",
+      "sop_ref": "machine_startup",
+      "text": "Beginning of first shift on Monday - machine has been sitting cold since Friday night. Working through the startup this morning. Powered up the disconnect, waiting for the controller to initialize."
+    },
+    {
+      "id": "INC-055",
+      "sop_ref": "machine_startup",
+      "text": "Shift change for days - afternoon crew is taking over and the lathe needs to come up from standby. Controller was off during the break. Going through the normal startup steps before we run first piece."
+    },
+    {
+      "id": "INC-056",
+      "sop_ref": "machine_shutdown",
+      "text": "End of second shift - production run is done for the night. Stopping the program and working through the shutdown: coolant off, conveyor off, then pulling the main disconnect. Standard end of day."
+    },
+    {
+      "id": "INC-057",
+      "sop_ref": "machine_shutdown",
+      "text": "Finished the last part on the job and the cleaning crew is coming through in 20 minutes. Shutting down lathe 1 in cell 2 - stopping the cycle, securing the coolant, and removing power before they start mopping."
+    },
+    {
+      "id": "INC-058",
+      "sop_ref": "dimension_oor_check",
+      "text": "First article on the new part number came back with the OD about 0.15mm oversize. Gauge flagged it before it went to assembly. Need to pull the part, measure it at the inspection stand, and get the offsets corrected."
+    },
+    {
+      "id": "INC-059",
+      "sop_ref": "dimension_oor_check",
+      "text": "Parts started drifting on the turned length - third piece in the batch was flagged by the gauge as too long. Need to check it at the bench and dial in the offset before we scrap any more."
+    },
+    {
+      "id": "INC-060",
+      "sop_ref": "dimension_oor_check",
+      "text": "Quality pulled a part off line 1 lathe and the bore is coming in undersized - outside the print tolerance. Gauge-OOR alert on the panel. Need to measure the part and adjust the tool register before running more."
+    }
+  ]
+}

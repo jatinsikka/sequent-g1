@@ -1,0 +1,728 @@
+{
+  "family": "Robotic Palletizer",
+  "sops": [
+    {
+      "ref": "low_suction_pressure",
+      "title": "Gripper Suction Pressure Below Setpoint",
+      "condition": "Vacuum level on the gripper suction circuit reads below 45 kPa during a pick cycle, triggering a sustained low-vacuum alarm without complete loss of grip.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "read_sensor gripper_vacuum_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to vacuum_pump_station",
+        "read_sensor vacuum_pump_inlet_pressure_sensor",
+        "notify maintenance_technician",
+        "wait 30"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "gripper_vacuum_sensor",
+        "alarm_acknowledge_button",
+        "vacuum_pump_station",
+        "vacuum_pump_inlet_pressure_sensor",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "suction_pressure_collapse",
+      "title": "Mid-Cycle Gripper Vacuum Total Loss",
+      "condition": "Vacuum pressure on the gripper drops instantaneously to zero while a carton is actively held mid-transfer, triggering an immediate drop-fault interlock and halting all motion.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button cycle_halt_button",
+        "wait 10",
+        "walk_to robot_arm_end_effector",
+        "read_sensor gripper_vacuum_sensor",
+        "notify shift_supervisor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "cycle_halt_button",
+        "robot_arm_end_effector",
+        "gripper_vacuum_sensor",
+        "shift_supervisor",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "over_vacuum",
+      "title": "Gripper Suction Pressure Exceeds Maximum Threshold",
+      "condition": "Vacuum level on the gripper suction circuit reads above 80 kPa, indicating the vacuum regulator or pressure-relief valve is stuck closed and over-pulling on carton surfaces.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "read_sensor gripper_vacuum_sensor",
+        "press_button cycle_halt_button",
+        "walk_to vacuum_pump_station",
+        "press_button vacuum_pump_shutoff_button",
+        "notify maintenance_technician",
+        "wait 60"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "gripper_vacuum_sensor",
+        "cycle_halt_button",
+        "vacuum_pump_station",
+        "vacuum_pump_shutoff_button",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "pallet_dispenser_jam",
+      "title": "Pallet Dispenser Feed Jam",
+      "condition": "A pallet fails to separate cleanly from the magazine stack and the pallet-present sensor at the staging position does not confirm within the 30-second timeout window.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button alarm_acknowledge_button",
+        "walk_to pallet_dispenser_station",
+        "read_sensor pallet_present_sensor",
+        "notify maintenance_technician",
+        "wait 120",
+        "press_button pallet_dispenser_reset_button"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "alarm_acknowledge_button",
+        "pallet_dispenser_station",
+        "pallet_present_sensor",
+        "maintenance_technician",
+        "pallet_dispenser_reset_button"
+      ]
+    },
+    {
+      "ref": "infeed_jam",
+      "title": "Carton Infeed Conveyor Jam",
+      "condition": "The infeed conveyor jam sensor detects a blocked product flow for more than 5 consecutive seconds, stopping the palletizer cycle while upstream conveyor continues to run.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button conveyor_stop_button",
+        "walk_to infeed_conveyor_zone",
+        "read_sensor infeed_jam_sensor",
+        "notify shift_supervisor",
+        "wait 60",
+        "press_button conveyor_restart_button"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "conveyor_stop_button",
+        "infeed_conveyor_zone",
+        "infeed_jam_sensor",
+        "shift_supervisor",
+        "conveyor_restart_button"
+      ]
+    },
+    {
+      "ref": "fence_intrusion_warning",
+      "title": "Safety Fence Zone Intrusion Warning",
+      "condition": "A safety light curtain or gate-position switch detects partial or momentary entry into the robot work envelope and issues a warning-level alert without triggering a full emergency stop.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "read_sensor safety_fence_gate_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to safety_fence_gate",
+        "read_sensor light_curtain_sensor",
+        "notify shift_supervisor",
+        "wait 15"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "safety_fence_gate_sensor",
+        "alarm_acknowledge_button",
+        "safety_fence_gate",
+        "light_curtain_sensor",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "fence_estop_triggered",
+      "title": "Safety Fence Emergency Stop Activation",
+      "condition": "A guard door is forcibly opened or the safety relay detects a dual-channel fault, triggering an emergency stop that locks out all robot motion until a deliberate reset sequence is completed.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "read_sensor safety_relay_status_sensor",
+        "notify shift_supervisor",
+        "notify safety_officer",
+        "walk_to safety_fence_gate",
+        "press_button safety_relay_reset_button",
+        "wait 30"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "safety_relay_status_sensor",
+        "shift_supervisor",
+        "safety_officer",
+        "safety_fence_gate",
+        "safety_relay_reset_button"
+      ]
+    },
+    {
+      "ref": "servo_drive_fault",
+      "title": "Robot Arm Servo Drive Electrical Fault",
+      "condition": "The robot controller reports a servo drive overcurrent or encoder feedback error fault code on any axis, halting all robot arm motion and illuminating a drive fault LED.",
+      "steps": [
+        "walk_to robot_controller_cabinet",
+        "read_sensor servo_drive_fault_indicator",
+        "press_button robot_controller_estop_button",
+        "notify maintenance_technician",
+        "wait 300",
+        "press_button servo_drive_reset_button"
+      ],
+      "equipment": [
+        "robot_controller_cabinet",
+        "servo_drive_fault_indicator",
+        "robot_controller_estop_button",
+        "maintenance_technician",
+        "servo_drive_reset_button"
+      ]
+    },
+    {
+      "ref": "plc_comm_fault",
+      "title": "PLC-to-Robot Communication Loss",
+      "condition": "The palletizer PLC reports a loss of EtherNet/IP connection to the robot controller, causing the palletizer system to enter a faulted idle state with no motion and no alarm sound.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "read_sensor plc_comm_status_indicator",
+        "press_button alarm_acknowledge_button",
+        "walk_to robot_controller_cabinet",
+        "read_sensor ethernet_link_indicator",
+        "notify maintenance_technician",
+        "wait 60"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "plc_comm_status_indicator",
+        "alarm_acknowledge_button",
+        "robot_controller_cabinet",
+        "ethernet_link_indicator",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "vacuum_pump_overtemp_warning",
+      "title": "Vacuum Pump Over-Temperature Warning",
+      "condition": "The vacuum pump thermal sensor reads above 95 degrees C, generating a warning-level caution that allows the current pick cycle to finish but forces a mandatory cooldown pause before the next cycle begins.",
+      "steps": [
+        "walk_to vacuum_pump_station",
+        "read_sensor vacuum_pump_temp_sensor",
+        "notify maintenance_technician",
+        "press_button cycle_halt_button",
+        "wait 600",
+        "read_sensor vacuum_pump_temp_sensor"
+      ],
+      "equipment": [
+        "vacuum_pump_station",
+        "vacuum_pump_temp_sensor",
+        "maintenance_technician",
+        "cycle_halt_button"
+      ]
+    },
+    {
+      "ref": "vacuum_filter_replacement",
+      "title": "Vacuum Inlet Filter Scheduled Replacement",
+      "condition": "The 500-hour PM interval is reached, or the differential pressure sensor across the vacuum inlet filter reads above 15 kPa, indicating a filter loaded with carton dust that is starving the pump.",
+      "steps": [
+        "walk_to vacuum_pump_station",
+        "press_button vacuum_pump_shutoff_button",
+        "wait 30",
+        "pick replacement_vacuum_filter",
+        "place replacement_vacuum_filter",
+        "press_button vacuum_pump_start_button",
+        "read_sensor vacuum_pump_inlet_pressure_sensor"
+      ],
+      "equipment": [
+        "vacuum_pump_station",
+        "vacuum_pump_shutoff_button",
+        "replacement_vacuum_filter",
+        "vacuum_pump_start_button",
+        "vacuum_pump_inlet_pressure_sensor"
+      ]
+    },
+    {
+      "ref": "robot_arm_lubrication",
+      "title": "Robot Arm Joint Lubrication Scheduled Service",
+      "condition": "The 2000-hour greasing interval is due, or audible bearing noise is detected from any robot arm joint during an automatic cycle, requiring grease application to all six joints.",
+      "steps": [
+        "walk_to robot_controller_cabinet",
+        "press_button robot_controller_estop_button",
+        "walk_to robot_arm_joint_1",
+        "pick grease_cartridge",
+        "place grease_cartridge",
+        "notify maintenance_technician",
+        "wait 120"
+      ],
+      "equipment": [
+        "robot_controller_cabinet",
+        "robot_controller_estop_button",
+        "robot_arm_joint_1",
+        "grease_cartridge",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "gripper_cup_replacement",
+      "title": "Suction Cup Wear Inspection and Replacement",
+      "condition": "A drop-event count exceeds 3 per 1000 pick cycles, or visual inspection reveals cracked, torn, or hardened suction cups on the end-of-arm tool.",
+      "steps": [
+        "walk_to robot_controller_cabinet",
+        "press_button robot_controller_estop_button",
+        "walk_to robot_arm_end_effector",
+        "pick worn_suction_cup",
+        "place worn_suction_cup",
+        "pick replacement_suction_cup",
+        "place replacement_suction_cup"
+      ],
+      "equipment": [
+        "robot_controller_cabinet",
+        "robot_controller_estop_button",
+        "robot_arm_end_effector",
+        "worn_suction_cup",
+        "replacement_suction_cup"
+      ]
+    },
+    {
+      "ref": "pallet_dispenser_lubrication",
+      "title": "Pallet Dispenser Drive Chain Lubrication",
+      "condition": "The weekly maintenance schedule requires lubrication of the pallet dispenser drive chain, or the chain emits a chattering or ticking noise at the start of a pallet-drop cycle.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button cycle_halt_button",
+        "walk_to pallet_dispenser_station",
+        "pick chain_lube_applicator",
+        "place chain_lube_applicator",
+        "notify maintenance_technician",
+        "wait 60"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "cycle_halt_button",
+        "pallet_dispenser_station",
+        "chain_lube_applicator",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "safety_fence_calibration",
+      "title": "Safety Fence Light Curtain Calibration",
+      "condition": "The quarterly calibration schedule is due, or the light curtain self-test reports a marginal receiver signal strength that could produce false zone-clear readings.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button cycle_halt_button",
+        "walk_to safety_fence_gate",
+        "read_sensor light_curtain_sensor",
+        "press_button light_curtain_calibration_button",
+        "wait 30",
+        "read_sensor light_curtain_sensor"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "cycle_halt_button",
+        "safety_fence_gate",
+        "light_curtain_sensor",
+        "light_curtain_calibration_button"
+      ]
+    },
+    {
+      "ref": "eoat_cleaning",
+      "title": "End-of-Arm Tool Deep Cleaning",
+      "condition": "End-of-shift or product changeover requires removal of carton dust, adhesive residue, and debris accumulated on the gripper face plate and suction cup lips.",
+      "steps": [
+        "walk_to robot_controller_cabinet",
+        "press_button robot_controller_estop_button",
+        "walk_to robot_arm_end_effector",
+        "pick cleaning_brush",
+        "place cleaning_brush",
+        "pick compressed_air_nozzle",
+        "place compressed_air_nozzle"
+      ],
+      "equipment": [
+        "robot_controller_cabinet",
+        "robot_controller_estop_button",
+        "robot_arm_end_effector",
+        "cleaning_brush",
+        "compressed_air_nozzle"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Palletizer Lockout-Tagout for Maintenance Entry",
+      "condition": "A maintenance task requires a technician to physically enter the robot work envelope, mandating full electrical and pneumatic energy isolation before personnel entry.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button cycle_halt_button",
+        "walk_to main_power_disconnect",
+        "press_button main_power_disconnect_switch",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "cycle_halt_button",
+        "main_power_disconnect",
+        "main_power_disconnect_switch",
+        "lockout_hasp",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "spill_response",
+      "title": "Hydraulic Fluid or Grease Spill Response",
+      "condition": "A visible pool or smear of oil, grease, or hydraulic fluid is discovered on the floor inside or immediately adjacent to the palletizer work cell.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button cycle_halt_button",
+        "notify safety_officer",
+        "walk_to spill_kit_cabinet",
+        "pick spill_absorbent_pad",
+        "place spill_absorbent_pad",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "cycle_halt_button",
+        "safety_officer",
+        "spill_kit_cabinet",
+        "spill_absorbent_pad",
+        "maintenance_technician"
+      ]
+    },
+    {
+      "ref": "estop_response",
+      "title": "Emergency Stop Response and System Recovery",
+      "condition": "Any hardwired e-stop button on the palletizer cell has been pressed, cutting power to all motion axes and requiring a deliberate, inspected reset sequence before restart.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "read_sensor estop_status_sensor",
+        "notify shift_supervisor",
+        "walk_to red_estop_button",
+        "press_button red_estop_button",
+        "wait 30",
+        "press_button system_restart_button"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "estop_status_sensor",
+        "shift_supervisor",
+        "red_estop_button",
+        "system_restart_button"
+      ]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Daily Palletizer Startup Procedure",
+      "condition": "Start-of-shift power-up is required to bring the palletizer from a fully de-energized overnight state to full automatic production mode with all safety interlocks confirmed.",
+      "steps": [
+        "walk_to main_power_disconnect",
+        "press_button main_power_on_button",
+        "walk_to palletizer_hmi_panel",
+        "press_button hmi_power_on_button",
+        "read_sensor gripper_vacuum_sensor",
+        "read_sensor pallet_present_sensor",
+        "press_button cycle_start_button"
+      ],
+      "equipment": [
+        "main_power_disconnect",
+        "main_power_on_button",
+        "palletizer_hmi_panel",
+        "hmi_power_on_button",
+        "gripper_vacuum_sensor",
+        "pallet_present_sensor",
+        "cycle_start_button"
+      ]
+    },
+    {
+      "ref": "shift_shutdown",
+      "title": "End-of-Shift Palletizer Shutdown",
+      "condition": "Production shift ends and the palletizer must be safely powered down with the robot arm returned to home position, all conveyors cleared, and the main disconnect opened.",
+      "steps": [
+        "walk_to palletizer_hmi_panel",
+        "press_button cycle_halt_button",
+        "wait 30",
+        "press_button robot_home_button",
+        "walk_to main_power_disconnect",
+        "press_button main_power_off_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": [
+        "palletizer_hmi_panel",
+        "cycle_halt_button",
+        "robot_home_button",
+        "main_power_disconnect",
+        "main_power_off_button",
+        "shift_supervisor"
+      ]
+    },
+    {
+      "ref": "pallet_pattern_inspection",
+      "title": "Completed Pallet Load Pattern Quality Inspection",
+      "condition": "The robot has completed building a full pallet and the load must be inspected for layer alignment, carton orientation, and overall stack stability before the pallet exits to the stretch wrapper.",
+      "steps": [
+        "walk_to completed_pallet_staging_area",
+        "read_sensor pallet_height_sensor",
+        "read_sensor pallet_weight_sensor",
+        "notify quality_inspector",
+        "wait 120",
+        "press_button pallet_accept_button"
+      ],
+      "equipment": [
+        "completed_pallet_staging_area",
+        "pallet_height_sensor",
+        "pallet_weight_sensor",
+        "quality_inspector",
+        "pallet_accept_button"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-PAL-001",
+      "sop_ref": "low_suction_pressure",
+      "text": "Line 4 palletizer started dropping boxes again around 10am on first shift. Every 5 or 6 picks the carton would slip on the way up and land sideways on the pallet. Nothing was alarming loudly but the little vacuum gauge on the pump manifold was reading around 38 when it usually sits at 50-something. Robot kept trying to complete the pick but the grip was weak the whole time."
+    },
+    {
+      "id": "INC-PAL-002",
+      "sop_ref": "low_suction_pressure",
+      "text": "Third shift complained the robot kept faulting out every 20 minutes on the unit near the stretch wrapper. Checked it first thing in the morning and the suction feels noticeably weak — you can barely feel any pull when you hold your hand up to the cups. Gauge on the pendant was down around 40, which I know is below spec."
+    },
+    {
+      "id": "INC-PAL-003",
+      "sop_ref": "low_suction_pressure",
+      "text": "Line 2 was running fine at the start of second shift then started occasionally missing picks — box lifts halfway and then tilts and gets set back down. The robot was not throwing a hard fault, just retrying over and over. When I checked the vacuum manifold the gauge read 42, definitely below what it should be."
+    },
+    {
+      "id": "INC-PAL-004",
+      "sop_ref": "suction_pressure_collapse",
+      "text": "A whole carton came off mid-air on line 3 — robot had it lifted maybe 18 inches off the infeed belt and it just let go instantly. Scared the heck out of the operator standing at the stretch wrapper. The system locked itself out right after the drop and everything went dead. Nothing gradual about it, the carton was there and then it wasn't."
+    },
+    {
+      "id": "INC-PAL-005",
+      "sop_ref": "suction_pressure_collapse",
+      "text": "Second shift had a carton drop event at the palletizer by the loading dock. Box was already moving toward the pallet layer position and fell straight down from about 2 feet up. System threw a fault interlock immediately and all motion stopped. This was a full drop — not a slip, not a slide — just instant release mid-transfer."
+    },
+    {
+      "id": "INC-PAL-006",
+      "sop_ref": "suction_pressure_collapse",
+      "text": "We had an incident on line 1 near end of first shift where a box fell from the arm during the swing. One second the arm was carrying the carton and the next it was on the floor between the infeed and the pallet. The robot went into a hard stop by itself, which is correct, but the carton was crushed at the corner from the drop. The operator said there was no buildup — it went from fine to dropped in one cycle."
+    },
+    {
+      "id": "INC-PAL-007",
+      "sop_ref": "over_vacuum",
+      "text": "I noticed on line 2 the vacuum needle was buried past the 80 mark during second shift — way past where it normally runs. The cups were practically sucking themselves inside out and you could see the top panels of the cartons flexing inward while the arm was holding them."
+    },
+    {
+      "id": "INC-PAL-008",
+      "sop_ref": "over_vacuum",
+      "text": "QC flagged a bunch of cartons coming off line 4 with circular dent marks on the top flap — exactly the size of the suction cups. Checked the gauge at the pump and it was pegged well above where we want it, probably over 85. That much pull is enough to dent the cardboard."
+    },
+    {
+      "id": "INC-PAL-009",
+      "sop_ref": "pallet_dispenser_jam",
+      "text": "Line 3 palletizer went idle waiting on a pallet for about 4 minutes before the line lead noticed. Two pallets were kind of wedged together at the bottom of the magazine — the bottom one didn't drop clean and the second one got stuck on top of it. The robot was just sitting at home position waiting."
+    },
+    {
+      "id": "INC-PAL-010",
+      "sop_ref": "pallet_dispenser_jam",
+      "text": "The palletizer near the dock doors kept cycling back to home position and waiting — pallet never showed up at the staging spot. I heard a grinding sound from the dispenser area before the system finally gave up trying to feed one. Stack looks fine from the outside but something is sticking inside the magazine."
+    },
+    {
+      "id": "INC-PAL-011",
+      "sop_ref": "pallet_dispenser_jam",
+      "text": "Third shift log says the palletizer on line 1 stopped 6 times in 2 hours waiting on pallets. When I came in for first shift I could see the bottom two pallets were binding — looks like they warped from humidity overnight and the edges were interlocked. Had to manually separate them."
+    },
+    {
+      "id": "INC-PAL-012",
+      "sop_ref": "infeed_jam",
+      "text": "Products were piling up on the infeed belt near the gate sensor on line 2 during second shift. The accumulation got so bad a box fell off the side of the conveyor onto the floor. The palletizer just stopped and waited while the upstream line kept sending product."
+    },
+    {
+      "id": "INC-PAL-013",
+      "sop_ref": "infeed_jam",
+      "text": "Second shift said the line went down for about 20 minutes near the end of their run. A box had turned 90 degrees on the conveyor and jammed tight against the guide rail right before the palletizer cell. Everything behind it was backed up solid."
+    },
+    {
+      "id": "INC-PAL-014",
+      "sop_ref": "fence_intrusion_warning",
+      "text": "One of the newer operators on line 3 went in through the side gate to retrieve a fallen box while the robot was still in auto. The amber light on the cell started flashing and the HMI beeped — but the robot actually slowed way down rather than stopping hard. She got the box and came out and then it went back to full speed. We got lucky there."
+    },
+    {
+      "id": "INC-PAL-015",
+      "sop_ref": "fence_intrusion_warning",
+      "text": "QC lead was doing a walkthrough and pushed past the gate on the east side — the latch didn't catch right and the door swung partway open. The HMI popped a yellow caution screen and the buzzer pulsed a few times but there was no hard stop and the robot kept moving at a reduced rate."
+    },
+    {
+      "id": "INC-PAL-016",
+      "sop_ref": "fence_estop_triggered",
+      "text": "A forklift driver bumped the north guard door with the corner of a pallet load and it swung all the way open. Everything killed instantly — robot arm froze right in the middle of a pick with a carton hanging in the air. The cell was completely dead. Took maintenance about 15 minutes to verify the area and reset it."
+    },
+    {
+      "id": "INC-PAL-017",
+      "sop_ref": "fence_estop_triggered",
+      "text": "Someone ripped the south guard door open hard — we think a pallet edge caught the gate when the fork truck was staging on the dock. All motion stopped immediately and the fault light went solid red. Different from the normal warning — this was a complete lockout, robot didn't move at all even in slow mode."
+    },
+    {
+      "id": "INC-PAL-018",
+      "sop_ref": "servo_drive_fault",
+      "text": "Robot on line 2 stopped cold mid-cycle and the controller pendant showed an overcurrent fault code on axis 3. Nothing obvious to look at from the outside but the drive cabinet had a red LED flashing on the third slot. Robot wouldn't jog or home, just sat there faulted."
+    },
+    {
+      "id": "INC-PAL-019",
+      "sop_ref": "servo_drive_fault",
+      "text": "During startup this morning on line 1 the arm started to home and then seized up after about 10 degrees of travel on the wrist axis. Error on the pendant pointed to an encoder feedback problem on joint 4. Drive cabinet light was solid red on that slot."
+    },
+    {
+      "id": "INC-PAL-020",
+      "sop_ref": "servo_drive_fault",
+      "text": "Line 4 palletizer threw a fault halfway through second shift — arm was in the middle of placing a carton and just stopped moving. Screen on the controller showed an axis fault with an overcurrent code. Nothing was physically jammed, the arm just refused to move and the drive cabinet was showing a red indicator."
+    },
+    {
+      "id": "INC-PAL-021",
+      "sop_ref": "plc_comm_fault",
+      "text": "The HMI on line 3 went blank for about 30 seconds and came back with a communication loss message at the top. The robot was just sitting there doing nothing even though all the conveyor lines upstream were still running and sending product. No alarm sound, no motion, just a silent stop."
+    },
+    {
+      "id": "INC-PAL-022",
+      "sop_ref": "plc_comm_fault",
+      "text": "Line 4 palletizer dropped offline around 2pm — no estop pressed, no alarm horn, just stopped cold. Maintenance checked and found the Ethernet cable at the back of the robot controller was barely seated — looks like it got nudged loose. Reseating it brought everything back."
+    },
+    {
+      "id": "INC-PAL-023",
+      "sop_ref": "plc_comm_fault",
+      "text": "Third shift reported that the palletizer by the loading dock went into what they described as a frozen state — no faults on the HMI except a small blinking comm indicator in the corner. Robot was not faulted, not in estop, just not doing anything. PLC side showed the connection to the robot as offline."
+    },
+    {
+      "id": "INC-PAL-024",
+      "sop_ref": "vacuum_pump_overtemp_warning",
+      "text": "The pump on line 1 was hot enough that I didn't want to keep my hand on it for more than a second. The amber caution light on the panel was lit but the machine hadn't stopped yet — it finished the cycle it was on and then paused. Maintenance said it had been running continuously for most of the shift with no breaks."
+    },
+    {
+      "id": "INC-PAL-025",
+      "sop_ref": "vacuum_pump_overtemp_warning",
+      "text": "End of second shift on line 3, the maintenance tech flagged that the vacuum pump felt way hotter than normal during his rounds. The HMI had a temperature caution indicator lit. Unit ran the rest of the current pallet okay but it was clearly running hot — forced airflow around the pump felt warm."
+    },
+    {
+      "id": "INC-PAL-026",
+      "sop_ref": "vacuum_filter_replacement",
+      "text": "Maintenance tech said the pump on line 2 was working harder than usual — motor sounded like it was straining and the pickup force on the cartons felt sluggish. Pulled the inlet filter and it was completely grey and packed with fine carton dust. Could barely see daylight through it."
+    },
+    {
+      "id": "INC-PAL-027",
+      "sop_ref": "vacuum_filter_replacement",
+      "text": "The 500-hour PM tag on line 1 was overdue by about 50 hours based on the runtime log. When we finally pulled the filter during the weekend shutdown it had so much fines and fiber on it that we couldn't blow air through it with the shop gun."
+    },
+    {
+      "id": "INC-PAL-028",
+      "sop_ref": "vacuum_filter_replacement",
+      "text": "Line 4 pump differential pressure started spiking on the HMI trend screen — way above the 15 mark. The pump was audibly working harder between picks. Filter ended up being absolutely loaded with paper fiber from the new carton stock we switched to last week — apparently it sheds a lot more than the old material."
+    },
+    {
+      "id": "INC-PAL-029",
+      "sop_ref": "robot_arm_lubrication",
+      "text": "Joint 3 on the line 2 robot was making a high-pitched squeak on every back-swing cycle — you could hear it from the other side of the building. PM log showed we were about 300 hours past the greasing interval. Nobody had flagged it because the robot was still picking fine."
+    },
+    {
+      "id": "INC-PAL-030",
+      "sop_ref": "robot_arm_lubrication",
+      "text": "During the morning walkthrough on line 4, the maintenance tech heard a low grinding sound from the elbow area on the arm during auto cycle. Checked the service log and last documented grease was over 2200 hours ago. Definitely overdue."
+    },
+    {
+      "id": "INC-PAL-031",
+      "sop_ref": "gripper_cup_replacement",
+      "text": "Robot on line 3 was dropping maybe 1 in every 200 boxes — not enough to shut it down automatically but the rejects were piling up fast. Looked at the end-of-arm tool during a break and two of the four cups were cracked around the rim and one had a chunk missing from the lip."
+    },
+    {
+      "id": "INC-PAL-032",
+      "sop_ref": "gripper_cup_replacement",
+      "text": "QC flagged a pallet from line 1 where a bunch of cartons had small circular tear marks on the top panel. The cups were so hardened and worn they were leaving impressions and losing sealing ability at the same time. Pick failures had been slowly climbing over the past week."
+    },
+    {
+      "id": "INC-PAL-033",
+      "sop_ref": "pallet_dispenser_lubrication",
+      "text": "The dispenser on line 3 was making a chattering noise at the start of every pallet cycle — kind of a tick-tick-tick sound from the drive side. Looked at the chain and it was visibly dry, no lube sheen at all."
+    },
+    {
+      "id": "INC-PAL-034",
+      "sop_ref": "pallet_dispenser_lubrication",
+      "text": "Maintenance noticed the drive chain on the pallet dispenser by line 4 was starting to look rusty. Checked the log and nobody had greased it in at least two weeks. The weekly lube was getting skipped during the shift change rush."
+    },
+    {
+      "id": "INC-PAL-035",
+      "sop_ref": "safety_fence_calibration",
+      "text": "The light curtain on the north gate of the line 2 cell was intermittently triggering zone clear faults — maybe once every couple of hours — without anyone actually being near the fence. No actual intrusion, just random false trips. Signal strength test showed the receiver was marginal."
+    },
+    {
+      "id": "INC-PAL-036",
+      "sop_ref": "safety_fence_calibration",
+      "text": "Quarterly PM on line 1 light curtains was almost three weeks overdue. When maintenance finally ran the self-test the transmitter was only registering 58 percent on the receiver — well below the minimum threshold. A piece of grime on the lens turned out to be part of the problem."
+    },
+    {
+      "id": "INC-PAL-037",
+      "sop_ref": "eoat_cleaning",
+      "text": "After the afternoon product changeover to the smaller SKU on line 2, the new boxes were coming off the pallet with black smudge marks on the top flap right where the cups contact them. Old label adhesive had built up thick on the gripper face plate and was transferring onto the new product."
+    },
+    {
+      "id": "INC-PAL-038",
+      "sop_ref": "eoat_cleaning",
+      "text": "End of third shift the cups on line 4 had a visible ring of brown cardboard dust around the lip edge. The arm was still picking without drops but the QC supervisor raised a product cleanliness concern and flagged it for the shift change log."
+    },
+    {
+      "id": "INC-PAL-039",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance needed to get inside the work envelope on line 3 to replace the pallet dispenser guide rail — totally inaccessible from outside the fence. We had to do the full energy isolation at the main disconnect before anyone stepped through the gate. Tagged and tested before entry."
+    },
+    {
+      "id": "INC-PAL-040",
+      "sop_ref": "lockout_tagout",
+      "text": "Technician on line 1 found a broken proximity sensor bracket inside the cell — bracket had sheared and was hanging loose near the robot path. Couldn't reach it from outside the fence so we had to isolate power and go in. Full lockout procedure was done before entry, confirmed dead at the panel before anyone touched anything."
+    },
+    {
+      "id": "INC-PAL-041",
+      "sop_ref": "spill_response",
+      "text": "Found a puddle under the vacuum pump on line 4 — maybe a cup or so of pump oil on the concrete. Slippery enough that someone could have gone down on it walking past. Forklift driver almost rolled through it."
+    },
+    {
+      "id": "INC-PAL-042",
+      "sop_ref": "spill_response",
+      "text": "Maintenance spotted a grease smear on the floor right next to the robot base on line 1 — looked like it came from the joint that was over-lubed during last week's PM. Not a huge amount but it was shiny and definitely a slip hazard in the walkway between the robot and the pallet staging area."
+    },
+    {
+      "id": "INC-PAL-043",
+      "sop_ref": "estop_response",
+      "text": "Operator on line 3 hit the red button when she saw the arm swinging toward her — she had reached into the edge of the area to grab a fallen carton and didn't realize the robot was mid-cycle. Everything froze instantly. Arm was stopped with a carton in the gripper about 3 feet off the ground."
+    },
+    {
+      "id": "INC-PAL-044",
+      "sop_ref": "estop_response",
+      "text": "Someone bumped the estop on the dock-side palletizer on line 2 — we think a forklift operator accidentally brushed it while staging nearby. The whole cell went silent with no warning. Took maintenance about 10 minutes to walk the area, confirm it was clear, and get back into production."
+    },
+    {
+      "id": "INC-PAL-045",
+      "sop_ref": "daily_startup",
+      "text": "First shift couldn't get the line 1 palletizer to go into auto mode this morning. The HMI was up, robot had power, but it just sat there and wouldn't accept the cycle start. Turned out the vacuum pump hadn't had enough time to build pressure after power-on and the system was waiting on a sensor confirm before it would let the robot move."
+    },
+    {
+      "id": "INC-PAL-046",
+      "sop_ref": "daily_startup",
+      "text": "Start of day on line 3 the robot homed fine but then threw a fault before the very first pick — pallet staging sensor was showing no pallet even though there was clearly one sitting right there. Sensor face was covered in shrink wrap static cling from the night crew. Cleaned it and it read fine."
+    },
+    {
+      "id": "INC-PAL-047",
+      "sop_ref": "shift_shutdown",
+      "text": "End of second shift the line lead on line 4 forgot to send the robot home before cutting power at the main disconnect. When first shift came in the next morning the arm was sitting mid-air between the infeed and the pallet position. The system wouldn't accept a normal power-on sequence — it just kept asking for a home confirmation."
+    },
+    {
+      "id": "INC-PAL-048",
+      "sop_ref": "shift_shutdown",
+      "text": "Outgoing third shift left two cartons sitting on the infeed belt when they shut down line 2. When first shift powered up in the morning the robot immediately tried to pick the first one before a pallet was staged. It threw a fault right away and had to be manually cleared before normal startup could continue."
+    },
+    {
+      "id": "INC-PAL-049",
+      "sop_ref": "pallet_pattern_inspection",
+      "text": "QC rejected a pallet from line 2 at the end of second shift — one full layer was rotated 90 degrees from the pattern spec. The stretch wrapper had already done half a wrap before the QC tech caught it on the exit conveyor. Had to cut the film and manually re-stack that layer."
+    },
+    {
+      "id": "INC-PAL-050",
+      "sop_ref": "pallet_pattern_inspection",
+      "text": "Height sensor on line 3 showed a completed pallet reading about 5 cm above the spec limit. QC went to look and found that two layers were double-stacked with boxes in the wrong orientation — someone had loaded the infeed with the wrong-size SKU and the pattern got mixed. Pallet was rejected before it hit the dock."
+    }
+  ]
+}

@@ -1,0 +1,592 @@
+{
+  "family": "Aqueous Parts Washer",
+  "sops": [
+    {
+      "ref": "low_wash_pressure",
+      "title": "Wash Pressure Gradually Below Setpoint",
+      "condition": "The wash zone pressure sensor reads below 15 PSI while the pump is running at commanded speed, indicating a gradual loss of hydraulic output.",
+      "steps": [
+        "walk_to wash_pressure_gauge",
+        "read_sensor wash_pressure_sensor",
+        "walk_to pump_control_panel",
+        "press_button pump_speed_increase_button",
+        "wait 30",
+        "read_sensor wash_pressure_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["wash_pressure_gauge", "wash_pressure_sensor", "pump_control_panel", "pump_speed_increase_button"]
+    },
+    {
+      "ref": "high_wash_pressure",
+      "title": "Wash Pressure Exceeds Upper Limit",
+      "condition": "The wash zone pressure sensor reads above 45 PSI, indicating a restriction or blockage in the downstream flow path.",
+      "steps": [
+        "walk_to pump_control_panel",
+        "press_button pump_stop_button",
+        "wait 10",
+        "read_sensor wash_pressure_sensor",
+        "walk_to spray_nozzle_manifold",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["pump_control_panel", "pump_stop_button", "wash_pressure_sensor", "spray_nozzle_manifold"]
+    },
+    {
+      "ref": "pressure_collapse",
+      "title": "Sudden Complete Loss of Wash Pressure",
+      "condition": "Wash pressure drops from normal operating range to zero or near-zero within a single machine cycle while the pump remains energized and all other controls show no fault.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button e_stop_button",
+        "walk_to pump_motor_junction_box",
+        "read_sensor pump_motor_current_sensor",
+        "walk_to inlet_valve",
+        "read_sensor inlet_valve_position_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_control_panel", "e_stop_button", "pump_motor_junction_box", "pump_motor_current_sensor", "inlet_valve", "inlet_valve_position_sensor"]
+    },
+    {
+      "ref": "low_tank_temp",
+      "title": "Wash Solution Temperature Below Minimum",
+      "condition": "The tank thermocouple reads below 140 degrees F during a production run while the heater is indicated as active, signaling insufficient heat output.",
+      "steps": [
+        "walk_to temperature_control_panel",
+        "read_sensor tank_thermocouple",
+        "press_button heater_boost_button",
+        "wait 120",
+        "read_sensor tank_thermocouple",
+        "notify production_supervisor"
+      ],
+      "equipment": ["temperature_control_panel", "tank_thermocouple", "heater_boost_button"]
+    },
+    {
+      "ref": "high_tank_temp",
+      "title": "Wash Solution Temperature Exceeds Safe Limit",
+      "condition": "The tank thermocouple reads above 185 degrees F, triggering the high-temperature alarm on the control panel and creating steam vapor risk.",
+      "steps": [
+        "walk_to temperature_control_panel",
+        "read_sensor tank_thermocouple",
+        "press_button heater_shutoff_button",
+        "wait 60",
+        "read_sensor tank_thermocouple",
+        "notify maintenance_tech",
+        "notify production_supervisor"
+      ],
+      "equipment": ["temperature_control_panel", "tank_thermocouple", "heater_shutoff_button"]
+    },
+    {
+      "ref": "low_solution_level",
+      "title": "Wash Tank Solution Level Low Alarm",
+      "condition": "The float-type level sensor in the wash tank activates the low-level alarm, indicating solution has dropped below 60 percent of rated capacity and pump cavitation is imminent.",
+      "steps": [
+        "walk_to wash_tank",
+        "read_sensor tank_level_sensor",
+        "walk_to solution_makeup_valve",
+        "press_button makeup_water_valve_open_button",
+        "wait 90",
+        "read_sensor tank_level_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["wash_tank", "tank_level_sensor", "solution_makeup_valve", "makeup_water_valve_open_button"]
+    },
+    {
+      "ref": "nozzle_jam",
+      "title": "Spray Nozzle Obstruction Fault",
+      "condition": "One or more spray nozzles show zero flow output while the pump is running at normal pressure, indicating a physical blockage inside the nozzle orifice.",
+      "steps": [
+        "walk_to pump_control_panel",
+        "press_button pump_stop_button",
+        "wait 15",
+        "walk_to spray_nozzle_manifold",
+        "read_sensor nozzle_flow_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["pump_control_panel", "pump_stop_button", "spray_nozzle_manifold", "nozzle_flow_sensor"]
+    },
+    {
+      "ref": "pump_overload",
+      "title": "Wash Pump Motor Overload Fault",
+      "condition": "The pump motor overload relay trips and the fault indicator illuminates on the main control panel, halting pump operation.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor pump_motor_current_sensor",
+        "press_button pump_stop_button",
+        "wait 300",
+        "press_button overload_reset_button",
+        "read_sensor pump_motor_current_sensor",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_control_panel", "pump_motor_current_sensor", "pump_stop_button", "overload_reset_button"]
+    },
+    {
+      "ref": "filter_change",
+      "title": "Scheduled Filter Cartridge Replacement",
+      "condition": "The filter differential pressure gauge reads above 10 PSI or the 500-hour replacement interval has elapsed, whichever occurs first.",
+      "steps": [
+        "walk_to pump_control_panel",
+        "press_button pump_stop_button",
+        "walk_to filter_housing",
+        "pick spent_filter_cartridge",
+        "place spent_filter_cartridge",
+        "pick replacement_filter_cartridge",
+        "place replacement_filter_cartridge"
+      ],
+      "equipment": ["pump_control_panel", "pump_stop_button", "filter_housing", "spent_filter_cartridge", "replacement_filter_cartridge"]
+    },
+    {
+      "ref": "nozzle_cleaning",
+      "title": "Routine Scheduled Spray Nozzle Cleaning",
+      "condition": "Scheduled weekly maintenance interval requires inspection and mechanical cleaning of all spray nozzles to remove mineral scale before obstruction occurs.",
+      "steps": [
+        "walk_to pump_control_panel",
+        "press_button pump_stop_button",
+        "walk_to spray_nozzle_manifold",
+        "pick nozzle_cleaning_brush",
+        "place nozzle_cleaning_brush",
+        "walk_to pump_control_panel",
+        "press_button pump_start_button"
+      ],
+      "equipment": ["pump_control_panel", "pump_stop_button", "spray_nozzle_manifold", "nozzle_cleaning_brush", "pump_start_button"]
+    },
+    {
+      "ref": "tank_drain_clean",
+      "title": "Monthly Tank Drain and Interior Cleaning",
+      "condition": "Scheduled monthly maintenance requires full tank drain, sludge removal, and interior surface cleaning to prevent contamination carryover into the wash bath.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button machine_shutoff_button",
+        "walk_to tank_drain_valve",
+        "press_button drain_valve_open_button",
+        "wait 600",
+        "walk_to wash_tank",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_control_panel", "machine_shutoff_button", "tank_drain_valve", "drain_valve_open_button", "wash_tank"]
+    },
+    {
+      "ref": "solution_replenish",
+      "title": "Wash Solution Concentration Replenishment",
+      "condition": "Titration or conductivity measurement confirms detergent concentration has fallen below the 3 percent minimum specification and requires chemical addition to restore efficacy.",
+      "steps": [
+        "walk_to chemical_storage_cabinet",
+        "pick detergent_concentrate_jug",
+        "walk_to wash_tank",
+        "place detergent_concentrate_jug",
+        "wait 30",
+        "read_sensor solution_conductivity_sensor",
+        "notify production_supervisor"
+      ],
+      "equipment": ["chemical_storage_cabinet", "detergent_concentrate_jug", "wash_tank", "solution_conductivity_sensor"]
+    },
+    {
+      "ref": "pump_lubrication",
+      "title": "Wash Pump Bearing Lubrication Service",
+      "condition": "The 1000-hour scheduled maintenance interval requires lubrication of wash pump motor bearings to prevent premature wear.",
+      "steps": [
+        "walk_to pump_control_panel",
+        "press_button pump_stop_button",
+        "walk_to pump_motor_junction_box",
+        "read_sensor pump_motor_current_sensor",
+        "pick grease_gun",
+        "place grease_gun",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["pump_control_panel", "pump_stop_button", "pump_motor_junction_box", "pump_motor_current_sensor", "grease_gun"]
+    },
+    {
+      "ref": "conveyor_belt_replace",
+      "title": "Parts Conveyor Belt Replacement",
+      "condition": "Visual inspection identifies a torn, frayed, or excessively stretched conveyor belt that fails monthly wear-check acceptance criteria.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button machine_shutoff_button",
+        "walk_to conveyor_drive_unit",
+        "pick worn_conveyor_belt",
+        "place worn_conveyor_belt",
+        "pick replacement_conveyor_belt",
+        "place replacement_conveyor_belt"
+      ],
+      "equipment": ["main_control_panel", "machine_shutoff_button", "conveyor_drive_unit", "worn_conveyor_belt", "replacement_conveyor_belt"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Lockout Tagout Before Maintenance Entry",
+      "condition": "Any maintenance activity requiring physical entry into the wash enclosure or contact with internal components must be preceded by full energy isolation per LOTO procedure.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button machine_shutoff_button",
+        "walk_to main_disconnect_switch",
+        "press_button main_disconnect_switch",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_control_panel", "machine_shutoff_button", "main_disconnect_switch", "lockout_hasp"]
+    },
+    {
+      "ref": "solution_spill",
+      "title": "Wash Solution Spill Response",
+      "condition": "Wash solution is observed pooling on the floor around the machine base or flowing beyond the containment berm boundary.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button pump_stop_button",
+        "walk_to spill_kit_station",
+        "pick spill_absorbent_bag",
+        "place spill_absorbent_bag",
+        "notify safety_officer",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["main_control_panel", "pump_stop_button", "spill_kit_station", "spill_absorbent_bag"]
+    },
+    {
+      "ref": "chemical_overfill",
+      "title": "Detergent Concentrate Day Tank Overfill",
+      "condition": "The high-level alarm on the detergent concentrate day tank activates because the automated fill sequence has filled the tank above safe capacity.",
+      "steps": [
+        "walk_to chemical_fill_station",
+        "press_button concentrate_fill_valve_close_button",
+        "walk_to concentrate_day_tank",
+        "read_sensor concentrate_level_sensor",
+        "pick empty_collection_drum",
+        "place empty_collection_drum",
+        "notify safety_officer"
+      ],
+      "equipment": ["chemical_fill_station", "concentrate_fill_valve_close_button", "concentrate_day_tank", "concentrate_level_sensor", "empty_collection_drum"]
+    },
+    {
+      "ref": "e_stop_activation",
+      "title": "Emergency Stop Activation and Recovery",
+      "condition": "An emergency stop button has been pressed on the machine, halting all conveyor motion and pump operation and requiring controlled reset before production can resume.",
+      "steps": [
+        "walk_to main_control_panel",
+        "read_sensor e_stop_status_sensor",
+        "walk_to activated_e_stop_button",
+        "press_button activated_e_stop_button",
+        "wait 10",
+        "press_button machine_restart_button",
+        "notify production_supervisor"
+      ],
+      "equipment": ["main_control_panel", "e_stop_status_sensor", "activated_e_stop_button", "machine_restart_button"]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Daily Machine Startup Sequence",
+      "condition": "The machine has been idle overnight or across a shift change and requires a full controlled startup, including bath warm-up verification, before parts may be loaded.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button main_power_on_button",
+        "wait 60",
+        "read_sensor tank_thermocouple",
+        "read_sensor tank_level_sensor",
+        "press_button pump_start_button",
+        "notify production_supervisor"
+      ],
+      "equipment": ["main_control_panel", "main_power_on_button", "tank_thermocouple", "tank_level_sensor", "pump_start_button"]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "End-of-Shift Shutdown Sequence",
+      "condition": "Production has ended for the shift and the machine must be shut down in the correct sequence to prevent pump dry-run damage and solution degradation.",
+      "steps": [
+        "walk_to main_control_panel",
+        "press_button conveyor_stop_button",
+        "wait 30",
+        "press_button pump_stop_button",
+        "press_button heater_shutoff_button",
+        "press_button main_power_off_button",
+        "notify production_supervisor"
+      ],
+      "equipment": ["main_control_panel", "conveyor_stop_button", "pump_stop_button", "heater_shutoff_button", "main_power_off_button"]
+    },
+    {
+      "ref": "cleanliness_inspection",
+      "title": "Post-Wash Parts Cleanliness Inspection",
+      "condition": "A sample lot of washed parts must be inspected for residual oil film, particulate, or water spots before advancing to the next downstream operation.",
+      "steps": [
+        "walk_to parts_exit_conveyor",
+        "pick sample_part",
+        "walk_to inspection_station",
+        "place sample_part",
+        "read_sensor cleanliness_inspection_sensor",
+        "notify quality_inspector"
+      ],
+      "equipment": ["parts_exit_conveyor", "sample_part", "inspection_station", "cleanliness_inspection_sensor"]
+    },
+    {
+      "ref": "solution_concentration_check",
+      "title": "Daily Wash Solution Concentration Verification",
+      "condition": "Scheduled daily quality check requires sampling the bath and confirming detergent concentration remains within the 3 to 6 percent specification band before production begins.",
+      "steps": [
+        "walk_to wash_tank",
+        "pick solution_sample_cup",
+        "place solution_sample_cup",
+        "walk_to titration_station",
+        "read_sensor solution_conductivity_sensor",
+        "notify quality_inspector"
+      ],
+      "equipment": ["wash_tank", "solution_sample_cup", "titration_station", "solution_conductivity_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-PWR-001",
+      "sop_ref": "low_wash_pressure",
+      "text": "Second shift on line 4 — parts coming out of the washer looking greasy. Checked the spray arms and they were barely putting out anything. Gauge on the side of the machine was sitting at 8 PSI, way down from the usual 25. Pump is still spinning, it just is not pushing."
+    },
+    {
+      "id": "INC-PWR-002",
+      "sop_ref": "low_wash_pressure",
+      "text": "Called the maintenance desk around 9 AM — the rinse zone on the unit at the east end of the floor was producing a real weak spray. Pressure had crept down to around 11 PSI over the past hour. Nothing tripped, no alarm, just a gradual fade in output."
+    },
+    {
+      "id": "INC-PWR-003",
+      "sop_ref": "low_wash_pressure",
+      "text": "Third shift noticed the cleaning side was not keeping up. Pushed through a batch of valve bodies and they came out with residue on the machined surfaces. Glanced at the pressure indicator — it was barely touching 12 PSI. Pump running fine, just not making pressure like it should."
+    },
+    {
+      "id": "INC-HWP-001",
+      "sop_ref": "high_wash_pressure",
+      "text": "Line 2 washer — red light came on the panel around 2 PM. Something is backing up downstream; the gauge is pegged past 45 and still climbing. Never seen it that high before. The pump sounds like it is straining under the load."
+    },
+    {
+      "id": "INC-HWP-002",
+      "sop_ref": "high_wash_pressure",
+      "text": "Maintenance got a call that the pressure alarm was going off on the unit by the stamping press. Reading 50 PSI on the indicator. The manifold felt really hard to the touch and the bypass line was hot. Something is blocked in the circuit past the pump."
+    },
+    {
+      "id": "INC-PRC-001",
+      "sop_ref": "pressure_collapse",
+      "text": "Mid-cycle on line 3, the spray just cut out completely — zero. Not low, totally gone. Machine did not fault, the conveyor kept moving parts through, but nothing was coming out of the nozzles at all. Happened in about two seconds flat."
+    },
+    {
+      "id": "INC-PRC-002",
+      "sop_ref": "pressure_collapse",
+      "text": "We were running a clean cycle and then gone — no wash at all. The gauge went from 22 to nothing in one shot. E-stop was not hit, controls look normal, pump seems like it is trying to run but there is zero output pressure."
+    },
+    {
+      "id": "INC-PRC-003",
+      "sop_ref": "pressure_collapse",
+      "text": "First shift, unit near the loading dock — operator said the parts went through completely dry. No gradual drop, just an instant loss of all spray during a cycle. The pump is humming away but the pressure indicator is sitting on zero."
+    },
+    {
+      "id": "INC-LTT-001",
+      "sop_ref": "low_tank_temp",
+      "text": "Parts are coming through with an oily film. Checked around and found the tank temp is only sitting at 128 degrees — been there for about 20 minutes. The heater light is showing active on the panel but the bath is barely warm."
+    },
+    {
+      "id": "INC-LTT-002",
+      "sop_ref": "low_tank_temp",
+      "text": "Line 1, morning shift. The water in the tank feels barely warm through the inspection glass. Temperature display was showing 135, setpoint is 155. Heater is apparently running but the reading keeps drifting down instead of recovering."
+    },
+    {
+      "id": "INC-HTT-001",
+      "sop_ref": "high_tank_temp",
+      "text": "Steam started coming off the tank on line 3. The alarm horn went off — temp gauge is showing 192 degrees. Well past where it is supposed to be. The whole area around the unit is getting hot and humid."
+    },
+    {
+      "id": "INC-HTT-002",
+      "sop_ref": "high_tank_temp",
+      "text": "Maintenance was walking by and noticed the high-temp alarm light was solid red on the east washer. Display was reading 188 degrees. Heater must have stuck on. It had apparently been climbing for a while before anyone caught it."
+    },
+    {
+      "id": "INC-HTT-003",
+      "sop_ref": "high_tank_temp",
+      "text": "Second shift called it in — said they could see visible vapor rising from the hood of the washer near the loading dock. Looked at the display and it was already at 190. Nobody touched the setpoint. Temperature is way too high."
+    },
+    {
+      "id": "INC-LSL-001",
+      "sop_ref": "low_solution_level",
+      "text": "The float alarm beeped on line 2. Walked over and looked through the sight glass — you can barely see any fluid in there. Level indicator is flashing on the panel. Looks like it is down maybe 40 percent or more below the fill mark."
+    },
+    {
+      "id": "INC-LSL-002",
+      "sop_ref": "low_solution_level",
+      "text": "Coming in for third shift on the big washer — the alarm was already going. Looked at the panel and the low level indicator was lit up. Sight glass on the side of the tank showed we were well below the normal operating line."
+    },
+    {
+      "id": "INC-LSL-003",
+      "sop_ref": "low_solution_level",
+      "text": "Ops noticed the washer near the assembly line was making a gurgling noise. The pump sounded like it was pulling air intermittently. Level indicator on the HMI was showing below minimum. Tank was definitely running low."
+    },
+    {
+      "id": "INC-NJM-001",
+      "sop_ref": "nozzle_jam",
+      "text": "Line 3, afternoon shift. Pressure gauge looked completely normal but parts were coming out dirty on one side. Stopped the machine and looked through the inspection door — one whole bank of spray arms was bone dry while the others were flowing fine."
+    },
+    {
+      "id": "INC-NJM-002",
+      "sop_ref": "nozzle_jam",
+      "text": "Maintenance ticket from line 4: washer pressure reads fine at 22 PSI but the top nozzle array is not spraying anything. Rest of the nozzles look OK. Parts are only getting cleaned on the bottom half and sides."
+    },
+    {
+      "id": "INC-POL-001",
+      "sop_ref": "pump_overload",
+      "text": "Red fault light came on the main panel on line 1 — the overload indicator is solid. Machine stopped mid-cycle. The motor area smells a bit hot. Looks like the pump thermal trip popped."
+    },
+    {
+      "id": "INC-POL-002",
+      "sop_ref": "pump_overload",
+      "text": "Line 3 washer went down with a fault. The overload relay on the motor control cabinet is tripped. Pump was sounding labored for a few minutes before it cut out, then the breaker popped and everything stopped."
+    },
+    {
+      "id": "INC-FLT-001",
+      "sop_ref": "filter_change",
+      "text": "The differential pressure across the filter housing is reading 13 PSI. Maintenance said it has been creeping up all week. Time to swap it out — screen is probably loaded with metal fines from the last batch of castings we ran."
+    },
+    {
+      "id": "INC-FLT-002",
+      "sop_ref": "filter_change",
+      "text": "Scheduled PM on the south washer — per the maintenance log it has been 510 hours since the last filter swap. No alarm is on yet but we are pulling the cartridge per the hour-based interval."
+    },
+    {
+      "id": "INC-FLT-003",
+      "sop_ref": "filter_change",
+      "text": "Line 4 unit by the exit door — filter delta-P gauge is pegged all the way to the right. Parts have been getting less clean over the last few hours. Filter housing is probably packed with sludge from the roughing operation."
+    },
+    {
+      "id": "INC-NCL-001",
+      "sop_ref": "nozzle_cleaning",
+      "text": "Weekly PM on line 2 washer. No fault and no alarm — just time on the calendar to pull the nozzle assemblies and clean the mineral scale off. Spray pattern looked a bit uneven during last Thursday's run but no flow was lost."
+    },
+    {
+      "id": "INC-NCL-002",
+      "sop_ref": "nozzle_cleaning",
+      "text": "PM log shows the nozzles on the east unit are due for their weekly brush-out. Maintenance is pulling the caps to clean them off preventively. No flow loss, no blockage — strictly following the maintenance calendar."
+    },
+    {
+      "id": "INC-TDC-001",
+      "sop_ref": "tank_drain_clean",
+      "text": "Monthly PM on line 1 — need to drain the tank and get the sludge out. There is a visible layer of grey sediment on the bottom through the inspection port and it has been over 30 days since the last full drain."
+    },
+    {
+      "id": "INC-TDC-002",
+      "sop_ref": "tank_drain_clean",
+      "text": "The washer by the stamping press is due for its monthly cleanout. We can see black sediment buildup on the inside of the sight glass and the drain plug has not been touched since last cycle. Scheduling a full drain and scrub."
+    },
+    {
+      "id": "INC-SRP-001",
+      "sop_ref": "solution_replenish",
+      "text": "Quality flagged the washer on line 3 — parts are failing the downstream cleanliness check and the lab titrated the bath at 1.8 percent detergent, way below spec. The solution looks almost clear. Needs chemical added today."
+    },
+    {
+      "id": "INC-SRP-002",
+      "sop_ref": "solution_replenish",
+      "text": "The conductivity reading on the line 2 washer has been dropping all shift. Titration this morning showed 2.2 percent, which is under the 3 percent floor. The bath concentration is too low and parts are not coming out clean enough."
+    },
+    {
+      "id": "INC-PLB-001",
+      "sop_ref": "pump_lubrication",
+      "text": "The 1000-hour PM interval hit on the south washer pump. Maintenance log shows the bearings have not been greased since last quarter. No symptoms yet, but scheduling it out for this weekend before the interval gets any further past."
+    },
+    {
+      "id": "INC-PLB-002",
+      "sop_ref": "pump_lubrication",
+      "text": "PM schedule flagged the east line pump for bearing service. Hour meter is past the lubrication interval by about 50 hours. No noise or vibration yet, pulling it for grease this afternoon during the lunch break window."
+    },
+    {
+      "id": "INC-CBR-001",
+      "sop_ref": "conveyor_belt_replace",
+      "text": "Monthly belt inspection on line 3 — found a 4-inch crack along one of the belt seams near the middle section. Belt is also stretching too much and not tracking right through the wash zone. Needs to come out."
+    },
+    {
+      "id": "INC-CBR-002",
+      "sop_ref": "conveyor_belt_replace",
+      "text": "Line 1 washer conveyor belt has a frayed edge that has been getting progressively worse. Caught it during this morning's walkaround. The belt is also sagging in the middle section and catching slightly on the guide rail."
+    },
+    {
+      "id": "INC-LOT-001",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance is going in to replace the spray nozzle manifold on line 4. Need to lock the machine out before anyone gets near the internals — can not have that pump or the conveyor kick on while someone has their hands inside."
+    },
+    {
+      "id": "INC-LOT-002",
+      "sop_ref": "lockout_tagout",
+      "text": "Tech is climbing into the tank on the south washer to hand-scrub the sludge off the bottom. Full energy isolation is required before anyone steps inside the enclosure. Can not touch it until everything is locked and tagged."
+    },
+    {
+      "id": "INC-LOT-003",
+      "sop_ref": "lockout_tagout",
+      "text": "Line 2 washer — maintenance needs to reach inside the hood to clear a part that wedged itself on the conveyor track. Machine has to be fully de-energized before anyone puts a hand in there. Setting up the hasp now."
+    },
+    {
+      "id": "INC-SPL-001",
+      "sop_ref": "solution_spill",
+      "text": "There is a puddle forming outside the containment pan on line 4 — looks like it came from a fitting at the back of the machine. Fluid is running toward the center aisle drain and getting close to the yellow walk line."
+    },
+    {
+      "id": "INC-SPL-002",
+      "sop_ref": "solution_spill",
+      "text": "Second shift called in a spill around the south washer. The solution is pooling past the yellow berm line and spreading toward the aisle. Looks like a hose connection let go at the back of the unit near the filter housing."
+    },
+    {
+      "id": "INC-SPL-003",
+      "sop_ref": "solution_spill",
+      "text": "Maintenance walked in and found the floor wet around the unit near the loading dock. The liquid is coming from somewhere under the machine and crossing the aisle. Not plain water — it is sudsy and the smell is the wash chemical."
+    },
+    {
+      "id": "INC-COF-001",
+      "sop_ref": "chemical_overfill",
+      "text": "The fill alarm on the detergent day tank went off on line 3. Level indicator is showing over 95 percent capacity and the fill valve was apparently left open after the last top-up. No spill yet but the tank is about to run over."
+    },
+    {
+      "id": "INC-COF-002",
+      "sop_ref": "chemical_overfill",
+      "text": "Operator on third shift reported the concentrate tank by the chemical station is flashing a high-level warning. The automated fill system did not shut off when it was supposed to. Tank is dangerously close to the top."
+    },
+    {
+      "id": "INC-EST-001",
+      "sop_ref": "e_stop_activation",
+      "text": "Someone hit the red mushroom button on the line 2 washer — everything stopped, nothing is moving. We need to figure out which e-stop was activated and twist it out before we can even attempt to restart the machine."
+    },
+    {
+      "id": "INC-EST-002",
+      "sop_ref": "e_stop_activation",
+      "text": "E-stop got bumped on the east washer, probably by a forklift passing too close to the panel. All motion stopped mid-cycle. Parts are sitting inside the wash zone. Need to clear the e-stop and do a controlled restart."
+    },
+    {
+      "id": "INC-STR-001",
+      "sop_ref": "startup_procedure",
+      "text": "First shift, coming in Monday morning after the weekend. The washer on line 1 has been cold since Friday afternoon. Need to bring it up properly — warm the bath to operating temp, check the level, get the pump going before we start loading parts."
+    },
+    {
+      "id": "INC-STR-002",
+      "sop_ref": "startup_procedure",
+      "text": "Coming back from the holiday shutdown, the line 3 washer needs to be brought online from cold. Tank was partially drained for the maintenance window so need to go through the full bring-up — fill to level, heat to temp, verify, then pump on."
+    },
+    {
+      "id": "INC-STR-003",
+      "sop_ref": "startup_procedure",
+      "text": "Shift changeover at 6 AM on the line 4 unit. Machine was left in standby mode overnight. Morning shift operator needs to walk through the startup checks and confirm the bath is ready before production starts loading parts."
+    },
+    {
+      "id": "INC-SHT-001",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of day on line 2. Production is done and we need to shut the washer down right — stop the conveyor first, then the pump, then the heater, then kill the main. Do not want the pump running dry or the bath boiling overnight."
+    },
+    {
+      "id": "INC-SHT-002",
+      "sop_ref": "shutdown_procedure",
+      "text": "Third shift wrapping up at the east unit. Time to shut down for the two-day weekend. Pump and heater need to come off in the right order to avoid any problems over the long idle. Following the sequence on the placard."
+    },
+    {
+      "id": "INC-CLI-001",
+      "sop_ref": "cleanliness_inspection",
+      "text": "Quality hold called on line 1 — the bearing housings coming out of the washer have a visible oily sheen when you hold them up to the light at the right angle. Need to pull a sample and evaluate before we send any more downstream."
+    },
+    {
+      "id": "INC-CLI-002",
+      "sop_ref": "cleanliness_inspection",
+      "text": "Inspector caught residue on the valve bodies from line 3. Parts feel tacky and there is visible discoloration on the machined faces. Need to grab a sample off the exit conveyor and bring it to the inspection bench to check."
+    },
+    {
+      "id": "INC-SCC-001",
+      "sop_ref": "solution_concentration_check",
+      "text": "Daily quality check on line 2 washer — pulling a cup of bath solution to run through the conductivity meter and confirm we are still inside spec. No symptoms, no complaints from production, just the routine morning verification."
+    },
+    {
+      "id": "INC-SCC-002",
+      "sop_ref": "solution_concentration_check",
+      "text": "Quality tech on first shift needs to verify the bath on the line 4 unit before production starts. Last check was yesterday morning. Pulling a fresh sample today to make sure concentration has not drifted out of the spec band overnight."
+    }
+  ]
+}

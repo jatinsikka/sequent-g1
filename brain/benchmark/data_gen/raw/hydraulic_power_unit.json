@@ -1,0 +1,588 @@
+{
+  "family": "Central Hydraulic Power Unit",
+  "sops": [
+    {
+      "ref": "low_pressure_warning",
+      "title": "System Pressure Below Setpoint Warning",
+      "condition": "Hydraulic system pressure sensor reads below the 180 bar operating setpoint but remains above the 140 bar minimum trip threshold, triggering a low-pressure warning alarm.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "read_sensor hydraulic_pressure_sensor",
+        "press_button alarm_acknowledge_button",
+        "walk_to pump_station",
+        "read_sensor pump_speed_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "hydraulic_pressure_sensor", "alarm_acknowledge_button", "pump_station", "pump_speed_sensor"]
+    },
+    {
+      "ref": "pressure_collapse",
+      "title": "Sudden Pressure Collapse Emergency",
+      "condition": "Hydraulic system pressure drops from operating level to below 100 bar within five seconds, indicating a catastrophic loss event such as a ruptured line or seized valve.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button red_estop_button",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_supervisor",
+        "notify plant_safety_officer",
+        "walk_to pump_station",
+        "read_sensor pump_speed_sensor"
+      ],
+      "equipment": ["hpu_control_panel", "red_estop_button", "hydraulic_pressure_sensor", "pump_station", "pump_speed_sensor"]
+    },
+    {
+      "ref": "pressure_above_ceiling",
+      "title": "System Pressure Exceeding Maximum Safe Ceiling",
+      "condition": "Hydraulic system pressure sensor reads above 250 bar, the maximum rated ceiling, triggering a high-pressure critical alarm.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "read_sensor hydraulic_pressure_sensor",
+        "wait 10",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "hydraulic_pressure_sensor"]
+    },
+    {
+      "ref": "accumulator_precharge_low",
+      "title": "Accumulator Nitrogen Precharge Below Specification",
+      "condition": "Static accumulator pressure gauge reads below 90 bar with the hydraulic system fully depressurized, indicating insufficient nitrogen precharge for energy storage capacity.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "wait 30",
+        "walk_to accumulator_bay",
+        "read_sensor accumulator_pressure_gauge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "accumulator_bay", "accumulator_pressure_gauge"]
+    },
+    {
+      "ref": "pump_overload",
+      "title": "Pump Motor Current Overload Alarm",
+      "condition": "Pump motor current sensor reads above 95 amps, exceeding the 90-amp rated load, triggering the motor overload protection relay.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "read_sensor pump_current_sensor",
+        "press_button pump_stop_button",
+        "wait 5",
+        "notify maintenance_supervisor",
+        "read_sensor pump_current_sensor"
+      ],
+      "equipment": ["hpu_control_panel", "pump_current_sensor", "pump_stop_button"]
+    },
+    {
+      "ref": "pump_reduced_speed",
+      "title": "Pump Running at Reduced Speed",
+      "condition": "Pump speed sensor reads between 600 and 900 RPM, below the nominal 1450 RPM operating speed, while the pump motor remains energized and still rotating.",
+      "steps": [
+        "walk_to pump_station",
+        "read_sensor pump_speed_sensor",
+        "read_sensor pump_current_sensor",
+        "walk_to hpu_control_panel",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["pump_station", "pump_speed_sensor", "pump_current_sensor", "hpu_control_panel", "hydraulic_pressure_sensor"]
+    },
+    {
+      "ref": "pump_stopped_fault",
+      "title": "Pump Fully Stopped and Not Rotating",
+      "condition": "Pump speed sensor reads zero RPM and the motor contactor indicates de-energized state while the system start command remains active.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button alarm_acknowledge_button",
+        "read_sensor pump_speed_sensor",
+        "walk_to pump_station",
+        "read_sensor pump_current_sensor",
+        "notify maintenance_supervisor",
+        "press_button pump_stop_button"
+      ],
+      "equipment": ["hpu_control_panel", "alarm_acknowledge_button", "pump_speed_sensor", "pump_station", "pump_current_sensor", "pump_stop_button"]
+    },
+    {
+      "ref": "minor_seal_leak",
+      "title": "Minor Hydraulic Fluid Seal Seep",
+      "condition": "A small hydraulic fluid seep is detected at a manifold fitting or cylinder seal, producing a wet stain or slow drip with no floor pooling.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "notify maintenance_supervisor",
+        "walk_to pump_station",
+        "pick drip_tray",
+        "place drip_tray",
+        "read_sensor hydraulic_pressure_sensor",
+        "wait 30"
+      ],
+      "equipment": ["hpu_control_panel", "pump_station", "drip_tray", "hydraulic_pressure_sensor"]
+    },
+    {
+      "ref": "major_line_rupture",
+      "title": "Major Hydraulic Line Rupture and Fluid Release",
+      "condition": "A high-pressure hydraulic line has burst, releasing a large volume of fluid rapidly with visible spray or floor pooling across a significant area.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button red_estop_button",
+        "notify plant_safety_officer",
+        "notify maintenance_supervisor",
+        "walk_to spill_kit_station",
+        "pick absorbent_pads",
+        "place absorbent_pads"
+      ],
+      "equipment": ["hpu_control_panel", "red_estop_button", "spill_kit_station", "absorbent_pads"]
+    },
+    {
+      "ref": "temperature_high_warning",
+      "title": "Hydraulic Fluid Temperature High Warning",
+      "condition": "Fluid temperature sensor reads above 60 degrees Celsius, the warning threshold, while the cooler is running and the system remains operational.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "read_sensor fluid_temp_sensor",
+        "press_button alarm_acknowledge_button",
+        "wait 60",
+        "read_sensor fluid_temp_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "fluid_temp_sensor", "alarm_acknowledge_button"]
+    },
+    {
+      "ref": "temperature_critical",
+      "title": "Hydraulic Fluid Temperature Critical Shutdown",
+      "condition": "Fluid temperature sensor reads above 80 degrees Celsius, the critical shutdown threshold, requiring immediate pump stop to prevent fluid degradation and seal damage.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "read_sensor fluid_temp_sensor",
+        "notify maintenance_supervisor",
+        "notify plant_safety_officer",
+        "wait 120"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "fluid_temp_sensor"]
+    },
+    {
+      "ref": "return_filter_change",
+      "title": "Return Line Filter Element Replacement",
+      "condition": "The differential pressure indicator on the return filter housing exceeds 6 bar, or the scheduled 500-hour filter replacement interval has been reached.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "wait 20",
+        "walk_to filter_housing_A",
+        "pick replacement_filter_element",
+        "place replacement_filter_element",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "filter_housing_A", "replacement_filter_element"]
+    },
+    {
+      "ref": "suction_strainer_clean",
+      "title": "Pump Suction Strainer Inspection and Cleaning",
+      "condition": "The scheduled 250-hour suction strainer maintenance interval has been reached, or audible cavitation is detected from the pump inlet.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "wait 30",
+        "walk_to suction_strainer_housing",
+        "pick suction_strainer_cartridge",
+        "place suction_strainer_cartridge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "suction_strainer_housing", "suction_strainer_cartridge"]
+    },
+    {
+      "ref": "fluid_sampling",
+      "title": "Hydraulic Fluid Sample Collection for Analysis",
+      "condition": "The scheduled 250-hour oil sampling interval has been reached, or a change in system performance suggests possible fluid contamination.",
+      "steps": [
+        "walk_to oil_sample_port",
+        "pick oil_sample_bottle",
+        "wait 5",
+        "place oil_sample_bottle",
+        "walk_to hpu_control_panel",
+        "read_sensor fluid_temp_sensor",
+        "notify quality_technician"
+      ],
+      "equipment": ["oil_sample_port", "oil_sample_bottle", "hpu_control_panel", "fluid_temp_sensor"]
+    },
+    {
+      "ref": "fluid_top_off",
+      "title": "Hydraulic Reservoir Fluid Level Top-Off",
+      "condition": "Fluid level sensor reads in the low zone between the low-level warning mark and the low-level trip mark, requiring fluid addition to restore operating level.",
+      "steps": [
+        "walk_to hpu_reservoir",
+        "read_sensor fluid_level_sensor",
+        "pick hydraulic_fluid_container",
+        "place hydraulic_fluid_container",
+        "wait 15",
+        "read_sensor fluid_level_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_reservoir", "fluid_level_sensor", "hydraulic_fluid_container"]
+    },
+    {
+      "ref": "accumulator_recharge",
+      "title": "Accumulator Nitrogen Precharge Recharge",
+      "condition": "Accumulator nitrogen precharge confirmed below 90 bar following pump shutdown, requiring recharge to restore energy storage specification of 100 bar.",
+      "steps": [
+        "walk_to accumulator_bay",
+        "pick nitrogen_charging_kit",
+        "place nitrogen_charging_kit",
+        "read_sensor accumulator_pressure_gauge",
+        "wait 10",
+        "read_sensor accumulator_pressure_gauge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["accumulator_bay", "nitrogen_charging_kit", "accumulator_pressure_gauge"]
+    },
+    {
+      "ref": "pump_motor_bearing_lube",
+      "title": "Pump Motor Bearing Lubrication",
+      "condition": "The scheduled 1000-hour lubrication interval for pump motor drive-end and non-drive-end bearings has been reached.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "walk_to motor_bearing_A",
+        "pick grease_cartridge",
+        "place grease_cartridge",
+        "walk_to motor_bearing_B",
+        "place grease_cartridge"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "motor_bearing_A", "motor_bearing_B", "grease_cartridge"]
+    },
+    {
+      "ref": "lockout_tagout_hpu",
+      "title": "Hydraulic Power Unit Lockout-Tagout Procedure",
+      "condition": "Any maintenance task requiring physical entry into the HPU enclosure or disconnection of hydraulic lines, requiring full energy isolation before work begins.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "walk_to lockout_station",
+        "pick lockout_hasp",
+        "place lockout_hasp",
+        "pick danger_tag",
+        "place danger_tag"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "lockout_station", "lockout_hasp", "danger_tag"]
+    },
+    {
+      "ref": "hydraulic_spill_response",
+      "title": "Hydraulic Oil Spill Containment and Cleanup",
+      "condition": "Hydraulic fluid pooling is detected on the floor in the HPU area, presenting a slip hazard and environmental risk.",
+      "steps": [
+        "notify plant_safety_officer",
+        "walk_to spill_kit_station",
+        "pick absorbent_pads",
+        "place absorbent_pads",
+        "walk_to hpu_control_panel",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["spill_kit_station", "absorbent_pads", "hpu_control_panel", "hydraulic_pressure_sensor"]
+    },
+    {
+      "ref": "emergency_stop_procedure",
+      "title": "Emergency Stop Activation and Response",
+      "condition": "An immediate safety hazard is detected in the HPU area requiring instantaneous shutdown of all hydraulic power.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button red_estop_button",
+        "notify plant_safety_officer",
+        "notify maintenance_supervisor",
+        "wait 10",
+        "read_sensor hydraulic_pressure_sensor"
+      ],
+      "equipment": ["hpu_control_panel", "red_estop_button", "hydraulic_pressure_sensor"]
+    },
+    {
+      "ref": "cold_startup",
+      "title": "Cold Start Hydraulic Power Unit Startup Procedure",
+      "condition": "Hydraulic power unit has been fully shut down and cooled to ambient temperature, requiring a complete startup sequence to bring the system to operating condition.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "read_sensor fluid_level_sensor",
+        "read_sensor fluid_temp_sensor",
+        "press_button pump_start_button",
+        "wait 30",
+        "read_sensor hydraulic_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "fluid_level_sensor", "fluid_temp_sensor", "pump_start_button", "hydraulic_pressure_sensor"]
+    },
+    {
+      "ref": "controlled_shutdown",
+      "title": "Controlled Planned Shutdown Procedure",
+      "condition": "A scheduled production stop or end-of-shift shutdown is required, necessitating an orderly reduction and safe de-energization of the hydraulic system.",
+      "steps": [
+        "walk_to hpu_control_panel",
+        "press_button pump_stop_button",
+        "wait 20",
+        "read_sensor hydraulic_pressure_sensor",
+        "read_sensor fluid_level_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["hpu_control_panel", "pump_stop_button", "hydraulic_pressure_sensor", "fluid_level_sensor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "low_pressure_warning",
+      "text": "Was doing my rounds on line 3 around 9:30 and noticed the amber light on the HPU panel was flashing. Checked the gauge and the needle was sitting around 165 bar — not tripped out but definitely lower than it should be. Pump was still turning, nothing had stopped, just the warning tone going off."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "low_pressure_warning",
+      "text": "Second shift here. The HPU by the loading dock started beeping about an hour into the shift. The digital display was showing 172 bar — everything still running but the system was screaming at us. Called maintenance because it's been drifting low all week and nobody has looked at it."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "low_pressure_warning",
+      "text": "Line 2 HPU threw an amber light just after lunch break. Oil side looked fine visually, pump was humming along, but the readout showed 158 bar. No trip, no shutdown — just the steady light telling us something was off. Wrote it up and let the supervisor know before I moved on."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "pressure_collapse",
+      "text": "All hell broke loose on line 4 around 2 PM — the whole HPU just went dead in maybe two seconds. The gauge swung from operating range all the way into the red and the panel lit up everything at once. We could hear something let go right before it happened, like a bang."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "pressure_collapse",
+      "text": "First shift, unit near the stamping press. One second the system was fine, next second all the cylinders dropped and the machine just sagged. The pressure display hit zero so fast — like someone yanked the plug. Never seen it go from full to nothing that quick. Way faster than any slow bleed."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "pressure_above_ceiling",
+      "text": "The relief valve on the line 1 HPU was screaming — that hissing sound you get when it's dumping hard. Walked over and the gauge read 262 bar. Way past the top of the green zone, into territory we've never seen. Had to get the pump off as fast as possible."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "pressure_above_ceiling",
+      "text": "Third shift report: HPU near assembly bay B was reading dangerously high when I walked past on my checks — display showed 258 bar and the panel was flashing red, not amber. Pressure was still climbing when I got there, hadn't plateaued yet."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "pressure_above_ceiling",
+      "text": "The unit on the west side started hammering — that bang-bang sound the lines make when they're seriously over-pressured. Looked at the gauge and it was pegged past 250. The regulator must have seized closed again. Line was shaking."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "accumulator_precharge_low",
+      "text": "Did the weekend check on the HPU accumulators with the system bled down like you're supposed to for static testing. Bladder unit by pump 2 was only showing 72 bar on the static gauge — should be up in the nineties. You could tell something was soft because the system response felt spongy during the morning test cycle."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "accumulator_precharge_low",
+      "text": "Maintenance tech here on line 3. After shutting down the HPU for a valve swap and letting it sit fully depressurized, I checked the accumulator static charge and it came up short — gauge said 81 bar. The nitrogen must have slowly leaked off through the bladder seam."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "pump_overload",
+      "text": "The motor on HPU-2 kicked out on the overload relay just after startup Monday morning. Could smell something hot near the motor housing. The panel was showing a fault light and the motor protection had tripped it completely off."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "pump_overload",
+      "text": "Line 5 pump started making a heavy laboring sound, like it was working way too hard to keep up. The control panel threw a current alarm. Felt the motor housing and it was getting noticeably warm. Thing was drawing way more than it should for that load."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "pump_overload",
+      "text": "Second shift noticed the HPU panel light went from green to red fault on the unit by the press line. Checked the panel and the overload indicator was lit up solid. Pump was still trying to run but the motor protection circuit kept cutting it out every few seconds."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "pump_reduced_speed",
+      "text": "The HPU on line 4 sounds like it's dragging — not dead, but definitely not spinning right. Pressure is lower than normal but it hasn't tripped anything out. You can hear it's sluggish compared to the unit right next to it. Motor is running, it's just slow and labored."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "pump_reduced_speed",
+      "text": "Operator on line 2 called in saying the actuators were moving noticeably slower than they should be. Went to the HPU and the pump sounds like it's barely keeping up — still rotating, still building some pressure, just not reaching where it needs to be. Not a shutdown situation, just lazy and underperforming."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "pump_stopped_fault",
+      "text": "Came in at 6 AM and the whole line 3 HPU was stone dead — no hum, no vibration, nothing at all. Panel shows it thinks the pump should be running based on the command, but there was zero movement. Checked the shaft and it wasn't turning at all."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "pump_stopped_fault",
+      "text": "Production stopped on line 1 because the HPU just quit completely. Pump is not running — complete silence where you'd normally hear it humming away. The HMI shows the start command is active and calling for it, but nothing is moving. All the cylinders have dropped."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "pump_stopped_fault",
+      "text": "Third shift: HPU near loading bay just stopped dead mid-production run. No ramp-down, no warning I could see, just one minute running fine and next minute completely silent. Run command still showing on the panel like nothing happened but the shaft is locked up solid."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "minor_seal_leak",
+      "text": "Noticed a shiny wet patch on the manifold block on line 2's HPU — not dripping, just weeping slowly. About the size of my hand. Oil smell but nothing pooling on the floor yet. Looks like it's coming from around one of the port fittings on the back face."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "minor_seal_leak",
+      "text": "Did my visual walk at shift start and spotted a dark oily stain developing around a port on the HPU manifold. Ran my finger over it — just a slight seep, not an active drip. System pressure was still reading fine. Put a rag underneath to monitor how fast it was progressing."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "major_line_rupture",
+      "text": "Big bang from the HPU area on line 4 and then oil spraying everywhere — high-pressure hose let go completely. Fluid was hitting the ceiling tiles. Floor covered in a couple inches of oil within seconds. Had to get everyone clear of the area immediately."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "major_line_rupture",
+      "text": "Line 3 HPU, first shift. Heard a pop and then a hiss that turned into a full-on spray. The hydraulic line at the manifold outlet let go — oil misting out across the whole bay. Pressure gauge dropped to zero in an instant."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "major_line_rupture",
+      "text": "The unit by assembly line B let loose. A fitting failed on the high-pressure outlet and it was shooting a jet of oil about ten feet across. Floor got slick immediately, real bad. We had to shut everything down and clear the area before anyone could get close."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "temperature_high_warning",
+      "text": "HPU on line 2 started beeping — the temp warning tone, not the shutdown alarm. Cooler is running, you can hear the fan going, but the fluid is definitely getting warm. Gauge was showing about 63 degrees. System still running and hasn't shut down on us, but the amber light won't stop."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "temperature_high_warning",
+      "text": "Second shift: it was a hot day in the plant and the HPU temp started creeping up on the west-side unit by mid-afternoon. Hit 67 degrees on the readout and threw the warning. Cooler fan was on and working, system was still operational, but it was getting uncomfortable watching it climb."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "temperature_critical",
+      "text": "Line 1 HPU went into a full self-shutdown on temperature — the whole system de-energized itself with no manual input. When I got there the fluid temp gauge was reading 84 degrees. Could smell something like burnt oil. The cooler must have failed much earlier and nobody caught it."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "temperature_critical",
+      "text": "Operator flagged that the HPU on line 4 had just shut itself off in the middle of the shift. No manual stop command given. Checked the panel and it was showing the temperature fault at the top of the scale — 87 degrees. The unit had protected itself."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "temperature_critical",
+      "text": "Maintenance call on the HPU near the drill station. Unit had tripped itself off about twenty minutes into the shift. Fluid was way too hot when I touched the reservoir — over 80 on the gauge. Found out later the cooler bypass valve was stuck open, so all the heat was going nowhere."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "return_filter_change",
+      "text": "The differential pressure light on the return filter housing came on for the line 3 HPU during first shift. The indicator was sitting in the red zone — filter element is clearly loaded up solid. We're right around the 500-hour mark anyway so not too surprised, just need to get the element swapped."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "return_filter_change",
+      "text": "PM schedule flagged the return filter on line 1 HPU for replacement this week. Pulled the element and it was black with contamination — definitely been working overtime. The bypass indicator had been borderline for the last couple of weeks according to the log."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "suction_strainer_clean",
+      "text": "The pump on line 2 HPU started making that whirring grinding noise on startup — the kind that tells you it's starved for oil. Pulled the suction strainer housing and it was completely plugged up with debris. A wonder the pump was running at all, honestly."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "suction_strainer_clean",
+      "text": "250-hour PM on the HPU by the assembly station came due this shift. Dropped the suction strainer and it was pretty gunked up — not clogged solid but definitely restricting flow. Cleaned it out during the shift change window while the unit was already down."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "fluid_sampling",
+      "text": "It's the 250-hour mark for line 4 HPU so we need to pull an oil sample before the next production run. Fluid looks a little darker than normal when I shone a light into the reservoir sight glass — could just be age but the lab will tell us what's actually in there."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "fluid_sampling",
+      "text": "Quality tech requested an oil sample from the HPU on line 1 after the pump coupling issue last month. Fluid response has felt different — sluggish, a bit sticky. Pulling a sample to send to the lab before we add anything or change anything out."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "fluid_top_off",
+      "text": "Morning check on line 2 HPU — sight glass showing the fluid sitting in the low zone. Not tripped yet but it's clearly below the fill line. Probably lost some during the coupling seal job last week when we had to break the lines."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "fluid_top_off",
+      "text": "The low-fluid indicator came on for the HPU on line 3 this afternoon. Reservoir sight glass confirmed it — at the very bottom of the acceptable range. No spill visible anywhere on the floor so it's probably been evaporating slowly through the breather over time."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "fluid_top_off",
+      "text": "Third shift check on the unit near loading dock B. Fluid level indicator was in the yellow zone — below the fill mark. Happens every couple months on that unit. Need to top it up before the day shift comes in and they start blaming the HPU for slow response."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "accumulator_recharge",
+      "text": "After we confirmed the accumulator bladder on HPU-2 was short on nitrogen from the static check, we needed to get it back to spec. Had the nitrogen charging rig brought over to the accumulator bay and set up to get the charge back up to 100 bar where it belongs."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "accumulator_recharge",
+      "text": "Following the static charge check on line 3 that showed only 78 bar with the oil side fully bled down, we set up the charging rig at the accumulator port to top up the nitrogen. Bladder integrity checked out fine — membrane wasn't damaged, just needed gas."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "pump_motor_bearing_lube",
+      "text": "1000-hour PM is due on the HPU motor on line 4 this week. Bearing on the drive end was starting to sound a little rough anyway — a slight whine on startup. Got the grease gun loaded up to do both ends while we have the unit down rather than waiting for it to get worse."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "pump_motor_bearing_lube",
+      "text": "Planned outage on line 1 for the motor bearing greasing PM. Motor has been running smooth and quiet but we're at the interval so better to do it on schedule than have it fail mid-shift and lose production. Both end-shields need the grease nipples hit."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "lockout_tagout_hpu",
+      "text": "Got called in to swap a proportional valve on the HPU manifold on line 2. First thing before any wrench goes on anything is getting the energy isolation done properly. Grabbed the lockout kit from the station and walked the de-energize sequence."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "lockout_tagout_hpu",
+      "text": "Safety audit found we needed to re-demonstrate the isolation procedure for the HPU by assembly B. Had to walk through the whole de-energize-and-tag sequence for the auditor before the valve maintenance could start. Auditor wanted to see the hasp applied and tagged before signing off."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "hydraulic_spill_response",
+      "text": "Found a puddle of hydraulic oil under the HPU on line 3 when I came in this morning. About a square meter of it, real slippery underfoot. No idea when it started — must have been a slow seep overnight. Grabbed the spill kit right away before anyone walked through it."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "hydraulic_spill_response",
+      "text": "The drain plug on the HPU near pump 2 backed out on its own and dumped oil on the floor. About two gallons on the deck before anyone noticed. Serious slip hazard — had to get absorbent down before the fork truck came through that aisle."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "emergency_stop_procedure",
+      "text": "Operator got their hand too close to the HPU coupling guard on line 4 — guard wasn't properly seated after someone's earlier inspection. Hit the big red button immediately and killed the whole unit. Did not wait around to assess whether it was going to be a problem."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "emergency_stop_procedure",
+      "text": "Smoke started coming from around the electrical cabinet on the HPU near assembly station 3 during second shift. Smelled like burning plastic. Slapped the e-stop and got everyone back from the area. Turned out to be a wire burning in the terminal block."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "cold_startup",
+      "text": "Coming back from the three-day holiday shutdown, the HPU on line 1 needed a proper bring-up sequence. Fluid was cold, everything sitting at room temp, no residual pressure in the system. You have to go through the full startup checks to make sure it comes up right and doesn't cavitate."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "cold_startup",
+      "text": "After the weekend maintenance window where we had the HPU on line 3 completely powered down and drained for a reservoir clean, first shift needed to walk the full startup sequence. You check fluid, you check temp, you do not just hit go on a cold unit."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "cold_startup",
+      "text": "Monday morning on line 2 — unit's been sitting all weekend with no power, fluid stone cold. The startup isn't just press go on that thing. You have to verify the fluid is up, check the temp reading, and give it time to build pressure properly or you risk pump damage on the cold pull."
+    },
+    {
+      "id": "INC-051",
+      "sop_ref": "controlled_shutdown",
+      "text": "End of shift on Friday — needed to take line 4 HPU down for the weekend maintenance window. Walked through the proper stop sequence like always. You don't just kill it — you step it down and verify the pressure has bled off before you sign off and walk away."
+    },
+    {
+      "id": "INC-052",
+      "sop_ref": "controlled_shutdown",
+      "text": "Planned production stop for the model changeover on line 1. HPU had to be taken down in sequence with the rest of the line. Logged the fluid level at shutdown time so the morning crew knows exactly where things stood before the changeover work started."
+    }
+  ]
+}

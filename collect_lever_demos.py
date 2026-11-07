@@ -18,7 +18,7 @@ then a two-phase script:
 (obs, action) recorded at every step; only episodes ending with lever angle < 0.25 are
 kept. Saved to lever_demos.npz.
 
-Run: C:/Users/sikka/miniconda3/envs/amo/python.exe collect_lever_demos.py
+Run: python collect_lever_demos.py
 """
 import argparse
 import numpy as np

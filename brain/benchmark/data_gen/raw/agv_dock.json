@@ -1,0 +1,581 @@
+{
+  "family": "AGV Charging Dock",
+  "sops": [
+    {
+      "ref": "charging_voltage_low",
+      "title": "Charging Voltage Below Setpoint Warning",
+      "condition": "The charging voltage sensor reads between 21.0 V and 23.4 V during an active AGV docking cycle, triggering a low-voltage warning alarm while the unit continues to supply reduced power.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor charging_voltage_sensor",
+        "walk_to control_panel",
+        "read_sensor dock_temperature_sensor",
+        "notify electrical_technician",
+        "wait 300 seconds",
+        "read_sensor charging_voltage_sensor"
+      ],
+      "equipment": ["charging_voltage_sensor", "dock_temperature_sensor", "control_panel", "electrical_technician"]
+    },
+    {
+      "ref": "charging_voltage_critical",
+      "title": "Charging Voltage Sudden Collapse Emergency",
+      "condition": "The charging voltage sensor drops abruptly below 18.0 V in fewer than five seconds during an active docking cycle, indicating a sudden collapse rather than a gradual low-voltage drift, requiring immediate dock shutdown.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "press_button dock_estop_button",
+        "read_sensor charging_voltage_sensor",
+        "notify electrical_technician",
+        "notify shift_supervisor",
+        "wait 60 seconds",
+        "read_sensor charging_voltage_sensor"
+      ],
+      "equipment": ["dock_estop_button", "charging_voltage_sensor", "electrical_technician", "shift_supervisor"]
+    },
+    {
+      "ref": "charging_voltage_high",
+      "title": "Charging Voltage Overvoltage Condition",
+      "condition": "The charging voltage sensor reads above 29.5 V, exceeding the maximum allowable ceiling and triggering an overvoltage protection alarm that risks damage to the AGV battery management system.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "press_button dock_disable_button",
+        "read_sensor charging_voltage_sensor",
+        "walk_to control_panel",
+        "press_button fault_clear_button",
+        "notify electrical_technician",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["dock_disable_button", "charging_voltage_sensor", "control_panel", "fault_clear_button", "electrical_technician", "shift_supervisor"]
+    },
+    {
+      "ref": "charging_current_high",
+      "title": "Overcurrent During AGV Charging",
+      "condition": "The charging current sensor reads above 85 A during an active charge cycle, exceeding the rated 80 A maximum and triggering the overcurrent alarm on the dock control panel.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor charging_current_sensor",
+        "press_button dock_disable_button",
+        "notify electrical_technician",
+        "wait 120 seconds",
+        "read_sensor charging_current_sensor"
+      ],
+      "equipment": ["charging_current_sensor", "dock_disable_button", "electrical_technician"]
+    },
+    {
+      "ref": "dock_contact_misalign",
+      "title": "Docking Contact Misalignment Fault",
+      "condition": "The contact alignment sensor detects that the AGV charging contacts are offset beyond 3 mm from the dock receiver plate centerline, preventing a valid electrical connection from being established.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor contact_alignment_sensor",
+        "press_button dock_reset_button",
+        "wait 30 seconds",
+        "read_sensor contact_alignment_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["contact_alignment_sensor", "dock_reset_button", "maintenance_supervisor"]
+    },
+    {
+      "ref": "agv_stall_slow",
+      "title": "AGV Docking Approach Speed Degraded",
+      "condition": "The AGV speed sensor registers a docking approach velocity below 0.05 m/s but above zero, indicating the vehicle is still in motion but moving far too slowly to complete a normal docking cycle within the timeout window.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor agv_speed_sensor",
+        "read_sensor dock_proximity_sensor",
+        "notify shift_supervisor",
+        "wait 60 seconds",
+        "read_sensor agv_speed_sensor"
+      ],
+      "equipment": ["agv_speed_sensor", "dock_proximity_sensor", "shift_supervisor"]
+    },
+    {
+      "ref": "agv_stall_full",
+      "title": "AGV Fully Stopped Before Dock Contact",
+      "condition": "The AGV speed sensor reads exactly zero and the dock presence sensor confirms the vehicle is within 200 mm of the dock receiver plate but has made no electrical contact, indicating a complete stall before connection is established.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor agv_speed_sensor",
+        "read_sensor dock_presence_sensor",
+        "press_button dock_reset_button",
+        "notify shift_supervisor",
+        "notify maintenance_supervisor",
+        "wait 90 seconds"
+      ],
+      "equipment": ["agv_speed_sensor", "dock_presence_sensor", "dock_reset_button", "shift_supervisor", "maintenance_supervisor"]
+    },
+    {
+      "ref": "dock_sensor_failure",
+      "title": "Dock Proximity Sensor Hardware Failure",
+      "condition": "The dock proximity sensor returns a fault code or a persistent no-signal state during normal operating conditions when AGV presence is known, indicating sensor hardware failure rather than a genuine absence of vehicle.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor dock_proximity_sensor",
+        "press_button dock_disable_button",
+        "notify maintenance_supervisor",
+        "walk_to parts_storage",
+        "pick calibration_tool",
+        "walk_to agv_charging_station_1"
+      ],
+      "equipment": ["dock_proximity_sensor", "dock_disable_button", "calibration_tool", "maintenance_supervisor", "parts_storage"]
+    },
+    {
+      "ref": "contact_arc_fault",
+      "title": "Electrical Arc Detected at Charging Contacts",
+      "condition": "The arc detection sensor triggers a hard arc-fault alarm during AGV docking, indicating an uncontrolled high-energy electrical discharge between the vehicle contacts and the dock receiver plate requiring immediate dock de-energization.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "press_button dock_estop_button",
+        "read_sensor arc_detection_sensor",
+        "notify electrical_technician",
+        "notify safety_officer",
+        "wait 120 seconds",
+        "read_sensor dock_temperature_sensor"
+      ],
+      "equipment": ["dock_estop_button", "arc_detection_sensor", "dock_temperature_sensor", "electrical_technician", "safety_officer"]
+    },
+    {
+      "ref": "thermal_overtemp",
+      "title": "Charging Unit Over-Temperature Fault",
+      "condition": "The dock temperature sensor reads above 75 degrees C inside the charging unit enclosure, triggering the thermal protection alarm and requiring immediate cessation of charging operations to prevent component damage.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor dock_temperature_sensor",
+        "press_button dock_disable_button",
+        "notify maintenance_supervisor",
+        "wait 180 seconds",
+        "read_sensor dock_temperature_sensor",
+        "read_sensor filter_differential_pressure_sensor"
+      ],
+      "equipment": ["dock_temperature_sensor", "dock_disable_button", "filter_differential_pressure_sensor", "maintenance_supervisor"]
+    },
+    {
+      "ref": "contact_spark_warning",
+      "title": "Minor Visible Spark at Dock During Connection",
+      "condition": "An operator observes a brief, isolated visible spark at the charging contact point during initial AGV connection but the arc detection sensor reads below the alarm threshold, requiring logging and monitoring without immediate shutdown.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor arc_detection_sensor",
+        "read_sensor charging_voltage_sensor",
+        "notify shift_supervisor",
+        "walk_to control_panel",
+        "read_sensor dock_temperature_sensor"
+      ],
+      "equipment": ["arc_detection_sensor", "charging_voltage_sensor", "dock_temperature_sensor", "control_panel", "shift_supervisor"]
+    },
+    {
+      "ref": "contact_pad_replace",
+      "title": "Worn Charging Contact Pad Replacement",
+      "condition": "The contact wear sensor reading indicates the contact pads have reached or fallen below the minimum allowable thickness of 2 mm, requiring pad replacement before the next AGV charge cycle.",
+      "steps": [
+        "walk_to maintenance_bay",
+        "pick loto_lock",
+        "walk_to agv_charging_station_1",
+        "press_button dock_disable_button",
+        "walk_to parts_storage",
+        "pick contact_pad_set",
+        "walk_to agv_charging_station_1"
+      ],
+      "equipment": ["contact_pad_set", "dock_disable_button", "contact_wear_sensor", "loto_lock", "maintenance_supervisor", "parts_storage", "maintenance_bay"]
+    },
+    {
+      "ref": "dock_lubrication",
+      "title": "Dock Guide Rail and Actuator Lubrication",
+      "condition": "Scheduled lubrication interval of 500 operating hours has been reached, or a technician detects audible friction or increased resistance from dock guide rails during AGV approach, requiring lubrication of rail and actuator surfaces.",
+      "steps": [
+        "walk_to maintenance_bay",
+        "pick lubrication_gun",
+        "walk_to agv_charging_station_1",
+        "press_button dock_disable_button",
+        "place lubrication_gun",
+        "press_button dock_reset_button",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["lubrication_gun", "dock_disable_button", "dock_reset_button", "maintenance_supervisor", "maintenance_bay"]
+    },
+    {
+      "ref": "sensor_calibration",
+      "title": "Dock Proximity Sensor Calibration",
+      "condition": "Scheduled 90-day calibration interval has been reached, or the dock proximity sensor shows a consistent position offset against known AGV reference positions, requiring recalibration to restore accurate vehicle detection range.",
+      "steps": [
+        "walk_to parts_storage",
+        "pick calibration_tool",
+        "walk_to agv_charging_station_1",
+        "press_button dock_disable_button",
+        "place calibration_tool",
+        "read_sensor dock_proximity_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["calibration_tool", "dock_disable_button", "dock_proximity_sensor", "maintenance_supervisor", "parts_storage"]
+    },
+    {
+      "ref": "filter_replace",
+      "title": "Charging Unit Cooling Filter Replacement",
+      "condition": "The filter differential pressure sensor reads above 250 Pa, indicating the cooling and ventilation filter is clogged and requires replacement to restore adequate airflow through the charging unit enclosure.",
+      "steps": [
+        "walk_to parts_storage",
+        "pick replacement_filter",
+        "walk_to agv_charging_station_1",
+        "press_button dock_disable_button",
+        "place replacement_filter",
+        "read_sensor filter_differential_pressure_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["replacement_filter", "dock_disable_button", "filter_differential_pressure_sensor", "maintenance_supervisor", "parts_storage"]
+    },
+    {
+      "ref": "contact_cleaning",
+      "title": "Routine Charging Contact Surface Cleaning",
+      "condition": "Scheduled weekly cleaning interval has been reached or visual inspection identifies minor oxide film or particulate contamination on the charging contact pad surfaces that is within acceptable cleaning limits and has not triggered any alarm.",
+      "steps": [
+        "walk_to maintenance_bay",
+        "pick cleaning_cloth",
+        "walk_to agv_charging_station_1",
+        "press_button dock_disable_button",
+        "place cleaning_cloth",
+        "read_sensor contact_wear_sensor",
+        "press_button dock_reset_button"
+      ],
+      "equipment": ["cleaning_cloth", "dock_disable_button", "contact_wear_sensor", "dock_reset_button", "maintenance_bay"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "AGV Charging Dock Lockout-Tagout Procedure",
+      "condition": "Any maintenance or repair task on internal dock components requires full de-energization under a documented LOTO before a technician may physically access the charging unit enclosure or receiver plate assembly.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "press_button dock_estop_button",
+        "walk_to electrical_cabinet",
+        "press_button loto_disconnect_switch",
+        "pick loto_lock",
+        "place loto_lock",
+        "notify safety_officer"
+      ],
+      "equipment": ["dock_estop_button", "loto_disconnect_switch", "loto_lock", "loto_tag", "safety_officer", "electrical_cabinet"]
+    },
+    {
+      "ref": "emergency_shutdown",
+      "title": "Emergency Stop and Station Isolation",
+      "condition": "A fire, visible cable melt, smoke, or other imminent personnel safety hazard is observed at or adjacent to the AGV charging station, requiring immediate total dock shutdown and area isolation without waiting for a standard procedure sequence.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "press_button dock_estop_button",
+        "notify safety_officer",
+        "notify shift_supervisor",
+        "walk_to electrical_cabinet",
+        "press_button loto_disconnect_switch"
+      ],
+      "equipment": ["dock_estop_button", "loto_disconnect_switch", "safety_officer", "shift_supervisor", "electrical_cabinet"]
+    },
+    {
+      "ref": "dock_startup",
+      "title": "Shift Startup Procedure for AGV Charging Dock",
+      "condition": "Beginning of a production shift or return from planned downtime requires verification of dock sensor readings and output voltage before AGV charging operations are authorized to resume.",
+      "steps": [
+        "walk_to electrical_cabinet",
+        "press_button loto_disconnect_switch",
+        "walk_to agv_charging_station_1",
+        "read_sensor dock_proximity_sensor",
+        "read_sensor charging_voltage_sensor",
+        "press_button dock_start_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["loto_disconnect_switch", "dock_proximity_sensor", "charging_voltage_sensor", "dock_start_button", "shift_supervisor", "electrical_cabinet"]
+    },
+    {
+      "ref": "dock_shutdown",
+      "title": "Planned End-of-Shift Shutdown Procedure",
+      "condition": "End of a production shift or entry into a planned maintenance window requires a controlled power-down sequence after all AGVs have cleared the dock, to ensure safe handover to the next crew or maintenance team.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor dock_presence_sensor",
+        "press_button dock_disable_button",
+        "wait 60 seconds",
+        "read_sensor charging_voltage_sensor",
+        "press_button dock_estop_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["dock_presence_sensor", "dock_disable_button", "charging_voltage_sensor", "dock_estop_button", "shift_supervisor"]
+    },
+    {
+      "ref": "daily_inspection",
+      "title": "Daily Visual and Sensor Readiness Inspection",
+      "condition": "Beginning of each production day requires a systematic multi-sensor check of the AGV charging dock to confirm all sensors are within nominal range and no physical defects are present before the first AGV is dispatched.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "read_sensor dock_proximity_sensor",
+        "read_sensor contact_alignment_sensor",
+        "read_sensor charging_voltage_sensor",
+        "read_sensor dock_temperature_sensor",
+        "pick inspection_form",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["dock_proximity_sensor", "contact_alignment_sensor", "charging_voltage_sensor", "dock_temperature_sensor", "inspection_form", "maintenance_supervisor"]
+    },
+    {
+      "ref": "contact_wear_inspect",
+      "title": "Charging Contact Pad Wear Measurement",
+      "condition": "Scheduled bi-weekly wear measurement interval has been reached or a supervisor requests a thickness check; the sensor reading indicates pads are worn but still above the 2 mm replacement minimum, requiring documentation without replacement action.",
+      "steps": [
+        "walk_to agv_charging_station_1",
+        "press_button dock_disable_button",
+        "read_sensor contact_wear_sensor",
+        "walk_to control_panel",
+        "read_sensor charging_voltage_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": ["dock_disable_button", "contact_wear_sensor", "charging_voltage_sensor", "control_panel", "maintenance_supervisor"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-001",
+      "sop_ref": "charging_voltage_low",
+      "text": "Running the number 2 dock on the east wall — the unit kept beeping at us all morning, third shift said the same thing. Checked the readout and it's sitting around 22 volts, which isn't enough to top off the big counterbalances but it didn't cut out either. Nobody wanted to kill the line over it but the yellow light on the panel has been on since 6 AM."
+    },
+    {
+      "id": "INC-002",
+      "sop_ref": "charging_voltage_low",
+      "text": "The AGV on lane 4 came back and sat at the dock for nearly 45 minutes before the battery even hit 60 percent. Normally it's topped up in 20. Power meter on the dock is reading low — just under nominal — but the unit is still running, just slow. No red alarm, just the amber warning."
+    },
+    {
+      "id": "INC-003",
+      "sop_ref": "charging_voltage_low",
+      "text": "Second shift noticed the charge dock by the stamping exit wasn't keeping the fleet topped up. It's supplying power but the gauge is showing something like 23 point something, which is technically on but not right. Panel light is amber, not red, and the AGVs are finishing their cycles way behind schedule."
+    },
+    {
+      "id": "INC-004",
+      "sop_ref": "charging_voltage_critical",
+      "text": "Dock by bay 7 just died mid-charge. The AGV was sitting there and the whole thing went dark in about two seconds — voltage went from normal to basically nothing instantly. Had to pull the vehicle out by hand. This wasn't a brownout that faded in, it was a sudden drop."
+    },
+    {
+      "id": "INC-005",
+      "sop_ref": "charging_voltage_critical",
+      "text": "We had a full dropout at the unit next to the press line — the AGV disconnected itself because the output cratered. Floor guy said he watched the display go from green numbers to zero and then the fault screen came up all at once. Did not drift down slowly, just collapsed."
+    },
+    {
+      "id": "INC-006",
+      "sop_ref": "charging_voltage_critical",
+      "text": "Line 3 dock tripped hard during second shift — the charge controller shut everything off at once. Maintenance lead said it read 15 volts when she got there, which is nowhere close to normal. The AGV battery LED went from solid charging to flashing red in an instant, not a gradual change."
+    },
+    {
+      "id": "INC-007",
+      "sop_ref": "charging_voltage_high",
+      "text": "Panel on the dock near the assembly cell was screaming — red light, continuous alarm beeping. Looked at the output gauge and the number was way up past where it should ever be. Shift lead was worried we were cooking the AGV battery packs."
+    },
+    {
+      "id": "INC-008",
+      "sop_ref": "charging_voltage_high",
+      "text": "The charge station on the north wall was pushing way too much. The operator said the AGV refused to dock — it backed off automatically as soon as it touched the contacts. Display showed a number that is clearly out of spec on the high end. Never seen it that high in four years on this line."
+    },
+    {
+      "id": "INC-009",
+      "sop_ref": "charging_voltage_high",
+      "text": "Got a call from first shift that dock 1 was kicking out every vehicle — AGVs would seat and then immediately reverse out. Checked the screen and the output ceiling was blown past by a good margin. The dock was running hot electronically speaking."
+    },
+    {
+      "id": "INC-010",
+      "sop_ref": "charging_current_high",
+      "text": "The charge dock by conveyor 6 was humming louder than usual and tripped the breaker twice in one shift. Amp reading on the display was well over what's normal — the thing was pulling way too hard. AGV battery wasn't even fully depleted when it started, so it's not like the vehicle was starving for power."
+    },
+    {
+      "id": "INC-011",
+      "sop_ref": "charging_current_high",
+      "text": "Second shift maintenance said dock unit 3 kept cutting out mid-cycle. They watched the ammeter spike up and then the unit shut itself off. Happened three times in one shift before they called it in. The vehicle battery tested fine on the handheld checker, so whatever is pulling too hard is on the dock side."
+    },
+    {
+      "id": "INC-012",
+      "sop_ref": "dock_contact_misalign",
+      "text": "AGV pulled into the dock on line 2 and the charge never started. Vehicle just sat there blinking. When we looked at the contacts, the pads were not lined up — visible gap on one side. The machine made mechanical contact but not a real electrical connection."
+    },
+    {
+      "id": "INC-013",
+      "sop_ref": "dock_contact_misalign",
+      "text": "Had an AGV that kept throwing a no-charge fault right after docking. Vehicle was physically inside the pocket but something was off — the contact faces looked skewed when you got close and looked at them. The dock unit by the loading door has been doing this intermittently all week."
+    },
+    {
+      "id": "INC-014",
+      "sop_ref": "agv_stall_slow",
+      "text": "The AGV on rotation 4 was creeping into the dock like it was dying. Took almost three minutes to close the last foot of travel. It eventually made contact but it was painfully slow. No fault code on the vehicle display, it just was not moving at the right speed."
+    },
+    {
+      "id": "INC-015",
+      "sop_ref": "agv_stall_slow",
+      "text": "First shift said the unit in aisle C was crawling when it came back for a recharge. Still moving, but barely. A few guys thought the floor was wet but it did the same sluggish approach two runs in a row on a dry surface."
+    },
+    {
+      "id": "INC-016",
+      "sop_ref": "agv_stall_slow",
+      "text": "Dock 5 by the weld cell — the AGV approach has been sluggish all day. It is not stopping, it is just way slower than it should be going into the pocket. Takes roughly twice as long to dock as the other units on the same circuit. Still getting there, but the cycle time is way off."
+    },
+    {
+      "id": "INC-017",
+      "sop_ref": "agv_stall_full",
+      "text": "AGV on route 2 rolled up to the dock, got about eight inches away from the contacts, and just stopped dead. Would not move another inch. No alarm on the vehicle itself, and it never made contact with the charging contacts. Had to push it in manually to get a charge started."
+    },
+    {
+      "id": "INC-018",
+      "sop_ref": "agv_stall_full",
+      "text": "Line 4 dock — the vehicle pulled in, got close, and froze completely. Just sat there not moving at all. The dock sensors must have seen it coming but it never reached the contacts. Happened twice this morning on the same vehicle and the same dock."
+    },
+    {
+      "id": "INC-019",
+      "sop_ref": "agv_stall_full",
+      "text": "Maintenance found an AGV parked in front of dock 3 but not connected. It was just stopped short, not touching anything. Driver said no errors came up on the panel. You could see the vehicle sitting right at the dock entrance but it had completely given up before making contact."
+    },
+    {
+      "id": "INC-020",
+      "sop_ref": "dock_sensor_failure",
+      "text": "The detection gear on dock 2 near shipping was acting up — sometimes it would see the AGV coming in, sometimes it acted like nothing was there even with the vehicle sitting right in front of it. The dock would not initiate a charge because it thought the spot was empty."
+    },
+    {
+      "id": "INC-021",
+      "sop_ref": "dock_sensor_failure",
+      "text": "The dock on the far end of the floor stopped recognizing AGV arrivals entirely. The vehicle would seat fine mechanically but the system thought the spot was vacant. The tech confirmed it is not the vehicle causing it — the detection eye on the dock side is reading nothing."
+    },
+    {
+      "id": "INC-022",
+      "sop_ref": "contact_arc_fault",
+      "text": "Flash and a bang from dock 6 during second shift — loud enough that two workers on the line flinched and stepped back. Smelled like burnt insulation right after. The AGV that was docked rolled backward on its own. Nobody hurt but we cleared the area immediately."
+    },
+    {
+      "id": "INC-023",
+      "sop_ref": "contact_arc_fault",
+      "text": "Sparks came out of the charging socket on the dock by the trim line — not just a small crackle, a real discharge. The panel lit up red and the floor around the dock smelled like something shorted badly. The docked vehicle still had its fault lights going when maintenance arrived."
+    },
+    {
+      "id": "INC-024",
+      "sop_ref": "contact_arc_fault",
+      "text": "Line 1 charging station threw sparks during connection on first shift. One of the operators saw a bright flash at the contact point and heard a sharp pop. The system faulted itself out but not before the smell filled the corner of the bay. Real electrical event, not a tiny flicker."
+    },
+    {
+      "id": "INC-025",
+      "sop_ref": "thermal_overtemp",
+      "text": "The charging unit on the south side of the plant was hot to the touch on the housing — way hotter than normal during any previous shift. The internal fan sounded labored and strained. We checked and the temperature gauge was in the red zone but the unit was still trying to charge."
+    },
+    {
+      "id": "INC-026",
+      "sop_ref": "thermal_overtemp",
+      "text": "Second shift flagged the dock unit near press 4 — heat alarm on the display and the cabinet felt like an oven when you put your hand near the vent. The filter on the back panel looked completely blocked with dust and the unit was obviously struggling to pull any air through."
+    },
+    {
+      "id": "INC-027",
+      "sop_ref": "contact_spark_warning",
+      "text": "Saw a small flicker when the AGV connected at dock 3 during first shift — quick little spark, gone in half a second. The system did not alarm, no smell, and the charge started normally right after. We know to log anything like this even if it looks minor and the dock kept running."
+    },
+    {
+      "id": "INC-028",
+      "sop_ref": "contact_spark_warning",
+      "text": "Operator on line 2 said he saw a tiny blue flash when the vehicle seated into the dock contacts. Lasted maybe a tenth of a second and the dock kept running like nothing happened. No alarm lit up, no odor. He wanted it logged just to be safe. Everything looked fine afterward."
+    },
+    {
+      "id": "INC-029",
+      "sop_ref": "contact_pad_replace",
+      "text": "Maintenance pulled the pad inspection this morning on dock 4 and they are basically paper-thin. The wear indicator was in the red and the contact surfaces look burned and pitted all the way across. They cannot be cleaned back to usable, they need to come out entirely."
+    },
+    {
+      "id": "INC-030",
+      "sop_ref": "contact_pad_replace",
+      "text": "The pads on the charging contacts at station 2 are shot — we have been cleaning them every week but they are down to almost nothing. Resistance readings across the connection have been creeping up and a couple of recent charges were incomplete because the surface is too degraded to hold a good connection."
+    },
+    {
+      "id": "INC-031",
+      "sop_ref": "dock_lubrication",
+      "text": "The guide rails on dock 1 are squealing every time an AGV comes in for a charge. Started last week and has been getting louder since. The vehicle also jostles noticeably on entry compared to the other docks which still slide in smooth. Nobody can find a record of these rails ever being lubricated since install."
+    },
+    {
+      "id": "INC-032",
+      "sop_ref": "dock_lubrication",
+      "text": "There is a grinding noise from the dock slide on unit 5 near the paint line. Every time an AGV pulls in you can hear the rail resistance. The contact arm actuator also feels stiff when the tech manually operates it during a vehicle swap. Getting worse week over week."
+    },
+    {
+      "id": "INC-033",
+      "sop_ref": "sensor_calibration",
+      "text": "The proximity sensor on dock 3 has been triggering too late — AGVs are almost fully seated before the system even acknowledges arrival. Used to register the vehicle at about a foot out. Now it barely fires until the vehicle is nearly touching. It has been about three months since anyone checked the calibration on that unit."
+    },
+    {
+      "id": "INC-034",
+      "sop_ref": "sensor_calibration",
+      "text": "Dock 2 sensor was calling vehicles as present when they were still 18 inches away from the pocket, and then missing them when they were actually docked and making contact. The readings are just off across the board — not broken, just drifted. Probably needs a re-zero."
+    },
+    {
+      "id": "INC-035",
+      "sop_ref": "filter_replace",
+      "text": "The cooling fan on dock unit 4 has been running at maximum speed all shift but the unit is still running warmer than normal. Checked the back filter and it is completely packed with lint and metal grinding dust. Barely any airflow getting through it at all."
+    },
+    {
+      "id": "INC-036",
+      "sop_ref": "filter_replace",
+      "text": "Maintenance flagged dock 2 — the pressure drop alarm came on last week and nobody addressed it before the weekend. Filter looks like it has not been swapped in months, completely blocked. Unit is still running but it is overworking itself and the temp is climbing."
+    },
+    {
+      "id": "INC-037",
+      "sop_ref": "contact_cleaning",
+      "text": "The contact pads on dock 3 have a grayish film on them — looks like oxidation or maybe fine machining dust from the nearby press. Charging is still working normally and no alarms are up, but the weekly wipe-down is due and a tech noticed it looks grimy. Pads still have plenty of material left."
+    },
+    {
+      "id": "INC-038",
+      "sop_ref": "contact_cleaning",
+      "text": "One of the techs noticed a light coating of dust and a few small metal chips sitting on the contact faces at dock 1. Nothing alarming, just the normal accumulation from the shop floor environment. The pads are not worn, just dirty. Due for the regular scheduled cleaning."
+    },
+    {
+      "id": "INC-039",
+      "sop_ref": "lockout_tagout",
+      "text": "Electrical tech needs to swap out the charge controller board on dock 5 — put in a request for a full lockout before anyone opens the cabinet. Standard isolation required before any hands-on work inside that unit. No emergency, just planned board replacement."
+    },
+    {
+      "id": "INC-040",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance has a bearing swap planned on the dock guide actuator on unit 3 this afternoon. They submitted the LOTO ticket at the start of shift. Need the unit fully de-energized and tagged before anyone gets their hands inside the mechanism."
+    },
+    {
+      "id": "INC-041",
+      "sop_ref": "emergency_shutdown",
+      "text": "Smoke was coming from the top of the charging unit on the north wall — thin wisps but definitely smoke. Shift lead yelled to clear the area and kill it. We needed everything off fast and could not wait around for any kind of normal sequence."
+    },
+    {
+      "id": "INC-042",
+      "sop_ref": "emergency_shutdown",
+      "text": "One of the dock power cables on line 2 looked like it was melting — the outer jacket was bubbling and giving off an acrid smell. The worker closest to it hit the estop before anyone even told him to. Right call. The whole dock needed to be killed and isolated immediately."
+    },
+    {
+      "id": "INC-043",
+      "sop_ref": "dock_startup",
+      "text": "Coming back from the long weekend — first shift lead wanted to make sure the dock was reading correctly before letting any AGVs queue up for a charge. Did a full go/no-go check on all sensors before releasing vehicles to the charge lane."
+    },
+    {
+      "id": "INC-044",
+      "sop_ref": "dock_startup",
+      "text": "We were returning from a 4-hour planned downtime for the floor wax crew. Dock 2 needed to be verified and authorized before going live again. Supervisor asked for a complete sensor and output check before the first vehicle was allowed to charge on that shift."
+    },
+    {
+      "id": "INC-045",
+      "sop_ref": "dock_shutdown",
+      "text": "End of day Friday — last vehicle finished its charge and the shift lead wanted the dock unit properly powered down before the weekend. Normal procedure, just needs to be logged and signed off for the maintenance crew coming in Saturday."
+    },
+    {
+      "id": "INC-046",
+      "sop_ref": "dock_shutdown",
+      "text": "Dock 3 was being handed over for a weekend maintenance window. Second shift finished the last charge cycle and needed to bring the unit down in a controlled sequence before the maintenance crew arrived Sunday morning. No issues, just the standard handover."
+    },
+    {
+      "id": "INC-047",
+      "sop_ref": "daily_inspection",
+      "text": "Monday morning, first thing — foreman asked for the standard go-through on all docks before trucks started their first routes of the week. Nothing specific wrong, just the routine start-of-day checklist before loading the first AGV onto the charge lane."
+    },
+    {
+      "id": "INC-048",
+      "sop_ref": "daily_inspection",
+      "text": "Supervisor wanted documentation on dock conditions before a scheduled customer plant audit this afternoon. Tech ran through all the standard checks at the start of day shift and logged everything so the records would be current for the walkthrough."
+    },
+    {
+      "id": "INC-049",
+      "sop_ref": "contact_wear_inspect",
+      "text": "Bi-weekly check time for the contact pads on dock 4 — just measuring, no plans to pull them yet. Pads still look OK visually but we track the numbers every two weeks. Not at the swap threshold yet but maintenance wanted the wear trend documented."
+    },
+    {
+      "id": "INC-050",
+      "sop_ref": "contact_wear_inspect",
+      "text": "We have been keeping a close eye on dock 1 pads since the last set failed ahead of schedule. Tech went out and measured thickness today — they are worn but still within spec. Not time to change them yet, just monitoring. Supervisor wanted the measurement on record."
+    }
+  ]
+}

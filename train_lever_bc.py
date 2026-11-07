@@ -7,7 +7,7 @@ saves checkpoints_lever_bc/bc_lever.zip in SB3 format so
     python train_lever.py --curriculum --resume checkpoints_lever_bc/bc_lever.zip
 fine-tunes it with PPO. Ends with a deterministic verify rollout (2 eps, far starts).
 
-Run: C:/Users/sikka/miniconda3/envs/amo/python.exe train_lever_bc.py
+Run: python train_lever_bc.py
 """
 import argparse
 import os

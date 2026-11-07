@@ -1,0 +1,712 @@
+{
+  "family": "Dust Collection System",
+  "sops": [
+    {
+      "ref": "low_dp_warning",
+      "title": "Low Differential Pressure Warning Response",
+      "condition": "Differential pressure across the filter bank has declined gradually to below the 3 in-WC minimum setpoint over multiple minutes or hours, triggering the yellow warning lamp on the control panel.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "read_sensor dp_manometer_sensor",
+        "walk_to filter_bank_inspection_port",
+        "read_sensor filter_visual_port",
+        "wait 300",
+        "read_sensor dp_manometer_sensor",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "dp_manometer_sensor",
+        "filter_bank_inspection_port",
+        "filter_visual_port"
+      ]
+    },
+    {
+      "ref": "low_dp_collapse",
+      "title": "Sudden Differential Pressure Collapse Response",
+      "condition": "Differential pressure drops to near-zero within a single scan cycle (under 60 seconds), indicating catastrophic filter bag rupture or housing breach rather than gradual blinding recovery.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "read_sensor dp_manometer_sensor",
+        "press_button emergency_stop_button",
+        "notify plant_manager",
+        "notify safety_officer",
+        "walk_to filter_bank_access_panel"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "dp_manometer_sensor",
+        "emergency_stop_button",
+        "filter_bank_access_panel"
+      ]
+    },
+    {
+      "ref": "high_dp_alarm",
+      "title": "High Differential Pressure Alarm Response",
+      "condition": "Differential pressure has risen above the 6 in-WC high alarm setpoint, suggesting progressive filter blinding that may respond to additional manual pulse cleaning before requiring system shutdown.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "read_sensor dp_manometer_sensor",
+        "press_button manual_pulse_clean_button",
+        "wait 120",
+        "read_sensor dp_manometer_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "dp_manometer_sensor",
+        "manual_pulse_clean_button"
+      ]
+    },
+    {
+      "ref": "high_dp_critical",
+      "title": "Critical Differential Pressure Shutdown Response",
+      "condition": "Differential pressure has exceeded the 9 in-WC critical shutdown threshold, placing the fan motor at immediate risk of overload damage and requiring emergency de-energization of the system.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "press_button system_shutdown_button",
+        "notify maintenance_supervisor",
+        "notify production_supervisor",
+        "walk_to fan_motor_panel",
+        "read_sensor fan_motor_load_sensor"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "system_shutdown_button",
+        "fan_motor_panel",
+        "fan_motor_load_sensor"
+      ]
+    },
+    {
+      "ref": "fan_motor_overtemp",
+      "title": "Fan Motor Over-Temperature Alarm Response",
+      "condition": "The fan motor winding temperature sensor exceeds 155 degrees C, triggering the thermal protection alarm at the motor control center while the fan remains rotating.",
+      "steps": [
+        "walk_to motor_control_center",
+        "read_sensor fan_motor_temp_sensor",
+        "press_button fan_stop_button",
+        "wait 600",
+        "read_sensor fan_motor_temp_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "motor_control_center",
+        "fan_motor_temp_sensor",
+        "fan_stop_button"
+      ]
+    },
+    {
+      "ref": "fan_underspeed",
+      "title": "Fan Motor Under-Speed Fault Response",
+      "condition": "The fan tachometer reads below 90 percent of the 1800 RPM design speed for more than 30 consecutive seconds while the motor remains energized, indicating belt slip or drive degradation but not complete failure.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "read_sensor fan_tachometer_sensor",
+        "walk_to fan_drive_access_panel",
+        "read_sensor drive_belt_tension_indicator",
+        "notify maintenance_technician",
+        "wait 60",
+        "read_sensor fan_tachometer_sensor"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "fan_tachometer_sensor",
+        "fan_drive_access_panel",
+        "drive_belt_tension_indicator"
+      ]
+    },
+    {
+      "ref": "fan_stopped",
+      "title": "Fan Motor Complete Stop Fault Response",
+      "condition": "The fan tachometer reads zero RPM and the motor current sensor reads zero amperes simultaneously, indicating total motor or drive failure rather than a partial speed reduction.",
+      "steps": [
+        "walk_to motor_control_center",
+        "read_sensor fan_tachometer_sensor",
+        "read_sensor fan_motor_current_sensor",
+        "press_button emergency_stop_button",
+        "notify maintenance_supervisor",
+        "notify production_supervisor"
+      ],
+      "equipment": [
+        "motor_control_center",
+        "fan_tachometer_sensor",
+        "fan_motor_current_sensor",
+        "emergency_stop_button"
+      ]
+    },
+    {
+      "ref": "pulse_valve_fault",
+      "title": "Pulse Cleaning Valve Fault Response",
+      "condition": "The pulse controller diagnostic indicates one or more solenoid valves failed to actuate during the timed cleaning cycle, reducing cleaning effectiveness on the affected filter row.",
+      "steps": [
+        "walk_to pulse_controller_panel",
+        "read_sensor pulse_controller_diagnostic_display",
+        "walk_to pulse_valve_manifold",
+        "read_sensor solenoid_valve_status_indicator",
+        "notify maintenance_technician",
+        "wait 60",
+        "read_sensor dp_manometer_sensor"
+      ],
+      "equipment": [
+        "pulse_controller_panel",
+        "pulse_controller_diagnostic_display",
+        "pulse_valve_manifold",
+        "solenoid_valve_status_indicator",
+        "dp_manometer_sensor"
+      ]
+    },
+    {
+      "ref": "hopper_high_level",
+      "title": "Hopper High-Level Alarm Response",
+      "condition": "The capacitance level sensor in the dust hopper reaches the high-level setpoint, indicating the hopper is full and requires immediate discharge intervention.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "read_sensor hopper_level_sensor",
+        "walk_to rotary_airlock_valve_panel",
+        "press_button rotary_valve_start_button",
+        "wait 180",
+        "read_sensor hopper_level_sensor",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "hopper_level_sensor",
+        "rotary_airlock_valve_panel",
+        "rotary_valve_start_button"
+      ]
+    },
+    {
+      "ref": "filter_bag_replacement",
+      "title": "Filter Bag Scheduled Replacement",
+      "condition": "Filter bags have reached the 12-month service interval, or differential pressure trend data shows irrecoverable blinding that pulse cleaning cannot correct.",
+      "steps": [
+        "walk_to filter_access_door",
+        "pick worn_filter_bag",
+        "place worn_filter_bag_in_waste_container",
+        "pick replacement_filter_bag",
+        "place replacement_filter_bag_in_filter_housing",
+        "walk_to dust_collector_control_panel",
+        "read_sensor dp_manometer_sensor"
+      ],
+      "equipment": [
+        "filter_access_door",
+        "worn_filter_bag",
+        "waste_container",
+        "replacement_filter_bag",
+        "filter_housing",
+        "dust_collector_control_panel",
+        "dp_manometer_sensor"
+      ]
+    },
+    {
+      "ref": "pulse_diaphragm_replace",
+      "title": "Pulse Valve Diaphragm Replacement",
+      "condition": "A pulse valve diaphragm has reached the 6-month PM replacement interval or physical inspection reveals cracking and hardening that reduces pulse amplitude on the affected cleaning row.",
+      "steps": [
+        "walk_to pulse_valve_manifold",
+        "pick failed_pulse_valve_diaphragm",
+        "place failed_pulse_valve_diaphragm_in_waste_bin",
+        "pick replacement_diaphragm",
+        "place replacement_diaphragm_in_valve_body",
+        "walk_to pulse_controller_panel",
+        "press_button pulse_test_button"
+      ],
+      "equipment": [
+        "pulse_valve_manifold",
+        "failed_pulse_valve_diaphragm",
+        "waste_bin",
+        "replacement_diaphragm",
+        "valve_body",
+        "pulse_controller_panel",
+        "pulse_test_button"
+      ]
+    },
+    {
+      "ref": "fan_bearing_lubrication",
+      "title": "Fan Shaft Bearing Lubrication",
+      "condition": "Quarterly lubrication interval is due, or the fan bearing temperature sensor reads above 80 degrees C indicating insufficient grease in the bearing housing.",
+      "steps": [
+        "walk_to fan_bearing_grease_fitting",
+        "pick grease_gun",
+        "place grease_gun_on_grease_fitting",
+        "read_sensor fan_bearing_temp_sensor",
+        "walk_to dust_collector_control_panel",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "fan_bearing_grease_fitting",
+        "grease_gun",
+        "fan_bearing_temp_sensor",
+        "dust_collector_control_panel"
+      ]
+    },
+    {
+      "ref": "hopper_cleanout",
+      "title": "Dust Hopper Manual Cleanout",
+      "condition": "Weekly cleanout interval is due, or the hopper level sensor reading is stagnant despite the rotary valve running, indicating material bridging or plugging at the hopper outlet cone.",
+      "steps": [
+        "walk_to hopper_cleanout_access_port",
+        "pick hopper_cleanout_tool",
+        "place hopper_cleanout_tool_at_cleanout_port",
+        "walk_to rotary_airlock_valve_panel",
+        "press_button rotary_valve_start_button",
+        "wait 120",
+        "read_sensor hopper_level_sensor"
+      ],
+      "equipment": [
+        "hopper_cleanout_access_port",
+        "hopper_cleanout_tool",
+        "rotary_airlock_valve_panel",
+        "rotary_valve_start_button",
+        "hopper_level_sensor"
+      ]
+    },
+    {
+      "ref": "rotary_valve_inspection",
+      "title": "Rotary Airlock Valve Inspection and Service",
+      "condition": "Monthly PM interval for the rotary airlock valve is due, or audible grinding or scraping noise is detected from the valve body during normal operation.",
+      "steps": [
+        "walk_to rotary_airlock_valve_panel",
+        "read_sensor rotary_valve_torque_sensor",
+        "walk_to rotary_valve_body",
+        "pick rotary_valve_inspection_tool",
+        "place rotary_valve_inspection_tool_on_valve_housing",
+        "notify maintenance_technician"
+      ],
+      "equipment": [
+        "rotary_airlock_valve_panel",
+        "rotary_valve_torque_sensor",
+        "rotary_valve_body",
+        "rotary_valve_inspection_tool"
+      ]
+    },
+    {
+      "ref": "inlet_duct_inspection",
+      "title": "Inlet Duct Buildup Inspection",
+      "condition": "Monthly visual inspection interval for inlet ductwork is due, or the inlet airflow velocity sensor reads below 80 percent of design flow without a corresponding fan or filter fault.",
+      "steps": [
+        "walk_to inlet_duct_access_panel",
+        "pick inspection_mirror",
+        "place inspection_mirror_at_duct_opening",
+        "read_sensor inlet_airflow_velocity_sensor",
+        "notify maintenance_supervisor",
+        "walk_to dust_collector_control_panel"
+      ],
+      "equipment": [
+        "inlet_duct_access_panel",
+        "inspection_mirror",
+        "inlet_airflow_velocity_sensor",
+        "dust_collector_control_panel"
+      ]
+    },
+    {
+      "ref": "manometer_calibration",
+      "title": "Differential Pressure Manometer Calibration",
+      "condition": "Semi-annual calibration interval is due, or the installed manometer reading deviates more than 0.5 in-WC from a portable reference gauge connected at the same test ports.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "read_sensor dp_manometer_sensor",
+        "pick calibration_reference_gauge",
+        "place calibration_reference_gauge_at_test_port",
+        "read_sensor calibration_reference_gauge",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "dp_manometer_sensor",
+        "calibration_reference_gauge",
+        "test_port"
+      ]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Dust Collector Lockout Tagout Isolation",
+      "condition": "Any maintenance activity requiring physical entry into the dust collector housing, filter bank, or fan section, necessitating full de-energization of electrical and pneumatic energy sources before access.",
+      "steps": [
+        "walk_to motor_control_center",
+        "press_button fan_stop_button",
+        "walk_to main_disconnect_switch",
+        "press_button main_disconnect_switch",
+        "pick loto_lock_and_tag",
+        "place loto_lock_and_tag_on_main_disconnect",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "motor_control_center",
+        "fan_stop_button",
+        "main_disconnect_switch",
+        "loto_lock_and_tag"
+      ]
+    },
+    {
+      "ref": "hopper_fire_response",
+      "title": "Hopper Fire or Smoldering Response",
+      "condition": "The hopper spark detector or thermal camera detects a temperature above 200 degrees C inside the hopper, indicating active combustion or smoldering of accumulated combustible dust.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "press_button emergency_stop_button",
+        "notify safety_officer",
+        "notify plant_manager",
+        "walk_to hopper_fire_suppression_valve",
+        "press_button fire_suppression_activation_button",
+        "wait 300"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "emergency_stop_button",
+        "hopper_fire_suppression_valve",
+        "fire_suppression_activation_button"
+      ]
+    },
+    {
+      "ref": "dust_spill_response",
+      "title": "Collected Dust Spill Response",
+      "condition": "Collected dust from the system discharge is observed on the floor outside the normal discharge area, creating an inhalation hazard and slip risk for personnel in the area.",
+      "steps": [
+        "notify safety_officer",
+        "walk_to dust_spill_area",
+        "pick spill_containment_barrier",
+        "place spill_containment_barrier_around_spill",
+        "pick hepa_vacuum",
+        "place hepa_vacuum_at_spill_site",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "dust_spill_area",
+        "spill_containment_barrier",
+        "hepa_vacuum"
+      ]
+    },
+    {
+      "ref": "startup_procedure",
+      "title": "Dust Collector Normal Startup",
+      "condition": "Plant shift start or restart after planned shutdown, with all maintenance complete, access doors closed, and the system cleared for operation.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "read_sensor dp_manometer_sensor",
+        "press_button pulse_system_start_button",
+        "wait 30",
+        "press_button fan_start_button",
+        "wait 60",
+        "read_sensor fan_tachometer_sensor"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "dp_manometer_sensor",
+        "pulse_system_start_button",
+        "fan_start_button",
+        "fan_tachometer_sensor"
+      ]
+    },
+    {
+      "ref": "shutdown_procedure",
+      "title": "Dust Collector Planned Shutdown",
+      "condition": "End of production shift or planned system shutdown, requiring an orderly de-energization sequence to prevent residual dust from settling in ductwork.",
+      "steps": [
+        "walk_to dust_collector_control_panel",
+        "press_button fan_stop_button",
+        "wait 120",
+        "press_button pulse_system_stop_button",
+        "walk_to rotary_airlock_valve_panel",
+        "press_button rotary_valve_stop_button",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "dust_collector_control_panel",
+        "fan_stop_button",
+        "pulse_system_stop_button",
+        "rotary_airlock_valve_panel",
+        "rotary_valve_stop_button"
+      ]
+    },
+    {
+      "ref": "filter_leak_inspection",
+      "title": "Filter Bag Leak and Bypass Inspection",
+      "condition": "A visible dust plume is observed at the clean-air outlet stack, or the outlet opacity monitor reads above 10 percent, indicating filter media bypass rather than clean exhaust.",
+      "steps": [
+        "walk_to clean_air_outlet_stack",
+        "read_sensor outlet_opacity_sensor",
+        "walk_to filter_access_door",
+        "pick dye_leak_test_kit",
+        "place dye_leak_test_kit_at_filter_inspection_port",
+        "read_sensor filter_leak_indicator",
+        "notify maintenance_supervisor"
+      ],
+      "equipment": [
+        "clean_air_outlet_stack",
+        "outlet_opacity_sensor",
+        "filter_access_door",
+        "dye_leak_test_kit",
+        "filter_inspection_port",
+        "filter_leak_indicator"
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-DC-001",
+      "sop_ref": "low_dp_warning",
+      "text": "The pressure gauge on the baghouse serving line 4 has been slowly creeping down over the course of the morning shift. Started around 4 in. WC when I clocked in, now sitting at about 2.7. Yellow warning lamp came on maybe 20 minutes ago. No sudden change — just a steady drift lower. Third time this month it has done this on days."
+    },
+    {
+      "id": "INC-DC-002",
+      "sop_ref": "low_dp_warning",
+      "text": "Gauge on the unit by the stamping press is running low again. It has been dropping all day, not all at once, more like a quarter inch per hour. Reading 2.5 in. WC right now, which is below where it should be. Yellow indicator light is on. Fan sounds fine and nothing else is alarming on the panel."
+    },
+    {
+      "id": "INC-DC-003",
+      "sop_ref": "low_dp_collapse",
+      "text": "Reading on the main baghouse went from normal to practically zero in about two minutes flat. Was sitting at 4.5 in. WC, then without any warning it just crashed. Dust smell hit the aisle immediately after it happened. Something must have torn inside because the change was way too fast to be anything gradual."
+    },
+    {
+      "id": "INC-DC-004",
+      "sop_ref": "low_dp_collapse",
+      "text": "Complete pressure washout on the collector near door 7. One scan cycle it was reading fine, next it was at zero. The alarm barely had time to sound before the reading bottomed out. Dust got into the clean-air side — you could see it drifting out the outlet stack within seconds."
+    },
+    {
+      "id": "INC-DC-005",
+      "sop_ref": "low_dp_collapse",
+      "text": "Something structural gave way in the unit by press line 2. Gauge went from 4 in. WC to nothing in under a minute — I watched it drop on the panel. The alarm triggered but by the time I walked over the reading was already pegged at zero. Visible dust cloud near the outlet confirmed something blew through the filter media."
+    },
+    {
+      "id": "INC-DC-006",
+      "sop_ref": "high_dp_alarm",
+      "text": "Pressure across the bags on the welding area collector has climbed to 7.2 in. WC over the last couple of hours. Amber alarm light has been on for about 15 minutes. Fan is still running and nothing has tripped, but airflow at the hoods feels noticeably weaker. We have been running heavy grinding all week so the bags are probably caking up."
+    },
+    {
+      "id": "INC-DC-007",
+      "sop_ref": "high_dp_alarm",
+      "text": "Got a high-DP warning on the baghouse by the deburring station — reading 6.8 in. WC on the panel display. System has not tripped, everything is still running with just the amber light and the audible beep. Suction at the pickup hoods is reduced but the fan itself sounds perfectly normal."
+    },
+    {
+      "id": "INC-DC-008",
+      "sop_ref": "high_dp_critical",
+      "text": "Pressure on the collector near cell 3 shot up past 9.5 in. WC while I was doing my rounds. Motor was audibly straining — could hear it pulling hard from across the room. Had to get it off the line fast before something burned out. Nothing gradual about it, it was already past the red mark when I found it."
+    },
+    {
+      "id": "INC-DC-009",
+      "sop_ref": "high_dp_critical",
+      "text": "Critical fault alarm on the baghouse control panel, gauge reading 9.2 and climbing. Fan was vibrating and pulling so hard you could feel it through the floor grating. Nothing incremental here — this one needed to come down right away before the motor took damage."
+    },
+    {
+      "id": "INC-DC-010",
+      "sop_ref": "high_dp_critical",
+      "text": "The pressure gauge on the paint-area collector went way past the red line — hit 10 in. WC before the automatic trip kicked in. Motor current was through the roof and you could hear the fan struggling from across the room before the alarm even fired."
+    },
+    {
+      "id": "INC-DC-011",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "Main baghouse fan motor was hot to the touch — way beyond normal warm. The overtemp light came on at the MCC and the display showed 165 degrees C on the winding sensor. Fan was still turning when I got there but it smelled like warm insulation near the motor housing. No speed issue, just the heat."
+    },
+    {
+      "id": "INC-DC-012",
+      "sop_ref": "fan_motor_overtemp",
+      "text": "Thermal alarm tripped on the collector fan down by the loading dock during second shift. Winding temp was reading 158 degrees C on the panel. Fan was still running at speed but it clearly needed to come off before it cooked the windings. Speed and current were otherwise normal — purely a temperature problem."
+    },
+    {
+      "id": "INC-DC-013",
+      "sop_ref": "fan_underspeed",
+      "text": "Fan on line 5's collector sounds wrong — quieter than usual and the suction at the hoods is definitely weaker. It is turning, just not up to speed. Belt looks glazed when you get close to the drive cover. RPM indicator was sitting around 1,500 instead of the normal 1,800."
+    },
+    {
+      "id": "INC-DC-014",
+      "sop_ref": "fan_underspeed",
+      "text": "Airflow at the pickup points on the grinder cells dropped off this morning and dust started getting past the hoods. Checked the baghouse and the fan was spinning, just slower than it should be. Tach showed about 1,490 RPM. Fan is definitely rotating — it is just dragging."
+    },
+    {
+      "id": "INC-DC-015",
+      "sop_ref": "fan_underspeed",
+      "text": "Second shift noticed the fan on the collector near the press sounding sluggish all night. Checked the drive cover this morning — belt looked loose and there was some glazing on the sheave face. Fan was rotating the whole time, just clearly not hitting design speed."
+    },
+    {
+      "id": "INC-DC-016",
+      "sop_ref": "fan_stopped",
+      "text": "Came in this morning and the entire baghouse fan was dead — no rotation, no sound from the fan housing whatsoever. Panel shows zero current draw and the tach reads nothing at all. Production had to hold because there is zero pickup at any hood across the whole line."
+    },
+    {
+      "id": "INC-DC-017",
+      "sop_ref": "fan_stopped",
+      "text": "Fan on the main collector seized up partway through first shift. Complete stop — not sluggish, not slow, just completely dead. Current on the MCC panel dropped to zero right before the fault light came on. No airflow at any hood in the area. Totally different from the slow-speed issue we had last month."
+    },
+    {
+      "id": "INC-DC-018",
+      "sop_ref": "pulse_valve_fault",
+      "text": "Bags are caking up on the east bank of the collector and the cleaning cycle does not seem to be doing anything. You can hear some solenoids firing but a couple on row 3 are dead quiet when they should be banging. Controller screen is showing a fault on positions 5 and 6 — the solenoids themselves are not actuating."
+    },
+    {
+      "id": "INC-DC-019",
+      "sop_ref": "pulse_valve_fault",
+      "text": "Pressure has been climbing even though the pulse timer is running normally. Went to the manifold and listened — at least two valves are not making the normal firing sound during their cycle. The diagnostic panel had red indicators on two of the valve positions."
+    },
+    {
+      "id": "INC-DC-020",
+      "sop_ref": "pulse_valve_fault",
+      "text": "The bags on the south side are not getting cleaned — the pulse pattern sounds wrong and lopsided compared to a normal cycle. Checked the controller and sure enough a couple of solenoids have faulted out on the display. Pressure keeps creeping up on that bank."
+    },
+    {
+      "id": "INC-DC-021",
+      "sop_ref": "hopper_high_level",
+      "text": "Level alarm on the hopper went off on the collector by the shipping area. Rotary valve was running but the indicator just kept reading full. Capacitance sensor must have hit the high mark. Nothing was coming out the discharge chute even with the valve turning."
+    },
+    {
+      "id": "INC-DC-022",
+      "sop_ref": "hopper_high_level",
+      "text": "Dust was packing into the hopper on line 8's baghouse and finally tripped the full alarm. The level indicator on the panel was maxed out. Rotary valve was operating but barely keeping up — something was slowing the discharge below what the collection rate needed."
+    },
+    {
+      "id": "INC-DC-023",
+      "sop_ref": "filter_bag_replacement",
+      "text": "Bags in the main collector are past the one-year mark and the DP never fully recovers between shifts anymore. Even after a full cleaning cycle it only comes back to about 5 in. WC and then climbs again by mid-shift. Already have the new ones on order in the parts cage."
+    },
+    {
+      "id": "INC-DC-024",
+      "sop_ref": "filter_bag_replacement",
+      "text": "Annual PM on the baghouse near the weld shop. Bags looked gray and completely caked — ran a cleaning cycle first and it barely made a dent. Blinding too far gone. Pulled all twelve and the fabric was rigid, not flexible like it should be when you bend it in your hands."
+    },
+    {
+      "id": "INC-DC-025",
+      "sop_ref": "filter_bag_replacement",
+      "text": "Change was overdue on the collector near dock 2. Trend data showed the DP was not recovering between shifts the way it did when the bags were newer. Pulled one out as a sample check and it was plugged solid — could not blow air through the media at all."
+    },
+    {
+      "id": "INC-DC-026",
+      "sop_ref": "pulse_diaphragm_replace",
+      "text": "Six-month PM on the pulse valves for the south collector. Pulled the diaphragms on three of them and two had visible cracks you could see daylight through. That explains why the cleaning pulses on that bank were so weak — rubber was just not sealing properly."
+    },
+    {
+      "id": "INC-DC-027",
+      "sop_ref": "pulse_diaphragm_replace",
+      "text": "Cleaning pulses on the north bank sounded muffled all week compared to the south side. Opened up two of the valves and the rubber inside was hardened and cracked — no flexibility left in the material at all. PM interval was due at the same time, so we had both problems at once."
+    },
+    {
+      "id": "INC-DC-028",
+      "sop_ref": "fan_bearing_lubrication",
+      "text": "Quarterly lube was due on the fan bearings on the main collector. Inboard bearing housing felt warm when I put my hand on it and the sensor was reading 83 degrees C. Added grease to both fittings and the temperature came back down within about 20 minutes of continued running."
+    },
+    {
+      "id": "INC-DC-029",
+      "sop_ref": "fan_bearing_lubrication",
+      "text": "Came to do the scheduled greasing on the fan shaft and the inboard bearing was running hot. Sensor showed 86 degrees C, and looking at the trend log it had been climbing slowly over the past few days. Nothing catastrophic yet but definitely needed attention before it got any worse."
+    },
+    {
+      "id": "INC-DC-030",
+      "sop_ref": "hopper_cleanout",
+      "text": "Hopper on the assembly area collector bridged over again — same spot as last month, right at the outlet cone. Level sensor was stuck at the same number even though the rotary valve was turning. Material had arched across the opening and nothing was getting through."
+    },
+    {
+      "id": "INC-DC-031",
+      "sop_ref": "hopper_cleanout",
+      "text": "Weekly cleanout on the baghouse hopper by the grinder bank. Dust inside had packed into a solid mass in the lower cone section. Had to break it up with the rod before the rotary valve could move anything out. Hopper was not alarming yet but it would have by end of shift."
+    },
+    {
+      "id": "INC-DC-032",
+      "sop_ref": "hopper_cleanout",
+      "text": "Level on the hopper for line 7's collector was not dropping even with the rotary valve running. Checked the cleanout port and there was a solid plug right at the hopper-to-valve transition. Dust had caked hard enough that it was not going anywhere on its own."
+    },
+    {
+      "id": "INC-DC-033",
+      "sop_ref": "rotary_valve_inspection",
+      "text": "Rotary valve on the collector near the press room has been making a grinding, metal-on-metal noise for the past two days. You can hear it from 10 feet away when it turns. Monthly service is coming up anyway but we need to get eyes on the blades and liner before it gets worse."
+    },
+    {
+      "id": "INC-DC-034",
+      "sop_ref": "rotary_valve_inspection",
+      "text": "Monthly service on the rotary airlock for the main collector. Torque reading on the sensor was elevated above normal and there was a noticeable vibration in the housing when it ran. Pulled the inspection cover and the blade tips had worn down enough to start catching on the liner."
+    },
+    {
+      "id": "INC-DC-035",
+      "sop_ref": "inlet_duct_inspection",
+      "text": "Airflow at the hoods on line 3 has been getting progressively weaker over the past week even though the fan is running at speed and the bags look fine. Suction just is not there. Must be something in the ductwork itself restricting the flow upstream of the collector."
+    },
+    {
+      "id": "INC-DC-036",
+      "sop_ref": "inlet_duct_inspection",
+      "text": "Monthly inspection on the duct serving the grinding cells. Opened the access panel and found a thick crust of metal fines built up at the first elbow — easily 2 inches thick in spots. That accounts for the airflow loss the operators have been complaining about on that side."
+    },
+    {
+      "id": "INC-DC-037",
+      "sop_ref": "manometer_calibration",
+      "text": "Semi-annual calibration is due on the DP transmitter for the baghouse on line 4. Also had a tech mention the numbers seemed off — compared it to a handheld reference gauge at the same taps and the installed unit was reading about 0.8 in. WC high across the whole range."
+    },
+    {
+      "id": "INC-DC-038",
+      "sop_ref": "manometer_calibration",
+      "text": "The manometer on the collector by the stamping machines has been giving questionable readings. Brought a portable reference gauge and connected it at the same test ports — installed unit was consistently 0.6 in. WC higher than the reference throughout the span. Calibration is past due."
+    },
+    {
+      "id": "INC-DC-039",
+      "sop_ref": "lockout_tagout",
+      "text": "Getting ready to do the bag change on unit 2 and need to get inside the housing. Fan is still spinning and there are compressed air lines supplying the pulse system that need to be isolated. Need a full energy isolation before anyone opens an access door on this one."
+    },
+    {
+      "id": "INC-DC-040",
+      "sop_ref": "lockout_tagout",
+      "text": "Maintenance crew is staging for the annual internal inspection on the main collector. Before anyone goes through the access hatch we are doing a proper isolation on the MCC and tagging the disconnect — no shortcuts on this job given what is inside."
+    },
+    {
+      "id": "INC-DC-041",
+      "sop_ref": "lockout_tagout",
+      "text": "Scheduled bag swap on the collector by the paint line. Before touching anything I locked out the main disconnect at the LOTO station and tagged it. Verified no power at the terminal block inside before opening the filter housing. Standard isolation before entry."
+    },
+    {
+      "id": "INC-DC-042",
+      "sop_ref": "hopper_fire_response",
+      "text": "Smelled something burning near the baghouse hopper on second shift — not the normal dust smell, actually like something combusting. Thermal camera on the hopper showed a reading of 225 degrees C inside. Material coming off the grinding cells can hold a smoldering spark for a while before it fully goes."
+    },
+    {
+      "id": "INC-DC-043",
+      "sop_ref": "hopper_fire_response",
+      "text": "Spark detector on the collector near the grinder threw an alarm and when we pulled up the hopper camera image there was a visible glow inside the cone. Temperature reading was well above 200 degrees C on the thermal sensor. Had to react immediately before it got up into the bags."
+    },
+    {
+      "id": "INC-DC-044",
+      "sop_ref": "hopper_fire_response",
+      "text": "Was doing rounds and noticed smoke coming out of the cleanout port on the hopper for line 6's collector. Could feel the heat radiating from a foot away when I put my hand near the opening. Something inside was actively burning, not just warm."
+    },
+    {
+      "id": "INC-DC-045",
+      "sop_ref": "dust_spill_response",
+      "text": "Discharge hose on the collector came loose during third shift and dumped a pile of fine metal dust on the floor near dock 3. Whole area became a slip hazard immediately and the powder was going airborne every time someone walked through it. Needed to get it contained before the shift crew came through."
+    },
+    {
+      "id": "INC-DC-046",
+      "sop_ref": "dust_spill_response",
+      "text": "Hopper discharge valve failed open on the unit near the loading area and dumped about half a drum of gray powder onto the concrete floor outside the discharge zone. People were coughing as soon as they walked by and the floor was like walking on grease."
+    },
+    {
+      "id": "INC-DC-047",
+      "sop_ref": "startup_procedure",
+      "text": "Coming on for first shift and the baghouse has been off since the end of the overnight cleanout. Need to bring it up in the right order before the lines start running — pulse system has to come on before the fan so we are not drawing unfiltered air through clean bags while they are still settling from being idle."
+    },
+    {
+      "id": "INC-DC-048",
+      "sop_ref": "startup_procedure",
+      "text": "Restarting the collector on line 5 after the long weekend. It sat idle all day Saturday and Sunday. Ran through the full bring-up sequence to make sure everything energized in order before the press operators started loading parts."
+    },
+    {
+      "id": "INC-DC-049",
+      "sop_ref": "shutdown_procedure",
+      "text": "End of second shift and we are taking the collector down for the night while the floor crew does their cleaning. Fan has to come off first, then we give the cleaning cycle time to finish knocking the dust cake off the bags before cutting that system too. Cannot just kill everything at once."
+    },
+    {
+      "id": "INC-DC-050",
+      "sop_ref": "shutdown_procedure",
+      "text": "Taking the baghouse down for the long holiday weekend. Normal orderly sequence — stop the fan, let the cleaning system run through one more full cycle to clear the bags, then stop the rotary valve last so the hopper is as empty as possible before we walk away for four days."
+    },
+    {
+      "id": "INC-DC-051",
+      "sop_ref": "filter_leak_inspection",
+      "text": "Someone on the floor noticed a faint brownish haze coming out of the exhaust stack on the collector serving the deburr cells. Not a big cloud but definitely visible from the ground. Opacity monitor at the panel was reading 12 percent, which is over the threshold. Something is getting through to the clean side."
+    },
+    {
+      "id": "INC-DC-052",
+      "sop_ref": "filter_leak_inspection",
+      "text": "Stack on the baghouse by line 2 had a noticeable plume at startup this morning. Could clearly see dust coming out the top of the outlet. One of the safety guys flagged it from outside the building before I even knew there was an issue. Opacity reading on the panel confirmed it was above the limit."
+    },
+    {
+      "id": "INC-DC-053",
+      "sop_ref": "filter_leak_inspection",
+      "text": "Neighbor plant called us and said our exhaust was putting out visible emissions over the fence line. Went out back and could plainly see dust drifting off the clean-air outlet stack. Had to get inside and figure out which bag had let go and was letting material bypass."
+    }
+  ]
+}

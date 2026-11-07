@@ -1,0 +1,586 @@
+{
+  "family": "Automated Torque Station",
+  "sops": [
+    {
+      "ref": "torque_below_setpoint",
+      "title": "Torque Reading Below Minimum Setpoint",
+      "condition": "The torque transducer reports a fastener tightening value that is consistently below the minimum specified torque setpoint for the current job program.",
+      "steps": [
+        "walk_to torque_control_panel",
+        "read_sensor torque_transducer",
+        "place hold_tag on torque_station",
+        "pick suspect_assembly",
+        "place suspect_assembly on inspection_bench",
+        "notify quality_engineer",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["torque_control_panel", "torque_transducer", "hold_tag", "torque_station", "suspect_assembly", "inspection_bench"]
+    },
+    {
+      "ref": "torque_sudden_collapse",
+      "title": "Mid-Cycle Torque Sudden Collapse",
+      "condition": "Torque value abruptly drops to near-zero during an active fastening cycle after initially building normally, indicating spindle disengagement or a stripped fastener thread.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to torque_station",
+        "read_sensor torque_transducer",
+        "pick stripped_fastener_sample",
+        "place stripped_fastener_sample in reject_bin",
+        "notify maintenance_tech",
+        "notify quality_engineer"
+      ],
+      "equipment": ["cycle_stop_button", "torque_station", "torque_transducer", "stripped_fastener_sample", "reject_bin"]
+    },
+    {
+      "ref": "torque_above_ceiling",
+      "title": "Torque Exceeds Maximum Ceiling",
+      "condition": "The torque transducer detects a peak fastening value that exceeds the maximum allowable torque limit for the current joint specification, indicating over-tightening or joint failure.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to torque_control_panel",
+        "read_sensor torque_transducer",
+        "pick over_torque_flag",
+        "place over_torque_flag on affected_part",
+        "notify quality_engineer",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["cycle_stop_button", "torque_control_panel", "torque_transducer", "over_torque_flag", "affected_part"]
+    },
+    {
+      "ref": "torque_warning_alert",
+      "title": "Torque Approaching Upper Warning Threshold",
+      "condition": "The torque monitoring system issues a caution alert because fastener torque values are trending toward the upper warning threshold but have not yet exceeded the maximum ceiling limit.",
+      "steps": [
+        "walk_to torque_control_panel",
+        "read_sensor torque_transducer",
+        "read_sensor nutrunner_load_sensor",
+        "notify quality_engineer",
+        "wait 300",
+        "read_sensor torque_transducer"
+      ],
+      "equipment": ["torque_control_panel", "torque_transducer", "nutrunner_load_sensor"]
+    },
+    {
+      "ref": "nutrunner_jam",
+      "title": "Nutrunner Spindle Mechanical Jam",
+      "condition": "The nutrunner spindle is physically obstructed and will not rotate, with the drive motor reporting zero RPM despite receiving a valid run command and no overcurrent condition present.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to nutrunner_station",
+        "read_sensor spindle_rpm_sensor",
+        "pick obstruction_removal_tool",
+        "place obstruction_removal_tool at nutrunner_spindle",
+        "notify maintenance_tech",
+        "wait 60"
+      ],
+      "equipment": ["cycle_stop_button", "nutrunner_station", "spindle_rpm_sensor", "obstruction_removal_tool", "nutrunner_spindle"]
+    },
+    {
+      "ref": "nutrunner_stall",
+      "title": "Nutrunner Motor Stall Under Load",
+      "condition": "The nutrunner drive motor stalls and draws excessive current when encountering fastener resistance during rundown, without any physical mechanical obstruction present in the spindle.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to nutrunner_station",
+        "read_sensor motor_current_sensor",
+        "read_sensor spindle_load_sensor",
+        "notify maintenance_tech",
+        "wait 120",
+        "read_sensor motor_current_sensor"
+      ],
+      "equipment": ["cycle_stop_button", "nutrunner_station", "motor_current_sensor", "spindle_load_sensor"]
+    },
+    {
+      "ref": "transducer_fault",
+      "title": "Torque Transducer Erratic Signal Fault",
+      "condition": "The torque transducer outputs implausible, wildly fluctuating, or out-of-range readings that are not correlated with any active fastening operation, indicating sensor or signal cable failure.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to torque_control_panel",
+        "read_sensor torque_transducer",
+        "walk_to transducer_junction_box",
+        "read_sensor signal_integrity_sensor",
+        "notify maintenance_tech",
+        "notify quality_engineer"
+      ],
+      "equipment": ["cycle_stop_button", "torque_control_panel", "torque_transducer", "transducer_junction_box", "signal_integrity_sensor"]
+    },
+    {
+      "ref": "fixture_clamp_fail",
+      "title": "Workpiece Fixture Clamp Failure",
+      "condition": "The pneumatic workpiece fixture fails to reach confirmed clamp status before the fastening cycle begins, leaving the part unsecured in the nest and blocking cycle initiation.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to fixture_station",
+        "read_sensor clamp_pressure_sensor",
+        "read_sensor clamp_confirm_sensor",
+        "notify maintenance_tech",
+        "wait 60",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["cycle_stop_button", "fixture_station", "clamp_pressure_sensor", "clamp_confirm_sensor"]
+    },
+    {
+      "ref": "spindle_lubrication",
+      "title": "Nutrunner Spindle Bearing Lubrication",
+      "condition": "Scheduled spindle bearing lubrication interval has been reached per the preventive maintenance calendar or cumulative run-hours counter.",
+      "steps": [
+        "walk_to torque_station",
+        "pick grease_cartridge",
+        "walk_to nutrunner_spindle_port",
+        "place grease_cartridge at spindle_lube_fitting",
+        "wait 30",
+        "pick empty_grease_cartridge",
+        "place empty_grease_cartridge in waste_bin"
+      ],
+      "equipment": ["torque_station", "grease_cartridge", "nutrunner_spindle_port", "spindle_lube_fitting", "empty_grease_cartridge", "waste_bin"]
+    },
+    {
+      "ref": "gearbox_oil_change",
+      "title": "Drive Unit Gearbox Oil Change",
+      "condition": "The periodic gearbox oil change interval has elapsed or oil analysis from a sample pull indicates degraded lubricant in the nutrunner drive unit gearbox.",
+      "steps": [
+        "walk_to lockout_panel",
+        "press_button gearbox_lockout_switch",
+        "walk_to gearbox_drain_port",
+        "pick drain_pan",
+        "place drain_pan under gearbox_drain_port",
+        "pick gearbox_oil_fill_bottle",
+        "place gearbox_oil_fill_bottle at gearbox_fill_port"
+      ],
+      "equipment": ["lockout_panel", "gearbox_lockout_switch", "gearbox_drain_port", "drain_pan", "gearbox_oil_fill_bottle", "gearbox_fill_port"]
+    },
+    {
+      "ref": "transducer_calibration",
+      "title": "Torque Transducer Calibration",
+      "condition": "The annual calibration interval for the torque transducer has been reached, or a calibration drift has been identified during a quality audit of fastener output values.",
+      "steps": [
+        "walk_to torque_control_panel",
+        "press_button calibration_mode_button",
+        "walk_to transducer_calibration_port",
+        "pick calibration_reference_tool",
+        "place calibration_reference_tool on transducer_mount",
+        "read_sensor torque_transducer",
+        "notify quality_engineer"
+      ],
+      "equipment": ["torque_control_panel", "calibration_mode_button", "transducer_calibration_port", "calibration_reference_tool", "transducer_mount", "torque_transducer"]
+    },
+    {
+      "ref": "socket_replacement",
+      "title": "Drive Socket and Bit Replacement",
+      "condition": "The nutrunner drive socket or bit is worn beyond acceptable dimensional limits as identified during routine inspection or following a torque fault or cross-threading event.",
+      "steps": [
+        "walk_to nutrunner_station",
+        "pick socket_removal_tool",
+        "place socket_removal_tool on worn_drive_socket",
+        "pick replacement_socket",
+        "place replacement_socket on nutrunner_spindle",
+        "pick worn_drive_socket",
+        "place worn_drive_socket in reject_bin"
+      ],
+      "equipment": ["nutrunner_station", "socket_removal_tool", "worn_drive_socket", "replacement_socket", "nutrunner_spindle", "reject_bin"]
+    },
+    {
+      "ref": "fixture_filter_cleaning",
+      "title": "Pneumatic Fixture Air Filter Service",
+      "condition": "The scheduled service interval for the pneumatic fixture clamp system air filter has been reached, or measured filter differential pressure exceeds the maximum allowable threshold.",
+      "steps": [
+        "walk_to air_supply_panel",
+        "press_button fixture_air_shutoff_valve",
+        "walk_to fixture_filter_housing",
+        "pick dirty_air_filter",
+        "place dirty_air_filter in waste_bin",
+        "pick replacement_air_filter",
+        "place replacement_air_filter in fixture_filter_housing"
+      ],
+      "equipment": ["air_supply_panel", "fixture_air_shutoff_valve", "fixture_filter_housing", "dirty_air_filter", "waste_bin", "replacement_air_filter"]
+    },
+    {
+      "ref": "reaction_bar_inspection",
+      "title": "Torque Reaction Bar Wear Inspection",
+      "condition": "The scheduled inspection interval for the torque reaction bar has been reached to verify freedom from cracks, deformation, or wear that could compromise torque measurement accuracy or structural integrity.",
+      "steps": [
+        "walk_to torque_station",
+        "pick inspection_flashlight",
+        "walk_to reaction_bar_mount",
+        "read_sensor reaction_bar_strain_sensor",
+        "place inspection_flashlight at reaction_bar_mount",
+        "notify quality_engineer",
+        "wait 120"
+      ],
+      "equipment": ["torque_station", "inspection_flashlight", "reaction_bar_mount", "reaction_bar_strain_sensor"]
+    },
+    {
+      "ref": "cable_connector_inspection",
+      "title": "Signal and Power Cable Connector Inspection",
+      "condition": "The scheduled inspection interval for torque station signal and power cable connectors has been reached to check for corrosion, physical damage, or loose connections that could cause measurement errors.",
+      "steps": [
+        "walk_to lockout_panel",
+        "press_button station_power_lockout",
+        "walk_to transducer_junction_box",
+        "read_sensor signal_integrity_sensor",
+        "pick cable_cleaning_kit",
+        "place cable_cleaning_kit at connector_panel",
+        "notify maintenance_tech"
+      ],
+      "equipment": ["lockout_panel", "station_power_lockout", "transducer_junction_box", "signal_integrity_sensor", "cable_cleaning_kit", "connector_panel"]
+    },
+    {
+      "ref": "lockout_tagout",
+      "title": "Torque Station Lockout Tagout Procedure",
+      "condition": "Planned maintenance or repair work on the torque station requires full energy isolation of all electrical, pneumatic, and mechanical energy sources before personnel access internal components.",
+      "steps": [
+        "notify shift_supervisor",
+        "walk_to main_power_panel",
+        "press_button main_disconnect_switch",
+        "walk_to pneumatic_supply_panel",
+        "press_button pneumatic_shutoff_valve",
+        "pick lockout_hasp",
+        "place lockout_hasp on main_disconnect_switch"
+      ],
+      "equipment": ["main_power_panel", "main_disconnect_switch", "pneumatic_supply_panel", "pneumatic_shutoff_valve", "lockout_hasp"]
+    },
+    {
+      "ref": "e_stop_response",
+      "title": "Emergency Stop Activation and Reset",
+      "condition": "An emergency stop has been triggered at the torque station due to an unexpected safety hazard, uncontrolled equipment event, or automatic protective device activation requiring an immediate and complete halt of all motion.",
+      "steps": [
+        "press_button red_estop_button",
+        "walk_to torque_control_panel",
+        "read_sensor station_status_sensor",
+        "notify shift_supervisor",
+        "wait 30",
+        "notify safety_officer",
+        "press_button estop_reset_button"
+      ],
+      "equipment": ["red_estop_button", "torque_control_panel", "station_status_sensor", "estop_reset_button"]
+    },
+    {
+      "ref": "work_envelope_incursion",
+      "title": "Personnel Work Envelope Incursion Response",
+      "condition": "A person or unauthorized object has entered the robot and nutrunner work envelope at the torque station while the system is in automatic operation mode, triggering the area safety scanner.",
+      "steps": [
+        "press_button red_estop_button",
+        "read_sensor area_safety_scanner",
+        "notify shift_supervisor",
+        "wait 60",
+        "read_sensor area_safety_scanner",
+        "press_button estop_reset_button",
+        "notify safety_officer"
+      ],
+      "equipment": ["red_estop_button", "area_safety_scanner", "estop_reset_button"]
+    },
+    {
+      "ref": "daily_startup",
+      "title": "Daily Startup and Verification Sequence",
+      "condition": "Beginning of a production shift requires controlled startup and system verification of the torque station before any production parts are run through the fastening cycle.",
+      "steps": [
+        "walk_to main_power_panel",
+        "press_button main_power_on_button",
+        "walk_to torque_control_panel",
+        "read_sensor torque_transducer",
+        "read_sensor clamp_pressure_sensor",
+        "press_button cycle_start_button",
+        "notify shift_supervisor"
+      ],
+      "equipment": ["main_power_panel", "main_power_on_button", "torque_control_panel", "torque_transducer", "clamp_pressure_sensor", "cycle_start_button"]
+    },
+    {
+      "ref": "end_of_shift_shutdown",
+      "title": "End-of-Shift Controlled Shutdown",
+      "condition": "Production shift has ended and the torque station must be de-energized in a controlled sequence to preserve equipment condition and ensure the work cell is in a safe state for the next shift.",
+      "steps": [
+        "press_button cycle_stop_button",
+        "walk_to torque_control_panel",
+        "read_sensor torque_transducer",
+        "walk_to main_power_panel",
+        "press_button main_power_off_button",
+        "pick end_of_shift_log",
+        "place end_of_shift_log at supervisor_station"
+      ],
+      "equipment": ["cycle_stop_button", "torque_control_panel", "torque_transducer", "main_power_panel", "main_power_off_button", "end_of_shift_log", "supervisor_station"]
+    },
+    {
+      "ref": "torque_audit_inspection",
+      "title": "Fastener Torque Quality Audit",
+      "condition": "Scheduled quality audit requires verification that completed assemblies leaving the torque station meet fastener torque specifications by sampling and bench-checking production output.",
+      "steps": [
+        "walk_to finished_parts_rack",
+        "pick audit_sample_part",
+        "walk_to torque_verification_bench",
+        "place audit_sample_part on torque_verification_bench",
+        "read_sensor torque_audit_transducer",
+        "pick audit_result_tag",
+        "notify quality_engineer"
+      ],
+      "equipment": ["finished_parts_rack", "audit_sample_part", "torque_verification_bench", "torque_audit_transducer", "audit_result_tag"]
+    },
+    {
+      "ref": "rundown_angle_check",
+      "title": "Fastener Rundown Angle Inspection",
+      "condition": "Fastener rundown angle data logged by the nutrunner controller falls outside acceptable limits for the current joint program, suggesting cross-threading, wrong fastener, or a poor joint condition.",
+      "steps": [
+        "walk_to torque_control_panel",
+        "read_sensor angle_encoder_sensor",
+        "pick suspect_assembly",
+        "place suspect_assembly on inspection_bench",
+        "read_sensor torque_audit_transducer",
+        "notify quality_engineer",
+        "place reject_tag on suspect_assembly"
+      ],
+      "equipment": ["torque_control_panel", "angle_encoder_sensor", "suspect_assembly", "inspection_bench", "torque_audit_transducer", "reject_tag"]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-TS-001",
+      "sop_ref": "torque_below_setpoint",
+      "text": "Line 3 kept kicking out parts with the yellow reject light all morning. Checked the readout on the nutrunner HMI and the live numbers were coming up around 18 Nm every single cycle, but the job card says we need 28 minimum. Been happening since about 6 AM, three hours before I called it in."
+    },
+    {
+      "id": "INC-TS-002",
+      "sop_ref": "torque_below_setpoint",
+      "text": "Second shift here, unit near bay 4. The tightening sounded normal to the ear but the controller log is full of low-value flags going back about two hours. Pulled three random pieces off the rack and the fasteners all backed off with just finger pressure — not even a quarter turn."
+    },
+    {
+      "id": "INC-TS-003",
+      "sop_ref": "torque_below_setpoint",
+      "text": "The station by the press line was putting green lights on every part but I spot-checked a handful with the click wrench and they were all loose. The live display is reading single digits when it should be up in the high twenties. Something is seriously off with how much it is actually putting on."
+    },
+    {
+      "id": "INC-TS-004",
+      "sop_ref": "torque_sudden_collapse",
+      "text": "Was watching the cycle on the HMI screen and the torque trace shot up completely normal then just fell off a cliff halfway through — went from building nicely to basically nothing in about a quarter second. Part came out and the fastener spun in by hand with no effort. Definitely a stripped thread."
+    },
+    {
+      "id": "INC-TS-005",
+      "sop_ref": "torque_sudden_collapse",
+      "text": "Third bolt of the cycle on the unit at station 7 — the tool started winding then the sound changed and the readout cratered to zero. It looked like the tool grabbed, then just lost it completely. Tool backed out on schedule but the bolt stayed loose in the hole and wiggled."
+    },
+    {
+      "id": "INC-TS-006",
+      "sop_ref": "torque_sudden_collapse",
+      "text": "Early this morning on the line 2 torque press: four consecutive parts all flagged the same way. Each one the curve looks normal until maybe 80 percent of the way up, then bang — drops to nothing. Maintenance pulled one fastener and the thread was completely gone. Not a gradual drift, each one just collapses."
+    },
+    {
+      "id": "INC-TS-007",
+      "sop_ref": "torque_above_ceiling",
+      "text": "Got an overload alarm at the very end of the fastening cycle at station 12 — the HMI showed the peak number way past the red line on the graph. The joint made a sound like something cracked. Stopped the line immediately and physically tagged the piece before touching anything else."
+    },
+    {
+      "id": "INC-TS-008",
+      "sop_ref": "torque_above_ceiling",
+      "text": "Day shift, station 12 near the end of bay 2: two parts in a row where the tool just kept pulling and the number went completely off the chart before the controller cut it out. When we looked at the bolts the heads looked stretched and the flanges were distorted. QE had to come over."
+    },
+    {
+      "id": "INC-TS-009",
+      "sop_ref": "torque_warning_alert",
+      "text": "The amber caution light on the panel started blinking around noon — not a hard fault, no reject light, just the amber. The screen was showing torque values creeping up toward the top of the green band. Everything still running and parts still passing. Wanted to log it so maintenance knows before it becomes a real problem."
+    },
+    {
+      "id": "INC-TS-010",
+      "sop_ref": "torque_warning_alert",
+      "text": "Noticed the trend screen on station 4 showing values drifting high over the last hour of first shift — not tripping any hard faults and not lighting the reject beacon, just tickling the caution zone. Parts are still passing final check but it is definitely trending the wrong direction and I did not want to ignore it."
+    },
+    {
+      "id": "INC-TS-011",
+      "sop_ref": "nutrunner_jam",
+      "text": "The nutrunner on line 1 stopped dead mid-cycle this afternoon. You could hear the motor whining like it was trying to go but the drive bit was absolutely not moving at all. Hit the stop before the motor could fry itself. Something is wedged in there solid — the spindle will not budge by hand."
+    },
+    {
+      "id": "INC-TS-012",
+      "sop_ref": "nutrunner_jam",
+      "text": "Station 9 this morning — robot positioned, cycle started, and the spindle never turned. Controller showed zero RPM on the display and the drive fault light went red almost instantly. Felt like it hit a solid wall from the very first pulse. Bolt was still sitting there completely untouched."
+    },
+    {
+      "id": "INC-TS-013",
+      "sop_ref": "nutrunner_jam",
+      "text": "Second shift, unit near the east wall of bay 3. Tool engaged, made a heavy grinding clunk, then nothing. RPM readout dropped to zero and the cycle timed out on a no-motion fault. Did not want to force it or cycle-reset without someone looking inside first. Called maintenance right away."
+    },
+    {
+      "id": "INC-TS-014",
+      "sop_ref": "nutrunner_stall",
+      "text": "The tool on station 6 kept cutting out with an overcurrent fault every few cycles. It would start spinning, get about halfway down the fastener, then trip out. No obvious jam — the bit was definitely turning fine at the start, it just cannot push through the joint under load."
+    },
+    {
+      "id": "INC-TS-015",
+      "sop_ref": "nutrunner_stall",
+      "text": "Line 3, the nutrunner next to the assembly carousel: tripping out on every third or fourth cycle with an overload code. The amp draw on the drive display spikes way past normal right before the breaker drops it. Socket looks fine, nothing in the hole, spindle turns freely when we jog it manually at low speed."
+    },
+    {
+      "id": "INC-TS-016",
+      "sop_ref": "transducer_fault",
+      "text": "The torque readout on station 5 was going absolutely crazy — showing 80 Nm, then jumping to negative values, then back up, with no tool running and no part in the fixture. We had not even started a cycle. Could not trust a single number coming off that station after that started."
+    },
+    {
+      "id": "INC-TS-017",
+      "sop_ref": "transducer_fault",
+      "text": "Line 2 at the end of bay 1: getting random reject flags even on parts we pulled from a known-good batch. The live torque trace on the HMI looks like static — spiking randomly all over the place between fastener engagements. Called maintenance because the joint definitely is not causing this."
+    },
+    {
+      "id": "INC-TS-018",
+      "sop_ref": "transducer_fault",
+      "text": "The HMI was throwing a sensor-out-of-range error between cycles, not during them. Swapped in the reference master tool and the displayed value was all over the map with nothing actually running. Setup did not change overnight — maintenance thinks the signal cable got pinched during yesterday's changeover job."
+    },
+    {
+      "id": "INC-TS-019",
+      "sop_ref": "fixture_clamp_fail",
+      "text": "Kept getting a part-not-clamped fault on the fixture at station 3. The air pressure gauge on the panel looked totally fine but the green clamp-confirm light never came on after the pneumatic fired. Controller held the interlock and would not let the cycle start. Happened four times back to back."
+    },
+    {
+      "id": "INC-TS-020",
+      "sop_ref": "fixture_clamp_fail",
+      "text": "Line 5, the clamping fixture right by the end stop near the exit conveyor: part drops in, you can hear the pneumatics fire, but the hold-down does not latch. You can wiggle the part in the nest freely after the clamp supposedly closes. Controller blocks the nutrunner from coming down. Started about halfway through second shift."
+    },
+    {
+      "id": "INC-TS-021",
+      "sop_ref": "spindle_lubrication",
+      "text": "PM calendar flagged station 8 nutrunner for its scheduled service today. Checked the grease port and the lubricant looked pretty dried out — brownish and stiff around the fitting. Put in the fresh cartridge per the maintenance sheet and logged the hour count."
+    },
+    {
+      "id": "INC-TS-022",
+      "sop_ref": "spindle_lubrication",
+      "text": "During my weekly inspection walk I noticed the spindle on the unit at bay 6 making a faint high-pitched squeal at the beginning of each cycle — goes away after a few seconds. Maintenance confirmed it has been about 500 hours since the last grease service. Bumped it up the schedule to this week."
+    },
+    {
+      "id": "INC-TS-023",
+      "sop_ref": "gearbox_oil_change",
+      "text": "Pulled the oil sample from the gearbox on station 2 during the PM window last night. It came out dark brown and smelled burnt when we put it in the sample bottle — definitely well past the change interval. Drained it completely and refilled with the spec oil before first shift arrived."
+    },
+    {
+      "id": "INC-TS-024",
+      "sop_ref": "gearbox_oil_change",
+      "text": "The oil sight glass on the drive unit at station 11 was showing oil well below the minimum line and what was left in there looked almost black. Maintenance moved it up on the schedule and knocked out the change before first shift so we did not run it any longer in that condition."
+    },
+    {
+      "id": "INC-TS-025",
+      "sop_ref": "transducer_calibration",
+      "text": "Annual cal was overdue on the line 4 torque transducer — the calibration certificate had expired about two weeks ago and nobody had caught it. QE flagged it during the internal ISO audit this morning. Maintenance scheduled calibration for the next planned downtime window."
+    },
+    {
+      "id": "INC-TS-026",
+      "sop_ref": "transducer_calibration",
+      "text": "After the torque quality audit found readings running about 3 Nm high across the board on station 7 output, maintenance pulled the calibration history and confirmed the transducer had not been recalibrated since before the last major model changeover. Pulled it for a full cal."
+    },
+    {
+      "id": "INC-TS-027",
+      "sop_ref": "socket_replacement",
+      "text": "The drive socket on station 7 was visibly egg-shaped when we pulled it during the inspection window. Cross-section should be a clean hex but the corners were clearly rounded off and shiny from wear. Tool was still running cycles but the fit on the fastener head was sloppy enough to feel by hand."
+    },
+    {
+      "id": "INC-TS-028",
+      "sop_ref": "socket_replacement",
+      "text": "After a batch of cross-threading rejects on line 2 this morning, maintenance pulled the drive bit and found a chip broken off one of the hex drive surfaces — sharp little metal fragment still in the housing. Swapped in a new socket and confirmed the next ten pieces came out clean with no angle flags."
+    },
+    {
+      "id": "INC-TS-029",
+      "sop_ref": "fixture_filter_cleaning",
+      "text": "Station 3 fixture had been cycling noticeably slow on the clamp stroke — taking close to two seconds to close when it should be under half a second. Pulled the filter housing and it had grey metal dust sludge packed solid into the mesh. Long overdue for service honestly."
+    },
+    {
+      "id": "INC-TS-030",
+      "sop_ref": "fixture_filter_cleaning",
+      "text": "Pneumatic pressure to the clamp fixture on line 6 was dropping noticeably during the high-volume part of the shift when all stations are running together. Traced it to the inlet filter on the fixture supply — the element was almost completely blocked with fine metal particulate from the grinding cell next door."
+    },
+    {
+      "id": "INC-TS-031",
+      "sop_ref": "reaction_bar_inspection",
+      "text": "During the quarterly inspection on station 10 we found a hairline crack running across the upper arm of the reaction bar right where it contacts the locating pin. Not visible without the flashlight. Tagged the station out before the next shift started and called for a replacement bar."
+    },
+    {
+      "id": "INC-TS-032",
+      "sop_ref": "reaction_bar_inspection",
+      "text": "Maintenance noticed the reaction bar on line 1 had a slight but definite bend in it — most likely from a workpiece getting loaded in crooked a while back and nobody catching it. Torque values on that station had been drifting for about a week and this turned out to be the reason."
+    },
+    {
+      "id": "INC-TS-033",
+      "sop_ref": "cable_connector_inspection",
+      "text": "Opened the junction box on station 5 during the scheduled PM and found green corrosion growing on two of the signal pins inside the transducer connector. Cleaned them up with the contact kit and the intermittent erratic readings we had been chasing for the past week went away completely."
+    },
+    {
+      "id": "INC-TS-034",
+      "sop_ref": "cable_connector_inspection",
+      "text": "Line 3 torque station: the rubber boot on the transducer cable connector was cracked right at the strain relief and coolant mist from the neighboring wash station had wicked in over time. Pin 4 inside was almost corroded through. Caught it on the scheduled walk before it actually failed mid-production."
+    },
+    {
+      "id": "INC-TS-035",
+      "sop_ref": "lockout_tagout",
+      "text": "Before pulling the nutrunner drive motor for a full replacement on station 9 during Saturday maintenance, the crew had to lock out all energy sources first. Confirmed power off at the main disconnect, pneumatic pressure dumped to zero, and personal lock applied before anyone cracked the enclosure."
+    },
+    {
+      "id": "INC-TS-036",
+      "sop_ref": "lockout_tagout",
+      "text": "Planned rebuild on the gearbox at station 6 during the Sunday shutdown window. Crew walked through full energy isolation — disconnected and locked the main power feed, bled down the pneumatic accumulator, and applied both electrical and pneumatic locks before breaking any fittings. No incidents."
+    },
+    {
+      "id": "INC-TS-037",
+      "sop_ref": "e_stop_response",
+      "text": "A metal chip ejected out of the joint gap at the end of a rundown and pinged off the guarding panel right near the operator position. Operator slapped the red mushroom button on station 4 immediately and the whole cell went down hard. Supervisor came over to look before anyone touched the reset."
+    },
+    {
+      "id": "INC-TS-038",
+      "sop_ref": "e_stop_response",
+      "text": "Line 2 torque station dropped into an e-stop during a rundown cycle — tool locked mid-stroke and everything stopped. Nobody hit a button manually; it tripped on its own. Maintenance thinks a safety relay in the control cabinet kicked it out on an internal fault. Called it in and waited for the all-clear from supervision before resetting."
+    },
+    {
+      "id": "INC-TS-039",
+      "sop_ref": "e_stop_response",
+      "text": "Second shift on line 1: someone's jacket sleeve caught the palm safety button right next to the torque fixture and the whole cell hard-stopped mid-cycle. Took about 20 minutes to sort out who needed to authorize the reset and get everyone clear of the zone before we could bring it back up."
+    },
+    {
+      "id": "INC-TS-040",
+      "sop_ref": "work_envelope_incursion",
+      "text": "A new operator from the training group walked right into the robot work zone at station 8 while it was still in auto mode — the area scanner detected the break and killed all motion immediately. Nobody got hurt but we stopped the whole line and did a headcount and area sweep before calling it safe."
+    },
+    {
+      "id": "INC-TS-041",
+      "sop_ref": "work_envelope_incursion",
+      "text": "A material handler tried to reach in past the light curtain to grab a finished part while the robot arm was still completing the last torque cycle. Safety scanner tripped and everything stopped hard. Supervisor and the safety coordinator were both notified before we even thought about resetting anything."
+    },
+    {
+      "id": "INC-TS-042",
+      "sop_ref": "daily_startup",
+      "text": "First shift startup on line 3 this morning: the pressure readings looked low on the initial check — took about three minutes after the main air valve opened before everything stabilized in the normal range. Held off on releasing to production until the readings sat steady for a couple minutes."
+    },
+    {
+      "id": "INC-TS-043",
+      "sop_ref": "daily_startup",
+      "text": "Monday morning startup at station 7 coming back from the long weekend: the controller had lost its date and time setting after the power interruption Friday night. The startup sequence was throwing a configuration fault and would not advance past the initialization screen until we reset the clock."
+    },
+    {
+      "id": "INC-TS-044",
+      "sop_ref": "end_of_shift_shutdown",
+      "text": "End of day shift on line 4 last Thursday: the operator closed up and just killed the main breaker without running the shutdown sequence first. Came in next morning and found a part still clamped tight in the fixture with the nutrunner parked on top of it. No damage luckily but had to manually release the clamp."
+    },
+    {
+      "id": "INC-TS-045",
+      "sop_ref": "end_of_shift_shutdown",
+      "text": "Third shift wrapping up station 2 last night: the shutdown log printout jammed in the printer so we could not get the paper confirmation of close-out. Maintenance had to come over and physically verify the unit was fully de-energized and clear before they would sign off and release the area to housekeeping."
+    },
+    {
+      "id": "INC-TS-046",
+      "sop_ref": "torque_audit_inspection",
+      "text": "QE ran a mid-week sample pull on line 3 finished assemblies on Wednesday afternoon — grabbed 10 pieces from the outbound rack and put them on the audit bench. Two of them were sitting right at the low edge of the acceptance window but still technically passing. Logged the data and flagged the trend for the weekly review."
+    },
+    {
+      "id": "INC-TS-047",
+      "sop_ref": "torque_audit_inspection",
+      "text": "During the Friday afternoon audit on station 5 output, the bench audit transducer was showing values consistently about 2 Nm above what the station controller had been logging for those same parts. That kind of discrepancy between the station and the bench tool does not just happen on its own. Kicked it to engineering."
+    },
+    {
+      "id": "INC-TS-048",
+      "sop_ref": "rundown_angle_check",
+      "text": "Controller on line 2 flagged a bunch of parts from the afternoon run where the angle trace shows a step in the curve — it winds normally then kind of catches and jumps forward. That step pattern is a classic cross-thread signature. Parts got pulled and tagged before the end of shift."
+    },
+    {
+      "id": "INC-TS-049",
+      "sop_ref": "rundown_angle_check",
+      "text": "Station 11 logged three consecutive high-angle rejects early this morning. The fastener was going in fine by feel and hitting the target torque number just fine, but the angle counter was running way too many degrees before the torque started building. Wrong fastener length ended up being in the supply bin — shorter shank than the job called for."
+    },
+    {
+      "id": "INC-TS-050",
+      "sop_ref": "rundown_angle_check",
+      "text": "Near the end of second shift on line 4, the angle encoder was logging values well over the program limit even on parts that were hitting their torque target just fine. Engineering thinks the joint crush rate was off on this batch of brackets — sent the whole pallet for a teardown inspection to understand what is actually happening in the joint."
+    }
+  ]
+}

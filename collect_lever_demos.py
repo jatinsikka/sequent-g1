@@ -1,5 +1,5 @@
 """Collect scripted lever pull-down demos for BC warm-start (lever twin of the
-button's collect_demos in train_button_bc.py).
+button's collect_demos in experiments/train_button_bc.py).
 
 Per episode: curriculum reset (frac 0.6-1.0 -> mid/far arm starts, lever partially up),
 then a two-phase script:

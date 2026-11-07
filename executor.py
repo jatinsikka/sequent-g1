@@ -7,7 +7,7 @@ agrees it happened; otherwise the executor retries, then halts with a report.
 v0 scope:
   - `pick`/`grasp` run the real RL grasp policy (v5.5); `walk_to` runs PID+AMO
     navigation. Both verify against measured physics (mjData).
-  - remaining skills (press_button, place, read_sensor, ...) are HONESTLY stubbed:
+  - remaining skills (press_button, place, read_sensor, ...) are stubbed:
     marked `stubbed`, never reported as `verified`, until they get real runners.
 
 Each real skill runs as its own reset->rollout->verify episode for now; chaining

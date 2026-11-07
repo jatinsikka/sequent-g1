@@ -6,7 +6,7 @@ A simulated Unitree G1 humanoid that reads a plant-floor incident ticket, finds 
   <img src="docs/media/ticket_demo.gif" alt="Ticket demo: incident card, SOP retrieval, walk, RL button press, verified verdict" width="640">
 </p>
 
-**[Project page](https://jatinsikka.github.io/sequent-g1/)** · **[Paper](docs/PAPER.md)** ([PDF](docs/paper.pdf)) · **[Retrieval reproduction](brain/benchmark/REPRO_REPORT.md)** · [Website](https://sequentrobotics.com)
+**[Project page](https://jatinsikka.github.io/sequent-g1/)** · **[Paper](docs/PAPER.md)** ([PDF](docs/paper.pdf)) · **[Retrieval reproduction](brain/benchmark/REPRO_REPORT.md)**
 
 ## How it works
 

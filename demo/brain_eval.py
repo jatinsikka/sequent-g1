@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SEQUENT — MEASURE THE BRAIN, LIVE.
+Sequent retrieval evaluation.
 
 Runs labelled incident tickets through the rankers against the full SOP index and reports
 Recall@1, Recall@5 and MRR. Every number is computed on this machine, right now.
@@ -117,13 +117,8 @@ def metrics(ranked_ids: list, golds: list) -> dict:
     return {"R@1": r1 / n, "R@5": r5 / n, "MRR": rr / n, "n": n}
 
 
-# ---------------------------------------------------------------------------
-# The interesting test: tickets written the way a person on a plant floor
-# actually talks, deliberately avoiding the vocabulary the SOPs use. None of
-# these are in the dataset. `accept` holds every SOP that would be a defensible
-# answer, because some of these complaints are genuinely ambiguous and pretending
-# otherwise would rig the score.
-# ---------------------------------------------------------------------------
+# Ten tickets (not in the dataset) for the 100-SOP library. `accept` lists every SOP that
+# counts as correct, since some tickets are ambiguous.
 HARD = [
     ("there is a burning plastic stink coming off the unit",        {"SOP-079"}, ""),
     ("it is making a horrible grinding racket I have never heard before",
@@ -142,18 +137,14 @@ HARD = [
 
 
 def hard_mode() -> None:
-    """Head-to-head on operator-voice tickets that share almost no words with the SOPs."""
+    """TF-IDF vs MiniLM on the ten hard tickets (100-SOP library)."""
     sops, _ = load()
     from brain_bridge import _retrieve_sop_tfidf
     from src.retrieval.infer_retrieve import retrieve_topk
 
     console.print()
-    console.print(Rule(Text("  THE HARD SET — HOW PEOPLE ACTUALLY TALK  ",
+    console.print(Rule(Text("  Hard set: 10 tickets, 100-SOP library  ",
                             style=f"bold black on {GOLD}"), style=GOLD))
-    console.print()
-    console.print(Text("   Ten complaints written in plant-floor English, none of them in the",
-                       style=DIM))
-    console.print(Text("   dataset, each deliberately avoiding the words its SOP uses.", style=DIM))
     console.print()
 
     with console.status("[grey58]loading the encoder...[/]", spinner="dots"):
@@ -178,16 +169,16 @@ def hard_mode() -> None:
                 Text(f"{sid}  {title:<34.34}", style=GREEN if ok else RED),
                 Text("hit" if ok else "miss", style=f"bold {GREEN}" if ok else RED))
         if note and sok:
-            console.print(Text(f"      ({note} — counted as a hit)", style=DIM))
+            console.print(Text(f"      ({note}; counted as a hit)", style=DIM))
         console.print()
 
         if not sok:
             if note:
                 notes.append((text, note))
             elif sem_rank:
-                notes.append((text, f"correct SOP was semantic rank {sem_rank}, not 1"))
+                notes.append((text, f"semantic rank {sem_rank}"))
             else:
-                notes.append((text, "correct SOP not in either top 5 — a real miss"))
+                notes.append((text, "not in either top 5"))
 
     n = len(HARD)
     tt = Table(box=None, padding=(0, 3))
@@ -200,17 +191,11 @@ def hard_mode() -> None:
 
     if notes:
         console.print()
-        console.print(Text("   The ones that did not work, and why:", style=f"bold {GOLD}"))
+        console.print(Text("   Misses:", style=f"bold {GOLD}"))
         for text, note in notes:
             console.print(Text(f'     "{text[:46]}"', style=DIM))
             console.print(Text(f"        {note}", style=RED))
     console.print()
-    console.print(Text("   The picture: meaning-based retrieval clearly beats word",
-                       style=DIM))
-    console.print(Text("   overlap on real operator language, and it still misses when the", style=DIM))
-    console.print(Text("   complaint is ambiguous or when a word like 'blue' drags it toward the",
-                       style=DIM))
-    console.print(Text("   wrong procedure. Both facts belong on screen.", style=DIM))
     console.print()
 
 
@@ -238,7 +223,7 @@ def main() -> None:
     golds = [i["labels"]["sop_id"] for i in incs]
 
     console.print()
-    console.print(Rule(Text("  SEQUENT — LIVE RETRIEVAL EVALUATION  ", style=f"bold black on {GOLD}"),
+    console.print(Rule(Text("  Retrieval evaluation  ", style=f"bold black on {GOLD}"),
                        style=GOLD))
     console.print()
     console.print(Text(f"   {len(incs)} labelled incident tickets  x  {len(sops)}-SOP index"
@@ -273,7 +258,7 @@ def main() -> None:
         console.print(Text(f"   {name}  done in {elapsed:.1f}s", style=DIM))
 
     console.print()
-    t = Table(box=None, padding=(0, 3), title="measured just now, on this machine",
+    t = Table(box=None, padding=(0, 3), title="results",
               title_style=f"bold {GOLD}", title_justify="left")
     t.add_column("ranker", width=20)
     t.add_column("R@1", justify="right", width=7)
@@ -297,35 +282,22 @@ def main() -> None:
 
     console.print(Panel(
         Text.assemble(
-            ("Where the two rankers split at rank 1:\n\n", "white"),
-            (f"   {len(only_sem):>3}  tickets only the SEMANTIC ranker gets right", BLUE),
-            ("   (paraphrase: the operator's words are not the SOP's words)\n", DIM),
-            (f"   {len(only_lex):>3}  tickets only the LEXICAL ranker gets right", GOLD),
-            ("   (the ticket names the procedure almost verbatim)\n", DIM),
+            ("Rank-1 disagreements:\n", "white"),
+            (f"   {len(only_sem):>3}  only MiniLM correct\n", BLUE),
+            (f"   {len(only_lex):>3}  only TF-IDF correct", GOLD),
         ), border_style=DIM, padding=(1, 3)))
 
-    # Say the uncomfortable thing out loud: this benchmark is easy.
+    # The 100-SOP set is saturated; say so instead of reporting ~1.0 as a result.
     top = max(m["R@1"] for m, _ in runs.values())
     if top >= 0.95:
         console.print()
         console.print(Panel(
             Text.assemble(
-                ("READ THIS BEFORE YOU QUOTE THE NUMBER ABOVE.\n\n", f"bold {RED}"),
-                ("This benchmark is saturated, and that is a property of the data, not\n"
-                 "a result. There are 100 SOPs and 100 incidents in a clean 1-to-1\n"
-                 "mapping, and each incident was written as a near-paraphrase of its\n"
-                 "own SOP. Nothing competes for an answer. Any reasonable ranker scores\n"
-                 "near 1.0 here.\n\n", "white"),
-                ("This is exactly why the project moved to a 1,012-SOP corpus with 46\n"
-                 "equipment families and ~22 near-identical procedures each, where the\n"
-                 "fine-tuned retriever scores R@1 0.577 and TF-IDF 0.301. Run it with:\n"
-                 "    python demo/brain_eval.py --library plant\n\n", "white"),
-                ("Show this slide. It is more convincing than the 1.000.", f"italic {GOLD}"),
+                ("100 SOPs, one paraphrased ticket each: every ranker scores ~1.0.\n", "white"),
+                ("On the 1,012-SOP benchmark: fine-tuned 0.577, TF-IDF 0.301.\n", "white"),
+                ("    python demo/brain_eval.py --library plant", f"bold {GOLD}"),
             ), border_style=RED, padding=(1, 3),
-            title=f"[bold {RED}]saturation warning[/]"))
-        console.print()
-        console.print(Text("   For a test this data cannot give you, run:", style=DIM))
-        console.print(Text("       python demo/brain_eval.py --hard", style=f"bold {GOLD}"))
+            title=f"[bold {RED}]saturated[/]"))
 
     if a.disagree:
         for label, idxs, colour in (("only semantic gets it", only_sem, BLUE),
@@ -362,20 +334,15 @@ def main() -> None:
                            style=GOLD if rank and rank <= 5 else RED),
                       incs[i]["text"])
         console.print(t)
-        console.print()
-        console.print(Text("   Printed in full. A retrieval demo that only shows its hits is a "
-                           "sales pitch.", style=f"italic {DIM}"))
+
 
     console.print()
     if lib == "plant":
-        console.print(Text("   SCOPE: 1,012 SOPs. 'semantic' is one fine-tuned model; the paper reports the", style=DIM))
-        console.print(Text("   mean of 5 seeds (R@1 0.577 +/- 0.006), so this row can differ by about 0.01.", style=DIM))
+        console.print(Text("   One model. Paper: mean of 5 seeds, R@1 0.577 +/- 0.006.", style=DIM))
         if a.informed:
-            console.print(Text("   The 92 informed tickets were written by the author from each SOP's title", style=DIM))
-            console.print(Text("   and condition, so they share some of its vocabulary.", style=DIM))
+            console.print(Text("   Informed tickets: written by the author from SOP titles.", style=DIM))
     else:
-        console.print(Text("   SCOPE: 100-SOP course library + off-the-shelf MiniLM. The paper's headline", style=DIM))
-        console.print(Text("   is the 1,012-SOP benchmark: python demo/brain_eval.py --library plant", style=DIM))
+        console.print(Text("   100-SOP course library, off-the-shelf MiniLM.", style=DIM))
     console.print()
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SEQUENT — THE BODY, HEADLESS.
+Headless AMO walk with measurements.
 
 Runs the frozen AMO whole-body controller on the G1 in MuJoCo with no window:
 commands a forward walk, then measures what actually happened from mjData —
@@ -159,7 +159,7 @@ def main() -> None:
     print(f"    commanded distance     {a.vx * a.seconds:.2f} m   "
           f"(includes the settle before it starts moving)")
     print(f"    pelvis height          {np.mean(heights):.3f} m mean, {min(heights):.3f} m min")
-    print(f"    upright the whole way  {'no  <- IT FELL' if fell else 'yes'}")
+    print(f"    upright                {'no (fell)' if fell else 'yes'}")
     print(f"    heading error          {crab:.0f} deg off the commanded straight line")
     print(f"    real time factor       {a.seconds / wall:.2f}x  ({wall:.1f}s wall for "
           f"{a.seconds:.0f}s sim)")

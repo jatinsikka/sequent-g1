@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SEQUENT — DRIVE THE ROBOT YOURSELF.
+Drive the G1 in the MuJoCo viewer (AMO running), CPU-patched.
 
 Opens the live MuJoCo viewer with the frozen AMO whole-body controller running,
 and hands the keyboard to whoever is standing in front of the screen. This is

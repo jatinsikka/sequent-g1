@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SEQUENT — RUN ANY BODY SCRIPT ON A MACHINE WITHOUT AN NVIDIA GPU.
+Run any body script on a machine without an NVIDIA GPU.
 
 `amo_jit.pt` was traced on a CUDA box and the trace baked a literal
 `device=cuda:0` into a torch.zeros call inside the graph. `map_location` moves

@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 """
-SEQUENT — THE BRAIN, STEP BY STEP.
+Sequent brain walkthrough.
 
-A live, paced walkthrough of what happens between an operator typing a complaint
-in their own words and the G1 having an executable, verifiable plan. Every number
-on screen is computed live from this repo's code and data — nothing is replayed.
+Steps through ticket -> SOP -> plan, one stage per Enter. Everything is computed live.
 
     python demo/brain_walkthrough.py                       # default ticket, paced by Enter
     python demo/brain_walkthrough.py --ticket "..."        # your own words
-    python demo/brain_walkthrough.py --incident INC-042    # a labelled held-out ticket
+    python demo/brain_walkthrough.py --incident INC-00026  # a labelled held-out ticket
     python demo/brain_walkthrough.py --random              # random labelled ticket
     python demo/brain_walkthrough.py --auto                # no pauses (for screen recording)
     python demo/brain_walkthrough.py --list                # show the ticket menu and exit
@@ -21,16 +19,8 @@ Libraries:
     course  the original 100-SOP library with the off-the-shelf MiniLM (no training needed).
 
 Stages:
-    1  The ticket            what the operator actually wrote
-    2  The library           the SOPs the robot is allowed to run
-    3  Lexical retrieval     TF-IDF: word overlap, and where it breaks
-    4  Semantic retrieval    MiniLM: 384-d meaning vectors
-    5  The hybrid            why both rankers, and what each one contributes
-    6  The verdict           did it find the right procedure? (gold label revealed)
-    7  The faithful planner  every written step -> exactly one robot skill
-    8  The inferred steps    the navigation a human SOP leaves unsaid
-    9  The contracts         what the verifier will measure for each skill
-    10 The handoff           what the body does with this, and what it reports back
+    1 Ticket   2 SOP library   3 TF-IDF retrieval   4 MiniLM retrieval   5 Candidates   6 Result
+    7 Selected SOP   8 Plan   9 Inserted navigation   10 Verifier checks   11 Output
 """
 from __future__ import annotations
 
@@ -197,26 +187,19 @@ def rank_table(rows, gold: str = None, title: str = "", score_header: str = "sco
 def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
     console.print()
     console.print(Align.center(Text("S E Q U E N T", style=f"bold {GOLD}")))
-    console.print(Align.center(Text("the brain: from an operator's words to a verifiable robot plan",
-                                    style=DIM)))
     console.print()
     console.print(Align.center(Text(
-        "ticket  ->  retrieval  ->  SOP  ->  faithful plan  ->  skill contracts  ->  body",
+        "ticket  ->  retrieval  ->  SOP  ->  plan  ->  verifier",
         style="white")))
 
     # ------------------------------------------------------------ 1. the ticket
-    stage(1, "THE TICKET", "an operator types a complaint. no keywords, no SOP number, no form.")
+    stage(1, "Ticket")
     console.print(Panel(Text(ticket, style="bold white"),
                         title=f"[{GOLD}]INCIDENT {incident_id}[/]",
-                        subtitle="[grey58]operator's own words[/]",
                         border_style=GOLD, padding=(1, 3)))
-    console.print()
-    console.print(Text("   Note what is NOT in there: no procedure number, no equipment code,",
-                       style=DIM))
-    console.print(Text("   no controlled vocabulary. That is the whole problem.", style=DIM))
 
     # ----------------------------------------------------------- 2. the library
-    stage(2, "THE LIBRARY", f"{len(sops)} standard operating procedures the robot is allowed to run.")
+    stage(2, "SOP library")
     example = next((s for s in sops if s["sop_id"] in ("SOP-0001", "SOP-001")), sops[0])
     body = Group(
         Text(f"{example['sop_id']}  {example['title']}", style=f"bold {BLUE}"),
@@ -224,25 +207,16 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
         Text(""),
         *[Text(f"  {i}. {st}", style="white") for i, st in enumerate(example["steps"], 1)],
     )
-    console.print(Panel(body, title="[grey58]one entry, as written[/]", border_style=DIM,
+    console.print(Panel(body, title="[grey58]example[/]", border_style=DIM,
                         padding=(1, 3)))
     console.print()
     kv("corpus", f"{len(sops)} SOPs", "white")
     kv("steps per SOP", f"{min(len(s['steps']) for s in sops)}–{max(len(s['steps']) for s in sops)}", "white")
     if LIB == "plant":
-        kv("machines", "46 equipment families, about 22 look-alike SOPs each", "white")
-        console.print()
-        console.print(Text("   Each step names a skill and an object. The SOPs were written at skill", style=DIM))
-        console.print(Text("   level, so the hard part is finding the right one among near-twins:", style=DIM))
-        console.print(Text("   pressure BELOW setpoint vs SUDDEN collapse vs ABOVE ceiling.", style=DIM))
-    else:
-        kv("written for", "a human who already knows where the machine is", DIM)
-        console.print()
-        console.print(Text("   Nobody wrote 'walk to the machine' — a human just does that.", style=DIM))
-        console.print(Text("   Remember this. It comes back in stage 8.", style=DIM))
+        kv("machines", "46 families, ~22 SOPs each", "white")
 
     # -------------------------------------------------------- 3. lexical ranker
-    stage(3, "RETRIEVAL, TAKE ONE — LEXICAL", "TF-IDF cosine. pure word overlap. no learning.")
+    stage(3, "TF-IDF retrieval")
     t0 = time.perf_counter()
     lex = lexical_rank(ticket, sops, k=5)
     lex_ms = (time.perf_counter() - t0) * 1000
@@ -250,29 +224,20 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
     console.print()
     kv("latency", f"{lex_ms:.1f} ms", "white")
     shared = overlap_terms(ticket, lex[0][0])
-    kv("words it matched on", ", ".join(shared) if shared else "(none)", BLUE)
-    console.print()
-    console.print(Text("   TF-IDF can only see words the ticket and the SOP literally share.",
-                       style=DIM))
-    console.print(Text("   When the operator says 'shaking' and the SOP says 'vibration',", style=DIM))
-    console.print(Text("   it sees nothing at all.", style=DIM))
+    kv("matched words", ", ".join(shared) if shared else "(none)", BLUE)
 
     # ------------------------------------------------------- 4. semantic ranker
-    stage(4, "RETRIEVAL, TAKE TWO — SEMANTIC",
-          "MiniLM fine-tuned on 1,859 operator tickets: 22.7M params, 384-d vectors." if LIB == "plant"
-          else "all-MiniLM-L6-v2 (off the shelf): 22.7M params, 384-d meaning vectors.")
+    stage(4, "MiniLM retrieval", "fine-tuned on 1,859 tickets" if LIB == "plant" else "off the shelf")
     encode(["warm"])                              # model already loaded at startup; warm the cache
     t0 = time.perf_counter()
     qv = encode([ticket])[0]
     enc_ms = (time.perf_counter() - t0) * 1000
-    console.print(Text("   The ticket becomes a point in 384-dimensional space:", style=DIM))
-    console.print()
     preview = "  ".join(f"{x:+.3f}" for x in qv[:6])
     console.print(Text(f"      [ {preview}  ... ]", style=BLUE))
-    console.print(Text(f"      {qv.shape[0]} dimensions, unit length", style=DIM))
+    console.print(Text(f"      {qv.shape[0]}-d query vector", style=DIM))
     console.print()
-    kv("encode time", f"{enc_ms:.0f} ms  (model already resident)", "white")
-    kv("index", f"{len(sops)} SOP vectors, cosine over the full corpus", "white")
+    kv("encode time", f"{enc_ms:.0f} ms", "white")
+    kv("index", f"{len(sops)} SOPs", "white")
     console.print()
     t0 = time.perf_counter()
     sem = semantic_rank(ticket, sops, k=5)
@@ -280,13 +245,9 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
     console.print(rank_table(sem, gold, score_header="cosine"))
     console.print()
     kv("latency", f"{sem_ms:.0f} ms", "white")
-    console.print()
-    console.print(Text("   This ranker never sees the words. It sees the meaning —", style=DIM))
-    console.print(Text("   which is why it survives paraphrase, and why it can also be", style=DIM))
-    console.print(Text("   confidently vague when the ticket names an exact procedure.", style=DIM))
 
     # -------------------------------------------------------------- 5. hybrid
-    stage(5, "WHY BOTH — THE HYBRID", "each ranker's best candidates are guaranteed a slot.")
+    stage(5, "Candidates", "MiniLM and TF-IDF interleaved, top 5")
     hyb = hybrid_rank(ticket, sops, k=5)
     lex_ids = [s["sop_id"] for s, _ in lex]
     sem_ids = [s["sop_id"] for s, _ in sem]
@@ -309,16 +270,11 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
                   style=GREEN if hit else ("white" if i == 1 else DIM))
     console.print(t)
     console.print()
-    console.print(Text("   Interleave, dedup, top-5. The bet is not that either ranker is right —",
-                       style=DIM))
-    console.print(Text("   it's that the correct SOP is IN this set, where a picker can find it.",
-                       style=DIM))
     both = set(lex_ids) & set(sem_ids)
-    kv("agreed on", f"{len(both)}/5 SOPs" + (f"  ({', '.join(sorted(both))})" if both else ""), "white")
+    kv("in both top 5", f"{len(both)}/5 SOPs" + (f"  ({', '.join(sorted(both))})" if both else ""), "white")
 
     # ------------------------------------------------------------- 6. verdict
-    stage(6, "DID IT WORK?", "the ticket came with a ground-truth label. now we look."
-          if gold else "no ground-truth label for a free-typed ticket — judge it yourself.")
+    stage(6, "Result", "" if gold else "typed ticket, no label")
     chosen, chosen_score = hyb[0]
     if gold:
         rank = next((i for i, (s, _) in enumerate(hyb, 1) if s["sop_id"] == gold), None)
@@ -328,23 +284,19 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
         kv("retrieved", f"{chosen['sop_id']}  {chosen['title']}", "white")
         console.print()
         if rank == 1:
-            console.print(Panel(Text("RANK 1 — correct procedure, first try", style=f"bold {GREEN}"),
+            console.print(Panel(Text("rank 1: correct", style=f"bold {GREEN}"),
                                 border_style=GREEN, padding=(0, 3)))
         elif rank:
-            console.print(Panel(Text(f"RANK {rank} — in the candidate set, not at the top",
+            console.print(Panel(Text(f"rank {rank}: correct SOP in candidates, not first",
                                      style=f"bold {GOLD}"), border_style=GOLD, padding=(0, 3)))
-            console.print(Text("   Reported as it happened. The picker still has it to choose from.",
-                               style=DIM))
         else:
-            console.print(Panel(Text("MISS — the correct SOP is not in the top 5",
+            console.print(Panel(Text("miss: correct SOP not in top 5",
                                      style=f"bold {RED}"), border_style=RED, padding=(0, 3)))
-            console.print(Text("   Shown, not hidden. Run demo/brain_eval.py for the real", style=DIM))
-            console.print(Text("   hit rate over all labelled tickets rather than one anecdote.", style=DIM))
     else:
         kv("retrieved", f"{chosen['sop_id']}  {chosen['title']}  ({chosen_score:.4f})", "white")
 
     # -------------------------------------------------------- 7. the procedure
-    stage(7, "THE PROCEDURE IT CHOSE", "this is the document a human technician would be handed.")
+    stage(7, "Selected SOP")
     body = Group(
         Text(f"{chosen['sop_id']}  {chosen['title']}", style=f"bold {GOLD}"),
         Text(f"WHEN: {chosen['condition']}", style=DIM),
@@ -354,16 +306,9 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
         Text("  equipment: " + ", ".join(chosen.get("equipment", [])), style=DIM),
     )
     console.print(Panel(body, border_style=GOLD, padding=(1, 3)))
-    console.print()
-    if LIB == "plant":
-        console.print(Text("   Each line already names a skill. The robot can only ever run a procedure", style=DIM))
-        console.print(Text("   from this approved library; it never writes one of its own.", style=DIM))
-    else:
-        console.print(Text("   Every one of these lines is an instruction to a person.", style=DIM))
-        console.print(Text("   None of them is a thing a robot can execute.", style=DIM))
 
     # ----------------------------------------------------------- 8. the planner
-    stage(8, "THE FAITHFUL PLANNER", "one written step -> exactly one robot skill. in order. repeats kept.")
+    stage(8, "Plan", "one skill per SOP step")
     from src.planner.infer_plan import plan_from_sop, SKILL_KEYWORDS
     plan_steps = plan_from_sop(chosen["steps"])
 
@@ -378,7 +323,7 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
     for i, ps in enumerate(plan_steps):
         args = ", ".join(f"{k}={v}" for k, v in ps["args"].items())
         if ps["source"] == "inferred":
-            t.add_row(str(i), Text("(nobody wrote this down)", style=f"italic {BLUE}"),
+            t.add_row(str(i), Text("(inserted)", style=f"italic {BLUE}"),
                       Text("+", style=BLUE), Text(ps["skill"], style=f"bold {BLUE}"),
                       Text(args, style=BLUE), Text("inferred", style=BLUE))
         else:
@@ -398,21 +343,15 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
     console.print()
     n_sop = sum(1 for p in plan_steps if p["source"] == "sop")
     n_inf = sum(1 for p in plan_steps if p["source"] == "inferred")
-    kv("written SOP steps", f"{len(chosen['steps'])}", "white")
-    kv("mapped 1:1", f"{n_sop}   (nothing dropped, nothing invented)", GOLD)
-    kv("inferred navigation", f"{n_inf}", BLUE)
-    kv("total plan length", f"{len(plan_steps)} skills", "white")
+    kv("SOP steps", f"{len(chosen['steps'])}", "white")
+    kv("mapped", f"{n_sop}", GOLD)
+    kv("inserted walk_to", f"{n_inf}", BLUE)
+    kv("plan length", f"{len(plan_steps)} skills", "white")
     if LIB == "plant":
-        console.print()
-        console.print(Text("   Arguments are mapped onto what exists in the simulator: four colored", style=DIM))
-        console.print(Text("   buttons and a fixed set of tools. The skill sequence is the SOP's own.", style=DIM))
+        kv("arguments", "mapped to simulator objects", DIM)
 
     # ----------------------------------------------------- 9. the inferred part
-    stage(9, "THE STEPS NOBODY WROTE DOWN", "the gap between a human procedure and a robot program.")
-    console.print(Text("   A human SOP omits the obvious. 'Press the blue button' assumes you", style=DIM))
-    console.print(Text("   are standing at the machine. A robot standing at the parts table is", style=DIM))
-    console.print(Text("   not. The planner tracks where the body is and fills the gaps:", style=DIM))
-    console.print()
+    stage(9, "Inserted navigation", "walk_to added where the location changes")
     loc = None
     for i, ps in enumerate(plan_steps):
         if ps["source"] == "inferred":
@@ -423,14 +362,11 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
         elif ps["skill"] == "walk_to":
             loc = ps["args"].get("target")
     if n_inf == 0:
-        console.print(Text("      (this SOP happens entirely in one place — nothing to infer)",
+        console.print(Text("      (none: no location change)",
                            style=DIM))
-    console.print()
-    console.print(Text("   Every plan step is tagged 'sop' or 'inferred'. When the robot does", style=DIM))
-    console.print(Text("   something the procedure never asked for, the record says who asked.", style=DIM))
 
     # -------------------------------------------------------- 10. the contracts
-    stage(10, "WHAT THE VERIFIER WILL MEASURE", "a skill is not done because the policy says so.")
+    stage(10, "Verifier checks", "postconditions measured from simulator state")
     from src.data.skill_registry import SKILL_REGISTRY
     used = []
     for ps in plan_steps:
@@ -448,19 +384,9 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
                   Text(m["status"], style=f"bold {status_style.get(m['status'], 'white')}"))
     console.print(t)
     console.print()
-    console.print(Text("   Reading the status column:", style=DIM))
-    console.print(Text(f"     verified       ", style=GREEN), end="")
-    console.print(Text("checked against measured physics and it holds up", style=DIM))
-    console.print(Text(f"     reach-limited  ", style=RED), end="")
-    console.print(Text("physically attempted, cannot reliably complete, reported as failed",
-                       style=DIM))
-    console.print(Text(f"     operational    ", style=DIM), end="")
-    console.print(Text("a logged non-physical step (read, wait, notify)", style=DIM))
-    console.print()
-    console.print(Text("   A demo that cannot fail is not verifying anything.", style=f"italic {GOLD}"))
 
     # ----------------------------------------------------------- 11. the handoff
-    stage(11, "THE HANDOFF", "this JSON is the entire contract between brain and body.")
+    stage(11, "Output", "plan sent to the executor")
     payload = {
         "goal": f"{ticket}  [SOP {chosen['sop_id']}: {chosen['title']}]",
         "steps": [{"skill": p["skill"], "args": p["args"], "source": p["source"]}
@@ -482,20 +408,15 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
                           style=BLUE if p["source"] == "inferred" else "white"))
     lines += [Text('  ]', style="white"), Text('}', style="white")]
     console.print(Panel(Group(*lines), border_style=DIM, padding=(1, 2),
-                        title="[grey58]plan handed to the executor[/]"))
+                        title="[grey58]plan[/]"))
     console.print()
     kv("written to", str(out.relative_to(REPO)), DIM)
-    console.print()
-    console.print(Text("   From here the verifying executor runs each skill as its own", style=DIM))
-    console.print(Text("   precondition -> rollout -> postcondition episode, and returns a", style=DIM))
-    console.print(Text("   per-step verdict card. Steps that fail are printed as failed.", style=DIM))
 
     console.print()
     console.print(Rule(style=GOLD))
     console.print(Align.center(Text(
-        f"ticket  ->  {len(sops)} SOPs  ->  {chosen['sop_id']}  ->  {len(plan_steps)} verifiable skills",
+        f"ticket  ->  {len(sops)} SOPs  ->  {chosen['sop_id']}  ->  {len(plan_steps)} skills",
         style=f"bold {GOLD}")))
-    console.print(Align.center(Text("all of it computed live, on this machine", style=DIM)))
     console.print(Rule(style=GOLD))
     console.print()
 
@@ -563,8 +484,7 @@ def main() -> None:
 
     console.clear()
     run(ticket, gold, iid, sops)
-    console.print(Text(f"   (encoder + index came up in {load_s:.1f}s before the walkthrough started)",
-                       style=DIM))
+    console.print(Text(f"   (models loaded in {load_s:.1f}s)", style=DIM))
     console.print()
 
 

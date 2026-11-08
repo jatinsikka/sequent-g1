@@ -95,7 +95,7 @@ For parallel RL training, set `OMP_NUM_THREADS=1` per worker; without it, throug
 
 ## Next
 
-Teleoperated data collection in a simulated factory (Isaac Lab), then on hardware; train on the demonstrations and fine-tune with RL. This work moves to the R1 robot.
+Teleoperated data collection in a simulated factory (Isaac Lab), then on hardware; train on the demonstrations and fine-tune with RL. This work moves to the Unitree R1.
 
 ## Credits
 

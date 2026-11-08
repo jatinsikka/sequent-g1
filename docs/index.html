@@ -82,49 +82,49 @@
 
 <section class="teaser">
   <video src="static/videos/onetake.mp4" poster="static/videos/onetake.jpg" autoplay muted loop playsinline controls preload="metadata"></video>
-  <p class="cap"><b>One continuous simulation, no cuts.</b> A Unitree G1 walks to the table, picks the box, carries it to the panel with a 180° turn, places it, presses the button with an RL policy, and returns to rest. Every step is checked against the simulator state.</p>
+  <p class="cap">One continuous simulation: walk to the table, pick the box, carry it to the panel (180° turn), place it, press the button (RL policy), and return to rest.</p>
 </section>
 
 <h2>Abstract</h2>
-<p class="abstract">Sequent takes a plant-floor incident ticket written the way an operator would write it, retrieves the matching Standard Operating Procedure out of 1,012, turns its steps into robot skills, and executes them on a simulated Unitree G1 in one continuous MuJoCo run. A verifier checks every step against measured physics rather than the policy's own report, so a step that fails is reported as failed. The retriever is a transformer bi-encoder fine-tuned with a contrastive loss: on vague operator tickets it ranks the right procedure first 58% of the time, against 36% for BM25 and 41% for the same model without fine-tuning, and the gain holds on procedures and machines never seen in training. The body uses controllers where the problem is geometric (walking, grasping) and reinforcement learning where it is contact-rich (pressing a button, pulling a lever). Neither RL skill is solved: the press policy learned to farm reward by pressing repeatedly, which we stopped by ending the episode rather than fixing, and the lever succeeds about half the time. Every reward hack was caught by watching rollouts, not by a metric.</p>
+<p class="abstract">Sequent maps a plant-floor incident ticket to one of 1,012 Standard Operating Procedures (SOPs) and executes the SOP's steps on a simulated Unitree G1 in MuJoCo. A verifier checks each step's postcondition from simulator state. The retriever, all-MiniLM-L6-v2 fine-tuned with a contrastive loss, reaches R@1 0.577 on held-out operator tickets, against 0.357 for BM25 and 0.409 for the same model untuned, and keeps most of the gain on SOPs and equipment families held out from training. Walking uses the AMO controller and picking uses inverse kinematics with a force-gated latch. The two RL skills are partial: the button-press policy re-presses for reward and is stopped after the first held press, and the lever policy completes the throw in 1 of 2 episodes.</p>
 
 <h2>Method</h2>
 <img class="fig" src="figures/fig_pipeline.png" alt="Pipeline: ticket, fine-tuned retriever over 1,012 SOPs, rule-based planner, verifier, verdict; G1 skills walk (AMO policy), pick/place (IK and force-gated latch), press (PPO), lever (BC, DAgger, PPO)">
-<p class="cap"><b>Only the retriever and three of the skills are learned.</b> The ticket is matched to an SOP by the fine-tuned retriever; the planner maps each written step to a skill; the verifier runs each skill inside a pre/postcondition contract measured from simulator state and reports a verdict.</p>
+<p class="cap">System overview. The retriever (learned) selects an SOP, the planner (rules) maps each step to a skill, and the verifier checks each skill's pre- and postconditions from simulator state. Blue: learned components.</p>
 
 <h2>Retrieval</h2>
-<p>The benchmark has 1,012 synthetic SOPs across 46 equipment families, 22 look-alike procedures per machine, with 2,338 incidents written in vague, symptom-first operator language. The retriever is <code>all-MiniLM-L6-v2</code> (22.7M parameters) fine-tuned on 1,859 incident→SOP pairs in about two minutes on a laptop.</p>
+<p>The benchmark has 1,012 synthetic SOPs in 46 equipment families (22 per family) and 2,338 incidents written as operators describe symptoms. The retriever is <code>all-MiniLM-L6-v2</code> (22.7M parameters), fine-tuned on 1,859 incident–SOP pairs.</p>
 <div class="stats">
-  <div class="stat"><div class="v">0.58</div><div class="l">right SOP first, vague tickets<br>(BM25 0.36, untuned 0.41)</div></div>
-  <div class="stat"><div class="v">0.66 / 0.61</div><div class="l">on SOPs / machines never seen<br>in training (untuned 0.47 / 0.42)</div></div>
-  <div class="stat"><div class="v">0.92</div><div class="l">clear tickets from an<br>informed operator</div></div>
+  <div class="stat"><div class="v">0.58</div><div class="l">R@1, held-out tickets<br>(BM25 0.36, untuned 0.41)</div></div>
+  <div class="stat"><div class="v">0.66 / 0.61</div><div class="l">R@1, held-out SOPs / families<br>(untuned 0.47 / 0.42)</div></div>
+  <div class="stat"><div class="v">0.92</div><div class="l">R@1, 92 tickets written<br>from SOP titles</div></div>
 </div>
 <img class="fig" src="figures/fig_retrieval.png" alt="Bar chart of R@1 for TF-IDF, BM25, untuned MiniLM, untuned bge-small and fine-tuned MiniLM on vague tickets, the same tickets with the machine named, and clear informed-operator tickets">
-<p class="cap"><b>Fine-tuning matters most when operators write vaguely.</b> R@1 over the full 1,012-SOP index; fine-tuned bars are mean ± std over 3 seeds. Clear tickets are easy for every method. Most remaining errors pick the right problem on the wrong machine, even when the ticket names the machine. The informed-operator tickets were written by the author.</p>
+<p class="cap">R@1 over the 1,012-SOP index for three ticket sets: held-out test tickets, the same tickets with the machine named, and 92 tickets written by the author from SOP titles. Fine-tuned bars: mean ± std over 3 seeds. Most errors select an SOP for a different machine.</p>
 
 <h2>Skills</h2>
 <div class="grid">
   <div>
     <video src="static/videos/pick.mp4" poster="static/videos/pick.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>Pick: a controller, not RL.</b> IK to the box; the latch engages only when both finger pads measure contact force. 11 of 12 held lifts.</p>
+    <p class="cap">Pick: inverse kinematics to the box; the gripper latches only when both pads measure contact force. 11 of 12 held lifts.</p>
   </div>
   <div>
     <video src="static/videos/press_reach.mp4" poster="static/videos/press_reach.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>Press: partial.</b> PPO with a reach curriculum learned to reach about 19 cm from rest and press, but also to farm reward by pressing repeatedly. The run is stopped after the first 0.6 s hold; the reward was never fixed.</p>
+    <p class="cap">Press: PPO with a reach curriculum, from the rest pose (about 19 cm). The policy also re-presses for reward; the run is stopped after the first 0.6 s hold.</p>
   </div>
   <div>
     <video src="static/videos/lever.mp4" poster="static/videos/lever.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>Lever: partial.</b> BC → DAgger → PPO. Completed the throw in 1 of 2 deterministic episodes, with jerky motion; the policy cannot observe a per-episode reach offset.</p>
+    <p class="cap">Lever: behavior cloning, one DAgger pass, then PPO. 1 of 2 deterministic episodes complete the throw. The policy does not observe a per-episode reach offset.</p>
   </div>
   <div>
     <video src="static/videos/ticket.mp4" poster="static/videos/ticket.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>Ticket to robot.</b> A held-out ticket goes through the retriever and planner; the robot walks and presses. Steps it has no body for (wait, read, notify) are shown as captions.</p>
+    <p class="cap">A held-out ticket through retrieval and planning; the robot walks to the panel and presses. Non-embodied steps (wait, read, notify) are shown as text.</p>
   </div>
 </div>
 
-<h2>The full run</h2>
+<h2>Full run</h2>
 <video src="static/videos/finale.mp4" poster="static/videos/finale.jpg" muted playsinline controls preload="none"></video>
-<p class="cap"><b>One ticket, five actions, one take.</b> The SOP for this run was written for the demo, and keyword search also retrieves it, so this shows the pipeline end to end rather than retrieval accuracy. The recording is take 3 of 3, the weakest: place drifts, the press misses and the lever springs back, and the verifier reports each as failed. The best take:</p>
+<p class="cap">Full run, take 3 of 3. The SOP was written for this demo, and TF-IDF also ranks it first, so this is not evidence of retrieval accuracy. In this take the place drifts, the press misses, and the lever returns; the verifier reports each as failed. Best of the three takes:</p>
 <div class="tablewrap">
 <table>
   <tr><th>Step</th><th>Measured outcome</th><th>Verdict</th></tr>
@@ -136,31 +136,31 @@
 </table>
 </div>
 
-<h2>What broke</h2>
+<h2>Failure cases</h2>
 <div class="hacks">
   <div>
     <video src="static/videos/hack_fling.mp4" poster="static/videos/hack_fling.jpg" autoplay muted loop playsinline preload="metadata"></video>
-    <p class="cap"><b>The reward paid for height, so the policy flung the tool.</b> Pure RL grasp, 1.5M steps: the "lift" metric looked great; the video shows a ballistic toss.</p>
+    <p class="cap">RL grasp, 1.5M steps. The reward paid for height; the tool is thrown upward rather than lifted.</p>
   </div>
   <div>
-    <p>Every one of these was found by watching rendered rollouts. None was caught by a metric.</p>
+    <p>Found by inspecting rendered rollouts:</p>
     <ul>
-      <li><b>Parking:</b> a proximity reward near the button taught the policy to hover 5 cm short and collect it indefinitely.</li>
-      <li><b>Pumping (not fixed):</b> a per-step depth reward made press, release, press again profitable. We stop the episode after the first 0.6 s hold instead of fixing the reward; left running, the policy keeps pressing.</li>
-      <li><b>Seat farming:</b> the lever's 0.17 rad of free travel paid a linear progress reward for sitting in it.</li>
-      <li><b>Air-swinging:</b> once pressing-once was enforced, the arm kept moving after the press while the hold counter ran.</li>
-      <li><b>Ballistic pop:</b> on the gripper humanoid, the RL grasp variants we tried scored 0% verified; their lifts were the box popping out of a crushing pinch. Grasping became a controller.</li>
+      <li><b>Parking:</b> proximity reward near the button; the policy stops 5 cm short.</li>
+      <li><b>Pumping:</b> per-step reward for press depth; the policy presses repeatedly. Not fixed; the episode is stopped after a 0.6 s hold.</li>
+      <li><b>Seat farming:</b> linear progress reward on the lever; the policy holds within the first 0.17 rad of free travel.</li>
+      <li><b>Air-swinging:</b> after press-once termination was added, the arm kept moving during the hold count.</li>
+      <li><b>Ballistic pop:</b> RL grasp on the gripper humanoid, 0% verified; logged lifts were the box ejected from the grip. Replaced by an IK controller.</li>
     </ul>
   </div>
 </div>
 <div class="grid" style="margin-top: 22px;">
   <div>
     <video src="static/videos/hack_hover.mp4" poster="static/videos/hack_hover.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>Paid for being near, not for grasping.</b> Grasp run v5.2: the hand parks next to the tool for the whole episode while the reward stays high.</p>
+    <p class="cap">RL grasp run v5.2. The hand stops next to the tool for the whole episode while the reward stays high.</p>
   </div>
   <div>
     <video src="static/videos/grasp_slap.mp4" poster="static/videos/grasp_slap.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>A grasp that counts but looks wrong.</b> Run v5.5, an earlier rig: 55% verified grasps, reached with this overhead swing (0.5x). Picking became a controller.</p>
+    <p class="cap">RL grasp run v5.5 (earlier rig): 55% verified grasps, reached with an overhead arm swing. Played at 0.5x.</p>
   </div>
 </div>
 

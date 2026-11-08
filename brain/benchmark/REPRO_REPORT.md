@@ -40,9 +40,9 @@ Reproduced November 2026 on an Apple M1 Pro (CPU/MPS, Python 3.10, sentence-tran
 
 The 92 informed tickets (`repro/data/informed_tickets.json`) were written by the author, 2 per family, from SOPs sampled with a fixed seed, using only each SOP's title and condition and without looking at model outputs.
 
-**Errors.** About 70% of misses on the vague test pick an SOP for a different machine. Naming the machine raises correct-machine top-1 from 0.71 to 0.85, so the remaining misses are same-machine look-alikes. Of the misses, only 1–3% happen to have the same skill sequence as the gold SOP, so a miss means executing a different procedure (`planner_end_to_end.csv`).
+**Errors.** About 70% of errors on the test tickets select an SOP for a different machine. Naming the machine raises correct-machine top-1 from 0.71 to 0.85, so the remaining misses are same-machine look-alikes. Of the misses, only 1–3% happen to have the same skill sequence as the gold SOP, so a miss means executing a different procedure (`planner_end_to_end.csv`).
 
-**Selective acting (future-work data point).** Cutoffs are chosen on val and reported on test, over 3 seeds (`abstain_eval.py` → `abstain_operating.csv`). Acting only when the top-1 vs top-2 margin clears the cutoff handles 41% ± 3% of vague tickets at 86% ± 3% precision and escalates the rest; acting always gives 58%.
+**Selective retrieval (not part of the system).** Cutoffs are chosen on val and reported on test, over 3 seeds (`abstain_eval.py` → `abstain_operating.csv`). Acting only when the top-1 vs top-2 margin clears the cutoff handles 41% ± 3% of vague tickets at 86% ± 3% precision and escalates the rest; acting always gives 58%.
 
 **Epochs.** 1 epoch: R@1 0.539 ± 0.013 (3 seeds); 3 epochs (default): 0.577. The 5-epoch run was not completed.
 

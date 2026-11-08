@@ -52,8 +52,8 @@ def fig_retrieval():
     df = pd.read_csv(RESULTS / "tiered_eval.csv")
     df["family"] = df.method.where(~df.method.str.startswith("ft_minilm"), "ft_minilm")
     agg = df.groupby(["tier", "family"])["R@1"].agg(["mean", "std", "count"]).reset_index()
-    tiers = [("hard", "Vague ticket\n(test set)"), ("machine_named", "Same ticket,\nmachine named"),
-             ("informed", "Clear ticket,\ninformed operator")]
+    tiers = [("hard", "Test tickets"), ("machine_named", "Test tickets,\nmachine named"),
+             ("informed", "Tickets written\nfrom SOP titles")]
     methods = [  # (key, label, color, hatch)
         ("tfidf", "TF-IDF", GREY_LIGHT, "//"),
         ("bm25", "BM25", GREY_DARK, "\\\\"),
@@ -83,8 +83,7 @@ def fig_retrieval():
     ax.yaxis.grid(True, color="#e6e5e0", linewidth=1.2, zorder=0)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(loc="upper left", ncol=1, frameon=False, bbox_to_anchor=(1.0, 1.0))
-    ax.set_title(f"Fine-tuning matters most when operators write vaguely  (1,012 SOPs; ours: mean ± std, {n_ft} seeds)",
-                 loc="left", fontsize=20, color=INK2, pad=14)
+    ax.set_title(f"R@1 over 1,012 SOPs (fine-tuned: mean ± std, {n_ft} seeds)", loc="left", fontsize=20, color=INK2, pad=14)
     save(fig, "fig_retrieval")
 
 
@@ -105,10 +104,10 @@ def fig_pipeline():
                                      color=INK, zorder=1))
 
     yb, h = 3.35, 1.7
-    box(0.1, yb, 2.6, h, "Ticket", "plain-language\nincident", False)
+    box(0.1, yb, 2.6, h, "Ticket", "incident\ntext", False)
     box(3.3, yb, 3.3, h, "Retriever", "fine-tuned MiniLM\nover 1,012 SOPs", True)
     box(7.2, yb, 2.9, h, "Planner", "one skill per\nSOP step (rules)", False)
-    box(10.7, yb, 2.9, h, "Verifier", "checks every step\nfrom sim state", False)
+    box(10.7, yb, 2.9, h, "Verifier", "pre/postconditions\nfrom sim state", False)
     box(14.2, yb, 2.7, h, "Verdict", "resolved /\npartial / failed", False)
     for x0, x1 in [(2.7, 3.3), (6.6, 7.2), (10.1, 10.7), (13.6, 14.2)]:
         arrow(x0, yb + h / 2, x1, yb + h / 2)
@@ -152,7 +151,7 @@ def fig_pipeline_col():
     w, h = 2.95, 1.75
     xs = [0.1, 3.52, 6.95]
     ya, yb = 5.7, 3.25
-    box(xs[0], ya, w, h, "Ticket", "operator's\nown words", False)
+    box(xs[0], ya, w, h, "Ticket", "operator\ntext", False)
     box(xs[1], ya, w, h, "Retriever", "fine-tuned,\n1,012 SOPs", True)
     box(xs[2], ya, w, h, "Planner", "one skill per\nSOP step", False)
     arrow(xs[0] + w, ya + h / 2, xs[1], ya + h / 2)

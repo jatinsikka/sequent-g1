@@ -19,7 +19,7 @@ Run each demo once before presenting so the models are cached.
 | Demo | Runs? | Notes |
 |---|---|---|
 | `demo/brain_walkthrough.py` | yes | 1,012 SOPs, fine-tuned retriever; `--library course` for the 100-SOP set |
-| `demo/brain_eval.py` | yes | the paper's retrieval table, live, ~30 s; `--informed` for the 92 clear tickets |
+| `demo/brain_eval.py` | yes | the paper's retrieval table, live, ~30 s; `--informed` for the 92 title-derived tickets |
 | `demo/brain_eval.py --hard` | yes | 10 hard tickets, 100-SOP library |
 | `demo/body_walk.py`, `demo/drive_g1.py` | needs MuJoCo | AMO walking; last run August 2026 |
 | `pick_table.py` | needs MuJoCo + `mujoco_menagerie` | IK pick |
@@ -52,7 +52,7 @@ Robot videos: the [project page](https://jatinsikka.github.io/sequent-g1/), file
 Default ticket: INC-00056 (correct at rank 1). Other options:
 
 ```bash
-demo/brain_walkthrough.py --incident INC-00026   # right problem, wrong machine (rank 3)
+demo/brain_walkthrough.py --incident INC-00026   # correct SOP at rank 3; top pick is another machine's SOP
 demo/brain_walkthrough.py --ticket "..."         # a ticket from the audience
 demo/brain_walkthrough.py --list                 # all 269 test tickets
 demo/brain_walkthrough.py --auto --pace 1.0      # hands-free
@@ -62,11 +62,11 @@ Tickets already run on the 1,012-SOP library:
 
 | `--ticket "..."` | TF-IDF picks | fine-tuned picks | shows |
 |---|---|---|---|
-| `The hydraulic press is making a grinding noise and the ram is moving slower than usual.` | Ram Descent Velocity Below Specified Rate | same | clear ticket, both right |
+| `The hydraulic press is making a grinding noise and the ram is moving slower than usual.` | Ram Descent Velocity Below Specified Rate | same | both correct |
 | `The machine is overheating.` | Machine Lockout-Tagout (CNC mill) | Fan Motor Overtemperature Alarm (fume extractor); top-2 gap 0.006 | no machine named |
 | `Screwdriving robot torque went over the max limit during fastening, might be cross-threaded.` | Torque Reading Above Maximum Ceiling (screwdriving robot), correct | Torque Exceeds Maximum Ceiling (torque station) | wrong machine; why TF-IDF stays in the candidates |
 | `Smoke coming out of the electrical cabinet near line 3, smells like burning plastic.` | Electrical Cabinet Cooling Filter | Emergency Stop for Fire or Smoke (air compressor) | right emergency, wrong machine |
-| `My cat knocked over a plant.` | an e-stop SOP | Sudden Catastrophic Pressure Collapse | it always returns an SOP |
+| `My cat knocked over a plant.` | an e-stop SOP | Sudden Catastrophic Pressure Collapse | out-of-scope ticket still returns an SOP |
 
 ### 2. Numbers (3 min)
 

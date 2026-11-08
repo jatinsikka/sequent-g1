@@ -10,7 +10,7 @@ A simulated Unitree G1 humanoid that reads a plant-floor incident ticket, finds 
 
 ## How it works
 
-1. **Retrieve.** A small transformer (MiniLM, 22.7M parameters), fine-tuned on operator-style tickets, picks the SOP that fits the ticket. It can only pick an existing procedure, never write a new one.
+1. **Retrieve.** A small transformer (MiniLM, 22.7M parameters), fine-tuned on operator-style tickets, selects an SOP from the library; the robot runs only procedures in that library.
 2. **Plan.** SOP steps are written as skills (`press_button estop_button`), so the plan is the SOP's steps in order. No learning here.
 3. **Execute and verify.** The G1 walks (AMO policy), picks and places (IK with a force-gated latch), presses a button (PPO), and pulls a lever (BC + PPO). Each step has a precondition and postcondition computed from simulator state.
 
@@ -30,8 +30,8 @@ A simulated Unitree G1 humanoid that reads a plant-floor incident ticket, finds 
 | **MiniLM, fine-tuned** | **0.58** | **0.86** |
 
 - On SOPs never seen in training: 0.66 (untuned 0.47). On five machine families never seen: 0.61 (untuned 0.42).
-- On clear tickets from someone who knows the system: 0.92, with the right SOP in the top 5 every time. Clear tickets are easy for every method; training matters on vague ones.
-- Most mistakes pick the right problem on the wrong machine. The retriever always acts on its best guess; asking "which machine?" when unsure is the next step.
+- On 92 tickets written from SOP titles: 0.92 (top 5: 1.00). All methods score above 0.75 on these; the fine-tuned model's margin is largest on the test tickets.
+- About 70% of errors select an SOP for a different machine. The retriever always returns its top SOP; abstaining or asking for the machine when the top scores are close is future work.
 
 **Skills**, judged by the verifier:
 

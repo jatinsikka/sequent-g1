@@ -115,54 +115,46 @@ where contact makes modeling hard (pressing a button, pulling a lever).
 Neither RL contact skill is solved. The button-press policy learned to
 farm reward by pressing repeatedly; we stopped it by ending the episode
 after the first held press rather than fixing the reward. The lever
-succeeds about half the time. We report these and the other reward
-hacks, each found by watching rollouts rather than from training
-metrics.
+succeeds about half the time. We also report six reward exploits found
+by inspecting rendered rollouts.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
 
 \begin{figure}[t]
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Only the retriever
-and three of the skills are learned. A ticket is matched to one of 1,012
-SOPs by the fine-tuned retriever. The planner maps each written step to
-a skill by rule. The verifier runs each skill inside a
-precondition/postcondition check measured from simulator state and
-reports a verdict. Blue: learned. Grey: rules and
-controllers.}]{figures/fig_pipeline_col.png}}
-\caption{\textbf{Only the retriever and three of the skills are
-learned.} A ticket is matched to one of 1,012 SOPs by the fine-tuned
-retriever. The planner maps each written step to a skill by rule. The
-verifier runs each skill inside a precondition/postcondition check
-measured from simulator state and reports a verdict. Blue: learned.
-Grey: rules and controllers.}
+\pandocbounded{\includegraphics[keepaspectratio,alt={System overview.
+The fine-tuned retriever selects one of 1,012 SOPs, the planner maps
+each step to a skill by rule, and the verifier checks each skill's pre-
+and postconditions from simulator state. Blue: learned components. Grey:
+rules and controllers.}]{figures/fig_pipeline_col.png}}
+\caption{\textbf{System overview.} The fine-tuned retriever selects one
+of 1,012 SOPs, the planner maps each step to a skill by rule, and the
+verifier checks each skill's pre- and postconditions from simulator
+state. Blue: learned components. Grey: rules and controllers.}
 \end{figure}
 
-A plant floor is full of written procedures: what to do when a press
-jams, when coolant pressure drops, before anyone opens a cabinet. When
-something goes wrong, an operator does not name the procedure. They
-write something like ``the dispenser coasted to a stop and the thermal
-light is red.'' A robot that could act on that report, using the
-procedures the plant already trusts, would be useful well before it
-could do anything open-ended.
+Industrial plants document their responses to faults as written Standard
+Operating Procedures (SOPs). Operators report faults in their own words,
+for example ``the dispenser coasted to a stop and the thermal light is
+red,'' without naming the procedure. A robot that maps such a report to
+an approved SOP and executes it would be useful without open-ended
+planning.
 
 Recent language-driven robot systems use large language models to turn
-instructions into plans {[}1, 2, 3{]}. Despite their flexibility, a key
-open problem is grounding: a freely generated plan is not tied to an
-approved procedure, and success is often judged by the model's own
-report or by the policy's reward. In a plant, both are risky. A plan
-must come from an approved SOP, and ``done'' must mean the physical
-state actually changed.
+instructions into plans {[}1, 2, 3{]}. A freely generated plan, however,
+is not tied to an approved procedure, and success is often judged by the
+model's own report or by the policy's reward. In a plant, the plan
+should come from an approved SOP, and a step should count as done only
+if the physical state changed.
 
-Our approach rests on three choices. First, retrieve rather than
-generate: a retriever trained on operator language picks an existing
-SOP, so the robot can only ever run an approved procedure. Second,
-verify from physics: each skill runs inside a precondition and
-postcondition check computed from the simulator state, never from the
-policy's output. Third, pick the tool per skill: walking and grasping
-are geometric and get controllers, while pressing and pulling are
-dominated by contact and get RL.
+Our approach makes three choices. First, we retrieve rather than
+generate: a retriever trained on operator tickets selects an existing
+SOP, so the robot runs only approved procedures. Second, we verify from
+simulator state: each skill runs inside a precondition and postcondition
+check that does not use the policy's output. Third, we use controllers
+for the geometric skills (walking, grasping) and RL for the
+contact-dominated ones (pressing, pulling).
 
 \textbf{Related work.} Our work relates to four lines of research.
 \emph{Language-conditioned task planning} uses LLMs to produce skill
@@ -205,8 +197,9 @@ hacks we document are instances of specification gaming {[}11, 12{]}.
   curriculum learned to reach and press the button, but also to farm
   reward by re-pressing, which we did not fix.
 \item
-  A catalog of six reward hacks, each caught by watching rollouts, with
-  the class of fix that worked.
+  Six reward exploits observed during training, identified from rendered
+  rollouts, and the fix applied to each (pumping was stopped by early
+  termination, not fixed).
 \end{enumerate}
 
 \textbf{Organization.} Section 2 states the problem. Section 3 describes
@@ -255,12 +248,11 @@ and report a verdict computed only from the \(\mathrm{post}_k\) values,
 never from a policy's own success signal.
 \end{quote}
 
-\textbf{Why this is hard.} Tickets describe symptoms, not procedures,
-and each machine has around 22 SOPs that differ in small ways (pressure
-below setpoint versus sudden collapse versus above ceiling). On the
-execution side, the skills chain on one body in one simulation, so
-errors carry from step to step: a robot that arrives a few centimeters
-off makes the next reach harder.
+\textbf{Difficulty.} Tickets describe symptoms rather than procedures,
+and each machine family has about 22 SOPs that differ in small ways
+(pressure below setpoint, sudden collapse, above ceiling). The skills
+run in sequence on one body in one simulation, so errors propagate:
+arriving a few centimeters off makes the next reach harder.
 
 \section{Approach}\label{approach}
 
@@ -350,9 +342,9 @@ seeds.
 
 \begin{table}[t]
 \centering\small
-\caption{\textbf{Fine-tuning adds 17 points of R@1 over the same encoder
-untuned.} The off-the-shelf reranker lowers R@1, so it is not
-used.}
+\caption{\textbf{Retrieval on the held-out test set} (269 tickets, 1,012
+SOPs). Fine-tuning adds 0.17 R@1 over the same encoder untuned. The
+cross-encoder reranker lowers R@1 and is not used.}
 \begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
@@ -382,62 +374,56 @@ MiniLM-FT + CE & 0.452 ± 0.006 & 0.843 ± 0.003 & 0.611 ± 0.004 \\
 \end{table}
 
 \textbf{Generalization.} Every test SOP also has training tickets, so
-the test above is closed-set. We add two harder splits. In the first,
-20\% of SOPs are held out entirely (459 test tickets). In the second,
-five whole equipment families are held out (257 tickets). The fine-tuned
-model reaches R@1 0.656 and 0.607, against 0.468 and 0.420 for MiniLM-0
-and 0.447 and 0.311 for BM25. Each split has its own test set, so only
-within-split comparisons are meaningful. The model is learning how
-operators describe problems, not memorizing the training SOPs.
+the test above is closed-set. We add two splits: 20\% of SOPs held out
+entirely (459 test tickets) and five equipment families held out (257
+tickets). The fine-tuned model reaches R@1 0.656 and 0.607, against
+0.468 and 0.420 for MiniLM-0 and 0.447 and 0.311 for BM25. Each split
+has its own test set, so only within-split comparisons are meaningful.
+The gain is therefore not limited to SOPs seen in training.
 
 \begin{figure*}[t]
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The fine-tuned
-model's advantage is largest on vague tickets. R@1 on the vague test
-tickets, on the same tickets with the machine named up front, and on 92
-clear tickets from an operator who knows the system. Fine-tuned bars:
-mean ± std over 3 seeds. On clear tickets every method does
-well.}]{figures/fig_retrieval.png}}
-\caption{\textbf{The fine-tuned model's advantage is largest on vague
-tickets.} R@1 on the vague test tickets, on the same tickets with the
-machine named up front, and on 92 clear tickets from an operator who
-knows the system. Fine-tuned bars: mean ± std over 3 seeds. On clear
-tickets every method does well.}
+\pandocbounded{\includegraphics[keepaspectratio,alt={R@1 by ticket set.
+Held-out test tickets, the same tickets with the machine named, and 92
+tickets written by the author from SOP titles. Fine-tuned bars: mean ±
+std over 3 seeds.}]{figures/fig_retrieval.png}}
+\caption{\textbf{R@1 by ticket set.} Held-out test tickets, the same
+tickets with the machine named, and 92 tickets written by the author
+from SOP titles. Fine-tuned bars: mean ± std over 3 seeds.}
 \end{figure*}
 
-\textbf{Ticket clarity.} Real operators vary. We test the same index
-with three kinds of ticket (Fig. 2): the vague test tickets (R@1 0.577),
-the same tickets with the machine named (0.632), and 92 clear tickets
-written by the author from each sampled SOP's title and condition, two
-per family, without looking at model outputs (0.920, with the correct
-SOP in the top 5 every time). BM25 scores 0.357, 0.398, and 0.837 on the
-same three sets. Clear tickets are easy for every method. The value of
-training is on the vague ones.
+\textbf{Ticket sets.} We evaluate the same index on three ticket sets
+(Fig. 2): the held-out test tickets (R@1 0.577), the same tickets with
+the machine named (0.632), and 92 tickets written by the author from
+each sampled SOP's title and condition, two per family, without looking
+at model outputs (0.920; the correct SOP is in the top 5 for all 92).
+BM25 scores 0.357, 0.398, and 0.837. All methods score above 0.75 on the
+title-derived tickets; the fine-tuned model's margin is largest on the
+test tickets.
 
-\textbf{Where it fails.} About 70\% of misses on the vague test pick an
-SOP for a different machine. Naming the machine raises the share of
-top-1 picks on the correct machine from 0.71 to 0.85, but R@1 only to
-0.63, so most remaining errors are same-machine look-alikes. In the
-informed-ticket misses of one seed, 4 of 7 picked another machine's SOP
-for the same symptom even though the ticket named the machine. A miss is
-costly: only 1--3\% of wrong picks share the correct SOP's skill
-sequence, so a miss means executing a different procedure.
+\textbf{Error analysis.} About 70\% of errors on the test tickets select
+an SOP for a different machine. Naming the machine raises the share of
+top-1 picks on the correct machine from 0.71 to 0.85, and R@1 to 0.63,
+so most remaining errors are same-machine SOPs. In one seed, 4 of the 7
+errors on the title-derived tickets selected another machine's SOP for
+the same symptom although the ticket named the machine. Only 1--3\% of
+incorrect picks share the correct SOP's skill sequence, so most errors
+would execute a different procedure.
 
-\textbf{Acting only when confident.} The retriever always acts on its
-top SOP. We measured what a confidence cutoff would give, using the gap
-between the top two scores and choosing the cutoff on the validation
-split. Acting only above the cutoff covers 41\% ± 3\% of vague test
-tickets at 86\% ± 3\% precision, against 58\% precision when acting on
-all of them. The rest would be escalated to a person. This is measured
-but not built into the system.
+\textbf{Selective retrieval.} The retriever always acts on its top SOP.
+We measured the effect of a confidence cutoff on the gap between the top
+two scores, with the cutoff chosen on the validation split. Acting only
+above the cutoff covers 41\% ± 3\% of test tickets at 86\% ± 3\%
+precision, against 58\% when acting on all of them; the remainder would
+be referred to a person. This is not part of the system.
 
 \subsection{Skills}\label{skills-1}
 
-\begin{table*}[t]
+\begin{table}[t]
 \centering\small
-\caption{\textbf{Controllers where the task is geometric, RL where
-contact dominates.} The press and lever are partial and the RL grasp
-failed; each is reported as such.}
+\caption{\textbf{Skill results.} Pick uses a controller; press and lever
+use RL. The press and lever are partial, and RL grasping
+failed.}
 \begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
@@ -467,72 +453,72 @@ RL grasp, gripper humanoid & PPO, several reward variants & 0\% verified
 & deterministic evaluation \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
-\textbf{Why grasping became a controller.} RL grasping on the
-gripper-equipped humanoid reached 0\% verified success, although the
-logged ``lift'' rate was 30--60\%. The videos showed the box being
-squeezed out of a hard pinch and popping upward; the height check fired
-while it was in the air. A stochastic policy's grip force oscillates,
-and a stable two-sided pinch is a narrow regime in the contact solver.
-The IK controller with a force-gated latch held 11 of 12 lifts on its
-first day. RL did work on an earlier fixed-base rig with a different
-hand (55\% verified), so the conclusion is about this embodiment and
-contact setup, not about RL grasping in general.
+\textbf{RL grasping.} RL grasping on the gripper-equipped humanoid
+reached 0\% verified success, although the logged lift rate was
+30--60\%. Rendered rollouts showed the box being squeezed out of the
+pinch and moving upward, which triggered the height check without a
+grasp. A stochastic policy's grip force oscillates, and a stable
+two-sided pinch is a narrow regime in the contact solver. The IK
+controller with a force-gated latch held 11 of 12 lifts. RL grasping did
+reach 55\% verified success on an earlier fixed-base rig with a
+different hand, so this result is specific to this embodiment and
+contact setup.
 
 \begin{figure}[t]
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The policy could
-not reach the button from rest. Required rest-to-contact joint offsets
-versus the action range. The original ±0.5 rad range was smaller than
-every offset the tasks require, so far-start attempts saturated silently
-at the clamp. Widening it to 0.8 rad (press) and 1.2 rad (lever)
-unblocked training.}]{figures/fig_envelope_col.png}}
-\caption{\textbf{The policy could not reach the button from rest.}
-Required rest-to-contact joint offsets versus the action range. The
-original ±0.5 rad range was smaller than every offset the tasks require,
-so far-start attempts saturated silently at the clamp. Widening it to
-0.8 rad (press) and 1.2 rad (lever) unblocked training.}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Required joint
+offsets and action range. Rest-to-contact joint offsets for the press
+and lever versus the policy's action range. The original ±0.5 rad range
+was smaller than every required offset, so far-start actions saturated
+at the clamp. The range was widened to 0.8 rad (press) and 1.2 rad
+(lever).}]{figures/fig_envelope_col.png}}
+\caption{\textbf{Required joint offsets and action range.}
+Rest-to-contact joint offsets for the press and lever versus the
+policy's action range. The original ±0.5 rad range was smaller than
+every required offset, so far-start actions saturated at the clamp. The
+range was widened to 0.8 rad (press) and 1.2 rad (lever).}
 \end{figure}
 
-\textbf{Check the action space before the reward.} A day of failed
-far-start press training traced to one number: the policy's action range
-was 0.5 rad per joint around the neutral pose, while reaching the button
-from rest needs 0.511 rad at the shoulder and 0.672 rad at the elbow,
-and the lever needs up to 1.1 rad (Fig. 3). Saturated actions look like
-a timid policy in every training curve.
+\textbf{Action range.} Far-start press training failed for a day because
+the policy's action range was 0.5 rad per joint around the neutral pose,
+while reaching the button from rest needs 0.511 rad at the shoulder and
+0.672 rad at the elbow, and the lever needs up to 1.1 rad (Fig. 3).
+Saturated actions are not visible in the training curves.
 
-\textbf{The press is partial.} From the rest pose, random exploration
-never touched the button, so a contact-based reward gave no signal; a
-curriculum that starts the arm on the button and moves it back toward
-rest was needed to learn the reach at all. Two bugs cost time along the
-way: the action range was smaller than the reach required (Fig. 3), and
-a collision-mask error let the gripper pass through the buttons. Each
-reward change then produced a new exploit (Table 4). The last one,
-pumping, came from a per-step reward for press depth: pressing,
-releasing, and pressing again paid more than holding. We did not fix the
-reward. To run the full chain, the episode is stopped once the first
-press has been held for 0.6 s, so in the demos the policy never gets the
-chance to press again; left running, it does. We put the remaining time
-into the end-to-end system, the verifier, and the retriever. The fix we
-would make is to pay for one sustained press as a single event, penalize
-any release after it, and evaluate without early stopping.
+\textbf{Press.} From the rest pose, random exploration never touched the
+button, so a contact-based reward gave no signal; a curriculum that
+starts the arm on the button and moves it back toward rest was needed to
+learn the reach at all. Two bugs cost time along the way: the action
+range was smaller than the reach required (Fig. 3), and a collision-mask
+error let the gripper pass through the buttons. Each reward change then
+produced a new exploit (Table 4). The last one, pumping, came from a
+per-step reward for press depth: pressing, releasing, and pressing again
+paid more than holding. We did not fix the reward. To run the full
+chain, the episode is stopped once the first press has been held for 0.6
+s, so in the demos the policy never gets the chance to press again; left
+running, it does. We put the remaining time into the end-to-end system,
+the verifier, and the retriever. The fix we would make is to pay for one
+sustained press as a single event, penalize any release after it, and
+evaluate without early stopping.
 
-\textbf{The lever is partial.} The lever needed a latching mechanism so
-partial progress persisted, quieter exploration (initial log-std −1.5),
-and behavior cloning to reach any reward at all. The best policy
-completed the throw in 1 of 2 deterministic episodes, with jerky motion.
-The cause is identified: a per-episode reach offset that changes what an
-action does is not in the policy's observation, so identical
-observations call for different actions. The fix (add it to the
-observation) is designed but not trained.
+\textbf{Lever.} The lever needed a latching mechanism so partial
+progress persisted, quieter exploration (initial log-std −1.5), and
+behavior cloning to reach any reward at all. The best policy completed
+the throw in 1 of 2 deterministic episodes, with jerky motion. The cause
+is identified: a per-episode reach offset that changes what an action
+does is not in the policy's observation, so identical observations call
+for different actions. The fix (add it to the observation) is designed
+but not trained.
 
 \subsection{Full system}\label{full-system}
 
-\textbf{One take.} In one continuous simulation the robot walks to the
-table, picks the box, carries it to the panel with a 180° turn, places
-it, presses the button (34.5 mm; the run stops the press policy after
-its first 0.6 s hold), and returns to rest. Every postcondition holds.
+\textbf{Single-run chain.} In one continuous simulation the robot walks
+to the table, picks the box, carries it to the panel with a 180° turn,
+places it, presses the button (34.5 mm; the run stops the press policy
+after its first 0.6 s hold), and returns to rest. Every postcondition
+holds.
 
 \textbf{Ticket to robot.} For the final run we wrote one SOP (SOP-1013)
 that uses all five embodied skills and added it to the corpus. The
@@ -543,9 +529,9 @@ best is:
 
 \begin{table}[t]
 \centering\small
-\caption{\textbf{The system reports its own failure.} Verdict:
-``partially resolved.'' In the weakest take, place, press, and lever all
-failed and the verifier reported each.}
+\caption{\textbf{Full run, best of three takes.} Verdict: ``partially
+resolved.'' In the weakest take, place, press, and lever failed and the
+verifier reported each.}
 \begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
@@ -572,12 +558,13 @@ notify & verdict card sent & pass \\
 
 \subsection{Reward hacks}\label{reward-hacks}
 
-\begin{table*}[t]
+\begin{table}[t]
 \centering\small
-\caption{\textbf{Every hack was found by watching rollouts, not from a
-metric.} Pumping was stopped, not fixed. For the others, three fix
-classes recur: end what can be farmed, move constraints from the reward
-into the controller, and judge sustained states instead of instantaneous
+\caption{\textbf{Reward exploits observed in training,} each found by
+inspecting rendered rollouts. Pumping was stopped by early termination,
+not fixed. The other fixes fall into three classes: terminating what can
+be farmed, moving constraints from the reward into the controller, and
+checking sustained states rather than instantaneous
 ones.}
 \begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
@@ -610,7 +597,7 @@ Lift height & Launched the box out of a crushing pinch & Replace RL with
 a controller; verify a sustained held state \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 \textbf{Limitations.} Everything runs in MuJoCo; no hardware transfer
 was attempted. The SOPs and tickets come from one generator, and there
@@ -623,16 +610,16 @@ reward hacks were judged by one reviewer.
 
 \section{Conclusion}\label{conclusion}
 
-Sequent connects an operator's description of a problem to a humanoid
-carrying out an approved procedure, with a verifier that reports
-``partially resolved'' when a step fails. A small retriever trained on
-operator language finds the right SOP first 58\% of the time on vague
-tickets and 92\% on clear ones, and its gain over the untuned model
-holds on procedures and machines it never saw. On the body, controllers
-outperformed RL for grasping on this embodiment. The RL press learned to
-reach but also to farm reward by re-pressing, which we stopped rather
-than fixed, and the lever is partial. Each reward hack was caught by
-watching rollouts.
+Sequent maps an operator's ticket to an approved SOP and executes it on
+a simulated humanoid, with a verifier that reports ``partially
+resolved'' when a step fails. The fine-tuned retriever reaches R@1 0.577
+on the held-out test tickets and 0.92 on title-derived tickets, and its
+gain over the untuned model holds on held-out SOPs and equipment
+families. On the body, controllers outperformed RL for grasping on this
+embodiment. The RL press learned to reach and press but also to re-press
+for reward, which we stopped rather than fixed; the lever is partial.
+The reward exploits were identified from rendered rollouts, not from
+training metrics.
 
 \textbf{Future work.} The most important addition is for the retriever
 to ask instead of guess, using the confidence measured above, and to

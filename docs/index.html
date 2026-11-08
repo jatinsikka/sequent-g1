@@ -86,7 +86,7 @@
 </section>
 
 <h2>Abstract</h2>
-<p class="abstract">Sequent takes a plant-floor incident ticket written the way an operator would write it, retrieves the matching Standard Operating Procedure out of 1,012, turns its steps into robot skills, and executes them on a simulated Unitree G1 in one continuous MuJoCo run. A verifier checks every step against measured physics rather than the policy's own report, so a step that fails is reported as failed. The retriever is a transformer bi-encoder fine-tuned with a contrastive loss: on vague operator tickets it ranks the right procedure first 58% of the time, against 36% for BM25 and 41% for the same model without fine-tuning, and the gain holds on procedures and machines never seen in training. The body uses controllers where the problem is geometric (walking, grasping) and reinforcement learning where it is contact-rich (pressing a button, pulling a lever). Every reward hack we hit along the way was caught by watching rollouts, not by a metric.</p>
+<p class="abstract">Sequent takes a plant-floor incident ticket written the way an operator would write it, retrieves the matching Standard Operating Procedure out of 1,012, turns its steps into robot skills, and executes them on a simulated Unitree G1 in one continuous MuJoCo run. A verifier checks every step against measured physics rather than the policy's own report, so a step that fails is reported as failed. The retriever is a transformer bi-encoder fine-tuned with a contrastive loss: on vague operator tickets it ranks the right procedure first 58% of the time, against 36% for BM25 and 41% for the same model without fine-tuning, and the gain holds on procedures and machines never seen in training. The body uses controllers where the problem is geometric (walking, grasping) and reinforcement learning where it is contact-rich (pressing a button, pulling a lever). Neither RL skill is solved: the press policy learned to farm reward by pressing repeatedly, which we stopped by ending the episode rather than fixing, and the lever succeeds about half the time. Every reward hack was caught by watching rollouts, not by a metric.</p>
 
 <h2>Method</h2>
 <img class="fig" src="figures/fig_pipeline.png" alt="Pipeline: ticket, fine-tuned retriever over 1,012 SOPs, rule-based planner, verifier, verdict; G1 skills walk (AMO policy), pick/place (IK and force-gated latch), press (PPO), lever (BC, DAgger, PPO)">
@@ -110,7 +110,7 @@
   </div>
   <div>
     <video src="static/videos/press_reach.mp4" poster="static/videos/press_reach.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>Press: PPO with a reach curriculum.</b> From the rest pose the arm reaches about 19 cm and presses: 8 of 8 deterministic starts, 29–40 mm. The episode ends once the press is held 0.6 s.</p>
+    <p class="cap"><b>Press: partial.</b> PPO with a reach curriculum learned to reach about 19 cm from rest and press, but also to farm reward by pressing repeatedly. The run is stopped after the first 0.6 s hold; the reward was never fixed.</p>
   </div>
   <div>
     <video src="static/videos/lever.mp4" poster="static/videos/lever.jpg" muted loop playsinline controls preload="none"></video>
@@ -130,7 +130,7 @@
   <tr><th>Step</th><th>Measured outcome</th><th>Verdict</th></tr>
   <tr><td>pick</td><td>box gripped, lifted, held</td><td class="ok">✓ pass</td></tr>
   <tr><td>carry / place</td><td>carried to the panel, placed upright</td><td class="ok">✓ pass</td></tr>
-  <tr><td>press</td><td>33.8 mm press, held</td><td class="ok">✓ pass</td></tr>
+  <tr><td>press</td><td>33.8 mm press, held (run stopped after the first hold)</td><td class="ok">✓ pass</td></tr>
   <tr><td>lever</td><td>reached 0.443 rad; success needs under 0.25 rad (best of 4 stance variants)</td><td class="no">✗ fail</td></tr>
   <tr><td>notify</td><td>verdict card sent: <b>“PARTIALLY RESOLVED”</b></td><td class="ok">✓ pass</td></tr>
 </table>
@@ -146,7 +146,7 @@
     <p>Every one of these was found by watching rendered rollouts. None was caught by a metric.</p>
     <ul>
       <li><b>Parking:</b> a proximity reward near the button taught the policy to hover 5 cm short and collect it indefinitely.</li>
-      <li><b>Pumping:</b> a per-step depth reward made press, release, press again profitable. The episode now ends once the press is held 0.6 s; whether the policy would press again if left running was not tested.</li>
+      <li><b>Pumping (not fixed):</b> a per-step depth reward made press, release, press again profitable. We stop the episode after the first 0.6 s hold instead of fixing the reward; left running, the policy keeps pressing.</li>
       <li><b>Seat farming:</b> the lever's 0.17 rad of free travel paid a linear progress reward for sitting in it.</li>
       <li><b>Air-swinging:</b> once pressing-once was enforced, the arm kept moving after the press while the hold counter ran.</li>
       <li><b>Ballistic pop:</b> on the gripper humanoid, the RL grasp variants we tried scored 0% verified; their lifts were the box popping out of a crushing pinch. Grasping became a controller.</li>

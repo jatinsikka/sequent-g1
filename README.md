@@ -38,11 +38,11 @@ A simulated Unitree G1 humanoid that reads a plant-floor incident ticket, finds 
 | Skill | How | Result |
 |---|---|---|
 | Pick | IK + force-gated latch | 11 of 12 held lifts |
-| Press | PPO + curriculum | 8 of 8 deterministic starts, 29–40 mm |
+| Press | PPO + curriculum | partial: reaches and presses, but re-presses for reward (pumping) unless stopped after the first hold |
 | Lever | BC → DAgger → PPO | 1 of 2 episodes (partial) |
-| Full chain | walk, pick, carry, place, press | one take, every check passes |
+| Full chain | walk, pick, carry, place, press | one take, every check passes (press stopped after its first hold) |
 
-RL grasping on this gripper-equipped humanoid reached 0% verified success (the logged "lifts" were the box popping out of the grip), which is why picking is a controller. The paper lists the six reward hacks we hit and how each was fixed.
+RL grasping on this gripper-equipped humanoid reached 0% verified success (the logged "lifts" were the box popping out of the grip), which is why picking is a controller. The press policy's pumping was never fixed: the episode is stopped after the first held press so the chain can continue. The paper lists the six reward hacks we hit and what was done about each.
 
 ## What's released
 

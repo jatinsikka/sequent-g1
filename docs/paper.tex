@@ -112,9 +112,12 @@ fine-tuning, and it keeps most of this gain on SOPs and machine families
 held out from training. For the body we use controllers where the
 problem is geometric (walking, grasping) and reinforcement learning
 where contact makes modeling hard (pressing a button, pulling a lever).
-We report what did not work, including the lever, and a set of reward
-hacks that were each found by watching rollouts rather than from
-training metrics.
+Neither RL contact skill is solved. The button-press policy learned to
+farm reward by pressing repeatedly; we stopped it by ending the episode
+after the first held press rather than fixing the reward. The lever
+succeeds about half the time. We report these and the other reward
+hacks, each found by watching rollouts rather than from training
+metrics.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
@@ -199,7 +202,8 @@ hacks we document are instances of specification gaming {[}11, 12{]}.
   Evidence for the controller/RL split: RL grasping on the
   gripper-equipped humanoid reached 0\% verified success, while an IK
   controller with a force-gated latch held 11 of 12 lifts; PPO with a
-  curriculum presses reliably (8 of 8 deterministic starts).
+  curriculum learned to reach and press the button, but also to farm
+  reward by re-pressing, which we did not fix.
 \item
   A catalog of six reward hacks, each caught by watching rollouts, with
   the class of fix that worked.
@@ -432,8 +436,8 @@ but not built into the system.
 \begin{table*}[t]
 \centering\small
 \caption{\textbf{Controllers where the task is geometric, RL where
-contact dominates.} Lever and grasp results are small-sample or negative
-and are reported as such.}
+contact dominates.} The press and lever are partial and the RL grasp
+failed; each is reported as such.}
 \begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
@@ -455,8 +459,8 @@ Pick & IK + force-gated latch & 11 of 12 held lifts & fixed-base
 validation \\
 Pick (in walk→pick run) & same & 11.9 cm held lift & one continuous
 run \\
-Press & PPO + curriculum & 8 of 8, 29--40 mm, no re-pressing &
-deterministic, near and far starts \\
+Press & PPO + curriculum & reaches from rest and presses; re-presses for
+reward unless stopped after the first hold & deterministic rollouts \\
 Lever & BC → DAgger → PPO & 1 of 2 completed throws & deterministic
 episodes \\
 RL grasp, gripper humanoid & PPO, several reward variants & 0\% verified
@@ -498,6 +502,22 @@ from rest needs 0.511 rad at the shoulder and 0.672 rad at the elbow,
 and the lever needs up to 1.1 rad (Fig. 3). Saturated actions look like
 a timid policy in every training curve.
 
+\textbf{The press is partial.} From the rest pose, random exploration
+never touched the button, so a contact-based reward gave no signal; a
+curriculum that starts the arm on the button and moves it back toward
+rest was needed to learn the reach at all. Two bugs cost time along the
+way: the action range was smaller than the reach required (Fig. 3), and
+a collision-mask error let the gripper pass through the buttons. Each
+reward change then produced a new exploit (Table 4). The last one,
+pumping, came from a per-step reward for press depth: pressing,
+releasing, and pressing again paid more than holding. We did not fix the
+reward. To run the full chain, the episode is stopped once the first
+press has been held for 0.6 s, so in the demos the policy never gets the
+chance to press again; left running, it does. We put the remaining time
+into the end-to-end system, the verifier, and the retriever. The fix we
+would make is to pay for one sustained press as a single event, penalize
+any release after it, and evaluate without early stopping.
+
 \textbf{The lever is partial.} The lever needed a latching mechanism so
 partial progress persisted, quieter exploration (initial log-std −1.5),
 and behavior cloning to reach any reward at all. The best policy
@@ -511,8 +531,8 @@ observation) is designed but not trained.
 
 \textbf{One take.} In one continuous simulation the robot walks to the
 table, picks the box, carries it to the panel with a 180° turn, places
-it, presses the button (34.5 mm, no re-pressing), and returns to rest.
-Every postcondition holds.
+it, presses the button (34.5 mm; the run stops the press policy after
+its first 0.6 s hold), and returns to rest. Every postcondition holds.
 
 \textbf{Ticket to robot.} For the final run we wrote one SOP (SOP-1013)
 that uses all five embodied skills and added it to the corpus. The
@@ -555,9 +575,10 @@ notify & verdict card sent & pass \\
 \begin{table*}[t]
 \centering\small
 \caption{\textbf{Every hack was found by watching rollouts, not from a
-metric.} Three fix classes recur: end what can be farmed, move
-constraints from the reward into the controller, and judge sustained
-states instead of instantaneous ones.}
+metric.} Pumping was stopped, not fixed. For the others, three fix
+classes recur: end what can be farmed, move constraints from the reward
+into the controller, and judge sustained states instead of instantaneous
+ones.}
 \begin{tabular}{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
@@ -577,8 +598,9 @@ indefinitely & Narrow the band from 0.20 to 0.05 m, double the distance
 penalty \\
 Progress along the lever arc & Sat in the lever's 0.17 rad of free
 travel & Measure progress from past the free travel, make it convex \\
-Per-step press depth & Pressed, released, pressed again & End the
-episode on success \\
+Per-step press depth & Pressed, released, pressed again & Not fixed: the
+episode is stopped after a 0.6 s hold; left running, the policy
+re-presses \\
 Hold counter after the press & Swung the arm while the counter ran &
 Stillness cost after the press; hold counter tolerates brief dips \\
 Jerk penalty & Flailed fast enough that bumping the button paid more
@@ -595,8 +617,9 @@ was attempted. The SOPs and tickets come from one generator, and there
 is no evaluation on real maintenance tickets. Because SOPs are written
 at skill granularity, planning is a lookup, and SOPs written in ordinary
 prose would need a learned planner. The retriever cannot decline. Skill
-results are small-sample, and the lever succeeds about half the time.
-The reward hacks were judged by one reviewer.
+results are small-sample. The press policy still re-presses for reward
+when it is not stopped, and the lever succeeds about half the time. The
+reward hacks were judged by one reviewer.
 
 \section{Conclusion}\label{conclusion}
 
@@ -606,18 +629,21 @@ carrying out an approved procedure, with a verifier that reports
 operator language finds the right SOP first 58\% of the time on vague
 tickets and 92\% on clear ones, and its gain over the untuned model
 holds on procedures and machines it never saw. On the body, controllers
-outperformed RL for grasping on this embodiment, while RL with a
-curriculum handled pressing, and each reward hack was caught by watching
-rollouts.
+outperformed RL for grasping on this embodiment. The RL press learned to
+reach but also to farm reward by re-pressing, which we stopped rather
+than fixed, and the lever is partial. Each reward hack was caught by
+watching rollouts.
 
 \textbf{Future work.} The most important addition is for the retriever
 to ask instead of guess, using the confidence measured above, and to
 filter by the machine ID that a real ticket carries. Beyond that:
 hard-negative training against same-machine look-alike SOPs; a
 comparison against an LLM choosing among the retriever's candidates; a
-learned planner for SOPs written in prose; retraining the lever with the
-missing observation; moving the body to Isaac Lab for faster contact
-training; and a test set of real tickets. Code, data, and results:
+learned planner for SOPs written in prose; retraining the press so it
+stops on its own (reward one sustained press as an event, train without
+early stopping); retraining the lever with the missing observation;
+moving the body to Isaac Lab for faster contact training; and a test set
+of real tickets. Code, data, and results:
 \url{https://github.com/jatinsikka/sequent-g1}.
 
 \section*{Acknowledgments}\label{acknowledgments}

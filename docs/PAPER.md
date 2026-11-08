@@ -5,7 +5,7 @@ Project page: <https://jatinsikka.github.io/sequent-g1/> · Code: <https://githu
 
 ## Abstract
 
-Factories run on written Standard Operating Procedures (SOPs), but operators report problems in their own words. We built Sequent, a system in which a simulated Unitree G1 humanoid reads such a report, retrieves the SOP that applies out of 1,012, maps its steps to robot skills, and executes them in one continuous MuJoCo simulation. A verifier checks every step against the simulator state instead of trusting the policy, so a step that fails is reported as failed. The retriever is a small transformer fine-tuned with a contrastive loss. On vague operator tickets it ranks the correct SOP first 57.7% of the time (5 seeds), against 35.7% for BM25 and 40.9% for the same model without fine-tuning, and it keeps most of this gain on SOPs and machine families held out from training. For the body we use controllers where the problem is geometric (walking, grasping) and reinforcement learning where contact makes modeling hard (pressing a button, pulling a lever). We report what did not work, including the lever, and a set of reward hacks that were each found by watching rollouts rather than from training metrics.
+Factories run on written Standard Operating Procedures (SOPs), but operators report problems in their own words. We built Sequent, a system in which a simulated Unitree G1 humanoid reads such a report, retrieves the SOP that applies out of 1,012, maps its steps to robot skills, and executes them in one continuous MuJoCo simulation. A verifier checks every step against the simulator state instead of trusting the policy, so a step that fails is reported as failed. The retriever is a small transformer fine-tuned with a contrastive loss. On vague operator tickets it ranks the correct SOP first 57.7% of the time (5 seeds), against 35.7% for BM25 and 40.9% for the same model without fine-tuning, and it keeps most of this gain on SOPs and machine families held out from training. For the body we use controllers where the problem is geometric (walking, grasping) and reinforcement learning where contact makes modeling hard (pressing a button, pulling a lever). Neither RL contact skill is solved. The button-press policy learned to farm reward by pressing repeatedly; we stopped it by ending the episode after the first held press rather than fixing the reward. The lever succeeds about half the time. We report these and the other reward hacks, each found by watching rollouts rather than from training metrics.
 
 ## 1. Introduction
 
@@ -25,7 +25,7 @@ Our approach rests on three choices. First, retrieve rather than generate: a ret
 
 1. A system that goes from an operator's ticket to a verified, multi-skill humanoid execution in one continuous simulation: walk, pick, carry, place, press, and a partial lever pull, with every step checked against simulator state.
 2. A retrieval benchmark of 1,012 SOPs across 46 equipment families with 2,338 operator-style incidents, and a reproducible evaluation: the fine-tuned retriever reaches R@1 0.577 ± 0.006 versus 0.357 for BM25 and 0.409 untuned, with held-out-SOP, held-out-family, and ticket-clarity tests. Code, data, and per-run results are released.
-3. Evidence for the controller/RL split: RL grasping on the gripper-equipped humanoid reached 0% verified success, while an IK controller with a force-gated latch held 11 of 12 lifts; PPO with a curriculum presses reliably (8 of 8 deterministic starts).
+3. Evidence for the controller/RL split: RL grasping on the gripper-equipped humanoid reached 0% verified success, while an IK controller with a force-gated latch held 11 of 12 lifts; PPO with a curriculum learned to reach and press the button, but also to farm reward by re-pressing, which we did not fix.
 4. A catalog of six reward hacks, each caught by watching rollouts, with the class of fix that worked.
 
 **Organization.** Section 2 states the problem. Section 3 describes the approach and the baselines. Section 4 reports retrieval, skill, and full-system results. Section 5 concludes.
@@ -116,11 +116,11 @@ The verifier wraps every skill with its precondition and postcondition (Section 
 |---|---|---|---|
 | Pick | IK + force-gated latch | 11 of 12 held lifts | fixed-base validation |
 | Pick (in walk→pick run) | same | 11.9 cm held lift | one continuous run |
-| Press | PPO + curriculum | 8 of 8, 29–40 mm, no re-pressing | deterministic, near and far starts |
+| Press | PPO + curriculum | reaches from rest and presses; re-presses for reward unless stopped after the first hold | deterministic rollouts |
 | Lever | BC → DAgger → PPO | 1 of 2 completed throws | deterministic episodes |
 | RL grasp, gripper humanoid | PPO, several reward variants | 0% verified | deterministic evaluation |
 
-*Table 2: **Controllers where the task is geometric, RL where contact dominates.** Lever and grasp results are small-sample or negative and are reported as such.*
+*Table 2: **Controllers where the task is geometric, RL where contact dominates.** The press and lever are partial and the RL grasp failed; each is reported as such.*
 
 **Why grasping became a controller.** RL grasping on the gripper-equipped humanoid reached 0% verified success, although the logged "lift" rate was 30–60%. The videos showed the box being squeezed out of a hard pinch and popping upward; the height check fired while it was in the air. A stochastic policy's grip force oscillates, and a stable two-sided pinch is a narrow regime in the contact solver. The IK controller with a force-gated latch held 11 of 12 lifts on its first day. RL did work on an earlier fixed-base rig with a different hand (55% verified), so the conclusion is about this embodiment and contact setup, not about RL grasping in general.
 
@@ -130,11 +130,13 @@ The verifier wraps every skill with its precondition and postcondition (Section 
 
 **Check the action space before the reward.** A day of failed far-start press training traced to one number: the policy's action range was 0.5 rad per joint around the neutral pose, while reaching the button from rest needs 0.511 rad at the shoulder and 0.672 rad at the elbow, and the lever needs up to 1.1 rad (Fig. 3). Saturated actions look like a timid policy in every training curve.
 
+**The press is partial.** From the rest pose, random exploration never touched the button, so a contact-based reward gave no signal; a curriculum that starts the arm on the button and moves it back toward rest was needed to learn the reach at all. Two bugs cost time along the way: the action range was smaller than the reach required (Fig. 3), and a collision-mask error let the gripper pass through the buttons. Each reward change then produced a new exploit (Table 4). The last one, pumping, came from a per-step reward for press depth: pressing, releasing, and pressing again paid more than holding. We did not fix the reward. To run the full chain, the episode is stopped once the first press has been held for 0.6 s, so in the demos the policy never gets the chance to press again; left running, it does. We put the remaining time into the end-to-end system, the verifier, and the retriever. The fix we would make is to pay for one sustained press as a single event, penalize any release after it, and evaluate without early stopping.
+
 **The lever is partial.** The lever needed a latching mechanism so partial progress persisted, quieter exploration (initial log-std −1.5), and behavior cloning to reach any reward at all. The best policy completed the throw in 1 of 2 deterministic episodes, with jerky motion. The cause is identified: a per-episode reach offset that changes what an action does is not in the policy's observation, so identical observations call for different actions. The fix (add it to the observation) is designed but not trained.
 
 ### 4.3 Full system
 
-**One take.** In one continuous simulation the robot walks to the table, picks the box, carries it to the panel with a 180° turn, places it, presses the button (34.5 mm, no re-pressing), and returns to rest. Every postcondition holds.
+**One take.** In one continuous simulation the robot walks to the table, picks the box, carries it to the panel with a 180° turn, places it, presses the button (34.5 mm; the run stops the press policy after its first 0.6 s hold), and returns to rest. Every postcondition holds.
 
 **Ticket to robot.** For the final run we wrote one SOP (SOP-1013) that uses all five embodied skills and added it to the corpus. The retriever ranks it first (score 0.897). Because the ticket and SOP were written together, and TF-IDF also ranks it first, this run shows the pipeline end to end rather than retrieval accuracy. Of three takes, the best is:
 
@@ -154,20 +156,20 @@ The verifier wraps every skill with its precondition and postcondition (Section 
 |---|---|---|
 | Proximity income near the button | Hovered 5 cm short and collected it indefinitely | Narrow the band from 0.20 to 0.05 m, double the distance penalty |
 | Progress along the lever arc | Sat in the lever's 0.17 rad of free travel | Measure progress from past the free travel, make it convex |
-| Per-step press depth | Pressed, released, pressed again | End the episode on success |
+| Per-step press depth | Pressed, released, pressed again | Not fixed: the episode is stopped after a 0.6 s hold; left running, the policy re-presses |
 | Hold counter after the press | Swung the arm while the counter ran | Stillness cost after the press; hold counter tolerates brief dips |
 | Jerk penalty | Flailed fast enough that bumping the button paid more than the penalty (jerk 0.83) | Low-pass filter on the arm command, α = 0.12 (jerk 0.001) |
 | Lift height | Launched the box out of a crushing pinch | Replace RL with a controller; verify a sustained held state |
 
-*Table 4: **Every hack was found by watching rollouts, not from a metric.** Three fix classes recur: end what can be farmed, move constraints from the reward into the controller, and judge sustained states instead of instantaneous ones.*
+*Table 4: **Every hack was found by watching rollouts, not from a metric.** Pumping was stopped, not fixed. For the others, three fix classes recur: end what can be farmed, move constraints from the reward into the controller, and judge sustained states instead of instantaneous ones.*
 
-**Limitations.** Everything runs in MuJoCo; no hardware transfer was attempted. The SOPs and tickets come from one generator, and there is no evaluation on real maintenance tickets. Because SOPs are written at skill granularity, planning is a lookup, and SOPs written in ordinary prose would need a learned planner. The retriever cannot decline. Skill results are small-sample, and the lever succeeds about half the time. The reward hacks were judged by one reviewer.
+**Limitations.** Everything runs in MuJoCo; no hardware transfer was attempted. The SOPs and tickets come from one generator, and there is no evaluation on real maintenance tickets. Because SOPs are written at skill granularity, planning is a lookup, and SOPs written in ordinary prose would need a learned planner. The retriever cannot decline. Skill results are small-sample. The press policy still re-presses for reward when it is not stopped, and the lever succeeds about half the time. The reward hacks were judged by one reviewer.
 
 ## 5. Conclusion
 
-Sequent connects an operator's description of a problem to a humanoid carrying out an approved procedure, with a verifier that reports "partially resolved" when a step fails. A small retriever trained on operator language finds the right SOP first 58% of the time on vague tickets and 92% on clear ones, and its gain over the untuned model holds on procedures and machines it never saw. On the body, controllers outperformed RL for grasping on this embodiment, while RL with a curriculum handled pressing, and each reward hack was caught by watching rollouts.
+Sequent connects an operator's description of a problem to a humanoid carrying out an approved procedure, with a verifier that reports "partially resolved" when a step fails. A small retriever trained on operator language finds the right SOP first 58% of the time on vague tickets and 92% on clear ones, and its gain over the untuned model holds on procedures and machines it never saw. On the body, controllers outperformed RL for grasping on this embodiment. The RL press learned to reach but also to farm reward by re-pressing, which we stopped rather than fixed, and the lever is partial. Each reward hack was caught by watching rollouts.
 
-**Future work.** The most important addition is for the retriever to ask instead of guess, using the confidence measured above, and to filter by the machine ID that a real ticket carries. Beyond that: hard-negative training against same-machine look-alike SOPs; a comparison against an LLM choosing among the retriever's candidates; a learned planner for SOPs written in prose; retraining the lever with the missing observation; moving the body to Isaac Lab for faster contact training; and a test set of real tickets. Code, data, and results: <https://github.com/jatinsikka/sequent-g1>.
+**Future work.** The most important addition is for the retriever to ask instead of guess, using the confidence measured above, and to filter by the machine ID that a real ticket carries. Beyond that: hard-negative training against same-machine look-alike SOPs; a comparison against an LLM choosing among the retriever's candidates; a learned planner for SOPs written in prose; retraining the press so it stops on its own (reward one sustained press as an event, train without early stopping); retraining the lever with the missing observation; moving the body to Isaac Lab for faster contact training; and a test set of real tickets. Code, data, and results: <https://github.com/jatinsikka/sequent-g1>.
 
 ## Acknowledgments
 

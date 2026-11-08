@@ -377,7 +377,7 @@ def run(ticket: str, gold: str, incident_id: str, sops: list) -> None:
     t.add_column("runs on", width=12)
     t.add_column("postcondition, measured from mjData", overflow="fold", max_width=52)
     t.add_column("status", width=15)
-    status_style = {"verified": GREEN, "reach-limited": RED, "operational": DIM}
+    status_style = {"verified": GREEN, "partial": GOLD, "reach-limited": RED, "operational": DIM}
     for sk in used:
         m = SKILL_REGISTRY[sk]
         t.add_row(Text(sk, style="bold white"), m["kind"], m["postcondition"] or "—",

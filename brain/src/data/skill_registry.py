@@ -38,8 +38,8 @@ SKILL_REGISTRY: Dict[str, dict] = {
         "precondition": "robot is standing in front of the panel",
         "postcondition": "button displacement held >= threshold for >=25 steps with the base upright",
         "runner": "skills_manipulation.run_press_button",
-        "status": "verified",
-        "note": "8 of 8 deterministic starts, 29-40 mm press, no re-pressing. Checkpoint not released.",
+        "status": "partial",
+        "note": "Reaches and presses, but the policy re-presses for reward (pumping); the episode is stopped after the first 0.6 s hold. Checkpoint not released.",
     },
     "pick": {
         "kind": "manipulation",

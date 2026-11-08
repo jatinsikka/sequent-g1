@@ -93,6 +93,10 @@ For parallel RL training, set `OMP_NUM_THREADS=1` per worker; without it, throug
 | `docs/` | Paper, figures, project page |
 | `experiments/` | One-off scripts from development |
 
+## Next
+
+Teleoperated data collection in a simulated factory (Isaac Lab), then on hardware; train on the demonstrations and fine-tune with RL. This work moves to the R1 robot.
+
 ## Credits
 
 Jatin Sikka ([jatinsikka.me](https://jatinsikka.me)). The AMO whole-body controller is by Li, Cheng et al. (RSS 2025). Apache 2.0.

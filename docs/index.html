@@ -109,8 +109,8 @@
     <p class="cap"><b>Pick: a controller, not RL.</b> IK to the box; the latch engages only when both finger pads measure contact force. 11 of 12 held lifts.</p>
   </div>
   <div>
-    <video src="static/videos/press.mp4" poster="static/videos/press.jpg" muted loop playsinline controls preload="none"></video>
-    <p class="cap"><b>Press: PPO with a curriculum.</b> Reaches about 19 cm from the rest pose and presses 29–40 mm, 8 of 8 deterministic starts.</p>
+    <video src="static/videos/press_reach.mp4" poster="static/videos/press_reach.jpg" muted loop playsinline controls preload="none"></video>
+    <p class="cap"><b>Press: PPO with a reach curriculum.</b> From the rest pose the arm reaches about 19 cm and presses: 8 of 8 deterministic starts, 29–40 mm. The episode ends once the press is held 0.6 s.</p>
   </div>
   <div>
     <video src="static/videos/lever.mp4" poster="static/videos/lever.jpg" muted loop playsinline controls preload="none"></video>
@@ -146,11 +146,21 @@
     <p>Every one of these was found by watching rendered rollouts. None was caught by a metric.</p>
     <ul>
       <li><b>Parking:</b> a proximity reward near the button taught the policy to hover 5 cm short and collect it indefinitely.</li>
-      <li><b>Pumping:</b> a per-step depth reward made press, release, press again profitable. Fix: end the episode on success.</li>
+      <li><b>Pumping:</b> a per-step depth reward made press, release, press again profitable. The episode now ends once the press is held 0.6 s; whether the policy would press again if left running was not tested.</li>
       <li><b>Seat farming:</b> the lever's 0.17 rad of free travel paid a linear progress reward for sitting in it.</li>
       <li><b>Air-swinging:</b> once pressing-once was enforced, the arm kept moving after the press while the hold counter ran.</li>
       <li><b>Ballistic pop:</b> on the gripper humanoid, the RL grasp variants we tried scored 0% verified; their lifts were the box popping out of a crushing pinch. Grasping became a controller.</li>
     </ul>
+  </div>
+</div>
+<div class="grid" style="margin-top: 22px;">
+  <div>
+    <video src="static/videos/hack_hover.mp4" poster="static/videos/hack_hover.jpg" muted loop playsinline controls preload="none"></video>
+    <p class="cap"><b>Paid for being near, not for grasping.</b> Grasp run v5.2: the hand parks next to the tool for the whole episode while the reward stays high.</p>
+  </div>
+  <div>
+    <video src="static/videos/grasp_slap.mp4" poster="static/videos/grasp_slap.jpg" muted loop playsinline controls preload="none"></video>
+    <p class="cap"><b>A grasp that counts but looks wrong.</b> Run v5.5, an earlier rig: 55% verified grasps, reached with this overhead swing (0.5x). Picking became a controller.</p>
   </div>
 </div>
 

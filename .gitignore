@@ -59,3 +59,8 @@ brain/benchmark/repro/results/scores_*.npz
 
 # LaTeX build log (docs/build_paper.py)
 docs/paper.log
+
+# demo kit + scene builder outputs
+.venv/
+demo/_last_plan.json
+g1_amo_gripper_base.xml

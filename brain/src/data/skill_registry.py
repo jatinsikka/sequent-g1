@@ -7,7 +7,7 @@ and the verifying executor runs each skill and checks its postcondition against 
 physics (see `executor.VerifyingExecutor`).
 
 Each entry documents: what the skill does, its args, which subsystem runs it, its
-pre/postconditions, and its HONEST verification status (validated 2026-06-21):
+pre/postconditions, and its verification status (updated 2026-11 to match docs/PAPER.md):
   - "verified"      : runs in sim and is checked against measured physics; reliable.
   - "reach-limited" : physically attempted, but the frozen AMO base controller recoils ~18cm
                       when the arm reaches, so it cannot reliably complete; the verifier
@@ -33,23 +33,23 @@ SKILL_REGISTRY: Dict[str, dict] = {
     },
     "press_button": {
         "kind": "manipulation",
-        "description": "Reach out and press a control-panel button, holding it depressed past the trip threshold.",
+        "description": "Reach from the rest pose and press a control-panel button (PPO with a reach curriculum), holding it past the trip threshold.",
         "args": {"button": "red_button | green_button | blue_button | yellow_button"},
         "precondition": "robot is standing in front of the panel",
         "postcondition": "button displacement held >= threshold for >=25 steps with the base upright",
         "runner": "skills_manipulation.run_press_button",
-        "status": "reach-limited",
-        "note": "The arm cannot reach a flush wall button standing (AMO recoils the pelvis ~18cm). The verifier flags it NOT verified; needs a base-controller rework.",
+        "status": "verified",
+        "note": "8 of 8 deterministic starts, 29-40 mm press, no re-pressing. Checkpoint not released.",
     },
     "pick": {
         "kind": "manipulation",
-        "description": "Reach to an object on a surface and grasp it (magnetic latch on slow contact), then lift and hold.",
+        "description": "IK to an object on the table; the grip latches only when both gripper pads measure contact force; then lift and hold.",
         "args": {"object": "screwdriver | wrench | intake_cover | cleaning_cloth | <object>"},
         "precondition": "object present on the work surface within nominal reach",
         "postcondition": "object grasped AND lifted >= min_lift sustained for >= sustain_steps",
         "runner": "skills_manipulation.run_grasp",
-        "status": "reach-limited",
-        "note": "Same AMO recoil limit: the hand reaches only ~to the body, so tabletop grasps mostly miss/knock-off. Verifier reports honestly.",
+        "status": "verified",
+        "note": "Controller, not RL: 11 of 12 held lifts in validation; 11.9 cm held lift in the walk-to-pick run.",
     },
     "place": {
         "kind": "manipulation",
@@ -59,7 +59,7 @@ SKILL_REGISTRY: Dict[str, dict] = {
         "postcondition": "object released at the target location (depends on a working pick)",
         "runner": None,
         "status": "operational",
-        "note": "Logical/operational until pick is verified; not independently physics-checked yet.",
+        "note": "Passed its postcondition in the one-take chain (box placed upright at the panel); not separately benchmarked.",
     },
     "read_sensor": {
         "kind": "operational",

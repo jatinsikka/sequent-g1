@@ -74,6 +74,8 @@ python g6_onetake.py
 python final_ticket_demo.py
 ```
 
+To present it live, see [`LOCAL_DEMO.md`](LOCAL_DEMO.md): a step-by-step brain walkthrough and the retrieval table computed in about 30 seconds.
+
 For parallel RL training, set `OMP_NUM_THREADS=1` per worker; without it, throughput drops from about 2,600 to 18 steps/s.
 
 ## Repository
@@ -87,6 +89,7 @@ For parallel RL training, set `OMP_NUM_THREADS=1` per worker; without it, throug
 | `ik_pick.py`, `pick_table.py` | Pick controller |
 | `train_button.py`, `train_lever.py`, `train_lever_bc.py` | RL training |
 | `unified_env.py`, `build_unified_model.py` | G1 with the Robotiq gripper |
+| `demo/`, `LOCAL_DEMO.md` | Live demos and a presentation runbook: brain walkthrough, live retrieval table, AMO walking on a Mac |
 | `docs/` | Paper, figures, project page |
 | `experiments/` | One-off scripts from development |
 
